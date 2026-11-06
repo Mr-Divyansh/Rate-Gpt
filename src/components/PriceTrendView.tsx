@@ -112,7 +112,7 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
               <span>{t("trends.title")}</span>
             </h2>
             <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-              Verified historical observations recorded in the Rate GPT database
+              Historical observations stored in the Rate GPT database
             </p>
           </div>
 
@@ -157,13 +157,11 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
         <div className="mt-4 p-3 border border-[var(--border-color)] bg-[var(--bg-page)] text-xs flex items-start space-x-2 text-[var(--text-secondary)]">
           <Info className="w-4 h-4 shrink-0 text-[var(--text-primary)] mt-0.5" />
           <div>
-            <strong className="text-[var(--text-primary)]">
-              Strict Data Integrity Rule:
-            </strong>
+            <strong className="text-[var(--text-primary)]">Data note:</strong>
             <span className="ml-1">
-              Historical chart points reflect actual recorded source arrivals
-              only. Rate GPT never synthesizes fake prices, predicted rates, or
-              interpolated points.
+              The chart shows stored observations only and does not synthesize,
+              predict, or interpolate prices. Source and freshness depend on
+              synchronization status.
             </span>
           </div>
         </div>
@@ -178,12 +176,12 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
         <div className="border border-[var(--border-color)] bg-[var(--bg-surface)] p-10 text-center">
           <AlertCircle className="w-8 h-8 mx-auto text-[var(--text-secondary)] mb-3" />
           <h3 className="text-base font-semibold text-[var(--text-primary)]">
-            Historical trend data will appear as records are collected.
+            No stored historical observations found.
           </h3>
           <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-md mx-auto">
             No stored historical observations were found for {commodity} at{" "}
-            {market}. As scheduled synchronization runs collect daily records
-            over time, trends will accumulate here.
+            {market}. Trends will accumulate if synchronization is configured
+            and runs successfully.
           </p>
         </div>
       ) : (
@@ -208,14 +206,22 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
                   className="text-[11px] font-mono text-[var(--text-secondary)]"
                   htmlFor="dateRange"
                 >
-                  {t("common.loading") === "Loading..."
-                    ? "Date range"
-                    : "Date range"}
+                  Date range
                 </label>
                 <select
                   id="dateRange"
                   value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value as any)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (
+                      value === "all" ||
+                      value === "7" ||
+                      value === "30" ||
+                      value === "90"
+                    ) {
+                      setDateRange(value);
+                    }
+                  }}
                   aria-label="Date range"
                   className="py-1 px-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs focus:outline-2 focus:outline-[var(--outline-focus)]"
                 >
@@ -327,7 +333,7 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
             </div>
           </div>
 
-          {/* Table of verified historical points */}
+          {/* Table of stored historical observations */}
           <div className="border border-[var(--border-color)] bg-[var(--bg-surface)]">
             <div className="p-3 border-b border-[var(--border-color)] bg-[var(--bg-page)] text-xs font-mono font-semibold uppercase text-[var(--text-secondary)]">
               Recorded Observations Audit Table

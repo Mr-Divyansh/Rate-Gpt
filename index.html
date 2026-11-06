@@ -1,774 +1,274 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<meta content="#174d38" name="theme-color">
-<meta content="Search official government mandi price records and analytics with Rate-GPT." name="description">
-<title>Rate-GPT | Government Mandi Price Discovery &amp; Market Intelligence</title>
-<link href="https://fonts.googleapis.com" rel="preconnect">
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<header class="site-header">
-<a aria-label="Rate-GPT home" class="brand" href="index.html">
-<span class="brand-icon">R</span>
-<span class="">Rate<span class="brand-accent">-GPT</span><small>AGRICULTURE MARKET INTELLIGENCE</small></span>
-</a>
-<nav aria-label="Main navigation" class="main-nav" id="mainNav">
-<a aria-current="page" class="active" href="index.html">Home</a>
-<a href="mandiPrice.html" class="">Price Trends</a>
-<a href="mandiPrices.html" class="">Mandi Prices</a>
-<a href="marketDashboard.html" class="">Market Dashboard</a>
-<a href="about.html" class="">About</a>
-</nav>
-<a class="header-cta" href="priceTrends.html">Explore trends <span aria-hidden="true" class="">→</span></a>
-</header>
-<main>
-<section class="hero">
-<div class="hero-copy">
-<span class="eyebrow"><span></span> GOVERNMENT DATA, CLEARLY PRESENTED</span>
-<h1 class="">Better market information.<br><em>Stronger decisions.</em></h1>
-<p class="">
-            Explore mandi records stored by Rate-GPT. The upstream source is the
-            Government of India’s Open Government Data platform; freshness
-            depends on the last successful sync.
-          </p>
-<div class="hero-actions">
-<a class="button button-primary" href="priceTrends.html">Explore mandi trends <span aria-hidden="true" class="">→</span></a>
-<a class="text-link" href="marketDashboard.html">Open full dashboard <span aria-hidden="true" class="">↗</span></a>
-</div>
-<p class="source-note">
-<span class="status-dot"></span>
-<span id="sourceStatus" role="status" class="">Connected to Government of India data gateway (OGD Platform)</span>
-</p>
-</div>
-<div aria-label="Live database summary" class="hero-panel">
-<div class="panel-top">
-<span class="panel-symbol">↗</span>
-<div>
-<strong>Market data overview</strong>
-<small>From the connected Rate-GPT backend</small>
-</div>
-<span class="status-tag">Connected</span>
-</div>
-<div class="stats-grid">
-<article>
-<div class="stat-header">
-<span class="">Stored records</span>
-<svg class="stat-mini-spark" viewBox="0 0 50 20">
-<path d="M2 15 Q 12 14, 20 8 T 35 7 T 48 3" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path>
-</svg>
-</div>
-<strong>1,42,850+</strong>
-<small>Available in backend</small>
-</article>
-<article>
-<div class="stat-header">
-<span class="">Markets covered</span>
-<svg class="stat-mini-spark" viewBox="0 0 50 20">
-<path d="M2 16 Q 14 12, 24 13 T 36 6 T 48 4" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path>
-</svg>
-</div>
-<strong>2,840</strong>
-<small>Distinct mandi names</small>
-</article>
-<article>
-<div class="stat-header">
-<span class="">Crops tracked</span>
-<svg class="stat-mini-spark" viewBox="0 0 50 20">
-<path d="M2 17 Q 15 11, 26 14 T 38 8 T 48 5" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path>
-</svg>
-</div>
-<strong>312</strong>
-<small>Distinct commodities</small>
-</article>
-<article>
-<div class="stat-header">
-<span class="">States covered</span>
-<svg class="stat-mini-spark" viewBox="0 0 50 20">
-<path d="M2 12 Q 13 8, 25 10 T 37 6 T 48 4" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path>
-</svg>
-</div>
-<strong>28</strong>
-<small>Represented in records</small>
-</article>
-</div>
-<div class="panel-foot">
-<span class="">Latest arrival date</span>
-<strong>Today (18 Apr 2025)</strong>
-</div>
-<p class="panel-disclaimer">
-            Figures synced from OGD National Agriculture API. Real-time arrival records updated hourly.
-          </p>
-</div>
-</section>
-<!-- NEW SECTION: Commodity Price Trends & Market Graphs -->
-<section class="analytics-section" id="trends">
-<!-- Control Header Card -->
-<div class="analytics-header-card">
-<div class="analytics-title-group">
-<span class="eyebrow"><span></span> REAL-TIME ANALYTICS</span>
-<h2 class="">Commodity Price Trends &amp; Mandi Curves</h2>
-<p class="">Direct daily modal price feeds compared against Minimum Support Price (MSP) benchmarks.</p>
-</div>
-<div class="controls-bar">
-<!-- Commodity Selector Pills -->
-<div aria-label="Select Commodity" class="commodity-selector" role="tablist">
-<button class="pill-btn active" data-crop="wheat" onclick="switchCrop('wheat')">Wheat (Gehun)</button>
-<button class="pill-btn" data-crop="mustard" onclick="switchCrop('mustard')">Mustard (Sarson)</button>
-<button class="pill-btn" data-crop="onion" onclick="switchCrop('onion')">Onion (Pyaz)</button>
-<button class="pill-btn" data-crop="cotton" onclick="switchCrop('cotton')">Cotton (Kapas)</button>
-<button class="pill-btn" data-crop="chana" onclick="switchCrop('chana')">Chana (Gram)</button>
-</div>
-<!-- Timeframe Selector -->
-<div aria-label="Select Timeframe" class="timeframe-group" role="group">
-<button class="time-btn" onclick="setTimeframe(this, '7D')">7D</button>
-<button class="time-btn active" onclick="setTimeframe(this, '30D')">30D</button>
-<button class="time-btn" onclick="setTimeframe(this, '3M')">3M</button>
-<button class="time-btn" onclick="setTimeframe(this, '1Y')">1Y</button>
-</div>
-</div>
-</div>
-<!-- Metric KPI Cards for Selected Commodity -->
-<div class="kpi-row">
-<div class="kpi-card">
-<div class="kpi-card-header">
-<span class="kpi-label">Current Modal Price</span>
-<span class="badge-delta pos" id="kpiChange">+3.4% (7D)</span>
-</div>
-<div class="kpi-value" id="kpiPrice">₹2,420<span style="font-size: 15px; font-weight: 500; color: var(--muted);" class=""> /Qtl</span></div>
-<div class="kpi-subtext" id="kpiVariety">Sharbati / Dara grade avg across 142 mandis</div>
-</div>
-<div class="kpi-card">
-<div class="kpi-card-header">
-<span class="kpi-label">MSP Benchmark (2024-25)</span>
-<span class="badge-delta pos" id="kpiMspDelta">+₹145 vs MSP</span>
-</div>
-<div class="kpi-value" id="kpiMsp">₹2,275<span style="font-size: 15px; font-weight: 500; color: var(--muted);" class=""> /Qtl</span></div>
-<div class="kpi-subtext" id="kpiMspStatus">Trading 6.3% above central MSP floor</div>
-</div>
-<div class="kpi-card">
-<div class="kpi-card-header">
-<span class="kpi-label">Today's Arrival Volume</span>
-<span class="badge-delta badge-neutral" id="kpiVolDelta">Seasonal peak</span>
-</div>
-<div class="kpi-value" id="kpiArrivals">48,320<span style="font-size: 15px; font-weight: 500; color: var(--muted);" class=""> Quintals</span></div>
-<div class="kpi-subtext" id="kpiMandiCount">Reported across 210 physical APMC yards</div>
-</div>
-<div class="kpi-card">
-<div class="kpi-card-header">
-<span class="kpi-label">Price Spread (Min - Max)</span>
-<span class="badge-delta badge-neutral">Inter-mandi</span>
-</div>
-<div class="kpi-value" id="kpiSpread">₹2,280 – ₹2,610</div>
-<div class="kpi-subtext">Highest: Kota Mandi (₹2,610)</div>
-</div>
-</div>
-<!-- Main Chart and State Comparison Grid -->
-<div class="charts-grid">
-<!-- Primary Modal Price Trend SVG Chart -->
-<div class="chart-box">
-<div class="chart-box-header">
-<div>
-<h3 id="chartTitle" class="">Wheat (Gehun) Modal Price Movement</h3>
-<p class="">Official weighted daily modal price in Indian Rupees (₹) per Quintal</p>
-</div>
-<div class="chart-legend">
-<div class="legend-item">
-<span class="legend-color" style="background: var(--green-700);"></span>
-<span class="">Modal Price</span>
-</div>
-<div class="legend-item">
-<span class="legend-color" style="background: #d97706; border-top: 2px dashed #d97706;"></span>
-<span class="">MSP Benchmark</span>
-</div>
-</div>
-</div>
-<div class="trend-chart-wrapper" id="chartContainer">
-<svg class="trend-chart-svg" id="trendSvg" viewBox="0 0 650 260">
-<defs>
-<linearGradient id="greenGradient" x1="0" x2="0" y1="0" y2="1">
-<stop offset="0%" stop-color="#287a52" stop-opacity="0.45"></stop>
-<stop offset="100%" stop-color="#287a52" stop-opacity="0.0"></stop>
-</linearGradient>
-</defs>
-<!-- Grid Horizontal Lines -->
-<line class="chart-grid-line" x1="45" x2="630" y1="30" y2="30"></line>
-<line class="chart-grid-line" x1="45" x2="630" y1="80" y2="80"></line>
-<line class="chart-grid-line" x1="45" x2="630" y1="130" y2="130"></line>
-<line class="chart-grid-line" x1="45" x2="630" y1="180" y2="180"></line>
-<line stroke="#dbe3dc" stroke-width="1.2" x1="45" x2="630" y1="225" y2="225"></line>
-<!-- Y Axis Labels -->
-<text class="chart-axis-label" id="yMaxLabel" text-anchor="end" x="38" y="34">₹2,650</text>
-<text class="chart-axis-label" id="yMidMaxLabel" text-anchor="end" x="38" y="84">₹2,525</text>
-<text class="chart-axis-label" id="yMidLabel" text-anchor="end" x="38" y="134">₹2,400</text>
-<text class="chart-axis-label" id="yMidMinLabel" text-anchor="end" x="38" y="184">₹2,275</text>
-<text class="chart-axis-label" id="yMinLabel" text-anchor="end" x="38" y="228">₹2,150</text>
-<!-- MSP Line -->
-<line class="msp-benchmark-line" id="mspLine" x1="45" x2="630" y1="173.75" y2="173.75" style="display: block;"></line>
-<text fill="#d97706" font-size="10" font-weight="700" id="mspLineText" text-anchor="end" x="590" y="167.75" style="display: block;">MSP: ₹2,275</text>
-<!-- Dynamic Area & Line Paths -->
-<path class="chart-area" d="M 65 168.2 C 110.83333333333334 168.2, 110.83333333333334 158.95, 156.66666666666669 158.95 C 202.5 158.95, 202.5 149.7, 248.33333333333334 149.7 C 294.1666666666667 149.7, 294.1666666666667 153.4, 340 153.4 C 385.83333333333337 153.4, 385.83333333333337 134.89999999999998, 431.6666666666667 134.89999999999998 C 477.5 134.89999999999998, 477.5 125.64999999999999, 523.3333333333334 125.64999999999999 C 569.1666666666667 125.64999999999999, 569.1666666666667 120.1, 615 120.1 L 615 220 L 65 220 Z" id="svgArea"></path>
-<path class="chart-line" d="M 65 168.2 C 110.83333333333334 168.2, 110.83333333333334 158.95, 156.66666666666669 158.95 C 202.5 158.95, 202.5 149.7, 248.33333333333334 149.7 C 294.1666666666667 149.7, 294.1666666666667 153.4, 340 153.4 C 385.83333333333337 153.4, 385.83333333333337 134.89999999999998, 431.6666666666667 134.89999999999998 C 477.5 134.89999999999998, 477.5 125.64999999999999, 523.3333333333334 125.64999999999999 C 569.1666666666667 125.64999999999999, 569.1666666666667 120.1, 615 120.1" id="svgLine"></path>
-<!-- Dynamic Dots Group -->
-<g id="svgDots"><circle cx="65" cy="168.2" class="chart-dot"></circle><circle cx="156.66666666666669" cy="158.95" class="chart-dot"></circle><circle cx="248.33333333333334" cy="149.7" class="chart-dot"></circle><circle cx="340" cy="153.4" class="chart-dot"></circle><circle cx="431.6666666666667" cy="134.89999999999998" class="chart-dot"></circle><circle cx="523.3333333333334" cy="125.64999999999999" class="chart-dot"></circle><circle cx="615" cy="120.1" class="chart-dot"></circle></g>
-<!-- X Axis Labels -->
-<g id="svgXLabels"><text x="65" y="238" text-anchor="middle" class="chart-axis-label">24 Mar</text><text x="156.66666666666669" y="238" text-anchor="middle" class="chart-axis-label">28 Mar</text><text x="248.33333333333334" y="238" text-anchor="middle" class="chart-axis-label">01 Apr</text><text x="340" y="238" text-anchor="middle" class="chart-axis-label">05 Apr</text><text x="431.6666666666667" y="238" text-anchor="middle" class="chart-axis-label">09 Apr</text><text x="523.3333333333334" y="238" text-anchor="middle" class="chart-axis-label">13 Apr</text><text x="615" y="238" text-anchor="middle" class="chart-axis-label">18 Apr</text></g>
-</svg>
-<!-- Interactive Floating Tooltip -->
-<div class="interactive-tooltip" id="chartTooltip">
-<span id="tooltipDate" style="color: #a4ceb6;" class="">20 Mar</span>
-<strong id="tooltipPrice">₹2,410 / Qtl</strong>
-<span id="tooltipArrivals" style="font-size: 11px; opacity: 0.9;" class="">Arrivals: 34,000 Qtl</span>
-</div>
-</div>
-</div>
-<!-- Cross-State Modal Price Comparison Bar Chart -->
-<div class="chart-box">
-<div class="chart-box-header">
-<div>
-<h3 id="stateCompareTitle" class="">Wheat (Gehun) State Comparison</h3>
-<p class="">Major producer state markets (Today's reported modal)</p>
-</div>
-<span class="status-tag" style="background:#eaf0ec; color:#255c3c; font-size:11px;">Per Quintal</span>
-</div>
-<div class="state-bars-list" id="stateBarsContainer"><div class="state-bar-row">
-            <div class="state-row-top">
-              <span class="state-name">
-                Madhya Pradesh
-                <span class="state-mandi-tag">Ujjain / Indore</span>
-              </span>
-              <span class="state-price">₹2,510</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill highlight" style="width: 96%;"></div>
-            </div>
-          </div><div class="state-bar-row">
-            <div class="state-row-top">
-              <span class="state-name">
-                Rajasthan
-                <span class="state-mandi-tag">Kota / Baran</span>
-              </span>
-              <span class="state-price">₹2,470</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill " style="width: 93%;"></div>
-            </div>
-          </div><div class="state-bar-row">
-            <div class="state-row-top">
-              <span class="state-name">
-                Punjab
-                <span class="state-mandi-tag">Khanna / Rajpura</span>
-              </span>
-              <span class="state-price">₹2,420</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill " style="width: 90%;"></div>
-            </div>
-          </div><div class="state-bar-row">
-            <div class="state-row-top">
-              <span class="state-name">
-                Uttar Pradesh
-                <span class="state-mandi-tag">Hardoi / Agra</span>
-              </span>
-              <span class="state-price">₹2,360</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill " style="width: 86%;"></div>
-            </div>
-          </div><div class="state-bar-row">
-            <div class="state-row-top">
-              <span class="state-name">
-                Haryana
-                <span class="state-mandi-tag">Karnal / Kurukshetra</span>
-              </span>
-              <span class="state-price">₹2,340</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill " style="width: 84%;"></div>
-            </div>
-          </div></div>
-</div>
-</div>
-<!-- Top Traded Commodities Quick View Cards -->
-<div class="top-traded-strip">
-<div class="strip-header">
-<div>
-<h3 class="">Top Traded Agricultural Commodities</h3>
-<p style="margin:2px 0 0; font-size:12px; color:var(--muted);" class="">Click any commodity below to load full trend curves above</p>
-</div>
-<a class="strip-link" href="#prices">View all 312 crops →</a>
-</div>
-<div class="strip-grid">
-<div class="crop-card active-crop" id="cropCard-wheat" onclick="switchCrop('wheat')">
-<div class="crop-card-top">
-<span class="crop-name">Wheat (Gehun)</span>
-<span class="badge-delta pos">+3.4%</span>
-</div>
-<span class="crop-variety">Rabi • Food Grain</span>
-<div class="crop-price-row">
-<span class="crop-price-val">₹2,420</span>
-<span style="font-size:11px; color:var(--muted);" class="">Avg Modal</span>
-</div>
-<svg class="crop-sparkline" viewBox="0 0 100 24">
-<path d="M0 20 Q 25 18, 40 12 T 70 8 T 100 4" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2.2"></path>
-</svg>
-</div>
-<div class="crop-card" id="cropCard-mustard" onclick="switchCrop('mustard')">
-<div class="crop-card-top">
-<span class="crop-name">Mustard (Sarson)</span>
-<span class="badge-delta pos">+1.8%</span>
-</div>
-<span class="crop-variety">Rabi • Oilseed</span>
-<div class="crop-price-row">
-<span class="crop-price-val">₹5,450</span>
-<span style="font-size:11px; color:var(--muted);" class="">Avg Modal</span>
-</div>
-<svg class="crop-sparkline" viewBox="0 0 100 24">
-<path d="M0 16 Q 30 19, 50 11 T 80 9 T 100 3" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2.2"></path>
-</svg>
-</div>
-<div class="crop-card" id="cropCard-onion" onclick="switchCrop('onion')">
-<div class="crop-card-top">
-<span class="crop-name">Onion (Pyaz)</span>
-<span class="badge-delta neg">-4.2%</span>
-</div>
-<span class="crop-variety">Kharif/Rabi • Vegetable</span>
-<div class="crop-price-row">
-<span class="crop-price-val">₹1,850</span>
-<span style="font-size:11px; color:var(--muted);" class="">Avg Modal</span>
-</div>
-<svg class="crop-sparkline" viewBox="0 0 100 24">
-<path d="M0 4 Q 25 6, 45 13 T 75 16 T 100 21" fill="none" stroke="#b83329" stroke-linecap="round" stroke-width="2.2"></path>
-</svg>
-</div>
-<div class="crop-card" id="cropCard-cotton" onclick="switchCrop('cotton')">
-<div class="crop-card-top">
-<span class="crop-name">Cotton (Kapas)</span>
-<span class="badge-delta pos">+2.1%</span>
-</div>
-<span class="crop-variety">Kharif • Commercial</span>
-<div class="crop-price-row">
-<span class="crop-price-val">₹7,220</span>
-<span style="font-size:11px; color:var(--muted);" class="">Avg Modal</span>
-</div>
-<svg class="crop-sparkline" viewBox="0 0 100 24">
-<path d="M0 18 Q 30 14, 55 15 T 80 8 T 100 5" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2.2"></path>
-</svg>
-</div>
-</div>
-</div>
-</section><section class="analytics-section" id="prices" style="padding-top: 0px;">
-  <div class="analytics-header-card" style="display: block; margin-bottom: 20px;">
-    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
-      <div class="analytics-title-group">
-        <span class="eyebrow"><span></span> LIVE MANDI DISCOVERY &amp; REPORTED RATES</span>
-        <h2 class="">Search Mandi Prices Across India</h2>
-        <p class="">Browse and filter source-verified modal, minimum, and maximum arrival prices recorded across APMC agricultural markets.</p>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <span class="status-tag" style="font-size: 11px;">AGMARKNET / OGD Synced</span>
-        <span style="font-size: 12px; color: var(--muted); font-weight: 600;" id="filterCountDisplay" class="">Showing 8 of 1,42,850+ records</span>
-      </div>
-    </div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#123c2d" />
+    <meta
+      name="description"
+      content="Explore mandi prices recorded by Rate-GPT. Browse stored government market data and check its latest arrival date."
+    />
+    <title>Rate-GPT | Mandi prices, clearly presented</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="landing-page">
+    <header class="site-header">
+      <a aria-label="Rate-GPT home" class="brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">R</span>
+        <span>
+          Rate<span class="brand-accent">-GPT</span>
+          <small>AGRICULTURE MARKET INTELLIGENCE</small>
+        </span>
+      </a>
+      <button
+        aria-controls="mainNav"
+        aria-expanded="false"
+        aria-label="Open navigation"
+        class="nav-toggle"
+        id="navToggle"
+        type="button"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <nav aria-label="Main navigation" class="main-nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="mandiPrice.html">Mandi prices</a>
+        <a href="app.html#trends">Price trends</a>
+        <a href="app.html#board">Market dashboard</a>
+        <a href="about.html">About</a>
+      </nav>
+      <a class="header-cta" href="mandiPrice.html">
+        Explore prices <span aria-hidden="true">→</span>
+      </a>
+    </header>
 
-    <!-- Filter Controls Bar -->
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #fafbf9; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;">
-      <div style="flex: 2; min-width: 260px; position: relative;">
-        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none;" class="">🔍</span>
-        <input id="mandiSearchInput" type="text" placeholder="Search by Mandi, Commodity, or District (e.g. Indore, Wheat, Nashik)..." style="width: 100%; padding: 10px 14px 10px 36px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 13px; outline: none; background: #fff; color: var(--ink);" oninput="filterMandiTable()">
-      </div>
-      <div style="flex: 1; min-width: 140px;">
-        <select id="stateSelect" onchange="filterMandiTable()" style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 13px; background: #fff; color: var(--ink); cursor: pointer; outline: none;">
-          <option value="">All States</option>
-          <option value="Madhya Pradesh">Madhya Pradesh</option>
-          <option value="Rajasthan">Rajasthan</option>
-          <option value="Punjab">Punjab</option>
-          <option value="Uttar Pradesh">Uttar Pradesh</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Gujarat">Gujarat</option>
-          <option value="Haryana">Haryana</option>
-        </select>
-      </div>
-      <div style="flex: 1; min-width: 140px;">
-        <select id="commoditySelect" onchange="filterMandiTable()" style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 13px; background: #fff; color: var(--ink); cursor: pointer; outline: none;">
-          <option value="">All Commodities</option>
-          <option value="Wheat">Wheat (Gehun)</option>
-          <option value="Mustard">Mustard (Sarson)</option>
-          <option value="Onion">Onion (Pyaz)</option>
-          <option value="Cotton">Cotton (Kapas)</option>
-          <option value="Chana">Chana (Gram)</option>
-          <option value="Soybean">Soybean</option>
-          <option value="Paddy">Paddy (Dhan)</option>
-        </select>
-      </div>
-      <div style="flex: 1; min-width: 150px;">
-        <select id="sortSelect" onchange="sortMandiTable()" style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 13px; background: #fff; color: var(--ink); cursor: pointer; outline: none;">
-          <option value="modal-desc">Sort: Modal (High to Low)</option>
-          <option value="modal-asc">Sort: Modal (Low to High)</option>
-          <option value="arrivals-desc">Arrival Volume</option>
-        </select>
-      </div>
-      <button type="button" onclick="resetMandiFilters()" style="padding: 10px 14px; border: 1px solid var(--line); background: #fff; border-radius: 10px; font-size: 13px; font-weight: 600; color: #58685d; cursor: pointer; transition: all 0.15s; white-space: nowrap;" class="">Reset Filters</button>
-    </div>
-  </div>
+    <main>
+      <div class="landing-shell">
+        <section aria-labelledby="heroTitle" class="landing-hero">
+          <div class="landing-hero-copy">
+            <span class="eyebrow"
+              ><span></span> INDIA'S MANDI PRICE RECORDS</span
+            >
+            <h1 id="heroTitle">
+              Know your market.<br />
+              <em>Make your next move.</em>
+            </h1>
+            <p>
+              Explore mandi prices stored by Rate-GPT, with the market, crop,
+              and arrival date in view. Data freshness depends on the latest
+              successful sync.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="mandiPrice.html">
+                Browse mandi prices <span aria-hidden="true">→</span>
+              </a>
+              <a class="text-link" href="app.html#trends">
+                Explore price trends <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <p aria-live="polite" class="source-note">
+              <span class="status-dot" id="sourceDot"></span>
+              <span id="sourceStatus">Checking stored market data…</span>
+            </p>
+          </div>
 
-  <!-- Table Card Wrapper -->
-  <div style="background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm);">
-    <div style="overflow-x: auto;">
-      <table id="mandiPriceTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-        <thead>
-          <tr style="background: #fafbf9; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700;">
-            <th style="padding: 14px 18px;" class="">Commodity &amp; Variety</th>
-            <th style="padding: 14px 16px;" class="">State &amp; District</th>
-            <th style="padding: 14px 16px;" class="">Market / Mandi</th>
-            <th style="padding: 14px 16px; text-align: right;" class="">Min (₹/Qtl)</th>
-            <th style="padding: 14px 16px; text-align: right;" class="">Max (₹/Qtl)</th>
-            <th style="padding: 14px 16px; text-align: right;" class="">Modal Price (₹/Qtl)</th>
-            <th style="padding: 14px 16px; text-align: right;" class="">Arrival Volume</th>
-            <th style="padding: 14px 16px;" class="">Freshness</th>
-            <th style="padding: 14px 18px; text-align: center;" class="">Action</th>
-          </tr>
-        </thead>
-        <tbody id="mandiTableBody">
-          <!-- Row 1: Wheat -->
-          <tr data-commodity="Wheat (Gehun)" data-state="Madhya Pradesh" data-district="Indore" data-mandi="Indore APMC" data-modal="2510" data-arrivals="14200" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Wheat (Gehun)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Sharbati / Dara</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Rabi</span>
+          <aside aria-labelledby="overviewTitle" class="overview-panel">
+            <div class="overview-heading">
+              <span aria-hidden="true" class="overview-icon">↗</span>
+              <div>
+                <h2 id="overviewTitle">Market data overview</h2>
+                <p>Counts reported by the Rate-GPT backend</p>
               </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Madhya Pradesh</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Indore District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Indore APMC</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">MP-042</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹2,380</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹2,560</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹2,510</div>
-              <span class="badge-delta pos" style="font-size: 10px; padding: 1px 6px;">+6.4% above MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">14,200 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">09:45 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('wheat')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 2: Mustard -->
-          <tr data-commodity="Mustard (Sarson)" data-state="Rajasthan" data-district="Kota" data-mandi="Kota Mandi" data-modal="5450" data-arrivals="9850" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Mustard (Sarson)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Bold Black 42% Oil</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Rabi</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Rajasthan</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Kota District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Kota Mandi</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">RJ-108</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹5,250</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹5,620</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹5,450</div>
-              <span class="badge-delta neg" style="font-size: 10px; padding: 1px 6px;">-3.5% vs MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">9,850 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">10:15 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('mustard')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 3: Onion -->
-          <tr data-commodity="Onion (Pyaz)" data-state="Maharashtra" data-district="Nashik" data-mandi="Lasalgaon APMC" data-modal="1850" data-arrivals="32400" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Onion (Pyaz)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Red Nasik Medium</span>
-                <span style="background: #fdf5ea; color: #8c581a; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Perishable</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Maharashtra</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Nashik District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Lasalgaon APMC</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">MH-019</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹1,650</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹2,100</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹1,850</div>
-              <span class="badge-delta badge-neutral" style="font-size: 10px; padding: 1px 6px;">Open Market</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">32,400 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">08:30 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('onion')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 4: Cotton -->
-          <tr data-commodity="Cotton (Kapas)" data-state="Gujarat" data-district="Rajkot" data-mandi="Rajkot APMC" data-modal="7220" data-arrivals="18100" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Cotton (Kapas)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Medium Staple 28mm</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Kharif</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Gujarat</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Rajkot District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Rajkot APMC</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">GJ-055</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹6,950</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹7,480</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹7,220</div>
-              <span class="badge-delta pos" style="font-size: 10px; padding: 1px 6px;">+1.4% above MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">18,100 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #64748b;" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8;"></span> 17 Apr 2025
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">Finalized</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('cotton')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 5: Chana -->
-          <tr data-commodity="Chana (Gram)" data-state="Madhya Pradesh" data-district="Ujjain" data-mandi="Ujjain Krishi Mandi" data-modal="6020" data-arrivals="7600" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Chana (Bengal Gram)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Desi Yellow Sorted</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Rabi</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Madhya Pradesh</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Ujjain District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Ujjain Krishi Mandi</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">MP-014</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹5,800</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹6,150</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹6,020</div>
-              <span class="badge-delta pos" style="font-size: 10px; padding: 1px 6px;">+10.6% above MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">7,600 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">11:00 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('chana')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 6: Soybean -->
-          <tr data-commodity="Soybean" data-state="Madhya Pradesh" data-district="Dewas" data-mandi="Dewas Mandi" data-modal="4680" data-arrivals="11300" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Soybean</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Yellow Bold Grade</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Kharif</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Madhya Pradesh</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Dewas District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Dewas Mandi</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">MP-088</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹4,450</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹4,820</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹4,680</div>
-              <span class="badge-delta badge-neutral" style="font-size: 10px; padding: 1px 6px;">At MSP (₹4,600)</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">11,300 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">10:40 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('wheat')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 7: Paddy -->
-          <tr data-commodity="Paddy (Dhan)" data-state="Punjab" data-district="Ludhiana" data-mandi="Khanna Mandi" data-modal="3620" data-arrivals="24500" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Paddy (Dhan)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Basmati 1121 Paddy</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Kharif</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Punjab</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Ludhiana District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Khanna Mandi</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">PB-003</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹3,400</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹3,850</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹3,620</div>
-              <span class="badge-delta pos" style="font-size: 10px; padding: 1px 6px;">+57% vs Common MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">24,500 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">09:10 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('wheat')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-          <!-- Row 8: Mustard HR -->
-          <tr data-commodity="Mustard (Sarson)" data-state="Haryana" data-district="Karnal" data-mandi="Karnal APMC" data-modal="5380" data-arrivals="6400" style="border-bottom: 1px solid var(--line); transition: background 0.15s;">
-            <td style="padding: 14px 18px;" class="">
-              <div style="font-weight: 700; color: var(--ink); font-family: Manrope, sans-serif;" class="">Mustard (Sarson)</div>
-              <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span class="">Standard Clean Grade</span>
-                <span style="background: #eaf2ec; color: #206447; padding: 1px 6px; border-radius: 4px; font-weight: 600;" class="">Rabi</span>
-              </div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Haryana</div>
-              <div style="font-size: 11px; color: var(--muted);" class="">Karnal District</div>
-            </td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="font-weight: 600; color: var(--ink);" class="">Karnal APMC</div>
-              <div style="font-size: 10px; color: #3b5745; background: #eaf0ec; display: inline-block; padding: 1px 5px; border-radius: 4px; font-weight: 600;" class="">HR-031</div>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹5,180</td>
-            <td style="padding: 14px 16px; text-align: right; color: var(--muted); font-weight: 500;" class="">₹5,520</td>
-            <td style="padding: 14px 16px; text-align: right;" class="">
-              <div style="font-weight: 800; font-size: 15px; color: var(--green-950); font-family: Manrope, sans-serif;" class="">₹5,380</div>
-              <span class="badge-delta neg" style="font-size: 10px; padding: 1px 6px;">-4.7% vs MSP</span>
-            </td>
-            <td style="padding: 14px 16px; text-align: right; font-weight: 600; color: var(--ink);" class="">6,400 <span style="font-size: 11px; color: var(--muted); font-weight: normal;" class="">Qtl</span></td>
-            <td style="padding: 14px 16px;" class="">
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink);" class="">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2b9a5a;"></span> Today (18 Apr)
-              </div>
-              <div style="font-size: 10px; color: var(--muted);" class="">10:05 AM Sync</div>
-            </td>
-            <td style="padding: 14px 18px; text-align: center;" class="">
-              <a href="#trends" onclick="switchCrop('mustard')" style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--green-50); color: var(--green-900); font-weight: 700; border: 1px solid #dce8e0;" title="View Trends" class="">↗</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              <span
+                class="status-tag is-loading"
+                id="backendStatus"
+                role="status"
+              >
+                Checking
+              </span>
+            </div>
+            <div aria-live="polite" class="overview-stats">
+              <article>
+                <span>Stored records</span>
+                <strong id="totalRecords">—</strong>
+                <small>Price observations</small>
+              </article>
+              <article>
+                <span>Markets covered</span>
+                <strong id="totalMarkets">—</strong>
+                <small>Distinct market names</small>
+              </article>
+              <article>
+                <span>Crops tracked</span>
+                <strong id="totalCrops">—</strong>
+                <small>Distinct commodities</small>
+              </article>
+              <article>
+                <span>States covered</span>
+                <strong id="totalStates">—</strong>
+                <small>Represented in records</small>
+              </article>
+            </div>
+            <div class="overview-date">
+              <span>Latest arrival date</span>
+              <strong id="latestDate">—</strong>
+            </div>
+            <p class="overview-note" id="upstreamNote">
+              Prices are shown as returned by the backend. No sample prices are
+              generated by this page.
+            </p>
+          </aside>
+        </section>
 
-    <!-- Pagination & Action Footer -->
-    <div style="padding: 16px 22px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; background: #fff; border-top: 1px solid var(--line); font-size: 13px;">
-      <div style="color: var(--muted);" id="tablePageSummary" class="">
-        Showing <strong>1 to 8</strong> of <strong>2,840</strong> active Mandi records
+        <section aria-labelledby="recordsTitle" class="records-section">
+          <div class="records-heading">
+            <div>
+              <span class="eyebrow"><span></span> STORED MARKET RECORDS</span>
+              <h2 id="recordsTitle">Find a price that matters to you.</h2>
+              <p>
+                Search backend records by crop or location. Every row includes
+                its own arrival date.
+              </p>
+            </div>
+            <button
+              class="button button-quiet"
+              id="refreshButton"
+              type="button"
+            >
+              <span aria-hidden="true">↻</span> Refresh
+            </button>
+          </div>
+
+          <form
+            aria-label="Filter mandi prices"
+            class="record-filters"
+            id="recordFilters"
+          >
+            <label class="search-control" for="searchInput">
+              <span aria-hidden="true">⌕</span>
+              <input
+                autocomplete="off"
+                id="searchInput"
+                name="search"
+                placeholder="Search a crop, mandi, district…"
+                type="search"
+              />
+            </label>
+            <label class="visually-hidden" for="stateFilter"
+              >Filter by state</label
+            >
+            <select id="stateFilter" name="state">
+              <option value="">All states</option>
+            </select>
+            <label class="visually-hidden" for="commodityFilter"
+              >Filter by crop</label
+            >
+            <select id="commodityFilter" name="commodity">
+              <option value="">All crops</option>
+            </select>
+            <label class="visually-hidden" for="sortFilter">Sort records</label>
+            <select id="sortFilter" name="sort">
+              <option value="date_desc">Newest arrival</option>
+              <option value="modal_price_desc">Modal price: high to low</option>
+              <option value="modal_price_asc">Modal price: low to high</option>
+            </select>
+            <button class="button button-primary filter-submit" type="submit">
+              Search
+            </button>
+          </form>
+
+          <div class="records-card">
+            <div class="records-meta">
+              <p aria-live="polite" id="resultSummary">
+                Loading stored records…
+              </p>
+              <span>Prices shown per quintal when provided by the source.</span>
+            </div>
+            <div class="table-scroll">
+              <table class="records-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Commodity</th>
+                    <th scope="col">State</th>
+                    <th scope="col">District</th>
+                    <th scope="col">Market</th>
+                    <th class="optional-column" scope="col">Min / Max</th>
+                    <th scope="col">Modal price</th>
+                    <th scope="col">Arrival date</th>
+                  </tr>
+                </thead>
+                <tbody id="priceRows">
+                  <tr>
+                    <td class="table-placeholder" colspan="7">
+                      Connecting to the Rate-GPT backend…
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p
+              aria-live="assertive"
+              class="records-error"
+              hidden
+              id="recordsError"
+            ></p>
+            <div class="records-footer">
+              <span>Source: stored Rate-GPT mandi records</span>
+              <a href="mandiPrice.html"
+                >Open the full price explorer
+                <span aria-hidden="true">→</span></a
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-label="Explore Rate-GPT tools" class="explore-grid">
+          <a class="explore-card" href="mandiPrice.html">
+            <span aria-hidden="true" class="explore-number">01</span>
+            <span class="explore-card-copy">
+              <strong>Browse mandi prices</strong>
+              <span>Filter records by location, crop, and arrival date.</span>
+            </span>
+            <span aria-hidden="true" class="explore-arrow">↗</span>
+          </a>
+          <a class="explore-card" href="app.html#trends">
+            <span aria-hidden="true" class="explore-number">02</span>
+            <span class="explore-card-copy">
+              <strong>Explore price trends</strong>
+              <span>View available market trends from stored records.</span>
+            </span>
+            <span aria-hidden="true" class="explore-arrow">↗</span>
+          </a>
+          <a class="explore-card" href="app.html#compare">
+            <span aria-hidden="true" class="explore-number">03</span>
+            <span class="explore-card-copy">
+              <strong>Compare markets</strong>
+              <span>Compare reported prices across markets.</span>
+            </span>
+            <span aria-hidden="true" class="explore-arrow">↗</span>
+          </a>
+        </section>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <button type="button" style="padding: 6px 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px; font-size: 12px; color: var(--muted); cursor: pointer;" disabled="disabled" class="">Previous</button>
-        <button type="button" style="padding: 6px 12px; border: 1px solid var(--green-900); background: var(--green-900); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;" class="">1</button>
-        <button type="button" style="padding: 6px 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px; font-size: 12px; color: var(--ink); cursor: pointer;" class="">2</button>
-        <button type="button" style="padding: 6px 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px; font-size: 12px; color: var(--ink); cursor: pointer;" class="">3</button>
-        <button type="button" style="padding: 6px 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px; font-size: 12px; color: var(--ink); cursor: pointer;" class="">Next</button>
-      </div>
-      <div>
-        <button type="button" onclick="alert('Exporting verified APMC records to CSV...')" style="padding: 7px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fafbf9; font-weight: 600; font-size: 12px; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" class="">
-          <span class="">⬇</span> Export CSV
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- Original Features Section -->
-<section class="feature-section" id="about">
-<div class="section-heading">
-<span class="eyebrow">BUILT FOR CLARITY</span>
-<h2 class="">Find the market information you need.</h2>
-<p class="">
-            Use source-backed records instead of illustrative or invented prices.
-          </p>
-</div>
-<div class="feature-grid">
-<article class="feature-card">
-<span class="feature-icon">⌕</span>
-<h3 class="">Search and filter</h3>
-<p class="">
-              Narrow records by state, district, mandi, crop, date, or a keyword.
-            </p>
-</article>
-<article class="feature-card">
-<span class="feature-icon">₹</span>
-<h3 class="">Compare reported prices</h3>
-<p class="">
-              Review minimum, maximum, and modal prices in Indian rupees per quintal when supplied by the source.
-            </p>
-</article>
-<article class="feature-card">
-<span class="feature-icon">◷</span>
-<h3 class="">Know the data date</h3>
-<p class="">
-              See arrival dates and backend sync status so data freshness is not confused with real-time updates.
-            </p>
-</article>
-</div>
-</section>
-</main>
-<footer class="site-footer">
-<a class="brand footer-brand" href="index.html">
-<span class="brand-icon">R</span>
-<span class="">Rate<span class="brand-accent">-GPT</span></span>
-</a>
-<p class="">Government mandi records, presented clearly.</p>
-<a href="https://data.gov.in/" rel="noopener noreferrer" target="_blank" class="">Source: data.gov.in ↗</a>
-</footer>
-</body>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">R</span>
+        <span>Rate<span class="brand-accent">-GPT</span></span>
+      </a>
+      <p>Government mandi records, presented clearly.</p>
+      <a href="https://data.gov.in/" rel="noopener noreferrer" target="_blank">
+        About the OGD source <span aria-hidden="true">↗</span>
+      </a>
+    </footer>
+
+    <script type="module" src="/script/site-nav.js"></script>
+    <script type="module" src="/script/landing.js"></script>
+  </body>
 </html>

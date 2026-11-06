@@ -8,6 +8,8 @@ import {
   RefreshCw,
   Calculator,
   Star,
+  Menu,
+  X,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.js";
 
@@ -36,8 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
   isSyncing,
 }) => {
   const { t, language, setLanguage } = useLanguage();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   return (
-    <header className="border-b border-[var(--border-color)] bg-[var(--bg-surface)] sticky top-0 z-30 transition-colors">
+    <header className="min-w-0 border-b border-[var(--border-color)] bg-[var(--bg-surface)] sticky top-0 z-30 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Title */}
@@ -62,6 +65,24 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
+          <nav
+            aria-label="Site navigation"
+            className="hidden lg:flex items-center gap-4 text-xs font-medium text-[var(--text-secondary)]"
+          >
+            <a className="hover:text-[var(--text-primary)]" href="/index.html">
+              Home
+            </a>
+            <a
+              className="hover:text-[var(--text-primary)]"
+              href="/mandiPrice.html"
+            >
+              Mandi prices
+            </a>
+            <a className="hover:text-[var(--text-primary)]" href="/about.html">
+              About
+            </a>
+          </nav>
+
           {/* Quick status & Theme toggle */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="hidden md:flex flex-col text-right text-xs">
@@ -77,14 +98,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </div>
-
-            {/* Home Link */}
-            <a
-              href="/"
-              className="px-2 py-1 border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] text-xs font-medium transition-colors"
-            >
-              Home
-            </a>
 
             {/* Quick Sync Button */}
             <button
@@ -123,14 +136,59 @@ export const Header: React.FC<HeaderProps> = ({
                 <Moon className="w-4 h-4" />
               )}
             </button>
+
+            <button
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-site-navigation"
+              aria-label={
+                isMobileMenuOpen ? t("nav.closeMenu") : t("nav.openMenu")
+              }
+              title={isMobileMenuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+              className="p-2 border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] transition-colors lg:hidden"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <Menu className="w-4 h-4" />
+              )}
+            </button>
           </div>
         </div>
+
+        <nav
+          id="mobile-site-navigation"
+          aria-label="Site navigation"
+          className={`${isMobileMenuOpen ? "flex" : "hidden"} lg:hidden flex-col gap-3 border-t border-[var(--border-color)] py-3 text-xs font-medium text-[var(--text-secondary)]`}
+        >
+          <a
+            className="hover:text-[var(--text-primary)]"
+            href="/index.html"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Home
+          </a>
+          <a
+            className="hover:text-[var(--text-primary)]"
+            href="/mandiPrice.html"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Mandi prices
+          </a>
+          <a
+            className="hover:text-[var(--text-primary)]"
+            href="/about.html"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            About
+          </a>
+        </nav>
 
         {/* Navigation Tabs */}
         <nav
           aria-label="Primary navigation"
           role="tablist"
-          className="flex space-x-1 sm:space-x-2 overflow-x-auto border-t border-[var(--border-color)] py-2 no-scrollbar text-xs sm:text-sm font-medium"
+          className="flex w-full min-w-0 space-x-1 sm:space-x-2 overflow-x-auto border-t border-[var(--border-color)] py-2 no-scrollbar text-xs sm:text-sm font-medium"
         >
           <button
             role="tab"

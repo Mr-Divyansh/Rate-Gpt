@@ -22,14 +22,22 @@ const state = {
   hasNext: false,
   filters: { states: [], districts: [], markets: [], commodities: [] },
   health: null,
-  loading: false,
 };
+let activePriceRequest;
+let messageElement = $("#stateMessage");
+if (!messageElement) {
+  messageElement = document.createElement("p");
+  messageElement.id = "stateMessage";
+  messageElement.className = "state-message";
+  messageElement.hidden = true;
+  $("#tableWrap").before(messageElement);
+}
 const params = () => ({
   state: $("#stateFilter").value,
   district: $("#districtFilter").value,
   market: $("#marketFilter").value,
   commodity: $("#commodityFilter").value,
-  date: $("#dateFilter").value,
+  date: $("#dateRangeFilter").value,
   search: $("#searchInput").value.trim(),
   sort: $("#sortFilter").value,
   limit: PAGE_SIZE,
@@ -104,20 +112,35 @@ async function loadHealth() {
     );
     $("#latestDate").textContent = displayDate(stats.latestArrivalDate);
     const sync = stats.lastSync;
-    $("#lastUpdated").textContent = sync?.completed_at
+    const lastSyncText = sync?.completed_at
       ? `Last sync attempt: ${new Date(sync.completed_at).toLocaleString("en-IN")}`
-      : "No completed sync attempt recorded";
-    $("#freshnessDot").classList.toggle(
-      "good",
-      Boolean(sync?.status === "SUCCESS"),
-    );
-    $("#freshnessDot").classList.toggle(
-      "bad",
-      Boolean(sync && ["FAILED", "NOT_CONFIGURED"].includes(sync.status)),
-    );
+      : sync?.status === "NOT_CONFIGURED"
+        ? "Upstream sync is not configured"
+        : "No completed sync attempt recorded";
+    $("#lastUpdated").textContent = lastSyncText;
+    const freshnessStatus =
+      $("#freshnessStatus") ||
+      $("#latestDate").parentElement.querySelector(
+        "span[style*='background: #ecfdf5']",
+      );
+    if (freshnessStatus) {
+      freshnessStatus.textContent =
+        sync?.status === "SUCCESS"
+          ? "LAST SYNC SUCCEEDED"
+          : sync?.status === "NOT_CONFIGURED"
+            ? "SYNC NOT CONFIGURED"
+            : sync?.status === "FAILED"
+              ? "LAST SYNC FAILED"
+              : "SYNC STATUS UNKNOWN";
+    }
   } catch (error) {
     $("#lastUpdated").textContent = "Backend status unavailable";
-    $("#freshnessDot").classList.add("bad");
+    const freshnessStatus =
+      $("#freshnessStatus") ||
+      $("#latestDate").parentElement.querySelector(
+        "span[style*='background: #ecfdf5']",
+      );
+    if (freshnessStatus) freshnessStatus.textContent = "STATUS UNAVAILABLE";
   }
 }
 async function loadFilters() {
@@ -164,8 +187,9 @@ async function updateCascadingFilters() {
   }
 }
 async function loadPrices() {
-  if (state.loading) return;
-  state.loading = true;
+  activePriceRequest?.abort();
+  activePriceRequest = new AbortController();
+  const { signal } = activePriceRequest;
   $("#applyFilters").disabled = true;
   $("#refreshButton").disabled = true;
   showMessage("Loading government-reported records…");
@@ -174,7 +198,8 @@ async function loadPrices() {
     if (value !== "" && value !== undefined && value !== null)
       query.set(key, String(value));
   try {
-    const payload = await requestJson(`/api/v1/prices?${query}`);
+    const payload = await requestJson(`/api/v1/prices?${query}`, { signal });
+    if (signal.aborted) return;
     const records = Array.isArray(payload.data) ? payload.data : [];
     const meta = payload.meta || {};
     state.total = Number(meta.total ?? records.length);
@@ -195,6 +220,7 @@ async function loadPrices() {
         "empty",
       );
   } catch (error) {
+    if (signal.aborted) return;
     showMessage(
       `Unable to load mandi prices: ${error.message}. Check that the backend is running and configured.`,
       "error",
@@ -204,9 +230,10 @@ async function loadPrices() {
     $("#prevPage").disabled = true;
     $("#nextPage").disabled = true;
   } finally {
-    state.loading = false;
-    $("#applyFilters").disabled = false;
-    $("#refreshButton").disabled = false;
+    if (!signal.aborted) {
+      $("#applyFilters").disabled = false;
+      $("#refreshButton").disabled = false;
+    }
   }
 }
 function applyFilters() {
@@ -226,15 +253,22 @@ $("#districtFilter").addEventListener("change", async () => {
 });
 $("#marketFilter").addEventListener("change", applyFilters);
 $("#commodityFilter").addEventListener("change", applyFilters);
-$("#dateFilter").addEventListener("change", applyFilters);
+$("#dateRangeFilter").addEventListener("change", applyFilters);
 $("#sortFilter").addEventListener("change", applyFilters);
 $("#applyFilters").addEventListener("click", applyFilters);
+$(".market-filters").addEventListener("submit", (event) => {
+  event.preventDefault();
+  applyFilters();
+});
 $("#searchInput").addEventListener("keydown", (event) => {
-  if (event.key === "Enter") applyFilters();
+  if (event.key === "Enter") {
+    event.preventDefault();
+    applyFilters();
+  }
 });
 $("#resetFilters").addEventListener("click", async () => {
   $("#searchInput").value = "";
-  $("#dateFilter").value = "";
+  $("#dateRangeFilter").value = "";
   $("#stateFilter").value = "";
   $("#sortFilter").value = "date_desc";
   setOptions($("#districtFilter"), state.filters.districts, "All districts");
@@ -256,12 +290,6 @@ $("#nextPage").addEventListener("click", () => {
     state.offset += PAGE_SIZE;
     loadPrices();
   }
-});
-const menuButton = $("#menuToggle");
-const nav = $("#mainNav");
-menuButton?.addEventListener("click", () => {
-  const open = nav.classList.toggle("open");
-  menuButton.setAttribute("aria-expanded", String(open));
 });
 async function init() {
   try {

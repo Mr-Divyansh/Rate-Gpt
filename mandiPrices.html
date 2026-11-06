@@ -1,142 +1,316 @@
-<!DOCTYPE html><html lang="en"><head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1" name="viewport">
-  <meta content="#174d38" name="theme-color">
-  <meta content="Browse official government mandi prices across India with filters and live market data." name="description">
-  <title>Mandi Prices | Rate-GPT</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<header class="site-header">
-  <a aria-label="Rate-GPT home" class="brand" href="index.html">
-    <span class="brand-icon">R</span>
-    <span class="">Rate<span class="brand-accent">-GPT</span><small>AGRICULTURE MARKET INTELLIGENCE</small></span>
-  </a>
-  <nav aria-label="Main navigation" class="main-nav" id="mainNav">
-    <a aria-current="page" class="" href="index.html">Home</a>
-    <a href="mandiPrice.html" class="">Price Trends</a>
-    <a href="mandiPrices.html" class="active">Mandi Prices</a>
-    <a href="marketDashboard.html" class="">Market Dashboard</a>
-    <a href="about.html" class="">About</a>
-  </nav>
-  <a class="header-cta" href="priceTrends.html">Explore trends <span aria-hidden="true" class="">→</span></a>
-</header>
-<main>
-  <section class="hero">
-    <div class="hero-copy">
-      <span class="eyebrow"><span></span> LIVE MANDI PRICE REGISTRY</span>
-      <h1 class="">Mandi prices across India</h1>
-      <p class="">
-        Browse reported spot prices from APMC mandis nationwide. Filter by state, district, crop, and
-        arrival date. All data comes from the Government of India Open Government Data platform.
-      </p>
-      <div class="hero-actions">
-        <a class="button button-primary" href="marketDashboard.html">Open full dashboard <span aria-hidden="true" class="">↗</span></a>
-        <a class="text-link" href="priceTrends.html">View price trends <span aria-hidden="true" class="">→</span></a>
-      </div>
-    </div>
-    <div aria-label="Live database summary" class="hero-panel">
-      <div class="panel-top">
-        <span class="panel-symbol">📊</span>
-        <div>
-          <strong>Market data overview</strong>
-          <small>From the connected Rate-GPT backend</small>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="#174d38" name="theme-color" />
+    <meta
+      content="Browse official government mandi prices across India with filters and live market data."
+      name="description"
+    />
+    <title>Mandi Prices | Rate-GPT</title>
+    <meta http-equiv="refresh" content="0; url=mandiPrice.html" />
+    <link rel="canonical" href="mandiPrice.html" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Manrope:wght@500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a aria-label="Rate-GPT home" class="brand" href="index.html">
+        <span class="brand-icon">R</span>
+        <span class=""
+          >Rate<span class="brand-accent">-GPT</span
+          ><small>AGRICULTURE MARKET INTELLIGENCE</small></span
+        >
+      </a>
+      <nav aria-label="Main navigation" class="main-nav" id="mainNav">
+        <a aria-current="page" class="" href="index.html">Home</a>
+        <a href="mandiPrice.html" class="">Price Trends</a>
+        <a href="mandiPrices.html" class="active">Mandi Prices</a>
+        <a href="marketDashboard.html" class="">Market Dashboard</a>
+        <a href="about.html" class="">About</a>
+      </nav>
+      <a class="header-cta" href="priceTrends.html"
+        >Explore trends <span aria-hidden="true" class="">→</span></a
+      >
+    </header>
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span></span> LIVE MANDI PRICE REGISTRY</span>
+          <h1 class="">Mandi prices across India</h1>
+          <p class="">
+            Browse reported spot prices from APMC mandis nationwide. Filter by
+            state, district, crop, and arrival date. All data comes from the
+            Government of India Open Government Data platform.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="marketDashboard.html"
+              >Open full dashboard <span aria-hidden="true" class="">↗</span></a
+            >
+            <a class="text-link" href="priceTrends.html"
+              >View price trends <span aria-hidden="true" class="">→</span></a
+            >
+          </div>
         </div>
-        <span class="status-tag">Connected</span>
-      </div>
-      <div class="stats-grid">
-        <article>
-          <div class="stat-header">
-            <span class="">Stored records</span>
-            <svg class="stat-mini-spark" viewBox="0 0 50 20"><path d="M2 15 Q 12 14, 20 8 T 35 7 T 48 3" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path></svg>
+        <div aria-label="Live database summary" class="hero-panel">
+          <div class="panel-top">
+            <span class="panel-symbol">📊</span>
+            <div>
+              <strong>Market data overview</strong>
+              <small>From the connected Rate-GPT backend</small>
+            </div>
+            <span class="status-tag">Connected</span>
           </div>
-          <strong>1,42,850+</strong>
-          <small>Available in backend</small>
-        </article>
-        <article>
-          <div class="stat-header">
-            <span class="">Markets covered</span>
-            <svg class="stat-mini-spark" viewBox="0 0 50 20"><path d="M2 16 Q 14 12, 24 13 T 36 6 T 48 4" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path></svg>
+          <div class="stats-grid">
+            <article>
+              <div class="stat-header">
+                <span class="">Stored records</span>
+                <svg class="stat-mini-spark" viewBox="0 0 50 20">
+                  <path
+                    d="M2 15 Q 12 14, 20 8 T 35 7 T 48 3"
+                    fill="none"
+                    stroke="#287a52"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+              </div>
+              <strong>1,42,850+</strong>
+              <small>Available in backend</small>
+            </article>
+            <article>
+              <div class="stat-header">
+                <span class="">Markets covered</span>
+                <svg class="stat-mini-spark" viewBox="0 0 50 20">
+                  <path
+                    d="M2 16 Q 14 12, 24 13 T 36 6 T 48 4"
+                    fill="none"
+                    stroke="#287a52"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+              </div>
+              <strong>2,840</strong>
+              <small>Distinct mandi names</small>
+            </article>
+            <article>
+              <div class="stat-header">
+                <span class="">Crops tracked</span>
+                <svg class="stat-mini-spark" viewBox="0 0 50 20">
+                  <path
+                    d="M2 17 Q 15 11, 26 14 T 38 8 T 48 5"
+                    fill="none"
+                    stroke="#287a52"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+              </div>
+              <strong>42+</strong>
+              <small>Agricultural commodities</small>
+            </article>
           </div>
-          <strong>2,840</strong>
-          <small>Distinct mandi names</small>
-        </article>
-        <article>
-          <div class="stat-header">
-            <span class="">Crops tracked</span>
-            <svg class="stat-mini-spark" viewBox="0 0 50 20"><path d="M2 17 Q 15 11, 26 14 T 38 8 T 48 5" fill="none" stroke="#287a52" stroke-linecap="round" stroke-width="2"></path></svg>
-          </div>
-          <strong>42+</strong>
-          <small>Agricultural commodities</small>
-        </article>
-      </div>
-    </div>
-  </section>
-  <section class="feature-section">
-    <div class="section-heading">
-      <h2>Filter and explore mandi prices</h2>
-      <p>Narrow down records by location, crop, and date to find the market rates you need.</p>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card">
-        <span class="feature-icon">🌾</span>
-        <h3 class="">Filter by state &amp; district</h3>
-        <p class="">Choose a state and district to see mandi prices in your region.</p>
-      </article>
-      <article class="feature-card">
-        <span class="feature-icon">₹</span>
-        <h3 class="">Compare modal prices</h3>
-        <p class="">Review minimum, maximum, and modal prices in Indian rupees per quintal.</p>
-      </article>
-      <article class="feature-card">
-        <span class="feature-icon">📅</span>
-        <h3 class="">Check arrival dates</h3>
-        <p class="">See the latest arrival dates so you know how fresh the data is.</p>
-      </article>
-    </div>
-  </section>
+        </div>
+      </section>
+      <section class="feature-section">
+        <div class="section-heading">
+          <h2>Filter and explore mandi prices</h2>
+          <p>
+            Narrow down records by location, crop, and date to find the market
+            rates you need.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-icon">🌾</span>
+            <h3 class="">Filter by state &amp; district</h3>
+            <p class="">
+              Choose a state and district to see mandi prices in your region.
+            </p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">₹</span>
+            <h3 class="">Compare modal prices</h3>
+            <p class="">
+              Review minimum, maximum, and modal prices in Indian rupees per
+              quintal.
+            </p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">📅</span>
+            <h3 class="">Check arrival dates</h3>
+            <p class="">
+              See the latest arrival dates so you know how fresh the data is.
+            </p>
+          </article>
+        </div>
+      </section>
 
-  <section class="hero" style="padding-top:40px;">
-    <div class="hero-copy">
-      <span class="eyebrow"><span></span> SAMPLE MANDI RECORDS</span>
-      <h3 class="">Recent mandi prices (₹ per quintal)</h3>
-      <p class="" style="margin-top:8px;">Below is a preview of mandi records. Use the dashboard for the full filterable table.</p>
-    </div>
-    <div class="hero-panel">
-      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
-        <article style="border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff;">
-          <div style="font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.5px;">Wheat — Ujjain, MP</div>
-          <div style="font:800 20px Manrope; color:var(--green-950); margin:6px 0;">₹2,510</div>
-          <div style="font-size:11px; color:var(--muted);">Modal price · Today</div>
-        </article>
-        <article style="border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff;">
-          <div style="font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.5px;">Mustard — Bharatpur, RJ</div>
-          <div style="font:800 20px Manrope; color:var(--green-950); margin:6px 0;">₹5,620</div>
-          <div style="font-size:11px; color:var(--muted);">Modal price · Today</div>
-        </article>
-        <article style="border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff;">
-          <div style="font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.5px;">Onion — Nashik, MH</div>
-          <div style="font:800 20px Manrope; color:var(--green-950); margin:6px 0;">₹1,850</div>
-          <div style="font-size:11px; color:var(--muted);">Modal price · Today</div>
-        </article>
-        <article style="border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff;">
-          <div style="font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.5px;">Cotton — Kurnool, AP</div>
-          <div style="font:800 20px Manrope; color:var(--green-950); margin:6px 0;">₹6,900</div>
-          <div style="font-size:11px; color:var(--muted);">Modal price · Today</div>
-        </article>
-      </div>
-    </div>
-  </section>
-</main>
-<footer class="site-footer">
-  <a class="brand footer-brand" href="index.html">
-    <span class="brand-icon">R</span>
-    <span class="">Rate<span class="brand-accent">-GPT</span></span>
-  </a>
-  <p class="">Government mandi records, presented clearly.</p>
-  <a href="https://data.gov.in/" rel="noopener noreferrer" target="_blank" class="">Source: data.gov.in ↗</a>
-</footer>
-</body></html>
+      <section class="hero" style="padding-top: 40px">
+        <div class="hero-copy">
+          <span class="eyebrow"><span></span> SAMPLE MANDI RECORDS</span>
+          <h3 class="">Recent mandi prices (₹ per quintal)</h3>
+          <p class="" style="margin-top: 8px">
+            Below is a preview of mandi records. Use the dashboard for the full
+            filterable table.
+          </p>
+        </div>
+        <div class="hero-panel">
+          <div
+            class="stats-grid"
+            style="
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 14px;
+            "
+          >
+            <article
+              style="
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 16px;
+                background: #fff;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: var(--muted);
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Wheat — Ujjain, MP
+              </div>
+              <div
+                style="
+                  font: 800 20px Manrope;
+                  color: var(--green-950);
+                  margin: 6px 0;
+                "
+              >
+                ₹2,510
+              </div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Modal price · Today
+              </div>
+            </article>
+            <article
+              style="
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 16px;
+                background: #fff;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: var(--muted);
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Mustard — Bharatpur, RJ
+              </div>
+              <div
+                style="
+                  font: 800 20px Manrope;
+                  color: var(--green-950);
+                  margin: 6px 0;
+                "
+              >
+                ₹5,620
+              </div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Modal price · Today
+              </div>
+            </article>
+            <article
+              style="
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 16px;
+                background: #fff;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: var(--muted);
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Onion — Nashik, MH
+              </div>
+              <div
+                style="
+                  font: 800 20px Manrope;
+                  color: var(--green-950);
+                  margin: 6px 0;
+                "
+              >
+                ₹1,850
+              </div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Modal price · Today
+              </div>
+            </article>
+            <article
+              style="
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 16px;
+                background: #fff;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: var(--muted);
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Cotton — Kurnool, AP
+              </div>
+              <div
+                style="
+                  font: 800 20px Manrope;
+                  color: var(--green-950);
+                  margin: 6px 0;
+                "
+              >
+                ₹6,900
+              </div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Modal price · Today
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-icon">R</span>
+        <span class="">Rate<span class="brand-accent">-GPT</span></span>
+      </a>
+      <p class="">Government mandi records, presented clearly.</p>
+      <a
+        href="https://data.gov.in/"
+        rel="noopener noreferrer"
+        target="_blank"
+        class=""
+        >Source: data.gov.in ↗</a
+      >
+    </footer>
+  </body>
+</html>

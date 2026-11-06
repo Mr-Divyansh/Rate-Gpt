@@ -8,7 +8,9 @@ Rate-GPT is an agricultural mandi-price discovery platform. It presents records 
 
 - `index.html` — public landing page with backend status and database summary.
 - `mandiPrice.html` — searchable, filterable, paginated mandi price table powered by `/api/v1`.
-- `app.html` — existing React application / NPS Dev data-flow reference. It remains separate from the public landing page.
+- `app.html` — React application with the market board, comparisons, trends, and other tools.
+- `about.html` — platform and data-source information.
+- `mandiPrices.html`, `marketDashboard.html`, and `priceTrends.html` — compatibility redirects to the working price explorer and application views.
 
 ## Stack
 
@@ -58,7 +60,9 @@ Rate-GPT is an agricultural mandi-price discovery platform. It presents records 
 7. Open:
    - Landing page: `http://localhost:3000/`
    - Mandi price table: `http://localhost:3000/mandiPrice.html`
-   - Existing React dashboard: `http://localhost:3000/app.html`
+   - Market board: `http://localhost:3000/app.html#board`
+   - Price trends: `http://localhost:3000/app.html#trends`
+   - About: `http://localhost:3000/about.html`
    - API health: `http://localhost:3000/api/v1/health`
 
 The development server may choose the next port if port 3000 is already occupied; read the terminal output for the actual URL.

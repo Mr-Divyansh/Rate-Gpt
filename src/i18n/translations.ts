@@ -1,13 +1,15 @@
 export const en: Record<string, string> = {
   "app.title": "Rate GPT",
   "app.subtitle": "Daily agricultural mandi prices across India",
-  "app.badge": "AGMARKNET / OGD",
+  "app.badge": "Mandi data",
   "nav.board": "Mandi Price Board",
   "nav.compare": "Market Comparison",
   "nav.trends": "Price Trends",
   "nav.calculator": "Price Calculator",
   "nav.watchlist": "Watchlist",
   "nav.sync": "API & Sync Status",
+  "nav.openMenu": "Open site menu",
+  "nav.closeMenu": "Close site menu",
   "header.records": "price records",
   "header.latestDate": "Latest date",
   "header.sync": "Synchronize from Government API",
@@ -38,7 +40,7 @@ export const en: Record<string, string> = {
   "filter.loadingStates": "Loading states...",
   "filter.recent": "Recent",
   "filter.totalResults": "results",
-  "table.loading": "Fetching official mandi price observations...",
+  "table.loading": "Fetching stored mandi price observations...",
   "table.empty.title": "No Mandi Records Found",
   "table.empty.desc":
     "No price observations matched your current location or commodity criteria. Try clearing selected filters or searching with a broader keyword.",
@@ -71,7 +73,7 @@ export const en: Record<string, string> = {
   "trends.title": "Price Trends",
   "calc.title": "Price Calculator",
   "calc.desc":
-    "Estimate total cost for a given quantity using verified mandi prices.",
+    "Estimate total cost for a given quantity using a stored price observation.",
   "calc.commodity": "Commodity",
   "calc.market": "Market / Mandi",
   "calc.quantity": "Quantity",
@@ -81,7 +83,7 @@ export const en: Record<string, string> = {
   "calc.pricePer": "Price per",
   "calc.estimatedTotal": "Estimated Total",
   "calc.noData":
-    "No verified mandi price data available for this commodity and market.",
+    "No stored price observation is available for this commodity and market.",
   "calc.invalid":
     "Please select a commodity and market, and enter a valid quantity.",
   "watchlist.empty.title": "Your Watchlist is Empty",
@@ -95,23 +97,25 @@ export const en: Record<string, string> = {
   "sync.loadingLogs": "Loading sync history...",
   "sync.noLogs": "No synchronization logs recorded yet.",
   "footer.source":
-    "Data Source: Government of India Open Government Data (OGD) Platform / AGMARKNET",
+    "Intended upstream catalog: Government of India Open Government Data (OGD) Platform / AGMARKNET",
   "footer.disclaimer":
-    "Reported mandi prices are official market arrivals collected for informational discovery. Modal price is the most frequently transacted rate and does not constitute a guaranteed commercial transaction quote.",
+    "Prices shown are records stored by Rate GPT and may be outdated, incomplete, or not independently verified. Confirm current rates with the market before trading. A modal price is not a guaranteed quote.",
   "footer.history":
-    "Historical price trends represent actual records preserved by the Rate GPT database. No predictive or interpolated prices are fabricated.",
+    "Trend charts use stored observations only; they are not forecasts, and missing dates are not interpolated.",
   "common.loading": "Loading...",
 };
 export const hi: Record<string, string> = {
   "app.title": "रेट जीपीटी",
   "app.subtitle": "भारत भर में दैनिक कृषि मंडी मूल्य",
-  "app.badge": "एजीमार्कनेट / ओजीडी",
+  "app.badge": "मंडी डेटा",
   "nav.board": "मंडी मूल्य बोर्ड",
   "nav.compare": "बाज़ार तुलना",
   "nav.trends": "मूल्य रुझान",
   "nav.calculator": "मूल्य कैलकुलेटर",
   "nav.watchlist": "वॉचलिस्ट",
   "nav.sync": "एपीआई और सिंक स्थिति",
+  "nav.openMenu": "साइट मेनू खोलें",
+  "nav.closeMenu": "साइट मेनू बंद करें",
   "header.records": "मूल्य रिकॉर्ड",
   "header.latestDate": "नवीनतम तारीख",
   "header.sync": "सरकारी एपीआई से सिंक करें",
@@ -142,7 +146,7 @@ export const hi: Record<string, string> = {
   "filter.loadingStates": "राज्य लोड हो रहे हैं...",
   "filter.recent": "हाल ही में",
   "filter.totalResults": "परिणाम",
-  "table.loading": "आधिकारिक मंडी मूल्य लोड हो रहे हैं...",
+  "table.loading": "संग्रहीत मंडी मूल्य लोड हो रहे हैं...",
   "table.empty.title": "कोई मंडी रिकॉर्ड नहीं मिला",
   "table.empty.desc":
     "आपके वर्तमान स्थान या कमोडिटी मानदंड से कोई मूल्य मेल नहीं खाया। फ़िल्टर हटाएँ या व्यापक कीवर्ड आज़माएँ।",
@@ -173,7 +177,7 @@ export const hi: Record<string, string> = {
   "compare.average": "औसत",
   "trends.title": "मूल्य रुझान",
   "calc.title": "मूल्य कैलकुलेटर",
-  "calc.desc": "सत्यापित मंडी मूल्यों का उपयोग करके कुल लागत का अनुमान लगाएँ।",
+  "calc.desc": "संग्रहीत मूल्य रिकॉर्ड के आधार पर कुल लागत का अनुमान लगाएँ।",
   "calc.commodity": "कमोडिटी",
   "calc.market": "बाज़ार / मंडी",
   "calc.quantity": "मात्रा",
@@ -183,7 +187,7 @@ export const hi: Record<string, string> = {
   "calc.pricePer": "प्रति",
   "calc.estimatedTotal": "अनुमानित कुल",
   "calc.noData":
-    "इस कमोडिटी और बाज़ार के लिए कोई सत्यापित मंडी मूल्य उपलब्ध नहीं है।",
+    "इस कमोडिटी और बाज़ार के लिए कोई संग्रहीत मूल्य रिकॉर्ड उपलब्ध नहीं है।",
   "calc.invalid": "कृपया कमोडिटी और बाज़ार चुनें, और वैध मात्रा दर्ज करें।",
   "watchlist.empty.title": "आपकी वॉचलिस्ट खाली है",
   "watchlist.empty.desc":
@@ -196,10 +200,10 @@ export const hi: Record<string, string> = {
   "sync.loadingLogs": "सिंक इतिहास लोड हो रहा है...",
   "sync.noLogs": "अभी तक कोई सिंक लॉग रिकॉर्ड नहीं है।",
   "footer.source":
-    "डेटा स्रोत: भारत सरकार ओपन गवर्नमेंट डेटा (OGD) प्लेटफ़ॉर्म / एजीमार्कनेट",
+    "निर्धारित अपस्ट्रीम कैटलॉग: भारत सरकार ओपन गवर्नमेंट डेटा (OGD) प्लेटफ़ॉर्म / एजीमार्कनेट",
   "footer.disclaimer":
-    "रिपोर्टेड मंडी मूल्य आधिकारिक बाज़ार आगमन हैं, जो सूचनात्मक खोज के लिए एकत्र किए गए हैं। मोडल मूल्य सबसे अधिक बार लेन-देन वाला रेट है और गारंटीड वाणिज्यिक कोटेशन नहीं है।",
+    "दिखाए गए मूल्य Rate GPT में संग्रहीत रिकॉर्ड हैं; वे पुराने, अधूरे या स्वतंत्र रूप से असत्यापित हो सकते हैं। व्यापार से पहले बाज़ार से वर्तमान दर की पुष्टि करें। मोडल मूल्य गारंटीड कोटेशन नहीं है।",
   "footer.history":
-    "ऐतिहासिक मूल्य रुझान रेट जीपीटी डेटाबेस द्वारा संरक्षित वास्तविक रिकॉर्ड हैं। कोई भविष्यवाणी या इंटरपोलेटेड मूल्य नहीं बनाया गया।",
+    "रुझान चार्ट केवल संग्रहीत रिकॉर्ड दिखाते हैं; वे पूर्वानुमान नहीं हैं और छूटी हुई तारीखों के लिए मूल्य नहीं जोड़े जाते।",
   "common.loading": "लोड हो रहा है...",
 };

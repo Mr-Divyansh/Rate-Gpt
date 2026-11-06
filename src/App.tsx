@@ -33,6 +33,25 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+type AppTab =
+  "board" | "compare" | "trends" | "sync" | "calculator" | "watchlist";
+
+function readCurrentTab(): AppTab {
+  if (typeof window === "undefined") return "board";
+
+  const tab = window.location.hash.slice(1);
+  switch (tab) {
+    case "compare":
+    case "trends":
+    case "sync":
+    case "calculator":
+    case "watchlist":
+      return tab;
+    default:
+      return "board";
+  }
+}
+
 const MarketComparison = lazy(() =>
   import("./components/MarketComparison.js").then((m) => ({
     default: m.MarketComparison,
@@ -130,9 +149,19 @@ export default function App() {
   const [priceUnit, setPriceUnit] = useState<PriceUnit>(initialFilters.unit);
 
   // Tab navigation
-  const [currentTab, setCurrentTab] = useState<
-    "board" | "compare" | "trends" | "sync" | "calculator" | "watchlist"
-  >("board");
+  const [currentTab, setCurrentTab] = useState<AppTab>(readCurrentTab);
+
+  const changeTab = useCallback((tab: AppTab) => {
+    setCurrentTab(tab);
+    const hash = tab === "board" ? "" : `#${tab}`;
+    const destination = `${window.location.pathname}${window.location.search}${hash}`;
+    if (
+      `${window.location.pathname}${window.location.search}${window.location.hash}` !==
+      destination
+    ) {
+      window.history.pushState(null, "", destination);
+    }
+  }, []);
 
   // Comparison & Trend targeted commodity/market
   const [compareCommodity, setCompareCommodity] = useState<string>("Wheat");
@@ -202,8 +231,13 @@ export default function App() {
       unit: priceUnit,
       offset,
     });
-    if (window.location.search !== `?${desired}`) {
-      window.history.pushState(null, "", `?${desired}`);
+    const query = desired ? `?${desired}` : "";
+    if (window.location.search !== query) {
+      window.history.pushState(
+        null,
+        "",
+        `${window.location.pathname}${query}${window.location.hash}`,
+      );
     }
     lastCoarseKeyRef.current = coarseKey;
   }, [
@@ -225,8 +259,13 @@ export default function App() {
       unit: priceUnit,
       offset,
     });
-    if (window.location.search === `?${desired}`) return;
-    window.history.replaceState(null, "", `?${desired}`);
+    const query = desired ? `?${desired}` : "";
+    if (window.location.search === query) return;
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query}${window.location.hash}`,
+    );
   }, [
     searchQuery,
     offset,
@@ -251,6 +290,7 @@ export default function App() {
       setSelectedSort(f.sort);
       setPriceUnit(f.unit);
       setOffset(Number.isFinite(o) && o >= 0 ? o : 0);
+      setCurrentTab(readCurrentTab());
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -350,7 +390,7 @@ export default function App() {
   // Actions from table rows
   const handleSelectCompare = (commodity: string) => {
     setCompareCommodity(commodity);
-    setCurrentTab("compare");
+    changeTab("compare");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -361,7 +401,7 @@ export default function App() {
     district: string,
   ) => {
     setTrendTarget({ commodity, market, state, district });
-    setCurrentTab("trends");
+    changeTab("trends");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -384,7 +424,7 @@ export default function App() {
       {/* Top Header */}
       <Header
         currentTab={currentTab}
-        onTabChange={setCurrentTab}
+        onTabChange={changeTab}
         isDark={isDark}
         onToggleTheme={toggleTheme}
         totalRecords={health?.stats.totalRecords ?? meta.total}
@@ -421,8 +461,9 @@ export default function App() {
                   Mandi Price Discovery Board
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
-                  Real-time agricultural market prices reported by agricultural
-                  produce market committees (APMC / Mandis)
+                  Stored agricultural market records reported by agricultural
+                  produce market committees (APMC / Mandis). Freshness depends
+                  on the latest successful data sync.
                 </p>
               </div>
 

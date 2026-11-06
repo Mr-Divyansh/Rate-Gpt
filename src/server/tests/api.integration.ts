@@ -2,7 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import http from "http";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 // Isolated temporary database for integration tests (never touch tracked rategpt.db)
 const __filename = fileURLToPath(import.meta.url);
@@ -16,7 +16,7 @@ const tmpDb = path.join(os.tmpdir(), `rategpt-api-test-${testDbHash}.db`);
 // We import after defining tmpDb so env vars are available, but we need the schema
 // from the real database to initialize the test database properly.
 const { createApiApp } = await import(
-  path.resolve(__dirname, "..", "..", "..", "server.ts")
+  pathToFileURL(path.resolve(__dirname, "..", "..", "..", "server.ts")).href
 );
 
 // Read the original rategpt.db path to copy schema from
@@ -26,6 +26,8 @@ const originalDbPath = path.resolve(process.cwd(), "rategpt.db");
 let dbSetup = false;
 
 async function setupTestDatabase() {
+  await cleanupTestDatabase();
+
   // If original database exists, use its schema; otherwise initialize from scratch
   if (fs.existsSync(originalDbPath)) {
     // Copy the original database to the temp location for schema fidelity
@@ -103,7 +105,9 @@ async function setupTestDatabase() {
         now,
       );
     testDb.close();
-    console.log("[TEST] Created fresh test database with schema + 1 seed record");
+    console.log(
+      "[TEST] Created fresh test database with schema + 1 seed record",
+    );
   }
 
   dbSetup = true;
@@ -113,7 +117,8 @@ async function setupTestDatabase() {
   // process entry point (see its isMainModule check), so importing it here
   // for createApiApp no longer requires VERCEL=1 as a workaround — and
   // setting it would make database-factory.ts refuse to fall back to SQLite.
-  process.env.ADMIN_SYNC_KEY = "integration-test-admin-sync-key-not-a-real-secret";
+  process.env.ADMIN_SYNC_KEY =
+    "integration-test-admin-sync-key-not-a-real-secret";
 }
 
 async function cleanupTestDatabase() {
@@ -343,7 +348,10 @@ async function run() {
       url,
       {
         method: "GET",
-        headers: { Authorization: "Bearer integration-test-admin-sync-key-not-a-real-secret" },
+        headers: {
+          Authorization:
+            "Bearer integration-test-admin-sync-key-not-a-real-secret",
+        },
       },
       (res) => {
         let c = "";
