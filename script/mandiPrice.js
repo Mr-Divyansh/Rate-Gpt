@@ -25,7 +25,7 @@ const state = {
   serviceChecks: { health: null, filters: null, prices: null },
 };
 const previewMessage =
-  "We’re putting the price explorer together. Search and live market prices will be enabled when the data service is connected. No estimates or sample prices are shown.";
+  "Mandi prices are coming soon. We’re getting the explorer ready; no sample prices are shown.";
 let activePriceRequest;
 let messageElement = $("#stateMessage");
 if (!messageElement) {

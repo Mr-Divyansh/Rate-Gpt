@@ -103,7 +103,7 @@ async function loadHealth() {
     if (!available) {
       updatePreviewMode();
       document.querySelector("#upstreamNote").textContent =
-        "Live market records are coming soon. This preview does not show estimated or sample prices.";
+        "Mandi prices are coming soon. We’re getting the explorer ready; no sample prices are shown.";
       updateServiceStatus(false, "Market data preview · no sample prices");
       return;
     }
@@ -118,7 +118,7 @@ async function loadHealth() {
     serviceChecks.health = false;
     updatePreviewMode();
     document.querySelector("#upstreamNote").textContent =
-      "Live market records are coming soon. This preview does not show estimated or sample prices.";
+      "Mandi prices are coming soon. We’re getting the explorer ready; no sample prices are shown.";
     updateServiceStatus(false, "Market data preview · no sample prices");
   }
 }
@@ -239,7 +239,7 @@ async function loadRecords() {
     errorMessage.hidden = true;
     renderRecords([]);
     document.querySelector("#priceRows .table-placeholder").textContent =
-      "Live mandi records will appear here when the data service is connected. No sample prices are shown.";
+      "Mandi prices are coming soon. No sample prices are shown.";
   } finally {
     if (!signal.aborted) refresh.disabled = false;
   }
