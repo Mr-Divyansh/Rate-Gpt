@@ -12,6 +12,7 @@
  */
 
 import { Pool, QueryResult } from "pg";
+import { getDatabaseConnectionString } from "./database-config.js";
 
 export interface MandiPriceRecord {
   id: string;
@@ -345,9 +346,11 @@ let pool: Pool | null = null;
 
 async function getPool(): Promise<Pool> {
   if (!pool) {
-    const connectionString = process.env.DATABASE_URL;
+    const connectionString = getDatabaseConnectionString();
     if (!connectionString) {
-      throw new Error("DATABASE_URL environment variable is not set");
+      throw new Error(
+        "PostgreSQL connection is not configured. Set DATABASE_URL or POSTGRES_URL.",
+      );
     }
     pool = new Pool({
       connectionString,

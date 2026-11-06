@@ -823,6 +823,16 @@ td:first-child {
   color: #8b968d;
   cursor: not-allowed;
 }
+.market-page.is-preview .filter-field input:disabled,
+.market-page.is-preview .filter-field select:disabled {
+  background: #f5f6f2;
+  color: #8b968d;
+  cursor: not-allowed;
+}
+.market-page.is-preview .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 .filter-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -891,6 +901,18 @@ td:first-child {
   border-color: #dbe3da;
   background: #f6f8f3;
   color: #526157;
+}
+.market-page .state-message.preview {
+  border-color: #e7d9b5;
+  background:
+    radial-gradient(
+      ellipse at 8% 0%,
+      rgba(233, 202, 132, 0.2),
+      transparent 58%
+    ),
+    #fffdf6;
+  color: #665734;
+  line-height: 1.65;
 }
 .market-page .table-wrap {
   overflow: hidden;

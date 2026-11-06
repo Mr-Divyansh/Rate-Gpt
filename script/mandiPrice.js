@@ -22,7 +22,10 @@ const state = {
   hasNext: false,
   filters: { states: [], districts: [], markets: [], commodities: [] },
   health: null,
+  serviceChecks: { health: null, filters: null, prices: null },
 };
+const previewMessage =
+  "We’re putting the price explorer together. Search and live market prices will be enabled when the data service is connected. No estimates or sample prices are shown.";
 let activePriceRequest;
 let messageElement = $("#stateMessage");
 if (!messageElement) {
@@ -54,6 +57,19 @@ function showMessage(message, type = "") {
   el.className = `state-message ${type}`;
   el.hidden = false;
   $("#tableWrap").hidden = true;
+}
+function updatePreviewMode() {
+  const checks = Object.values(state.serviceChecks);
+  const isPreview = checks.some((available) => available === false);
+  const isReady = checks.every((available) => available === true);
+  if (!isPreview && !isReady) return;
+
+  document.body.classList.toggle("is-preview", isPreview);
+  for (const control of document.querySelectorAll(
+    ".market-filters input, .market-filters select, .market-filters button",
+  )) {
+    control.disabled = isPreview;
+  }
 }
 function fillTable(records) {
   const tbody = $("#priceRows");
@@ -97,6 +113,7 @@ async function loadHealth() {
   try {
     const payload = await requestJson("/api/v1/health");
     state.health = payload.data;
+    state.serviceChecks.health = payload.data.status === "healthy";
     const stats = payload.data.stats || {};
     $("#totalRecords").textContent = numberFormat.format(
       stats.totalRecords || 0,
@@ -124,8 +141,9 @@ async function loadHealth() {
         "span[style*='background: #ecfdf5']",
       );
     if (freshnessStatus) {
-      freshnessStatus.textContent =
-        sync?.status === "SUCCESS"
+      freshnessStatus.textContent = !state.serviceChecks.health
+        ? "PREVIEW MODE"
+        : sync?.status === "SUCCESS"
           ? "LAST SYNC SUCCEEDED"
           : sync?.status === "NOT_CONFIGURED"
             ? "SYNC NOT CONFIGURED"
@@ -133,14 +151,23 @@ async function loadHealth() {
               ? "LAST SYNC FAILED"
               : "SYNC STATUS UNKNOWN";
     }
+    if (!state.serviceChecks.health) {
+      $("#lastUpdated").textContent =
+        "Live market data will appear here when the service is ready.";
+    }
+    updatePreviewMode();
   } catch (error) {
-    $("#lastUpdated").textContent = "Backend status unavailable";
+    console.error("[Mandi explorer] Could not load service status:", error);
+    state.serviceChecks.health = false;
+    $("#lastUpdated").textContent =
+      "Live market data will appear here when the service is ready.";
     const freshnessStatus =
       $("#freshnessStatus") ||
       $("#latestDate").parentElement.querySelector(
         "span[style*='background: #ecfdf5']",
       );
-    if (freshnessStatus) freshnessStatus.textContent = "STATUS UNAVAILABLE";
+    if (freshnessStatus) freshnessStatus.textContent = "PREVIEW MODE";
+    updatePreviewMode();
   }
 }
 async function loadFilters() {
@@ -151,6 +178,8 @@ async function loadFilters() {
   setOptions($("#marketFilter"), state.filters.markets, "All markets");
   setOptions($("#commodityFilter"), state.filters.commodities, "All crops");
   updateCascadeControls();
+  state.serviceChecks.filters = true;
+  updatePreviewMode();
 }
 function updateCascadeControls() {
   const hasState = Boolean($("#stateFilter").value);
@@ -200,6 +229,8 @@ async function loadPrices() {
   try {
     const payload = await requestJson(`/api/v1/prices?${query}`, { signal });
     if (signal.aborted) return;
+    state.serviceChecks.prices = true;
+    updatePreviewMode();
     const records = Array.isArray(payload.data) ? payload.data : [];
     const meta = payload.meta || {};
     state.total = Number(meta.total ?? records.length);
@@ -221,17 +252,18 @@ async function loadPrices() {
       );
   } catch (error) {
     if (signal.aborted) return;
-    showMessage(
-      `Unable to load mandi prices: ${error.message}. Check that the backend is running and configured.`,
-      "error",
-    );
-    $("#resultSummary").textContent = "Records could not be loaded";
+    console.error("[Mandi explorer] Could not load prices:", error);
+    state.serviceChecks.prices = false;
+    updatePreviewMode();
+    showMessage(previewMessage, "preview");
+    $("#resultSummary").textContent = "Mandi price explorer preview";
     $("#pageSummary").textContent = "Unavailable";
     $("#prevPage").disabled = true;
     $("#nextPage").disabled = true;
   } finally {
     if (!signal.aborted) {
-      $("#applyFilters").disabled = false;
+      $("#applyFilters").disabled =
+        document.body.classList.contains("is-preview");
       $("#refreshButton").disabled = false;
     }
   }
@@ -295,10 +327,11 @@ async function init() {
   try {
     await Promise.all([loadHealth(), loadFilters()]);
   } catch (error) {
-    showMessage(
-      `Could not load filter metadata: ${error.message}. The API may be unavailable or the database may not be initialized.`,
-      "error",
-    );
+    console.error("[Mandi explorer] Could not load filter options:", error);
+    state.serviceChecks.filters = false;
+    updatePreviewMode();
+    showMessage(previewMessage, "preview");
+    $("#resultSummary").textContent = "Mandi price explorer preview";
   }
   await loadPrices();
 }

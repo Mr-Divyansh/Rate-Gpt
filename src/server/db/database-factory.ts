@@ -1,22 +1,26 @@
 /**
- * Database adapter boundary. SQLite is used when DATABASE_URL is absent;
- * PostgreSQL is used when DATABASE_URL is configured. All operations are async
- * at this boundary so Express routes and the sync service work with either.
+ * Database adapter boundary. SQLite is used locally when no PostgreSQL URL is
+ * configured; PostgreSQL is used when DATABASE_URL or POSTGRES_URL is set.
+ * All operations are async at this boundary so Express routes and the sync
+ * service work with either.
  */
 import type * as SqliteTypes from "./database.js";
+import { getDatabaseConnectionString } from "./database-config.js";
 
 let adapterPromise: Promise<any> | undefined;
 
 async function getDb(): Promise<any> {
   if (!adapterPromise) {
     adapterPromise = (async () => {
-      if (process.env.DATABASE_URL) {
+      if (getDatabaseConnectionString()) {
         const pg = await import("./pg-database.js");
         await pg.initDb();
         return pg;
       }
       if (process.env.VERCEL) {
-        throw new Error("DATABASE_URL is required on Vercel; SQLite is only supported for local development.");
+        throw new Error(
+          "Database is not configured. Set DATABASE_URL (recommended) or POSTGRES_URL in Vercel Project Settings > Environment Variables, then redeploy.",
+        );
       }
       return import("./database.js");
     })();

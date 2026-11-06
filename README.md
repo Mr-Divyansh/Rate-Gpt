@@ -88,6 +88,7 @@ See `.env.example`. Keep credentials server-side only:
 - `DATA_GOV_RESOURCE_ID` — defaults to the AGMARKNET resource ID above.
 - `ADMIN_SYNC_KEY` — secret for protected sync endpoints.
 - `DATABASE_URL` — optional PostgreSQL connection string; when set, API reads and writes use the PostgreSQL adapter.
+- `POSTGRES_URL` — fallback PostgreSQL connection string used when `DATABASE_URL` is unset, including Vercel Postgres's standard pooled URL.
 - `PORT` — local server port (default `3000`).
 
 Do not paste secrets into issues, logs, frontend code, or source control.
@@ -102,7 +103,8 @@ Do not paste secrets into issues, logs, frontend code, or source control.
 
 ## Deployment notes and known limitations
 
-- The database factory selects PostgreSQL when `DATABASE_URL` is configured and SQLite otherwise. PostgreSQL end-to-end connectivity still requires a valid database URL and deployment-side verification. SQLite is local-only for durable use; serverless filesystems may be ephemeral or read-only.
+- The database factory selects PostgreSQL when `DATABASE_URL` or `POSTGRES_URL` is configured and SQLite otherwise. PostgreSQL end-to-end connectivity still requires a valid database URL and deployment-side verification. SQLite is local-only for durable use; serverless filesystems may be ephemeral or read-only.
+- On Vercel, add a pooled Neon/Postgres connection string as `DATABASE_URL` in **Project Settings → Environment Variables** (or connect Vercel Postgres to provide `POSTGRES_URL`). Apply it to Production and any Preview environments that need the API, then redeploy. The server initializes the PostgreSQL schema on first use; never commit the connection string.
 - Upstream sync requires a valid API key and the OGD endpoint to be available.
 - No scheduled sync is configured by default.
 - The UI reports backend status and does not claim data is real-time.

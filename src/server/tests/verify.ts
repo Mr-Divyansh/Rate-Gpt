@@ -2,6 +2,7 @@
 import path from "path";
 import os from "os";
 import fs from "fs";
+import { getDatabaseConnectionString } from "../db/database-config.js";
 
 let passed = 0;
 let failed = 0;
@@ -29,6 +30,48 @@ const tempDbPath = path.join(
 
 async function main() {
   console.log("Rate-GPT deterministic verification (no external API calls)");
+
+  check(
+    getDatabaseConnectionString({ DATABASE_URL: "postgres://primary" }) ===
+      "postgres://primary",
+    "DATABASE_URL takes priority",
+  );
+  check(
+    getDatabaseConnectionString({ POSTGRES_URL: "postgres://vercel" }) ===
+      "postgres://vercel",
+    "Vercel POSTGRES_URL fallback",
+  );
+  check(
+    getDatabaseConnectionString({
+      DATABASE_URL: " ",
+      POSTGRES_URL: "postgres://vercel",
+    }) === "postgres://vercel",
+    "blank DATABASE_URL uses POSTGRES_URL fallback",
+  );
+
+  const previousVercel = process.env.VERCEL;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  const previousPostgresUrl = process.env.POSTGRES_URL;
+  process.env.VERCEL = "1";
+  delete process.env.DATABASE_URL;
+  delete process.env.POSTGRES_URL;
+  try {
+    await (await import("../db/database-factory.js")).getDatabaseStats();
+    check(false, "Vercel reports missing PostgreSQL configuration");
+  } catch (error) {
+    check(
+      error instanceof Error &&
+        error.message.includes("Set DATABASE_URL (recommended) or POSTGRES_URL"),
+      "Vercel reports actionable PostgreSQL configuration error",
+    );
+  } finally {
+    if (previousVercel === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = previousVercel;
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+    if (previousPostgresUrl === undefined) delete process.env.POSTGRES_URL;
+    else process.env.POSTGRES_URL = previousPostgresUrl;
+  }
 
   // Pre-create a valid empty SQLite file so database.ts's resolveDbPath()
   // (which only honors RATEGPT_DB_PATH if the file already exists and opens

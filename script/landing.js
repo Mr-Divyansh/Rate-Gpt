@@ -1,4 +1,5 @@
 const numberFormat = new Intl.NumberFormat("en-IN");
+const serviceChecks = { health: null, filters: null, records: null };
 const formatMoney = (value) =>
   value === null || value === undefined || value === ""
     ? "—"
@@ -45,13 +46,31 @@ function updateServiceStatus(isAvailable, message) {
   const sourceDot = document.querySelector("#sourceDot");
   const sourceStatus = document.querySelector("#sourceStatus");
 
-  status.textContent = isAvailable ? "Database online" : "Unavailable";
+  status.textContent = isAvailable ? "Data available" : "Preview";
   status.classList.toggle("is-online", isAvailable);
-  status.classList.toggle("is-error", !isAvailable);
+  status.classList.toggle("is-preview", !isAvailable);
   status.classList.remove("is-loading");
 
-  sourceDot.classList.toggle("is-error", !isAvailable);
+  sourceDot.classList.toggle("is-preview", !isAvailable);
   sourceStatus.textContent = message;
+}
+
+function updatePreviewMode() {
+  const isPreview = Object.values(serviceChecks).some(
+    (available) => available === false,
+  );
+  const isReady = Object.values(serviceChecks).every(
+    (available) => available === true,
+  );
+  if (!isPreview && !isReady) return;
+
+  document.body.classList.toggle("is-preview", isPreview);
+  document.querySelector("#previewNotice").hidden = !isPreview;
+  for (const control of document.querySelectorAll(
+    "#recordFilters input, #recordFilters select, #recordFilters button",
+  )) {
+    control.disabled = isPreview;
+  }
 }
 
 async function loadHealth() {
@@ -59,6 +78,7 @@ async function loadHealth() {
     const payload = await requestJson("/api/v1/health");
     const { stats, upstreamSource, status } = payload.data;
     const available = status === "healthy";
+    serviceChecks.health = available;
 
     document.querySelector("#totalRecords").textContent = numberFormat.format(
       stats.totalRecords,
@@ -80,22 +100,26 @@ async function loadHealth() {
         ? "An OGD API key is configured. Data freshness still depends on the last successful sync."
         : "OGD sync is not configured in this environment. Saved backend records are shown as returned; this page does not generate prices.";
 
-    updateServiceStatus(
-      available,
-      available
-        ? `Stored backend records · latest arrival ${formatDate(stats.latestArrivalDate)}`
-        : "The market data service is currently unavailable.",
-    );
-
     if (!available) {
-      throw new Error("The market data service is currently unavailable.");
+      updatePreviewMode();
+      document.querySelector("#upstreamNote").textContent =
+        "Live market records are coming soon. This preview does not show estimated or sample prices.";
+      updateServiceStatus(false, "Market data preview · no sample prices");
+      return;
     }
+
+    updatePreviewMode();
+    updateServiceStatus(
+      true,
+      `Stored backend records · latest arrival ${formatDate(stats.latestArrivalDate)}`,
+    );
   } catch (error) {
-    updateServiceStatus(false, "Could not verify the market data service.");
+    console.error("[Landing] Could not load market data status:", error);
+    serviceChecks.health = false;
+    updatePreviewMode();
     document.querySelector("#upstreamNote").textContent =
-      error instanceof Error
-        ? error.message
-        : "Could not load market data status.";
+      "Live market records are coming soon. This preview does not show estimated or sample prices.";
+    updateServiceStatus(false, "Market data preview · no sample prices");
   }
 }
 
@@ -119,12 +143,12 @@ async function loadFilters() {
       document.querySelector("#commodityFilter"),
       payload.data.commodities || [],
     );
+    serviceChecks.filters = true;
+    updatePreviewMode();
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not load filters.";
-    document.querySelector("#recordsError").textContent =
-      `Filters could not be loaded: ${message}`;
-    document.querySelector("#recordsError").hidden = false;
+    console.error("[Landing] Could not load price filters:", error);
+    serviceChecks.filters = false;
+    updatePreviewMode();
   }
 }
 
@@ -202,16 +226,20 @@ async function loadRecords() {
     const records = Array.isArray(payload.data) ? payload.data : [];
     const total = Number(payload.meta?.total ?? records.length);
     renderRecords(records);
+    serviceChecks.records = true;
+    updatePreviewMode();
     summary.textContent = `${numberFormat.format(total)} matching stored record${total === 1 ? "" : "s"}`;
   } catch (error) {
     if (signal.aborted) return;
 
-    const message =
-      error instanceof Error ? error.message : "Could not load stored records.";
-    summary.textContent = "Stored records could not be loaded.";
-    errorMessage.textContent = `Unable to load mandi prices: ${message}`;
-    errorMessage.hidden = false;
+    console.error("[Landing] Could not load mandi records:", error);
+    serviceChecks.records = false;
+    updatePreviewMode();
+    summary.textContent = "Mandi price explorer preview";
+    errorMessage.hidden = true;
     renderRecords([]);
+    document.querySelector("#priceRows .table-placeholder").textContent =
+      "Live mandi records will appear here when the data service is connected. No sample prices are shown.";
   } finally {
     if (!signal.aborted) refresh.disabled = false;
   }

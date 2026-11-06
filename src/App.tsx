@@ -322,7 +322,9 @@ export default function App() {
       .catch((err) => {
         if (err.name !== "AbortError") {
           console.error("[Error fetching prices]", err);
-          setError(err.message || "Failed to retrieve mandi prices");
+          setError(
+            "The market dashboard is in preview. Prices and filters will be available when the data service is connected. No sample prices are shown.",
+          );
         }
       })
       .finally(() => {
