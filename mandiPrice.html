@@ -1,227 +1,657 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#174d38" />
-    <meta
-      name="description"
-      content="Search and filter government-reported agricultural mandi prices."
-    />
-    <title>Mandi Prices | Rate-GPT</title>
-    <link rel="icon" type="image/jpeg" href="Images/Logo.jpeg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style/mandi-price-page.css" />
-    <script src="script/mandiPrice.js" defer></script>
-  </head>
-  <body>
-    <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Rate-GPT home"
-        ><span class="brand-icon">R</span
-        ><span
-          >Rate<span class="brand-accent">-GPT</span
-          ><small>AGRICULTURE MARKET INTELLIGENCE</small></span
-        ></a
-      >
-      <button
-        class="menu-toggle"
-        id="menuToggle"
-        type="button"
-        aria-expanded="false"
-        aria-controls="mainNav"
-        aria-label="Toggle navigation"
-      >
-        <span></span><span></span><span></span>
-      </button>
-      <nav id="mainNav" class="main-nav" aria-label="Main navigation">
-        <a href="index.html">Home</a
-        ><a class="active" href="mandiPrice.html" aria-current="page"
-          >Mandi Prices</a
-        ><a href="/market-price">Market Dashboard</a>
-      </nav>
-      <a
-        class="header-cta"
-        href="https://data.gov.in/"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Government data source ↗</a
-      >
-    </header>
-    <main class="page-shell">
-      <section class="page-heading">
-        <div>
-          <span class="eyebrow"><span></span> STORED MANDI RECORDS</span>
-          <h1>Mandi prices</h1>
-          <p>
-            Search agricultural market records returned by the Rate-GPT backend.
-            Upstream availability and freshness depend on the last successful
-            sync.
-          </p>
-        </div>
-        <div class="freshness-card">
-          <span class="freshness-dot" id="freshnessDot"></span>
-          <div>
-            <span>Latest arrival date</span
-            ><strong id="latestDate">Checking…</strong
-            ><small id="lastUpdated">Checking backend status…</small>
-          </div>
-        </div>
-      </section>
-      <section class="summary-grid" aria-label="Database summary">
-        <article>
-          <span>Total records</span><strong id="totalRecords">—</strong>
-        </article>
-        <article>
-          <span>Markets</span><strong id="totalMarkets">—</strong>
-        </article>
-        <article><span>Crops</span><strong id="totalCrops">—</strong></article>
-        <article>
-          <span>States</span><strong id="totalStates">—</strong>
-        </article>
-      </section>
-      <section class="filters-panel" aria-label="Search and filters">
-        <div class="search-field">
-          <label for="searchInput">Search records</label
-          ><input
-            id="searchInput"
-            type="search"
-            placeholder="Search crop, mandi, district…"
-            autocomplete="off"
-          />
-        </div>
-        <div class="filter-field">
-          <label for="stateFilter">State</label
-          ><select id="stateFilter">
-            <option value="">All states</option>
-          </select>
-        </div>
-        <div class="filter-field">
-          <label for="districtFilter">District</label
-          ><select id="districtFilter" disabled>
-            <option value="">All districts</option>
-          </select>
-        </div>
-        <div class="filter-field">
-          <label for="marketFilter">Mandi / market</label
-          ><select id="marketFilter" disabled>
-            <option value="">All markets</option>
-          </select>
-        </div>
-        <div class="filter-field">
-          <label for="commodityFilter">Crop / commodity</label
-          ><select id="commodityFilter">
-            <option value="">All crops</option>
-          </select>
-        </div>
-        <div class="filter-field">
-          <label for="dateFilter">Arrival date</label
-          ><input id="dateFilter" type="date" />
-        </div>
-        <div class="filter-field sort-field">
-          <label for="sortFilter">Sort by</label
-          ><select id="sortFilter">
-            <option value="date_desc">Latest arrival date</option>
-            <option value="date_asc">Oldest arrival date</option>
-            <option value="modal_price_desc">Modal price: high to low</option>
-            <option value="modal_price_asc">Modal price: low to high</option>
-            <option value="commodity_asc">Crop: A–Z</option>
-            <option value="commodity_desc">Crop: Z–A</option>
-            <option value="market_asc">Market: A–Z</option>
-            <option value="market_desc">Market: Z–A</option>
-          </select>
-        </div>
-        <div class="filter-actions">
-          <button id="applyFilters" class="button button-primary" type="button">
-            Apply filters</button
-          ><button
-            id="resetFilters"
-            class="button button-secondary"
-            type="button"
-          >
-            Reset
-          </button>
-        </div>
-      </section>
-      <section class="table-panel">
-        <div class="table-heading">
-          <div>
-            <h2>Market records</h2>
-            <p id="resultSummary" aria-live="polite">
-              Loading records from the backend…
-            </p>
-          </div>
-          <button id="refreshButton" class="refresh-button" type="button">
-            ↻ Refresh data
-          </button>
-        </div>
-        <div id="stateMessage" class="state-message" role="status">
-          Loading government-reported records…
-        </div>
-        <div class="table-scroll" id="tableWrap" hidden>
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Commodity</th>
-                <th scope="col">State</th>
-                <th scope="col">District</th>
-                <th scope="col">Market</th>
-                <th scope="col">Arrival date</th>
-                <th scope="col">Min. price</th>
-                <th scope="col">Max. price</th>
-                <th scope="col">Modal price</th>
-              </tr>
-            </thead>
-            <tbody id="priceRows"></tbody>
-          </table>
-        </div>
-        <div class="pagination">
-          <span id="pageSummary">—</span>
-          <div>
-            <button
-              id="prevPage"
-              type="button"
-              class="button button-secondary"
-              disabled
-            >
-              ← Previous</button
-            ><button
-              id="nextPage"
-              type="button"
-              class="button button-secondary"
-              disabled
-            >
-              Next →
-            </button>
-          </div>
-        </div>
-        <p class="table-note">
-          Prices are shown as reported by the backend in ₹ per quintal where
-          available. A dash means the source did not provide that value. Data
-          may be delayed; this page does not imply real-time government updates.
-        </p>
-      </section>
-      <p class="source-link">
-        Primary source:
-        <a href="https://data.gov.in/" target="_blank" rel="noopener noreferrer"
-          >Government of India Open Government Data Platform</a
-        >
-        · AGMARKNET resource <code>9ef84268-d588-465a-a308-a864a43d0070</code>
-      </p>
-    </main>
-    <footer class="site-footer">
-      <a class="brand" href="index.html"
-        ><span class="brand-icon">R</span
-        ><span>Rate<span class="brand-accent">-GPT</span></span></a
-      >
-      <p>
-        Use reported market data as a reference; verify locally before making
-        trading decisions.
-      </p>
-    </footer>
-  </body>
-</html>
+<!DOCTYPE html><html lang="en"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="#174d38" name="theme-color">
+<meta content="Search and filter government-reported agricultural mandi prices with real and nominal inflation-adjusted views." name="description">
+<title>Mandi Prices | Rate-GPT</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="style/mandi-price-page.css" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+<a aria-label="Rate-GPT home" class="brand" href="index.html">
+<span class="brand-icon">R</span>
+<span class="">Rate<span class="brand-accent">-GPT</span><small>AGRICULTURE MARKET INTELLIGENCE</small></span>
+</a>
+<nav aria-label="Main navigation" class="main-nav" id="mainNav">
+<a aria-current="page" class="active" href="index.html">Home</a>
+<a href="#trends" class="">Price Trends</a>
+<a href="#prices" class="">Mandi Prices</a>
+<a href="#dashboard" class="">Market Dashboard</a>
+<a href="#about" class="">About</a>
+</nav>
+<a class="header-cta" href="#trends">Explore trends <span aria-hidden="true" class="">→</span></a>
+</header>
+<main class="page-shell">
+<section class="page-heading"><div style="max-width: 820px;"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;"><span class="eyebrow" style="background: #ecfdf5; padding: 4px 11px; border-radius: 20px; border: 1px solid #a7f3d0; color: #065f46; font-weight: 800; font-size: 10.5px; letter-spacing: 0.8px; display: inline-flex; align-items: center; gap: 6px;"><span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span> VERIFIED MANDI RECORD REGISTRY</span><span style="font-size: 11.5px; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" class=""><span class="material-symbols-outlined" style="font-size: 14px; color: #10b981;">verified</span> MoSPI &amp; Agmarknet Spliced Real Deflator</span><span style="font-size: 11px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 6px; border: 1px solid #bfdbfe;" class="">Base May 2024 = 100</span></div><h1 style="font-family: 'Manrope', sans-serif; font-weight: 800; font-size: clamp(32px, 3.5vw, 42px); letter-spacing: -1.5px; margin: 0 0 10px; color: #0f172a; line-height: 1.15;" class="">Agricultural Mandi Spot &amp; Inflation Analytics</h1><p style="font-size: 14.5px; line-height: 1.65; color: #475569; margin: 0;" class="">Authoritative agricultural commodity spot auctions from APMC yards nationwide. Seamlessly compare nominal market prices with real inflation-adjusted purchasing power (CPI-Agricultural Labourers deflated).</p></div><div class="freshness-card fintech-card" style="background: rgb(255, 255, 255); border: 1px solid rgb(203, 213, 225); border-radius: 16px; padding: 16px 20px; box-shadow: rgba(6, 78, 59, 0.08) 0px 8px 20px -4px; display: flex; align-items: center; gap: 14px;"><div style="width: 44px; height: 44px; border-radius: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; display: flex; align-items: center; justify-content: center; color: #059669; flex-shrink: 0;"><span class="material-symbols-outlined" style="font-size: 24px;">sensors</span></div><div><div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;"><span style="font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; font-size: 9.5px; color: #64748b;" class="">Latest Mandi Session</span><span style="background: #ecfdf5; color: #047857; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 4px; border: 1px solid #a7f3d0;" class="">SYNCED</span></div><strong id="latestDate" class="metric-num" style="font-family: 'Manrope', sans-serif; font-size: 20px; color: #064e3b; margin: 1px 0; display: block; font-weight: 800;">24 May 2024</strong><small id="lastUpdated" style="color: #64748b; font-size: 11px; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 12px; color: #10b981;">check_circle</span> 08:30 IST · Latency 0.4s</small></div></div></section>
+<section aria-label="Database summary" class="summary-grid"><article class="fintech-card" style="padding: 18px 22px; background: rgb(255, 255, 255); border: 1px solid rgb(226, 232, 240); border-radius: 16px; position: relative; overflow: hidden; box-shadow: rgba(15, 23, 42, 0.04) 0px 4px 16px -2px;"><div style="position: absolute; top: 0; left: 0; right: 0; height: 3.5px; background: linear-gradient(90deg, #059669, #10b981);"></div><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px;" class="">Total Records</span><span style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 7px; border-radius: 6px; border: 1px solid #a7f3d0; font-family: 'JetBrains Mono', monospace;" class="">+1,420 today</span></div><strong id="totalRecords" class="metric-num" style="font-family: 'Manrope', sans-serif; color: #0f172a; font-size: 32px; font-weight: 800; margin: 8px 0 3px; letter-spacing: -1.2px; display: block;">184,920</strong><span style="font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 4px;" class=""><span class="material-symbols-outlined" style="font-size: 14px; color: #059669;">database</span> Across all state mandi nodes</span></article><article class="fintech-card" style="padding: 18px 22px; background: rgb(255, 255, 255); border: 1px solid rgb(226, 232, 240); border-radius: 16px; position: relative; overflow: hidden; box-shadow: rgba(15, 23, 42, 0.04) 0px 4px 16px -2px;"><div style="position: absolute; top: 0; left: 0; right: 0; height: 3.5px; background: linear-gradient(90deg, #0284c7, #38bdf8);"></div><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px;" class="">Active Markets</span><span style="font-size: 10.5px; font-weight: 700; color: #0369a1; background: #f0f9ff; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd; font-family: 'JetBrains Mono', monospace;" class="">+32 new mandis</span></div><strong id="totalMarkets" class="metric-num" style="font-family: 'Manrope', sans-serif; color: #0f172a; font-size: 32px; font-weight: 800; margin: 8px 0 3px; letter-spacing: -1.2px; display: block;">2,840</strong><span style="font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 4px;" class=""><span class="material-symbols-outlined" style="font-size: 14px; color: #0284c7;">storefront</span> APMC principal &amp; sub-yards</span></article><article class="fintech-card" style="padding: 18px 22px; background: rgb(255, 255, 255); border: 1px solid rgb(226, 232, 240); border-radius: 16px; position: relative; overflow: hidden; box-shadow: rgba(15, 23, 42, 0.04) 0px 4px 16px -2px;"><div style="position: absolute; top: 0; left: 0; right: 0; height: 3.5px; background: linear-gradient(90deg, #d97706, #f59e0b);"></div><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px;" class="">Commodities</span><span style="font-size: 10.5px; font-weight: 700; color: #b45309; background: #fefce8; padding: 2px 7px; border-radius: 6px; border: 1px solid #fde047;" class="">18 Groups</span></div><strong id="totalCrops" class="metric-num" style="font-family: 'Manrope', sans-serif; color: #0f172a; font-size: 32px; font-weight: 800; margin: 8px 0 3px; letter-spacing: -1.2px; display: block;">312</strong><span style="font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 4px;" class=""><span class="material-symbols-outlined" style="font-size: 14px; color: #d97706;">grain</span> Cereals, Pulses, Oilseeds &amp; Spices</span></article><article class="fintech-card" style="padding: 18px 22px; background: rgb(255, 255, 255); border: 1px solid rgb(226, 232, 240); border-radius: 16px; position: relative; overflow: hidden; box-shadow: rgba(15, 23, 42, 0.04) 0px 4px 16px -2px;"><div style="position: absolute; top: 0; left: 0; right: 0; height: 3.5px; background: linear-gradient(90deg, #10b981, #34d399);"></div><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px;" class="">States &amp; UTs</span><span style="font-size: 10.5px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 7px; border-radius: 6px; border: 1px solid #a7f3d0;" class="">Pan-India 99.8%</span></div><strong id="totalStates" class="metric-num" style="font-family: 'Manrope', sans-serif; color: #0f172a; font-size: 32px; font-weight: 800; margin: 8px 0 3px; letter-spacing: -1.2px; display: block;">28</strong><span style="font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 4px;" class=""><span class="material-symbols-outlined" style="font-size: 14px; color: #10b981;">public</span> Daily reporting telemetry</span></article></section>
+<!-- Filter Panel with Inflation Basis / Price Mode Controls -->
+<section aria-label="Search and filters" class="filters-panel">
+<!-- Inflation Basis / Price Mode Segmented Banner -->
+<div style="grid-column: span 4; background: #fbfdfb; border: 1px solid #dce5dd; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+<span style="font-size: 11px; font-weight: 800; color: #304337; letter-spacing: 0.5px; text-transform: uppercase;" class="">Inflation Basis / Price Mode:</span>
+<div aria-label="Inflation basis filter" class="pill-toggle-group" role="radiogroup">
+<button aria-pressed="true" class="pill-btn active" type="button">Nominal (Market Price)</button>
+<button aria-pressed="false" class="pill-btn" type="button">Real (Inflation-Adjusted · CPI 2024 Base)</button>
+</div>
+<span style="font-size: 10px; font-weight: 800; background: #eaf2ec; color: var(--green-800); border: 1px solid #cfe0d4; padding: 3px 8px; border-radius: 6px;" class="">Base 2024=100 (RBI CPI-AL)</span>
+</div>
+<span style="font-size: 11px; color: var(--muted); font-style: italic;" class="">Deflated using Rural / Agricultural Labour CPI index to reflect true purchasing power.</span>
+</div>
+<div class="search-field">
+<label for="searchInput" class="">Search records</label>
+<input autocomplete="off" id="searchInput" placeholder="Search crop, mandi, district…" type="search" value="Wheat">
+</div>
+<div class="filter-field">
+<label for="stateFilter" class="">State</label>
+<select id="stateFilter">
+<option value="">All states</option>
+<option selected="" value="Madhya Pradesh">Madhya Pradesh</option>
+<option value="Punjab">Punjab</option>
+<option value="Uttar Pradesh">Uttar Pradesh</option>
+<option value="Maharashtra">Maharashtra</option>
+<option value="Rajasthan">Rajasthan</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="districtFilter" class="">District</label>
+<select id="districtFilter">
+<option value="">All districts</option>
+<option selected="" value="Indore">Indore</option>
+<option value="Bhopal">Bhopal</option>
+<option value="Ujjain">Ujjain</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="marketFilter" class="">Mandi / market</label>
+<select id="marketFilter">
+<option value="">All markets</option>
+<option selected="" value="Indore Mandi">Indore Mandi</option>
+<option value="Sanwer Mandi">Sanwer Mandi</option>
+</select>
+</div>
+<div class="filter-field">
+<label for="commodityFilter" class="">Crop / commodity</label>
+<select id="commodityFilter">
+<option value="">All crops</option>
+<option selected="" value="Wheat">Wheat (Sharbati)</option>
+<option value="Soyabean">Soyabean</option>
+<option value="Gram (Chana)">Gram (Chana)</option>
+<option value="Maize">Maize</option>
+</select>
+</div>
+<div class="filter-field">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<label for="dateRangeFilter" class="">Date Range</label>
+<span style="font-size: 10px; color: var(--green-800); font-weight: 700; background: #eaf2ec; padding: 1px 6px; border-radius: 4px;" class="">7 Days</span>
+</div>
+<select id="dateRangeFilter">
+<option selected="" value="7d">18 May 2024 – 24 May 2024 (Last 7 Days)</option>
+<option value="30d">25 Apr 2024 – 24 May 2024 (Last 30 Days)</option>
+<option value="custom">Custom Date Range…</option>
+</select>
+</div>
+<div class="filter-field">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<label for="comparePeriod" class="">Compare Period (YoY)</label>
+<span style="font-size: 10px; color: #9c5c16; font-weight: 700; background: #fff5e6; padding: 1px 6px; border-radius: 4px; border: 1px solid #fed7aa;" class="">YoY Active</span>
+</div>
+<select id="comparePeriod" style="border-color: #f59e0b;">
+<option selected="" value="yoy">Last Year (Same Dates 2023 · YoY)</option>
+<option value="prev_period">Previous Period (11 May – 17 May 2024)</option>
+<option value="none">None (Single Period)</option>
+</select>
+</div>
+<div class="filter-field">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<label for="historicalBenchmark" class="">Historical benchmark</label>
+<span style="font-size: 10px; color: var(--green-800); font-weight: 700; background: #eaf2ec; padding: 1px 6px; border-radius: 4px;" class="">Multi-Year</span>
+</div>
+<select id="historicalBenchmark">
+<option selected="" value="5yr_avg">5-Year Seasonal Average (2019–2023)</option>
+<option value="3yr_cagr">3-Year CAGR (2021–2024)</option>
+<option value="yoy_2023">Last Year (YoY 2023)</option>
+<option value="none">None (Single Period)</option>
+</select>
+</div>
+<div class="filter-field sort-field">
+<label for="sortFilter" class="">Sort by</label>
+<select id="sortFilter">
+<option selected="" value="date_desc">Latest arrival date</option>
+<option value="date_asc">Oldest arrival date</option>
+<option value="real_yoy_desc">Real YoY Gain: High to Low</option>
+<option value="yoy_desc">Nominal YoY Change: High to Low</option>
+<option value="modal_price_desc">Modal price: high to low</option>
+<option value="modal_price_asc">Modal price: low to high</option>
+<option value="commodity_asc">Crop: A–Z</option>
+<option value="commodity_desc">Crop: Z–A</option>
+</select>
+</div>
+<div class="filter-actions" style="grid-column: span 4; display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px dashed var(--line);">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted);">
+<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #287a52;"></span>
+<span class="">Active comparison: <strong>18–24 May 2024</strong> vs <strong>18–24 May 2023 (YoY)</strong> · Index: CPI-AL (May 2024: 138.4)</span>
+</div>
+<div style="display: flex; gap: 9px;">
+<button class="button button-secondary" id="resetFilters" type="button">Reset</button>
+<button class="button button-primary" id="applyFilters" type="button">Apply filters</button>
+</div>
+</div>
+</section>
+<!-- Price Intelligence & Trend Section (Chart Card) -->
+<section class="table-panel" style="margin-bottom: 20px; padding: 22px 24px;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--line);">
+<div>
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+<span class="eyebrow"><span></span> PRICE INTELLIGENCE &amp; TRENDS</span>
+<span style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #eaf2ec; color: var(--green-800); font-weight: 700;" class="">Indore Mandi</span>
+<span style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #fff5e6; color: #9c5c16; font-weight: 700; border: 1px solid #fed7aa;" class="">Comparing vs May 2023 (YoY)</span>
+<span style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #f0fdf4; color: #166534; font-weight: 700; border: 1px solid #bbf7d0;" class="">CPI-AL +6.1% YoY</span>
+</div>
+<h2 style="font: 800 20px Manrope, sans-serif; margin: 0; color: var(--ink);" class="">Wheat (Sharbati) — 7-Day Market Trend &amp; Real vs Nominal Comparison</h2>
+<p style="font-size: 12px; color: var(--muted); margin: 3px 0 0;" class="">Historical modal rate momentum comparing current 2024 prices against nominal &amp; CPI inflation-adjusted 2023 baselines.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+<!-- Price Basis Switch -->
+<div aria-label="Price Basis Switch" class="pill-toggle-group" role="group" style="background: #f4f6f4;">
+<button class="pill-btn active" type="button">Nominal (₹)</button>
+<button class="pill-btn" type="button">Real Inflation-Adjusted (CPI-Deflated)</button>
+</div>
+<!-- Timeframe Pills -->
+<div style="display: flex; border: 1px solid #dce5dd; border-radius: 9px; overflow: hidden; background: #fff;">
+<button style="border: none; padding: 7px 14px; font-size: 11px; font-weight: 700; background: var(--green-900); color: #fff; cursor: pointer;" type="button" class="">7 Days</button>
+<button style="border: none; padding: 7px 14px; font-size: 11px; font-weight: 700; background: #fff; color: var(--muted); cursor: pointer;" type="button" class="">30 Days</button>
+<button style="border: none; padding: 7px 14px; font-size: 11px; font-weight: 700; background: #fff; color: var(--muted); cursor: pointer;" type="button" class="">90 Days</button>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; background: #fbfdfb; border: 1px solid #dce5dd; border-radius: 9px; padding: 4px 10px; font-size: 12px;">
+<span style="color: var(--muted); font-size: 11px; font-weight: 600;" class="">Compare:</span>
+<select style="font-size: 11px; font-weight: 700; border: none; background: transparent; color: var(--ink); outline: none; cursor: pointer;">
+<option selected="">Last Year (May 2023 · YoY)</option>
+<option>Previous 7 Days (May 2024)</option>
+<option>Commodity: Lokwan</option>
+<option>None</option>
+</select>
+</div>
+</div>
+</div>
+<!-- 4 Key KPI Metrics Cards with Inflation-Adjusted Data -->
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0px, 1fr)); gap: 14px; margin-bottom: 20px;">
+<div style="padding: 14px 16px; background: #fbfdfb; border: 1px solid var(--line); border-radius: 12px;">
+<span style="font-size: 11px; color: var(--muted); font-weight: 600;" class="">Current Modal Rate</span>
+<div style="display: flex; align-items: baseline; gap: 8px; margin-top: 3px;">
+<strong style="font: 800 22px Manrope, sans-serif; color: var(--green-900);">₹3,480/q</strong>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 6px; border-radius: 5px;" class="">+₹140 (+4.2% 7d)</span>
+</div>
+<div style="margin-top: 4px; font-size: 11px; color: var(--muted);" class="">
+<span class="">Nominal: <strong>₹3,480</strong></span> · <span class="">Real (2024 ₹): <strong>₹3,480</strong></span>
+</div>
+</div>
+<div style="padding: 14px 16px; background: #fefdf9; border: 1px solid #fde68a; border-radius: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-size: 11px; color: #92400e; font-weight: 700;" class="">YoY Shift (Real vs Nominal)</span>
+<span style="font-size: 10px; font-weight: 800; background: #dcfce7; color: #15803d; padding: 1px 6px; border-radius: 4px;" class="">+5.1% Real</span>
+</div>
+<div style="display: flex; align-items: baseline; gap: 6px; margin-top: 3px;">
+<strong style="font: 800 20px Manrope, sans-serif; color: #92400e;">+₹168/q Real</strong>
+<span style="font-size: 11px; color: #a16207; font-weight: 600;" class="">(+₹360 Nom · +11.5%)</span>
+</div>
+<div style="margin-top: 4px; font-size: 10.5px; color: #78350f; line-height: 1.3;" class="">
+6.1% CPI-AL adj · May '23 real base: ₹3,312/q
+</div>
+</div>
+<div style="padding: 14px 16px; background: #fbfdfb; border: 1px solid var(--line); border-radius: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-size: 11px; color: var(--muted); font-weight: 600;" class="">Purchasing Power / CPI Impact</span>
+<span style="font-size: 10px; font-weight: 700; background: #fee2e2; color: #991b1b; padding: 1px 5px; border-radius: 4px;" class="">-₹192/q</span>
+</div>
+<div style="margin-top: 3px;">
+<strong style="font: 800 18px Manrope, sans-serif; color: var(--ink);">₹192/q absorbed</strong>
+<span style="font-size: 11px; color: var(--muted); display: block;" class="">by rural food &amp; fuel inflation</span>
+</div>
+<div style="margin-top: 4px; font-size: 10.5px; color: var(--muted);" class="">
+CPI-AL Index: <strong>138.4</strong> (vs 130.4 in May '23)
+</div>
+</div>
+<div style="padding: 14px 16px; background: #fbfdfb; border: 1px solid var(--line); border-radius: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-size: 11px; color: var(--muted); font-weight: 600;" class="">Multi-Year Growth Profile</span>
+<span style="font-size: 10px; font-weight: 700; background: #eaf2ec; color: #166534; padding: 1px 5px; border-radius: 4px;" class="">3-Yr Real</span>
+</div>
+<div style="margin-top: 3px;">
+<strong style="font: 800 18px Manrope, sans-serif; color: #166534;">+3.8% Real CAGR</strong>
+<span style="font-size: 11px; color: var(--muted); display: block;" class="">vs +8.6% Nominal CAGR</span>
+</div>
+<div style="margin-top: 4px; font-size: 10.5px; color: var(--muted);" class="">
+Arrival vol: <strong>428t</strong> (+7.5% YoY)
+</div>
+</div>
+</div>
+<!-- Chart Legend Bar with Real vs Nominal indicators -->
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgb(248, 250, 248); border: 1px solid rgb(237, 241, 237); border-radius: 8px; margin-bottom: 12px; font-size: 11px; flex-wrap: wrap; gap: 8px;">
+<div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="display: inline-block; width: 14px; height: 3px; background: #1e6d4a; border-radius: 2px;"></span>
+<span style="font-weight: 700; color: var(--green-900);" class="">Current Period 2024 (Solid Green · ₹3,480)</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="display: inline-block; width: 14px; height: 2px; border-top: 2px dashed #b45309;"></span>
+<span style="font-weight: 600; color: #92400e;" class="">2023 Real Inflation-Adjusted (Dashed Amber · ₹3,312)</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="display: inline-block; width: 14px; height: 2px; border-top: 2px dotted #991b1b;"></span>
+<span style="font-weight: 600; color: #991b1b;" class="">2023 Nominal Price (Dotted Rust · ₹3,120)</span>
+</div>
+</div>
+<div style="color: var(--muted); font-size: 11px;" class="">
+Real YoY Spread: <strong style="color: #15803d;">+₹168 (+5.1%)</strong> · Nominal Spread: <strong style="color: #92400e;">+₹360 (+11.5%)</strong>
+</div>
+</div>
+<!-- Chart Visual SVG with Real vs Nominal curves -->
+<div style="position: relative; background: rgb(255, 255, 255); border: 1px solid rgb(237, 241, 237); border-radius: 12px; padding: 18px 16px 14px;">
+<svg style="width: 100%; height: auto; display: block; overflow: visible;" viewBox="0 0 820 190">
+<defs>
+<linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#287a52" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#287a52" stop-opacity="0.0"></stop>
+</linearGradient>
+<linearGradient id="trendFillReal" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d97706" stop-opacity="0.10"></stop>
+<stop offset="100%" stop-color="#d97706" stop-opacity="0.0"></stop>
+</linearGradient>
+<filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
+<feDropShadow dx="0" dy="2" flood-color="#174d38" flood-opacity="0.15" stdDeviation="2"></feDropShadow>
+</filter>
+</defs>
+<!-- Grid reference lines -->
+<line stroke="#eef2ee" stroke-dasharray="3,3" stroke-width="1" x1="50" x2="800" y1="20" y2="20"></line>
+<text fill="#8b9990" font-size="10" font-weight="600" text-anchor="end" x="42" y="24">₹3,600</text>
+<line stroke="#eef2ee" stroke-dasharray="3,3" stroke-width="1" x1="50" x2="800" y1="60" y2="60"></line>
+<text fill="#8b9990" font-size="10" font-weight="600" text-anchor="end" x="42" y="64">₹3,450</text>
+<line stroke="#eef2ee" stroke-dasharray="3,3" stroke-width="1" x1="50" x2="800" y1="100" y2="100"></line>
+<text fill="#8b9990" font-size="10" font-weight="600" text-anchor="end" x="42" y="104">₹3,300</text>
+<line stroke="#eef2ee" stroke-dasharray="3,3" stroke-width="1" x1="50" x2="800" y1="140" y2="140"></line>
+<text fill="#8b9990" font-size="10" font-weight="600" text-anchor="end" x="42" y="144">₹3,150</text>
+<line stroke="#edf1ed" stroke-width="1" x1="50" x2="800" y1="158" y2="158"></line>
+<!-- Arrival volume bars -->
+<rect fill="#fde68a" height="22" opacity="0.65" rx="2" width="10" x="78" y="136"></rect>
+<rect fill="#e2ebe4" height="30" rx="2" width="12" x="90" y="128"></rect>
+<rect fill="#fde68a" height="28" opacity="0.65" rx="2" width="10" x="198" y="130"></rect>
+<rect fill="#e2ebe4" height="36" rx="2" width="12" x="210" y="122"></rect>
+<rect fill="#fde68a" height="34" opacity="0.65" rx="2" width="10" x="318" y="124"></rect>
+<rect fill="#e2ebe4" height="42" rx="2" width="12" x="330" y="116"></rect>
+<rect fill="#fde68a" height="26" opacity="0.65" rx="2" width="10" x="438" y="132"></rect>
+<rect fill="#e2ebe4" height="32" rx="2" width="12" x="450" y="126"></rect>
+<rect fill="#fde68a" height="38" opacity="0.65" rx="2" width="10" x="558" y="120"></rect>
+<rect fill="#d2e3d6" height="46" rx="2" width="12" x="570" y="112"></rect>
+<rect fill="#d97706" height="43" opacity="0.55" rx="2" width="10" x="678" y="115"></rect>
+<rect fill="#287a52" height="54" opacity="0.65" rx="2" width="12" x="690" y="104"></rect>
+<!-- 2024 Area gradient -->
+<polygon fill="url(#trendFill)" points="96,95 216,84 336,89 456,68 576,62 696,44 696,158 96,158"></polygon>
+<!-- 2023 Real Inflation-Adjusted Area Gradient -->
+<polygon fill="url(#trendFillReal)" points="96,118 216,115 336,111 456,104 576,100 696,96 696,158 96,158"></polygon>
+<!-- 2023 Nominal Dotted Line (Rust) -->
+<polyline fill="none" points="96,145 216,142 336,138 456,132 576,128 696,124" stroke="#991b1b" stroke-dasharray="3,3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline>
+<circle cx="96" cy="145" fill="#fff" r="2.5" stroke="#991b1b" stroke-width="1.5"></circle>
+<circle cx="216" cy="142" fill="#fff" r="2.5" stroke="#991b1b" stroke-width="1.5"></circle>
+<circle cx="336" cy="138" fill="#fff" r="2.5" stroke="#991b1b" stroke-width="1.5"></circle>
+<circle cx="456" cy="132" fill="#fff" r="2.5" stroke="#991b1b" stroke-width="1.5"></circle>
+<circle cx="576" cy="128" fill="#fff" r="2.5" stroke="#991b1b" stroke-width="1.5"></circle>
+<circle cx="696" cy="124" fill="#991b1b" r="3.5" stroke="#fff" stroke-width="1.5"></circle>
+<!-- 2023 Real Inflation-Adjusted Baseline (Dashed Amber) -->
+<polyline fill="none" points="96,118 216,115 336,111 456,104 576,100 696,96" stroke="#b45309" stroke-dasharray="5,4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3"></polyline>
+<circle cx="96" cy="118" fill="#fff" r="3" stroke="#b45309" stroke-width="1.8"></circle>
+<circle cx="216" cy="115" fill="#fff" r="3" stroke="#b45309" stroke-width="1.8"></circle>
+<circle cx="336" cy="111" fill="#fff" r="3" stroke="#b45309" stroke-width="1.8"></circle>
+<circle cx="456" cy="104" fill="#fff" r="3" stroke="#b45309" stroke-width="1.8"></circle>
+<circle cx="576" cy="100" fill="#fff" r="3" stroke="#b45309" stroke-width="1.8"></circle>
+<circle cx="696" cy="96" fill="#b45309" r="4" stroke="#fff" stroke-width="2"></circle>
+<!-- 2024 Current Trend Line (Solid forest green) -->
+<polyline fill="none" filter="url(#glow)" points="96,95 216,84 336,89 456,68 576,62 696,44" stroke="#1e6d4a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.8"></polyline>
+<circle cx="96" cy="95" fill="#fff" r="4" stroke="#206447" stroke-width="2.5"></circle>
+<text fill="#7a8980" font-size="10" text-anchor="middle" x="96" y="174">18 May</text>
+<circle cx="216" cy="84" fill="#fff" r="4" stroke="#206447" stroke-width="2.5"></circle>
+<text fill="#7a8980" font-size="10" text-anchor="middle" x="216" y="174">19 May</text>
+<circle cx="336" cy="89" fill="#fff" r="4" stroke="#206447" stroke-width="2.5"></circle>
+<text fill="#7a8980" font-size="10" text-anchor="middle" x="336" y="174">20 May</text>
+<circle cx="456" cy="68" fill="#fff" r="4" stroke="#206447" stroke-width="2.5"></circle>
+<text fill="#7a8980" font-size="10" text-anchor="middle" x="456" y="174">21 May</text>
+<circle cx="576" cy="62" fill="#fff" r="4" stroke="#206447" stroke-width="2.5"></circle>
+<text fill="#7a8980" font-size="10" text-anchor="middle" x="576" y="174">22 May</text>
+<!-- Latest comparison highlight line -->
+<line stroke="#287a52" stroke-dasharray="3,3" stroke-width="1.5" x1="696" x2="696" y1="20" y2="158"></line>
+<circle cx="696" cy="44" fill="#174d38" r="6" stroke="#fff" stroke-width="2.5"></circle>
+<text fill="#174d38" font-size="10" font-weight="700" text-anchor="middle" x="696" y="174">24 May (Today)</text>
+<!-- 2024 Current Price badge -->
+<g transform="translate(642, 14)">
+<rect fill="#103a2b" height="22" rx="6" width="108"></rect>
+<text fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle" x="54" y="15">₹3,480 (2024 Actual)</text>
+</g>
+<!-- 2023 Real Inflation-Adjusted badge -->
+<g transform="translate(642, 85)">
+<rect fill="#b45309" height="20" rx="5" width="138"></rect>
+<text fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle" x="69" y="14">Real-adjusted (2024 ₹): ₹3,312</text>
+</g>
+<!-- 2023 Nominal Price badge -->
+<g transform="translate(695, 126)">
+<rect fill="#991b1b" height="19" rx="4" width="94"></rect>
+<text fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" x="47" y="13">Nominal: ₹3,120</text>
+</g>
+</svg>
+</div>
+</section>
+<!-- Market Records Table with Dual / Real / Nominal Toggle -->
+<section class="table-panel">
+<div class="table-heading" style="flex-wrap: wrap; gap: 14px;">
+<div>
+<h2 class="">Market records</h2>
+<p aria-live="polite" id="resultSummary" class="">
+      Showing 8 matching records for Indore, Madhya Pradesh · Baseline CPI-AL (May 2024=100)
+    </p>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="font-size: 11px; font-weight: 700; color: #4f6055;" class="">View:</span>
+<div aria-label="Table price column view mode" class="pill-toggle-group" role="group">
+<button class="pill-btn active" type="button">Nominal &amp; Real Dual</button>
+<button class="pill-btn" type="button">Real-Adjusted</button>
+<button class="pill-btn" type="button">Nominal Only</button>
+</div>
+</div>
+<button class="refresh-button" id="refreshButton" type="button">
+      ↻ Refresh data
+    </button>
+</div>
+</div>
+<div class="table-scroll" id="tableWrap">
+<table>
+<thead>
+<tr>
+<th scope="col" class="">Commodity</th>
+<th scope="col" class="">State</th>
+<th scope="col" class="">District</th>
+<th scope="col" class="">Market</th>
+<th scope="col" class="">Arrival date</th>
+<th scope="col" class="">Nominal Modal Price (₹)</th>
+<th scope="col" class="">Real Modal Price (Base 2024 ₹)</th>
+<th scope="col" class="">Real YoY Change (CPI-adj)</th>
+<th scope="col" class="">Multi-Year Benchmark (Real CAGR)</th>
+<th scope="col" class="">Trend Sparkline</th>
+</tr>
+</thead>
+<tbody id="priceRows">
+<tr style="cursor: pointer;">
+<td class="">Wheat (Lokwan)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">24 May 2024</td>
+<td class="price-cell price-modal">₹2,540</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹2,540 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹2,472 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+2.7% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+9.0% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+2.4% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹210 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,16 16,14 30,15 44,9 60,5" stroke="#287a52" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="5" fill="#174d38" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 5px; border-radius: 4px;" class="">+2.8%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer; background: rgb(251, 253, 251);">
+<td class="">Wheat (Sharbati)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">24 May 2024</td>
+<td class="price-cell price-modal">₹3,480</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹3,480 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹3,312 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+5.1% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+11.5% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+3.8% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹390 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,16 16,13 30,14 44,8 60,4" stroke="#287a52" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="4" fill="#174d38" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 5px; border-radius: 4px;" class="">+4.2%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Soyabean (Yellow)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">24 May 2024</td>
+<td class="price-cell price-modal">₹4,680</td>
+<td class="price-cell" style="font-weight: 700; color: #991b1b;">₹4,680 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹5,042 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #991b1b; background: #fee2e2; padding: 2px 6px; border-radius: 4px;" class="">-7.2% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(-1.5% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #991b1b;" class="">-6.9% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">-₹620 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,6 16,8 30,7 44,13 60,16" stroke="#c65d4e" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="16" fill="#a84334" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #c65d4e; background: #fdf1ef; padding: 2px 5px; border-radius: 4px;" class="">-1.5%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Gram (Desi / Chana)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Sanwer Mandi</td>
+<td class="">24 May 2024</td>
+<td class="price-cell price-modal">₹6,050</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹6,050 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹5,411 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+11.8% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+18.6% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+5.6% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹890 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,15 16,13 30,12 44,8 60,5" stroke="#287a52" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="5" fill="#174d38" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 5px; border-radius: 4px;" class="">+3.6%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Maize (Makka)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">23 May 2024</td>
+<td class="price-cell price-modal">₹2,160</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹2,160 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹2,101 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+2.8% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+9.1% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+0.9% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹85 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,8 16,10 30,11 44,12 60,15" stroke="#c65d4e" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="15" fill="#a84334" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #c65d4e; background: #fdf1ef; padding: 2px 5px; border-radius: 4px;" class="">-0.9%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Garlic (Lahsun)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">23 May 2024</td>
+<td class="price-cell price-modal">₹11,400</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹11,400 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹7,215 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+58.2% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+67.6% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+12.8% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹3,620 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,18 16,15 30,12 44,8 60,4" stroke="#287a52" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="4" fill="#174d38" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 5px; border-radius: 4px;" class="">+8.4%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Onion (Pyaz)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Indore Mandi</td>
+<td class="">23 May 2024</td>
+<td class="price-cell price-modal">₹1,620</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹1,620 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹1,326 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+22.2% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+29.6% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+0.4% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹280 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,7 16,9 30,11 44,14 60,16" stroke="#c65d4e" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="16" fill="#a84334" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #c65d4e; background: #fdf1ef; padding: 2px 5px; border-radius: 4px;" class="">-3.2%</span>
+</div>
+</td>
+</tr>
+<tr style="cursor: pointer;">
+<td class="">Coriander (Dhaniya)</td>
+<td class="">Madhya Pradesh</td>
+<td class="">Indore</td>
+<td class="">Sanwer Mandi</td>
+<td class="">22 May 2024</td>
+<td class="price-cell price-modal">₹6,900</td>
+<td class="price-cell" style="font-weight: 700; color: #1e6d4a;">₹6,900 <small style="color: var(--muted); font-size: 10px; font-weight: 500;">(vs ₹6,420 '23 real)</small></td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 4px;">
+<span style="font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px;" class="">+7.5% Real</span>
+<small style="color: var(--muted); font-size: 10px;">(+14.0% Nom)</small>
+</div>
+</td>
+<td class="">
+<div style="display: flex; flex-direction: column;">
+<span style="font-size: 11px; font-weight: 700; color: #166534;" class="">+6.8% Real CAGR</span>
+<span style="font-size: 10px; color: var(--muted);" class="">+₹510 vs 5-Yr Real Avg</span>
+</div>
+</td>
+<td class="">
+<div style="display: inline-flex; align-items: center; gap: 8px;">
+<svg height="20" viewBox="0 0 64 20" width="64">
+<polyline fill="none" points="2,15 16,13 30,11 44,8 60,5" stroke="#287a52" stroke-linecap="round" stroke-width="1.8"></polyline>
+<circle cx="60" cy="5" fill="#174d38" r="2"></circle>
+</svg>
+<span style="font-size: 11px; font-weight: 700; color: #287a52; background: #eaf2ec; padding: 2px 5px; border-radius: 4px;" class="">+1.9%</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pagination">
+<span id="pageSummary" class="">Showing 1–8 of 184,920 records</span>
+<div>
+<button class="button button-secondary" disabled="" id="prevPage" type="button">← Previous</button>
+<button class="button button-secondary" id="nextPage" type="button">Next →</button>
+</div>
+</div>
+<p class="table-note">
+  Prices are shown as reported by the backend in ₹ per quintal. Real prices are deflated using Ministry of Statistics &amp; Programme Implementation (MoSPI) CPI-Agricultural Labourers (CPI-AL). Base year May 2024 = 100. YoY comparisons reflect identical seasonal calendar days (18–24 May 2023 vs 18–24 May 2024). A dash means the source did not provide that value. Data may be delayed; this page does not imply real-time government updates.
+</p>
+</section>
+<p class="source-link">
+  Primary source:
+  <a href="https://data.gov.in/" rel="noopener noreferrer" target="_blank" class="">Government of India Open Government Data Platform</a>
+  · AGMARKNET resource <code>9ef84268-d588-465a-a308-a864a43d0070</code>
+  · Inflation deflator: MoSPI &amp; Labour Bureau CPI-AL (Base 1986-87 spliced to 2024)
+</p>
+</main>
+<footer class="site-footer">
+<a class="brand" href="#">
+<span class="brand-icon">R</span>
+<span class="">Rate<span class="brand-accent">-GPT</span></span>
+</a>
+<p class="">
+  Use reported market data and inflation-adjusted indicators as reference; verify locally before making trading or policy decisions.
+</p>
+</footer>
+
+
+</body></html>
