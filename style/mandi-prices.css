@@ -50,8 +50,8 @@ a { color: inherit; text-decoration: none; }
 .brand-mark { width: 39px; height: 39px; border-radius: 13px; display: grid; place-items: center; background: var(--green-800); color: white; }
 .brand-mark svg { width: 21px; }
 .brand-accent { color: var(--green-500); }
-.brand img { width: 39px; height: 39px; object-fit: contain; display: block; }
 .brand small { display: block; margin-top: 5px; color: #87938b; font-size: 8px; letter-spacing: 1.4px; font-weight: 700; }
+.brand img { width: 39px; height: 39px; object-fit: contain; display: block; }
 .main-nav { display: flex; align-items: center; gap: 31px; flex: 1; }
 .main-nav a { color: #68756d; font-size: 13px; font-weight: 600; padding: 30px 0 27px; border-bottom: 3px solid transparent; transition: .2s; }
 .main-nav a:hover, .main-nav a.active { color: var(--green-800); }
@@ -64,7 +64,7 @@ a { color: inherit; text-decoration: none; }
 .location-pill .chevron { width: 14px; color: var(--muted); }
 .menu-toggle { display: none; border: 0; background: transparent; color: var(--green-800); }
 
-.hero { min-height: 310px; margin-top: 34px; border-radius: 26px; padding: 48px 58px; background: var(--green-900); color: white; position: relative; overflow: hidden; display: flex; align-items: center; }
+.hero { min-height: 310px; margin-top: 34px; border-radius: 26px; padding: 48px 58px; color: white; position: relative; overflow: hidden; display: flex; align-items: center; background: linear-gradient(rgba(16,58,42,.6), rgba(16,58,42,.5)), url('../Images/farmer mandi prices banner.jpg') center/cover no-repeat; }
 .hero-copy { position: relative; z-index: 2; max-width: 570px; }
 .eyebrow, .section-kicker { font-size: 10px; letter-spacing: 1.5px; font-weight: 800; color: var(--green-500); }
 .hero .eyebrow { color: #b9d7c3; display: flex; align-items: center; gap: 10px; }
@@ -78,7 +78,7 @@ a { color: inherit; text-decoration: none; }
 .updated { display: inline-flex; align-items: center; gap: 6px; }
 .updated svg { width: 14px; }
 .updated b { color: white; }
-.hero-art { position: absolute; right: 4%; top: 0; width: 410px; height: 100%; opacity: .95; }
+.hero-art { position: absolute; right: 4%; top: 0; width: 410px; height: 100%; opacity: .95; display: none; }
 .art-orbit { position: absolute; border: 1px solid rgba(202,226,201,.15); border-radius: 50%; }
 .orbit-one { width: 340px; height: 340px; right: 15px; top: -13px; }
 .orbit-two { width: 260px; height: 260px; right: 55px; top: 27px; }

@@ -12,51 +12,371 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="rategpt home">
-      <span class="brand-mark" aria-hidden="true">r</span>
-      <span>rategpt</span>
-    </a>
-    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="navLinks" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Home</a>
-      <a href="mandi-prices.html">Mandi Prices</a>
-      <a href="calculator.html">Calculator</a>
-      <a href="comparison.html">Comparison</a>
-      <a class="active" href="crops.html">Crops</a>
-      <a href="price-trends.html">Price Trends</a>
-      <a href="watchlist.html">Watchlist</a>
-    </nav>
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="rategpt home">
+        <span class="brand-mark"><i data-lucide="sprout"></i></span>
+        <span>Rate<span class="brand-accent">GPT</span></span>
+      </a>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="mandi-prices.html">Mandi Prices</a>
+        <a class="active" href="crops.html">Crops</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="header-actions">
+        <button class="search-toggle" aria-label="Search"><i data-lucide="search"></i></button>
+        <button class="btn btn-outline explore-more">Explore More <i data-lucide="chevron-down"></i></button>
+      </div>
+    </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <h1>Crops</h1>
-        <p>Browse crop prices and mandi rates for agricultural commodities.</p>
+    <section class="knowledge-hub">
+      <span class="hub-kicker">Agriculture Knowledge Hub</span>
+    </section>
+
+    <section class="hero page-container">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1>Know Your Crops.<br><span class="green">Understand Your Market.</span></h1>
+          <p>Explore detailed information about crops, their growing guide and current market prices — all in one place.</p>
+          <div class="hero-search">
+            <input type="search" placeholder="Search crops (e.g. Wheat, Rice, Mustard...)" aria-label="Search crops">
+            <button class="btn btn-primary">Search</button>
+          </div>
+        </div>
+        <div class="hero-badge">
+          <div class="badge-inner">
+            <span class="badge-icon"><i data-lucide="bar-chart-2"></i></span>
+            <div class="badge-text">
+              <div class="badge-value">50+</div>
+              <div class="badge-label">Total Crops</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun"></div><div class="sun-core"></div>
+          <div class="plant">
+            <div class="plant-stem"></div>
+            <div class="plant-leaf leaf-1"></div>
+            <div class="plant-leaf leaf-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-container section-block">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Crop Categories</span>
+          <h2>Explore different categories of crops</h2>
+        </div>
+        <a href="#" class="text-link">View All Categories <i data-lucide="arrow-right"></i></a>
+      </div>
+      <div class="category-grid">
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="wheat"></i></div>
+          <div class="cat-info">
+            <h3>Cereals & Grains</h3>
+            <p>Wheat, Rice, Maize, Barley</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="seed"></i></div>
+          <div class="cat-info">
+            <h3>Pulses</h3>
+            <p>Gram, Arhar, Moong, Masoor</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="droplet"></i></div>
+          <div class="cat-info">
+            <h3>Oilseeds</h3>
+            <p>Mustard, Soybean, Groundnut</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="leaf"></i></div>
+          <div class="cat-info">
+            <h3>Vegetables</h3>
+            <p>Potato, Onion, Tomato</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="flower"></i></div>
+          <div class="cat-info">
+            <h3>Cash Crops</h3>
+            <p>Cotton, Sugarcane, Jute</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+        <article class="category-card">
+          <div class="cat-icon"><i data-lucide="apple"></i></div>
+          <div class="cat-info">
+            <h3>Fruits</h3>
+            <p>Mango, Banana, Apple</p>
+          </div>
+          <i data-lucide="arrow-right" class="cat-arrow"></i>
+        </article>
+      </div>
+    </section>
+
+    <section class="page-container section-block">
+      <div class="seasonal-header">
+        <div>
+          <span class="section-kicker">Seasonal Crops</span>
+          <h2>Find crops suitable for the current season</h2>
+        </div>
+        <div class="season-tabs">
+          <button class="season-tab active">Kharif</button>
+          <button class="season-tab">Rabi</button>
+          <button class="season-tab">Zaid</button>
+        </div>
+      </div>
+      <div class="seasonal-grid">
+        <article class="season-chip"><i data-lucide="wheat"></i> Rice</article>
+        <article class="season-chip"><i data-lucide="corn"></i> Maize</article>
+        <article class="season-chip"><i data-lucide="soybean"></i> Soybean</article>
+        <article class="season-chip"><i data-lucide="cotton"></i> Cotton</article>
+        <article class="season-chip"><i data-lucide="pea"></i> Arhar</article>
+      </div>
+    </section>
+
+    <section class="page-container section-block">
+      <div class="section-heading all-crops-heading">
+        <div>
+          <span class="section-kicker">All Crops</span>
+          <h2>Browse through our complete crop directory</h2>
+        </div>
+        <div class="all-crops-controls">
+          <div class="filter-wrap">
+            <i data-lucide="search"></i>
+            <input type="search" placeholder="Search crops...">
+          </div>
+          <div class="select-wrap"><span>All Categories</span><i data-lucide="chevron-down"></i></div>
+          <div class="select-wrap"><span>All Seasons</span><i data-lucide="chevron-down"></i></div>
+          <div class="select-wrap"><span>Sort: A-Z</span><i data-lucide="chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="crop-grid">
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="wheat"></i></div>
+          <div class="crop-info">
+            <h3>Wheat</h3>
+            <span class="season-tag rabi">Rabi</span>
+            <div class="crop-price">₹21,425/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="wheat"></i></div>
+          <div class="crop-info">
+            <h3>Rice</h3>
+            <span class="season-tag kharif">Kharif</span>
+            <div class="crop-price">₹3,190/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="droplet"></i></div>
+          <div class="crop-info">
+            <h3>Mustard</h3>
+            <span class="season-tag rabi">Rabi</span>
+            <div class="crop-price">₹5,200/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="potato"></i></div>
+          <div class="crop-info">
+            <h3>Potato</h3>
+            <span class="season-tag rabi">Winter</span>
+            <div class="crop-price">₹9,500/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="tomato"></i></div>
+          <div class="crop-info">
+            <h3>Tomato</h3>
+            <span class="season-tag rabi">Rabi</span>
+            <div class="crop-price">₹2,800/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+        <article class="crop-card">
+          <div class="crop-icon"><i data-lucide="cotton"></i></div>
+          <div class="crop-info">
+            <h3>Cotton</h3>
+            <span class="season-tag kharif">Kharif</span>
+            <div class="crop-price">₹6,200/qtl</div>
+          </div>
+          <a href="#" class="crop-link">View Details <i data-lucide="arrow-right"></i></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="crop-detail">
+      <div class="page-container">
+        <div class="detail-nav">
+          <button class="back-btn"><i data-lucide="arrow-left"></i> Back to All Crops</button>
+          <div class="detail-tabs">
+            <button class="detail-tab active">Overview</button>
+            <button class="detail-tab">Cultivation Guide</button>
+            <button class="detail-tab">Market Intelligence</button>
+            <button class="detail-tab">Related Info</button>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-left">
+            <div class="detail-hero">
+              <i data-lucide="wheat" class="detail-hero-icon"></i>
+              <div class="detail-hero-info">
+                <h2>Wheat <span class="season-badge">Rabi Season</span></h2>
+                <p class="detail-scientific">Triticum aestivum</p>
+                <p class="detail-description">Wheat is one of the most important cereal crops in India, widely grown for its high nutritional value.</p>
+              </div>
+            </div>
+            <div class="quick-info">
+              <h4>Quick Info</h4>
+              <div class="info-item"><span class="info-label">Category</span><span class="info-value">Cereals & Grains</span></div>
+              <div class="info-item"><span class="info-label">Growing Season</span><span class="info-value">Rabi</span></div>
+              <div class="info-item"><span class="info-label">Major States</span><span class="info-value">UP, MP, Punjab</span></div>
+            </div>
+            <div class="cultivation-details">
+              <h4>Cultivation Details</h4>
+              <div class="cult-item"><span class="cult-label">Suitable Soil</span><span class="cult-value">Well-drained loamy soil</span></div>
+              <div class="cult-item"><span class="cult-label">Climate</span><span class="cult-value">Cool & dry climate</span></div>
+              <div class="cult-item"><span class="cult-label">Sowing Time</span><span class="cult-value">Nov - Dec</span></div>
+              <div class="cult-item"><span class="cult-label">Harvesting Time</span><span class="cult-value">Mar - Apr</span></div>
+              <div class="cult-item"><span class="cult-label">Water Needs</span><span class="cult-value">Moderate</span></div>
+              <div class="cult-tip"><span class="tip-label">Tip:</span> Use certified seeds for better yield.</div>
+            </div>
+          </div>
+          <div class="detail-right">
+            <div class="market-intel">
+              <div class="intel-header">
+                <h3>Market Intelligence</h3>
+                <span class="updated">Last Updated: Today, 10:30 AM</span>
+              </div>
+              <div class="price-cards">
+                <div class="price-card"><div class="price-label">Min Price</div><div class="price-value">₹2,200 <small>/qtl</small></div></div>
+                <div class="price-card"><div class="price-label">Max Price</div><div class="price-value">₹2,650 <small>/qtl</small></div></div>
+                <div class="price-card"><div class="price-label">Modal Price</div><div class="price-value">₹2,425 <small>/qtl</small></div></div>
+                <div class="price-card"><div class="price-label">MSP</div><div class="price-value">₹2,585 <small>/qtl</small></div></div>
+              </div>
+              <div class="chart-wrap">
+                <div class="chart-label">Price Trend (Last 30 Days)</div>
+                <div class="chart-controls">
+                  <button class="chart-btn active">7D</button>
+                  <button class="chart-btn">30D</button>
+                  <button class="chart-btn">6M</button>
+                  <button class="chart-btn">1Y</button>
+                </div>
+                <div class="price-chart" id="priceChart"></div>
+                <div class="chart-yaxis"><span>3k</span><span>2.5k</span><span>2k</span></div>
+              </div>
+            </div>
+            <div class="market-locations">
+              <h4>Market Locations</h4>
+              <p class="loc-sub">Commonly traded in: Uttar Pradesh, Madhya Pradesh, Punjab, Haryana and more states.</p>
+              <button class="btn btn-outline view-mandi">View Mandi Prices <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div class="crop-calendar">
+              <h4>Crop Calendar</h4>
+              <p class="cal-sub">Sowing: Nov - Dec | Harvesting: Mar - Apr</p>
+              <div class="calendar-grid">
+                <div class="cal-month">Jan</div><div class="cal-month">Feb</div><div class="cal-month active">Mar</div><div class="cal-month active">Apr</div><div class="cal-month">May</div><div class="cal-month">Jun</div><div class="cal-month">Jul</div><div class="cal-month">Aug</div><div class="cal-month">Sep</div><div class="cal-month">Oct</div><div class="cal-month">Nov</div><div class="cal-month">Dec</div>
+              </div>
+              <div class="cal-legend"><span class="cal-dot growing"></span> Growing<span class="cal-dot harvest"></span> Harvesting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-container section-block quick-insights">
+      <div class="insight-grid">
+        <article class="insight-card">
+          <div class="insight-icon"><i data-lucide="trending-up"></i></div>
+          <div class="insight-info">
+            <h4>Current Trend</h4>
+            <p>Stable</p>
+          </div>
+        </article>
+        <article class="insight-card">
+          <div class="insight-icon"><i data-lucide="rupee"></i></div>
+          <div class="insight-info">
+            <h4>Best Market Price</h4>
+            <p>₹2,650/qtl</p>
+          </div>
+        </article>
+        <article class="insight-card">
+          <div class="insight-icon"><i data-lucide="map-pin"></i></div>
+          <div class="insight-info">
+            <h4>Top Producing States</h4>
+            <p>UP, MP, Punjab</p>
+          </div>
+        </article>
+        <a href="#" class="insight-cta">Explore More Crops <i data-lucide="arrow-right"></i></a>
       </div>
     </section>
   </main>
 
+  <footer class="site-footer">
+    <div class="footer-inner page-container">
+      <div class="footer-brand">
+        <span class="brand-mark"><i data-lucide="sprout"></i></span>
+        <div>
+          <div class="footer-name">RateGPT</div>
+          <div class="footer-tag">Smart Farming, Better Tomorrow.</div>
+        </div>
+      </div>
+      <nav class="footer-nav">
+        <a href="index.html">Home</a>
+        <a href="mandi-prices.html">Mandi Prices</a>
+        <a class="active" href="crops.html">Crops</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="footer-social">
+        <a href="#"><i data-lucide="youtube"></i></a>
+        <a href="#"><i data-lucide="x"></i></a>
+        <a href="#"><i data-lucide="share-2"></i></a>
+        <a href="#"><i data-lucide="linkedin"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
-    const menuButton = document.querySelector(".menu-toggle");
-    const nav = document.querySelector(".nav-links");
-    const closeMenu = () => {
-      nav.classList.remove("is-open");
-      menuButton.setAttribute("aria-expanded", "false");
-      menuButton.setAttribute("aria-label", "Open navigation");
-    };
-    menuButton.addEventListener("click", () => {
-      const open = nav.classList.toggle("is-open");
-      menuButton.setAttribute("aria-expanded", String(open));
-      menuButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    lucide.createIcons();
+
+    // Season tabs
+    document.querySelectorAll('.season-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
-    nav.addEventListener("click", (event) => {
-      if (event.target.closest("a")) closeMenu();
+
+    // Detail tabs
+    document.querySelectorAll('.detail-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeMenu();
+
+    // Chart buttons
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
   </script>
 </body>
