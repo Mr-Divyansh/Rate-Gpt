@@ -1,0 +1,20 @@
+{
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30
+    }
+  },
+  "redirects": [
+    { "source": "/app", "destination": "/market-price", "permanent": true },
+    {
+      "source": "/app/:path*",
+      "destination": "/market-price/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/market-price", "destination": "/app.html" },
+    { "source": "/market-price/(.*)", "destination": "/app.html" }
+  ]
+}

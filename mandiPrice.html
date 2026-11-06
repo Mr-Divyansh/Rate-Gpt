@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#174d38" />
+    <meta
+      name="description"
+      content="Search and filter government-reported agricultural mandi prices."
+    />
+    <title>Mandi Prices | Rate-GPT</title>
+    <link rel="icon" type="image/jpeg" href="Images/Logo.jpeg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style/mandi-price-page.css" />
+    <script src="script/mandiPrice.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Rate-GPT home"
+        ><span class="brand-icon">R</span
+        ><span
+          >Rate<span class="brand-accent">-GPT</span
+          ><small>AGRICULTURE MARKET INTELLIGENCE</small></span
+        ></a
+      >
+      <button
+        class="menu-toggle"
+        id="menuToggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mainNav"
+        aria-label="Toggle navigation"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="mainNav" class="main-nav" aria-label="Main navigation">
+        <a href="index.html">Home</a
+        ><a class="active" href="mandiPrice.html" aria-current="page"
+          >Mandi Prices</a
+        ><a href="/market-price">Market Dashboard</a>
+      </nav>
+      <a
+        class="header-cta"
+        href="https://data.gov.in/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Government data source ↗</a
+      >
+    </header>
+    <main class="page-shell">
+      <section class="page-heading">
+        <div>
+          <span class="eyebrow"><span></span> STORED MANDI RECORDS</span>
+          <h1>Mandi prices</h1>
+          <p>
+            Search agricultural market records returned by the Rate-GPT backend.
+            Upstream availability and freshness depend on the last successful
+            sync.
+          </p>
+        </div>
+        <div class="freshness-card">
+          <span class="freshness-dot" id="freshnessDot"></span>
+          <div>
+            <span>Latest arrival date</span
+            ><strong id="latestDate">Checking…</strong
+            ><small id="lastUpdated">Checking backend status…</small>
+          </div>
+        </div>
+      </section>
+      <section class="summary-grid" aria-label="Database summary">
+        <article>
+          <span>Total records</span><strong id="totalRecords">—</strong>
+        </article>
+        <article>
+          <span>Markets</span><strong id="totalMarkets">—</strong>
+        </article>
+        <article><span>Crops</span><strong id="totalCrops">—</strong></article>
+        <article>
+          <span>States</span><strong id="totalStates">—</strong>
+        </article>
+      </section>
+      <section class="filters-panel" aria-label="Search and filters">
+        <div class="search-field">
+          <label for="searchInput">Search records</label
+          ><input
+            id="searchInput"
+            type="search"
+            placeholder="Search crop, mandi, district…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="filter-field">
+          <label for="stateFilter">State</label
+          ><select id="stateFilter">
+            <option value="">All states</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="districtFilter">District</label
+          ><select id="districtFilter" disabled>
+            <option value="">All districts</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="marketFilter">Mandi / market</label
+          ><select id="marketFilter" disabled>
+            <option value="">All markets</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="commodityFilter">Crop / commodity</label
+          ><select id="commodityFilter">
+            <option value="">All crops</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="dateFilter">Arrival date</label
+          ><input id="dateFilter" type="date" />
+        </div>
+        <div class="filter-field sort-field">
+          <label for="sortFilter">Sort by</label
+          ><select id="sortFilter">
+            <option value="date_desc">Latest arrival date</option>
+            <option value="date_asc">Oldest arrival date</option>
+            <option value="modal_price_desc">Modal price: high to low</option>
+            <option value="modal_price_asc">Modal price: low to high</option>
+            <option value="commodity_asc">Crop: A–Z</option>
+            <option value="commodity_desc">Crop: Z–A</option>
+            <option value="market_asc">Market: A–Z</option>
+            <option value="market_desc">Market: Z–A</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button id="applyFilters" class="button button-primary" type="button">
+            Apply filters</button
+          ><button
+            id="resetFilters"
+            class="button button-secondary"
+            type="button"
+          >
+            Reset
+          </button>
+        </div>
+      </section>
+      <section class="table-panel">
+        <div class="table-heading">
+          <div>
+            <h2>Market records</h2>
+            <p id="resultSummary" aria-live="polite">
+              Loading records from the backend…
+            </p>
+          </div>
+          <button id="refreshButton" class="refresh-button" type="button">
+            ↻ Refresh data
+          </button>
+        </div>
+        <div id="stateMessage" class="state-message" role="status">
+          Loading government-reported records…
+        </div>
+        <div class="table-scroll" id="tableWrap" hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Commodity</th>
+                <th scope="col">State</th>
+                <th scope="col">District</th>
+                <th scope="col">Market</th>
+                <th scope="col">Arrival date</th>
+                <th scope="col">Min. price</th>
+                <th scope="col">Max. price</th>
+                <th scope="col">Modal price</th>
+              </tr>
+            </thead>
+            <tbody id="priceRows"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="pageSummary">—</span>
+          <div>
+            <button
+              id="prevPage"
+              type="button"
+              class="button button-secondary"
+              disabled
+            >
+              ← Previous</button
+            ><button
+              id="nextPage"
+              type="button"
+              class="button button-secondary"
+              disabled
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+        <p class="table-note">
+          Prices are shown as reported by the backend in ₹ per quintal where
+          available. A dash means the source did not provide that value. Data
+          may be delayed; this page does not imply real-time government updates.
+        </p>
+      </section>
+      <p class="source-link">
+        Primary source:
+        <a href="https://data.gov.in/" target="_blank" rel="noopener noreferrer"
+          >Government of India Open Government Data Platform</a
+        >
+        · AGMARKNET resource <code>9ef84268-d588-465a-a308-a864a43d0070</code>
+      </p>
+    </main>
+    <footer class="site-footer">
+      <a class="brand" href="index.html"
+        ><span class="brand-icon">R</span
+        ><span>Rate<span class="brand-accent">-GPT</span></span></a
+      >
+      <p>
+        Use reported market data as a reference; verify locally before making
+        trading decisions.
+      </p>
+    </footer>
+  </body>
+</html>

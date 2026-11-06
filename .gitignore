@@ -1,0 +1,52 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.vercel/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.bak
+*.backup
+*.swp
+*.swo
+
+# Logs and local artifacts
+*.log
+.DS_Store
+Thumbs.db
+con
+devout.txt
+deverr.txt
+devpid.txt
+tmp_errors.txt
+current_errors.txt
+errors.txt
+output.txt
+filelist.txt
+filebackup.txt
+current_db.txt
+current_db_content.txt
+database_*
+backup_db.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Editor and OS
+.vscode/*
+!.vscode/extensions.json

@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/*
+ * Rate GPT design tokens
+ * Forest green + warm ivory: calm, trustworthy and agriculture-focused.
+ * Keep component styling token-driven so light/dark themes stay consistent.
+ */
+:root {
+  color-scheme: light;
+  --bg-page: #F7F7F0;
+  --bg-surface: #FFFFFF;
+  --text-primary: #202B25;
+  --text-secondary: #66736B;
+  --border-color: #E5E9E2;
+  --bg-input: #FFFFFF;
+  --outline-focus: #174D38;
+  --color-primary: #174D38;
+  --color-secondary: #287A52;
+  --color-accent: #E9A23B;
+  --color-soft-green: #EAF2EC;
+}
+
+html.dark {
+  color-scheme: dark;
+  --bg-page: #101A14;
+  --bg-surface: #17251C;
+  --text-primary: #F2F5F0;
+  --text-secondary: #B3C1B6;
+  --border-color: #34463A;
+  --bg-input: #1B2B21;
+  --outline-focus: #8CC6A0;
+  --color-primary: #8CC6A0;
+  --color-secondary: #A7D5B5;
+  --color-accent: #F0BD68;
+  --color-soft-green: #20392A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--outline-focus);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #287A52;
+  color: #FFFFFF;
+}
+
+/* Subtle scrollbars that work in both themes. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border: 2px solid var(--bg-page);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
