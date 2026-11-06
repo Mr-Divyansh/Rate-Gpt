@@ -1,291 +1,166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#123c2d" />
-    <meta
-      name="description"
-      content="Explore mandi prices recorded by Rate-GPT. Browse stored government market data and check its latest arrival date."
-    />
-    <title>Rate-GPT | Mandi prices, clearly presented</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body class="landing-page">
-    <header class="site-header">
-      <a aria-label="Rate-GPT home" class="brand" href="index.html">
-        <span class="brand-icon" aria-hidden="true">R</span>
-        <span>
-          Rate<span class="brand-accent">-GPT</span>
-          <small>AGRICULTURE MARKET INTELLIGENCE</small>
-        </span>
-      </a>
-      <button
-        aria-controls="mainNav"
-        aria-expanded="false"
-        aria-label="Open navigation"
-        class="nav-toggle"
-        id="navToggle"
-        type="button"
-      >
-        <span></span><span></span><span></span>
-      </button>
-      <nav aria-label="Main navigation" class="main-nav" id="mainNav">
-        <a href="index.html">Home</a>
-        <a href="mandiPrice.html">Mandi prices</a>
-        <a href="app.html#trends">Price trends</a>
-        <a href="app.html#board">Market dashboard</a>
-        <a href="about.html">About</a>
-      </nav>
-      <a class="header-cta" href="mandiPrice.html">
-        Explore prices <span aria-hidden="true">→</span>
-      </a>
-    </header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#174D38">
+  <title>rategpt | Smart Agricultural Market Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="rategpt home">
+      <img src="Images/Logo.jpeg" alt="rategpt logo" />
+    </a>
 
-    <main>
-      <div class="landing-shell">
-        <section aria-labelledby="heroTitle" class="landing-hero">
-          <div class="landing-hero-copy">
-            <span class="eyebrow"
-              ><span></span> INDIA'S MANDI PRICE RECORDS</span
-            >
-            <h1 id="heroTitle">
-              Know your market.<br />
-              <em>Make your next move.</em>
-            </h1>
-            <p>
-              A clearer way to explore crop prices, market locations, and
-              arrival dates. We’re preparing the live data connection—no
-              estimates or sample prices are shown.
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="mandiPrice.html">
-                Browse mandi prices <span aria-hidden="true">→</span>
-              </a>
-              <a class="text-link" href="app.html#trends">
-                Explore price trends <span aria-hidden="true">↗</span>
-              </a>
-            </div>
-            <p aria-live="polite" class="source-note">
-              <span class="status-dot" id="sourceDot"></span>
-              <span id="sourceStatus"
-                >Market data preview · no sample prices</span
-              >
-            </p>
-          </div>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="navLinks" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-          <aside aria-labelledby="overviewTitle" class="overview-panel">
-            <div class="overview-heading">
-              <span aria-hidden="true" class="overview-icon">↗</span>
-              <div>
-                <h2 id="overviewTitle">Market data overview</h2>
-                <p>Market data will appear here when it is ready</p>
-              </div>
-              <span
-                class="status-tag is-loading"
-                id="backendStatus"
-                role="status"
-              >
-                Preview
-              </span>
-            </div>
-            <div aria-live="polite" class="overview-stats">
-              <article>
-                <span>Stored records</span>
-                <strong id="totalRecords">—</strong>
-                <small>Price observations</small>
-              </article>
-              <article>
-                <span>Markets covered</span>
-                <strong id="totalMarkets">—</strong>
-                <small>Distinct market names</small>
-              </article>
-              <article>
-                <span>Crops tracked</span>
-                <strong id="totalCrops">—</strong>
-                <small>Distinct commodities</small>
-              </article>
-              <article>
-                <span>States covered</span>
-                <strong id="totalStates">—</strong>
-                <small>Represented in records</small>
-              </article>
-            </div>
-            <div class="overview-date">
-              <span>Latest arrival date</span>
-              <strong id="latestDate">—</strong>
-            </div>
-            <p class="overview-note" id="upstreamNote">
-              Mandi prices are coming soon. We’re getting the explorer ready; no
-              sample prices are shown.
-            </p>
-          </aside>
-        </section>
+    <nav class="nav-links" id="navLinks">
+      <a class="active" href="index.html">Home</a>
+      <a href="mandi-prices.html">Mandi Prices</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="comparison.html">Comparison</a>
+      <a href="crops.html">Crops</a>
+      <a href="price-trends.html">Price Trends</a>
+      <a href="watchlist.html">Watchlist</a>
+    </nav>
+  </header>
 
-        <section aria-labelledby="recordsTitle" class="records-section">
-          <div class="records-heading">
-            <div>
-              <span class="eyebrow"><span></span> STORED MARKET RECORDS</span>
-              <h2 id="recordsTitle">Find a price that matters to you.</h2>
-              <p>
-                Search by crop or location. Every record will include its market
-                arrival date.
-              </p>
-            </div>
-            <button
-              class="button button-quiet"
-              id="refreshButton"
-              type="button"
-            >
-              <span aria-hidden="true">↻</span> Refresh
-            </button>
-          </div>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <h1 class="anim-fade-in-up">Know Prices.<br><em>Plan Better.</em><br>Grow More<span class="period">.</span></h1>
+        <div class="headline-swoosh anim-fade-in-up"></div>
 
-          <aside
-            aria-live="polite"
-            class="preview-notice"
-            hidden
-            id="previewNotice"
-            role="status"
-          >
-            <span aria-hidden="true" class="preview-notice-mark">i</span>
-            <p>
-              <strong>Mandi prices are coming soon.</strong> We’re getting the
-              explorer ready; no sample prices are shown.
-            </p>
-          </aside>
+        <p class="hero-description anim-fade-in-up anim-delay-2">
+          Your AI-powered companion for real-time mandi prices, market trends,
+          and smart agricultural insights. Make informed decisions and get
+          better returns.
+        </p>
 
-          <form
-            aria-label="Filter mandi prices"
-            class="record-filters"
-            id="recordFilters"
-          >
-            <label class="search-control" for="searchInput">
-              <span aria-hidden="true">⌕</span>
-              <input
-                autocomplete="off"
-                id="searchInput"
-                name="search"
-                placeholder="Search a crop, mandi, district…"
-                type="search"
-              />
-            </label>
-            <label class="visually-hidden" for="stateFilter"
-              >Filter by state</label
-            >
-            <select id="stateFilter" name="state">
-              <option value="">All states</option>
-            </select>
-            <label class="visually-hidden" for="commodityFilter"
-              >Filter by crop</label
-            >
-            <select id="commodityFilter" name="commodity">
-              <option value="">All crops</option>
-            </select>
-            <label class="visually-hidden" for="sortFilter">Sort records</label>
-            <select id="sortFilter" name="sort">
-              <option value="date_desc">Newest arrival</option>
-              <option value="modal_price_desc">Modal price: high to low</option>
-              <option value="modal_price_asc">Modal price: low to high</option>
-            </select>
-            <button class="button button-primary filter-submit" type="submit">
-              Search
-            </button>
-          </form>
+        <div class="hero-actions anim-zoom-in">
+          <a class="button button-primary" href="home.html">Explore Mandi Prices <span>→</span></a>
+          <a class="button button-outline" href="#about"><span class="play">▶</span> Watch Demo</a>
+        </div>
 
-          <div class="records-card">
-            <div class="records-meta">
-              <p aria-live="polite" id="resultSummary">
-                Mandi price explorer preview
-              </p>
-              <span>Prices shown per quintal when provided by the source.</span>
-            </div>
-            <div class="table-scroll">
-              <table class="records-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Commodity</th>
-                    <th scope="col">State</th>
-                    <th scope="col">District</th>
-                    <th scope="col">Market</th>
-                    <th class="optional-column" scope="col">Min / Max</th>
-                    <th scope="col">Modal price</th>
-                    <th scope="col">Arrival date</th>
-                  </tr>
-                </thead>
-                <tbody id="priceRows">
-                  <tr>
-                    <td class="table-placeholder" colspan="7">
-                      Live mandi records will appear here when the data service
-                      is connected. No sample prices are shown.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p
-              aria-live="polite"
-              class="records-error"
-              hidden
-              id="recordsError"
-            ></p>
-            <div class="records-footer">
-              <span>Source: stored Rate-GPT mandi records</span>
-              <a href="mandiPrice.html"
-                >Open the full price explorer
-                <span aria-hidden="true">→</span></a
-              >
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Explore Rate-GPT tools" class="explore-grid">
-          <a class="explore-card" href="mandiPrice.html">
-            <span aria-hidden="true" class="explore-number">01</span>
-            <span class="explore-card-copy">
-              <strong>Browse mandi prices</strong>
-              <span>Filter records by location, crop, and arrival date.</span>
-            </span>
-            <span aria-hidden="true" class="explore-arrow">↗</span>
-          </a>
-          <a class="explore-card" href="app.html#trends">
-            <span aria-hidden="true" class="explore-number">02</span>
-            <span class="explore-card-copy">
-              <strong>Explore price trends</strong>
-              <span>View available market trends from stored records.</span>
-            </span>
-            <span aria-hidden="true" class="explore-arrow">↗</span>
-          </a>
-          <a class="explore-card" href="app.html#compare">
-            <span aria-hidden="true" class="explore-number">03</span>
-            <span class="explore-card-copy">
-              <strong>Compare markets</strong>
-              <span>Compare reported prices across markets.</span>
-            </span>
-            <span aria-hidden="true" class="explore-arrow">↗</span>
-          </a>
-        </section>
+        <div class="trust-line anim-fade-in-up anim-delay-3">
+          <span class="trust-shield">✓</span>
+          <span>Trusted by 1M+ Farmers</span>
+          <i></i>
+          <span>Powered by AI</span>
+        </div>
       </div>
-    </main>
+      <div class="hero-visual">
+        <!-- Ivory background layer -->
+        <div class="card-bg"></div>
+        <img class="farmer-photo" src="Images/farmer.png" alt="Farmer">
 
-    <footer class="site-footer">
-      <a class="brand footer-brand" href="index.html">
-        <span class="brand-icon" aria-hidden="true">R</span>
-        <span>Rate<span class="brand-accent">-GPT</span></span>
-      </a>
-      <p>Government mandi records, presented clearly.</p>
-      <a href="https://data.gov.in/" rel="noopener noreferrer" target="_blank">
-        About the OGD source <span aria-hidden="true">↗</span>
-      </a>
-    </footer>
+        <div class="dashboard anim-float" id="prices">
+          <div class="dashboard-top">
+            <div class="market-name"><span class="pin">●</span> Indore Mandi <span class="chevron">⌄</span></div>
+            <div class="updated"><i></i> Live · 10:24 AM</div>
+          </div>
 
-    <script type="module" src="/script/site-nav.js"></script>
-    <script type="module" src="/script/landing.js"></script>
-  </body>
+          <div class="price-cards">
+            <article class="price-card anim-bounce anim-delay-1">
+              <div class="crop-row"><span class="crop-symbol wheat-symbol">✳</span><b>Wheat</b></div>
+              <strong>₹2,425 <small>/Quintal</small></strong>
+              <span class="increase">↑ +2.8%</span>
+            </article>
+            <article class="price-card anim-bounce anim-delay-1">
+              <div class="crop-row"><span class="crop-symbol mustard-symbol">✿</span><b>Mustard</b></div>
+              <strong>₹6,250 <small>/Quintal</small></strong>
+              <span class="increase">↑ +1.9%</span>
+            </article>
+            <article class="price-card anim-bounce anim-delay-1">
+              <div class="crop-row"><span class="crop-symbol soybean-symbol">●</span><b>Soybean</b></div>
+              <strong>₹5,180 <small>/Quintal</small></strong>
+              <span class="increase">↑ +2.1%</span>
+            </article>
+          </div>
+
+          <article class="chart-card" id="insights">
+            <div class="chart-top">
+              <h3><span class="mini-bars">▥</span> Market Trend – Last 7 Days</h3>
+              <b>↑ +4.7%</b>
+            </div>
+            <div class="chart-area">
+              <div class="y-labels"><span>7k</span><span>6k</span><span>5k</span><span>4k</span></div>
+              <svg class="trend-chart" viewBox="0 0 520 170" preserveAspectRatio="none" role="img" aria-label="Rising market trend line chart">
+                <defs>
+                  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#399667" stop-opacity=".25"/>
+                    <stop offset="100%" stop-color="#399667" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M4 132 C35 118 43 102 75 106 S115 116 145 88 S190 67 220 83 S260 91 290 64 S335 48 365 61 S405 75 435 39 S480 28 516 17 L516 166 L4 166Z" fill="url(#areaFill)"/>
+                <path class="anim-draw" d="M4 132 C35 118 43 102 75 106 S115 116 145 88 S190 67 220 83 S260 91 290 64 S335 48 365 61 S405 75 435 39 S480 28 516 17" fill="none" stroke="#287A52" stroke-width="4" stroke-linecap="round"/>
+                <g fill="#174D38"><circle cx="4" cy="132" r="4"/><circle cx="75" cy="106" r="4"/><circle cx="145" cy="88" r="4"/><circle cx="220" cy="83" r="4"/><circle cx="290" cy="64" r="4"/><circle cx="365" cy="61" r="4"/><circle cx="435" cy="39" r="4"/><circle cx="516" cy="17" r="4"/></g>
+              </svg>
+            </div>
+            <div class="x-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          </article>
+        </div>
+
+        <aside class="ai-card anim-float anim-delay-2">
+          <div class="ai-heading"><span>✦</span><b>AI Insight</b><strong>↗</strong></div>
+          <p>Wheat prices are likely to rise<br>by <b>3–5%</b> this week.</p>
+        </aside>
+
+        <div class="art-leaf leaf-a anim-wiggle anim-delay-1"></div>
+        <div class="art-leaf leaf-b anim-wiggle anim-delay-2"></div>
+      </div>
+    </section>
+
+    <section class="benefits" id="about">
+      <div class="benefit-item anim-slide-in-left anim-delay-1">
+        <span class="benefit-icon">↗</span>
+        <p>Real-Time<br><b>Price Updates</b></p>
+      </div>
+      <div class="benefit-item anim-slide-in-left anim-delay-2">
+        <span class="benefit-icon">▥</span>
+        <p>Market Insights<br><b>with AI</b></p>
+      </div>
+      <div class="benefit-item anim-slide-in-left anim-delay-3">
+        <span class="benefit-icon">♧</span>
+        <p>Better Selling<br><b>Opportunities</b></p>
+      </div>
+      <div class="benefit-item anim-slide-in-left anim-delay-4">
+        <span class="benefit-icon">♧</span>
+        <p>Empowering<br><b>Farmers</b></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const menuButton = document.querySelector(".menu-toggle");
+    const nav = document.querySelector(".nav-links");
+    const closeMenu = () => {
+      nav.classList.remove("is-open");
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open navigation");
+    };
+
+    menuButton.addEventListener("click", () => {
+      const open = nav.classList.toggle("is-open");
+      menuButton.setAttribute("aria-expanded", String(open));
+      menuButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    });
+
+    nav.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeMenu();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
+  </script>
+</body>
 </html>

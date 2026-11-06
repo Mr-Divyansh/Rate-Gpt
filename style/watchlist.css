@@ -1,0 +1,6 @@
+/* Watchlist page */
+.watchlist-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media (max-width: 900px) { .watchlist-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 600px) { .watchlist-grid { grid-template-columns: 1fr; } }
+.watch-card { position: relative; }
+.watch-card .remove { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-secondary); cursor: pointer; }

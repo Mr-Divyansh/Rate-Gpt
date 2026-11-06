@@ -153,7 +153,7 @@ export async function getMandiPrices(params: GetPricesParams): Promise<{
     `SELECT COUNT(*) as total FROM mandi_prices ${whereClause}`,
     values,
   );
-  const total = parseInt(countRes.rows[0].count, 10);
+  const total = parseInt(countRes.rows[0].total, 10);
 
   const orderBy =
     params.sort === "date_asc"
