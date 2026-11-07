@@ -19,6 +19,7 @@ export default defineConfig(() => {
           app: path.resolve(__dirname, "app.html"),
           about: path.resolve(__dirname, "about.html"),
           mandiPrices: path.resolve(__dirname, "mandiPrices.html"),
+          mandiPricesPage: path.resolve(__dirname, "mandi-prices.html"),
           marketDashboard: path.resolve(__dirname, "marketDashboard.html"),
           priceTrends: path.resolve(__dirname, "priceTrends.html"),
         },

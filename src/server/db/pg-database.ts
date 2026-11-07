@@ -375,37 +375,33 @@ export async function upsertMandiPrices(
   const client = await pool.connect();
   const nowIso = new Date().toISOString();
   let inserted = 0;
-  let updated = 0;
+  const recordsByKey = new Map<string, RawMandiInput>();
 
-  try {
-    await client.query("BEGIN");
-    for (const record of records) {
-      const dedupKey = generateDedupKey(
+  for (const record of records) {
+    recordsByKey.set(
+      generateDedupKey(
         record.state,
         record.district,
         record.market,
         record.commodity,
         record.variety || "Other",
         record.arrivalDate,
-      );
-      const id = `rec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const result = await client.query(
-        `INSERT INTO mandi_prices (
-          id, source_record_id, state, district, market, commodity,
-          variety, grade, arrival_date, min_price, max_price, modal_price,
-          source_unit, dedup_key, first_fetched_at, last_fetched_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-        ON CONFLICT (dedup_key) DO UPDATE SET
-          min_price = EXCLUDED.min_price,
-          max_price = EXCLUDED.max_price,
-          modal_price = EXCLUDED.modal_price,
-          grade = EXCLUDED.grade,
-          variety = EXCLUDED.variety,
-          source_unit = EXCLUDED.source_unit,
-          last_fetched_at = EXCLUDED.last_fetched_at
-        RETURNING (xmax = 0) AS was_inserted`,
-        [
-          id,
+      ),
+      record,
+    );
+  }
+
+  try {
+    await client.query("BEGIN");
+    const entries = Array.from(recordsByKey.entries());
+    const batchSize = 250;
+
+    for (let start = 0; start < entries.length; start += batchSize) {
+      const batch = entries.slice(start, start + batchSize);
+      const values: unknown[] = [];
+      const placeholders = batch.map(([dedupKey, record]) => {
+        const rowValues = [
+          `rec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           record.sourceRecordId || null,
           record.state,
           record.district,
@@ -421,13 +417,35 @@ export async function upsertMandiPrices(
           dedupKey,
           nowIso,
           nowIso,
-        ],
+        ];
+        const firstParameter = values.length + 1;
+        values.push(...rowValues);
+        return `(${rowValues
+          .map((_, index) => `$${firstParameter + index}`)
+          .join(", ")})`;
+      });
+
+      const result = await client.query(
+        `INSERT INTO mandi_prices (
+          id, source_record_id, state, district, market, commodity,
+          variety, grade, arrival_date, min_price, max_price, modal_price,
+          source_unit, dedup_key, first_fetched_at, last_fetched_at
+        ) VALUES ${placeholders.join(", ")}
+        ON CONFLICT (dedup_key) DO UPDATE SET
+          min_price = EXCLUDED.min_price,
+          max_price = EXCLUDED.max_price,
+          modal_price = EXCLUDED.modal_price,
+          grade = EXCLUDED.grade,
+          variety = EXCLUDED.variety,
+          source_unit = EXCLUDED.source_unit,
+          last_fetched_at = EXCLUDED.last_fetched_at
+        RETURNING (xmax = 0) AS was_inserted`,
+        values,
       );
-      if (result.rows[0]?.was_inserted) inserted++;
-      else updated++;
+      inserted += result.rows.filter((row) => row.was_inserted).length;
     }
     await client.query("COMMIT");
-    return { inserted, updated };
+    return { inserted, updated: records.length - inserted };
   } catch (error) {
     try { await client.query("ROLLBACK"); } catch { /* preserve the original database error */ }
     throw error;
