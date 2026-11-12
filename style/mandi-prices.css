@@ -64,7 +64,7 @@ a { color: inherit; text-decoration: none; }
 .location-pill .chevron { width: 14px; color: var(--muted); }
 .menu-toggle { display: none; border: 0; background: transparent; color: var(--green-800); }
 
-.hero { min-height: 310px; margin-top: 34px; border-radius: 26px; padding: 48px 58px; color: white; position: relative; overflow: hidden; display: flex; align-items: center; background: linear-gradient(90deg, rgba(13,47,33,.88) 0%, rgba(17,58,39,.75) 58%, rgba(17,58,39,.36) 100%), url('../Images/Farmer Marketplace Sunrise Banner.png') center 55%/cover no-repeat; }
+.hero { min-height: 310px; margin-top: 34px; border-radius: 26px; padding: 48px 58px; color: white; position: relative; overflow: hidden; display: flex; align-items: center; background: linear-gradient(90deg, rgba(13,47,33,.88) 0%, rgba(17,58,39,.75) 58%, rgba(17,58,39,.36) 100%), url('../Images/Farmer Marketplace Sunrise Banner.webp') center 55%/cover no-repeat; }
 .hero-copy { position: relative; z-index: 2; max-width: 570px; }
 .eyebrow, .section-kicker { font-size: 10px; letter-spacing: 1.5px; font-weight: 800; color: var(--green-500); }
 .hero .eyebrow { color: #b9d7c3; display: flex; align-items: center; gap: 10px; }

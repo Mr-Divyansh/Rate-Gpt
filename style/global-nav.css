@@ -1,5 +1,10 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .global-site-header {
-  position: relative;
+  position: sticky;
+  top: 10px;
   z-index: 100;
   width: min(92%, 1440px);
   margin: 16px auto 0;
@@ -237,6 +242,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .global-navigation a,
   .global-menu-toggle span {
     transition: none;

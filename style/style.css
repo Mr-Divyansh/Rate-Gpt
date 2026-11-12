@@ -214,12 +214,12 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 /* Farmer photo — bottom left of the card */
 .farmer-photo {
   position: absolute;
-  z-index: 20;
-  left: -180px;
+  z-index: 3;
+  left: -10%;
   bottom: 0;
-  width: 400px;
+  width: min(72%, 520px);
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
 }
 .sun-glow {
   position: absolute; inset: 0 0 0 0; z-index: -5;
@@ -467,7 +467,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
   .hero { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); padding-inline:4%; }
   .hero h1 { font-size:clamp(50px,5.8vw,66px); letter-spacing:-3px; }
   .dashboard { width:97%; padding:14px; }
-  .farmer-photo { transform:scale(.83); transform-origin:bottom left; left:8%; }
+  .farmer-photo { left:0; width:min(66%, 440px); }
   .ai-card { right:0; width:225px; }
 }
 
@@ -556,9 +556,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
   .chart-top > b { font-size:10px; padding:6px 8px; }
   .chart-area { height:100px; }
   .x-labels { font-size:8px; }
-  .farmer-photo { display: none; }
-  .hero-visual { min-height: 400px; margin: 8px 0 0; }
-  .ai-card { left: 50%; right: auto; bottom: 12px; transform: translateX(-50%); width: min(88%, 260px); padding: 12px; }
+  .farmer-photo { display:block; left:0; width:min(56%, 230px); }
+  .hero-visual { min-height: 470px; margin: 8px 0 0; }
+  .ai-card { left:auto; right:0; bottom:12px; transform:none; width:min(60%, 260px); padding:12px; }
   .ai-card p { font-size:10px; }
   .benefits { width:90%; grid-template-columns:repeat(2,1fr); gap:17px 8px; padding:16px 8px; margin-bottom:22px; }
   .benefit-item { justify-content:flex-start; padding-left:8px; border:0; gap:8px; }
@@ -568,10 +568,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 @media (max-width: 390px) {
   .hero-actions { flex-direction:column; align-items:stretch; }
   .button { width:100%; }
-  .hero-visual { min-height:380px; }
+  .hero-visual { min-height:450px; }
 }
 @media (max-width: 320px) {
-  .hero-visual { min-height: 360px; }
+  .hero-visual { min-height: 430px; }
 }
 
 /* =========================================================

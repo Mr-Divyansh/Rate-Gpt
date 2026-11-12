@@ -45,7 +45,7 @@
   color: #fff;
   background:
     linear-gradient(90deg, rgba(13, 47, 33, .91) 0%, rgba(17, 58, 39, .78) 50%, rgba(17, 58, 39, .34) 100%),
-    url("../Images/Farmer Marketplace Sunrise Banner.png") center 55% / cover no-repeat;
+    url("../Images/Farmer Marketplace Sunrise Banner.webp") center 55% / cover no-repeat;
 }
 
 .about-hero-inner {
