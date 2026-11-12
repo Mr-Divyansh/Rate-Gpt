@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo & Title */}
           <div className="flex items-center space-x-3 sm:space-x-4">
             <img
-              src="Images/Logo.jpeg"
+              src="/Rate%20GPT%20Agritech%20Logo.png"
               alt="Rate GPT Agritech Logo"
               className="w-10 h-10 object-contain border border-[var(--border-color)] bg-[var(--bg-page)]"
             />

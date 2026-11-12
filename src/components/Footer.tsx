@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
         <div>
           <div className="flex items-center space-x-2">
             <img
-              src="Images/Logo.jpeg"
+              src="/Rate%20GPT%20Agritech%20Logo.png"
               alt="Rate GPT Agritech Logo"
               className="w-6 h-6 object-contain"
             />
