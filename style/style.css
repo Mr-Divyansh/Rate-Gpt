@@ -678,3 +678,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
     transition-duration: .01ms !important;
   }
 }
+
+/* Performance and responsive finishing */
+.anim-float,.anim-wiggle,.anim-bounce{animation:none!important}
+.anim-fade-in-up,.anim-zoom-in,.anim-slide-in-left{animation-duration:.45s}
+.hero-visual,.dashboard,.ai-card,.benefits{contain:layout paint}
+@media(max-width:900px){.hero{gap:28px}.hero-visual{min-height:500px}}
+@media(max-width:767px){.hero-visual{min-height:390px}.dashboard{transform:none}.benefits{contain:content}}
