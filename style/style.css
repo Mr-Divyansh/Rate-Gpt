@@ -214,12 +214,18 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 /* Farmer photo — bottom left of the card */
 .farmer-photo {
   position: absolute;
-  z-index: 20;
-  left: -180px;
+  z-index: 2;
+  left: clamp(0px, 1.5vw, 20px);
   bottom: 0;
-  width: 400px;
+  display: block;
+  width: clamp(260px, 34vw, 390px);
+  max-width: 52%;
+  max-height: 94%;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: bottom left;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 22px rgba(31, 55, 38, .12));
 }
 .sun-glow {
   position: absolute; inset: 0 0 0 0; z-index: -5;
@@ -685,3 +691,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 .hero-visual,.dashboard,.ai-card,.benefits{contain:layout paint}
 @media(max-width:900px){.hero{gap:28px}.hero-visual{min-height:500px}}
 @media(max-width:767px){.hero-visual{min-height:390px}.dashboard{transform:none}.benefits{contain:content}}
+
+/* Comfortable native anchor scrolling without JS animation overhead */
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media(max-width:900px){.farmer-photo{left:0;width:clamp(230px,42vw,340px);max-width:54%;max-height:86%}}
+@media(max-width:600px){.farmer-photo{left:0;width:clamp(205px,48vw,280px);max-width:56%;max-height:78%}}
