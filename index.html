@@ -64,36 +64,39 @@
 
         <div class="dashboard anim-float" id="prices">
           <div class="dashboard-top">
-            <div class="market-name"><span class="pin">●</span> Stored market observations</div>
-            <div class="updated"><i></i> Sync-dependent records</div>
+            <div class="market-name" id="homeMarketName" aria-live="polite">
+              <span class="pin" aria-hidden="true">●</span> Loading stored mandi prices…
+            </div>
+            <a class="updated dashboard-market-link" href="/mandi-prices.html">Choose a mandi <span aria-hidden="true">↗</span></a>
           </div>
 
           <div class="price-cards">
             <article class="price-card anim-bounce anim-delay-1">
               <div class="crop-row"><span class="crop-symbol wheat-symbol">—</span><b>Minimum</b></div>
-              <strong>— <small>/Quintal</small></strong>
-              <span class="increase">Select a mandi</span>
+              <strong id="homeMinimum">— <small>/Quintal</small></strong>
+              <span class="increase" id="homeMinimumContext">Loading latest record…</span>
             </article>
             <article class="price-card anim-bounce anim-delay-1">
               <div class="crop-row"><span class="crop-symbol mustard-symbol">—</span><b>Maximum</b></div>
-              <strong>— <small>/Quintal</small></strong>
-              <span class="increase">Select a mandi</span>
+              <strong id="homeMaximum">— <small>/Quintal</small></strong>
+              <span class="increase" id="homeMaximumContext">Loading latest record…</span>
             </article>
             <article class="price-card anim-bounce anim-delay-1">
               <div class="crop-row"><span class="crop-symbol soybean-symbol">—</span><b>Modal</b></div>
-              <strong>— <small>/Quintal</small></strong>
-              <span class="increase">Select a mandi</span>
+              <strong id="homeModal">— <small>/Quintal</small></strong>
+              <span class="increase" id="homeModalContext">Loading latest record…</span>
             </article>
           </div>
 
           <article class="chart-card" id="insights">
             <div class="chart-top">
-              <h3><span class="mini-bars">▥</span> Stored price history</h3>
-              <b>Arrival-date based</b>
+              <h3><span class="mini-bars" aria-hidden="true">▥</span> Modal price history</h3>
+              <b id="homeHistoryCaption">By arrival date</b>
             </div>
-            <div class="chart-area">
-              <div class="chart-empty">Choose a mandi to review stored price observations.</div>
+            <div class="chart-area" id="homePriceHistory" role="img" aria-label="Loading stored price history">
+              <div class="chart-empty">Loading stored price history…</div>
             </div>
+            <p class="home-data-message" id="homeDataMessage" role="status" aria-live="polite"></p>
           </article>
         </div>
 
@@ -150,6 +153,7 @@
       if (event.key === "Escape") closeMenu();
     });
   </script>
+  <script type="module" src="/script/home-market-preview.js"></script>
   <script type="module" src="/script/global-nav.js"></script>
 </body>
 </html>
