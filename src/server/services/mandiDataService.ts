@@ -411,7 +411,19 @@ async function runMandiPriceSync(
         ? "Upstream request timed out after 30 seconds."
         : "Upstream network request failed. Check connectivity and server configuration.";
 
-    console.error(`[Sync Error] ${errorMessage}`);
+    const cause = err?.cause;
+    console.error(`[Sync Error] ${errorMessage}`, {
+      name: typeof err?.name === "string" ? err.name : "UnknownError",
+      code: typeof err?.code === "string" ? err.code : undefined,
+      causeName: cause instanceof Error ? cause.name : undefined,
+      causeCode:
+        typeof cause === "object" &&
+        cause !== null &&
+        "code" in cause &&
+        typeof cause.code === "string"
+          ? cause.code
+          : undefined,
+    });
 
     await insertSyncLog({
       status: "FAILED",
