@@ -191,7 +191,7 @@ async function loadMarketPreview() {
   status.textContent = "";
   try {
     const latestRecords = await requestPrices(
-      new URLSearchParams({ limit: "100", sort: "date_desc" }),
+      new URLSearchParams({ limit: "30", sort: "date_desc" }),
     );
     const latest = latestRecords.find(
       (record) =>
