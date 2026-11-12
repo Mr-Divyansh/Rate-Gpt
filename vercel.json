@@ -12,16 +12,24 @@
     }
   ],
   "redirects": [
-    { "source": "/app", "destination": "/market-price", "permanent": true },
+    { "source": "/app", "destination": "/mandi-prices.html", "permanent": true },
     {
       "source": "/app/:path*",
-      "destination": "/market-price/:path*",
+      "destination": "/mandi-prices.html",
+      "permanent": true
+    },
+    {
+      "source": "/market-price",
+      "destination": "/mandi-prices.html",
+      "permanent": true
+    },
+    {
+      "source": "/market-price/:path*",
+      "destination": "/mandi-prices.html",
       "permanent": true
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" },
-    { "source": "/market-price", "destination": "/app.html" },
-    { "source": "/market-price/(.*)", "destination": "/app.html" }
+    { "source": "/api/(.*)", "destination": "/api/index.ts" }
   ]
 }

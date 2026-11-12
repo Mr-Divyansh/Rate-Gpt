@@ -156,24 +156,20 @@ if (isMainModule && !process.env.VERCEL) {
   const app = createApiApp();
   const distPath = path.resolve(__dirname, "dist");
   app.use(express.static(distPath));
-  // Redirect legacy /app routes to /market-price (preserve query string)
+  // Keep old market entry points pointed at the retained mandi price page.
   app.get("/app", (req, res) => {
     const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-    res.redirect(301, "/market-price" + qs);
+    res.redirect(301, "/mandi-prices.html" + qs);
   });
   app.get("/app/*", (req, res) => {
-    const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-    res.redirect(301, "/market-price" + qs);
+    res.redirect(301, "/mandi-prices.html");
   });
   app.get("/market-price", (req, res) => {
-    res.sendFile(path.resolve(distPath, "app.html"));
+    const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+    res.redirect(301, "/mandi-prices.html" + qs);
   });
   app.get("/market-price/*", (req, res) => {
-    res.sendFile(path.resolve(distPath, "app.html"));
-  });
-  app.get("*", (req, res) => {
-    if (req.path.startsWith("/api")) return;
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.redirect(301, "/mandi-prices.html");
   });
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`=========================================`);

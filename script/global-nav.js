@@ -1,13 +1,7 @@
 const navigationLinks = [
   ["Home", "index.html"],
   ["Mandi Prices", "mandi-prices.html"],
-  ["Calculator", "calculator.html"],
-  ["Comparison", "comparison.html"],
-  ["Crops", "crops.html"],
-  ["Price Trends", "price-trends.html"],
-  ["Watchlist", "watchlist.html"],
-  ["About", "about.html"],
-  ["Dashboard", "marketDashboard.html"],
+  ["About Us", "about.html"],
 ];
 
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";

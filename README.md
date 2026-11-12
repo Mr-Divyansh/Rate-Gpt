@@ -4,17 +4,17 @@ Rate-GPT is an agricultural mandi-price discovery platform. It presents records 
 
 **Important:** the application does not fabricate replacement prices. If the backend or source is unavailable, the UI shows an error or unavailable state. Government data availability and update frequency are controlled by the source; the product must not be described as real-time unless the source actually supports that claim.
 
-## Main HTML entry points
+## Public website pages
 
-- `index.html` — public landing page with backend status and database summary.
-- `mandiPrice.html` — searchable, filterable, paginated mandi price table powered by `/api/v1`.
-- `app.html` — React application with the market board, comparisons, trends, and other tools.
-- `about.html` — platform and data-source information.
-- `mandiPrices.html`, `marketDashboard.html`, and `priceTrends.html` — compatibility redirects to the working price explorer and application views.
+The public website has three pages:
+
+- `index.html` — landing page with a preview of the latest stored mandi price record.
+- `mandi-prices.html` — searchable market and crop selection with stored price records from `/api/v1`.
+- `about.html` — platform purpose, data-source context, and limitations.
 
 ## Stack
 
-- Frontend: HTML, CSS, JavaScript for the landing and price pages; React, TypeScript, Vite, Tailwind CSS for `app.html`.
+- Frontend: HTML, CSS, JavaScript, and Vite.
 - Backend: Node.js, Express, TypeScript, Zod.
 - Data storage: SQLite for local development when `DATABASE_URL` is unset; PostgreSQL when `DATABASE_URL` is configured. Both are accessed through `src/server/db/database-factory.ts`.
 - Upstream: Government of India OGD / AGMARKNET resource `9ef84268-d588-465a-a308-a864a43d0070`.
@@ -59,11 +59,11 @@ Rate-GPT is an agricultural mandi-price discovery platform. It presents records 
 
 7. Open:
    - Landing page: `http://localhost:3000/`
-   - Mandi price table: `http://localhost:3000/mandiPrice.html`
-   - Market board: `http://localhost:3000/app.html#board`
-   - Price trends: `http://localhost:3000/app.html#trends`
+   - Mandi prices: `http://localhost:3000/mandi-prices.html`
    - About: `http://localhost:3000/about.html`
    - API health: `http://localhost:3000/api/v1/health`
+
+Previous `/app` and `/market-price` URLs redirect to the Mandi Prices page.
 
 The development server may choose the next port if port 3000 is already occupied; read the terminal output for the actual URL.
 

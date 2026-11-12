@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#174D38">
-  <title>rategpt | Smart Agricultural Market Intelligence</title>
+  <title>Rate-GPT | Mandi Price Discovery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,11 +26,7 @@
     <nav class="nav-links" id="navLinks">
       <a class="active" href="index.html">Home</a>
       <a href="mandi-prices.html">Mandi Prices</a>
-      <a href="calculator.html">Calculator</a>
-      <a href="comparison.html">Comparison</a>
-      <a href="crops.html">Crops</a>
-      <a href="price-trends.html">Price Trends</a>
-      <a href="watchlist.html">Watchlist</a>
+      <a href="about.html">About Us</a>
     </nav>
   </header>
 
@@ -40,24 +36,24 @@
         <h1 class="anim-fade-in-up">Discover Prices.<br><em>Compare Markets.</em><br>Sell Smarter<span class="period">.</span></h1>
         <div class="headline-swoosh anim-fade-in-up"></div>
 
-        <p class="hero-description anim-fade-in-up anim-delay-2">Explore live mandi prices, compare markets, track crop trends, and make informed selling decisions.</p>
+        <p class="hero-description anim-fade-in-up anim-delay-2">Explore recorded mandi prices by crop and location, then use the latest arrival date to make a more informed selling decision.</p>
 
         <div class="hero-actions anim-zoom-in">
           <a class="button button-primary" href="mandi-prices.html">Explore Mandi Prices <span>→</span></a>
-          <a class="button button-outline" href="#about"><span class="play">▶</span> Watch Demo</a>
+          <a class="button button-outline" href="about.html">About Rate-GPT <span aria-hidden="true">→</span></a>
         </div>
 
         <div class="trust-line anim-fade-in-up anim-delay-3">
           <span class="trust-shield">✓</span>
-          <span>Official Government Mandi Records</span>
+          <span>Government-reported market records</span>
           <i></i>
-          <span>Reliable Market Data</span>
+          <span>Arrival dates shown for context</span>
         </div>
       </div>
       <div class="hero-visual">
         <!-- Ivory background layer -->
         <div class="card-bg"></div>
-        <img class="farmer-photo" src="./Images/farmer.png" alt="Farmer">
+        <img class="farmer-photo" src="./Images/farmer.png" alt="Farmer checking market information on a phone">
 
         <div class="dashboard anim-float" id="prices">
           <div class="dashboard-top">
@@ -107,49 +103,26 @@
       </div>
     </section>
 
-    <section class="benefits" id="about">
+    <section class="benefits" aria-label="What you can do with Rate-GPT">
       <div class="benefit-item anim-slide-in-left anim-delay-1">
         <span class="benefit-icon">↗</span>
-        <p>Real-Time Mandi Price Updates<br><b>Updated Mandi Price Records</b></p>
+        <p>Explore recorded<br><b>mandi prices</b></p>
       </div>
       <div class="benefit-item anim-slide-in-left anim-delay-2">
         <span class="benefit-icon">▥</span>
-        <p>Market Trends<br><b>Price InsightsI</b></p>
+        <p>Filter by crop and<br><b>market location</b></p>
       </div>
       <div class="benefit-item anim-slide-in-left anim-delay-3">
-        <span class="benefit-icon">♧</span>
-        <p>Smarter Selling<br><b>Decisions</b></p>
+        <span class="benefit-icon">₹</span>
+        <p>Review minimum, maximum<br>and <b>modal prices</b></p>
       </div>
       <div class="benefit-item anim-slide-in-left anim-delay-4">
-        <span class="benefit-icon">♧</span>
-        <p>Supporting<br><b>Indian Farmers</b></p>
+        <span class="benefit-icon">◷</span>
+        <p>Check the reported<br><b>arrival date</b></p>
       </div>
     </section>
   </main>
 
-  <script>
-    const menuButton = document.querySelector(".menu-toggle");
-    const nav = document.querySelector(".nav-links");
-    const closeMenu = () => {
-      nav.classList.remove("is-open");
-      menuButton.setAttribute("aria-expanded", "false");
-      menuButton.setAttribute("aria-label", "Open navigation");
-    };
-
-    menuButton.addEventListener("click", () => {
-      const open = nav.classList.toggle("is-open");
-      menuButton.setAttribute("aria-expanded", String(open));
-      menuButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
-    });
-
-    nav.addEventListener("click", (event) => {
-      if (event.target.closest("a")) closeMenu();
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeMenu();
-    });
-  </script>
   <script type="module" src="/script/home-market-preview.js"></script>
   <script type="module" src="/script/global-nav.js"></script>
 </body>

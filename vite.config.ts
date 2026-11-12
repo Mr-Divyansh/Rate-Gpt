@@ -1,33 +1,22 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
 import path from "path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "."),
+        "@": rootDir,
       },
     },
     build: {
       rollupOptions: {
         input: {
-          main: path.resolve(__dirname, "index.html"),
-          home: path.resolve(__dirname, "home.html"),
-          mandiPrice: path.resolve(__dirname, "mandiPrice.html"),
-          app: path.resolve(__dirname, "app.html"),
-          about: path.resolve(__dirname, "about.html"),
-          calculator: path.resolve(__dirname, "calculator.html"),
-          comparison: path.resolve(__dirname, "comparison.html"),
-          crops: path.resolve(__dirname, "crops.html"),
-          mandiPricesPage: path.resolve(__dirname, "mandi-prices.html"),
-          marketDashboard: path.resolve(__dirname, "marketDashboard.html"),
-          priceTrendsPage: path.resolve(__dirname, "price-trends.html"),
-          watchlist: path.resolve(__dirname, "watchlist.html"),
-          mandiPrices: path.resolve(__dirname, "mandiPrices.html"),
-          priceTrends: path.resolve(__dirname, "priceTrends.html"),
+          home: path.resolve(rootDir, "index.html"),
+          mandiPrices: path.resolve(rootDir, "mandi-prices.html"),
+          about: path.resolve(rootDir, "about.html"),
         },
       },
     },

@@ -17,15 +17,17 @@ const PORT = Number(process.env.PORT) || 3000;
 
 const app = createApiApp();
 
-// Dev-only: serve the React app at /market-price, redirect legacy /app
+// Redirect previous market-app URLs to the retained mandi price page.
 app.use((req, res, next) => {
   if (req.url === '/app' || req.url.startsWith('/app?') || req.url.startsWith('/app/')) {
     const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-    res.redirect(302, '/market-price' + qs);
+    res.redirect(302, '/mandi-prices.html' + qs);
     return;
   }
   if (req.url === '/market-price' || req.url.startsWith('/market-price?') || req.url.startsWith('/market-price/')) {
-    req.url = '/app.html';
+    const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    res.redirect(302, '/mandi-prices.html' + qs);
+    return;
   }
   next();
 });

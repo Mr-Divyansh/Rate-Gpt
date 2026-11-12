@@ -1,4 +1,0 @@
-/* Calculator page */
-.calc-box { max-width: 520px; margin: 0 auto; }
-.calc-result { margin-top: 20px; padding: 20px; background: var(--bg-page); border-radius: var(--radius); text-align: center; }
-.calc-result h2 { color: var(--color-primary); font-size: 2rem; }

@@ -2,7 +2,8 @@
 
 ## Vercel
 - `vercel.json`: API rewrite `/api/(.*)` → `/api/index.ts`; function `api/index.ts` maxDuration 300s and daily Vercel Cron at 00:00 UTC.
-- Routes: `/` → landing, `/market-price` → app.html, `/app` → redirect to `/market-price`.
+- Public routes: `/` → landing page, `/mandi-prices.html` → price explorer, `/about.html` → About Us.
+- Legacy `/app` and `/market-price` URLs redirect to `/mandi-prices.html`.
 - Build: `npm run build` (Vite) → `dist/`.
 - Configure `CRON_SECRET` with at least 32 characters. Vercel Cron sends it as a Bearer token to `/api/v1/scheduler/sync`.
 - Configure a persistent PostgreSQL `DATABASE_URL` (Neon is supported) for Vercel. SQLite is the local fallback and cannot persist writes on Vercel.
