@@ -5,14 +5,20 @@
  * service work with either.
  */
 import type * as SqliteTypes from "./database.js";
-import { getDatabaseConnectionString } from "./database-config.js";
+import {
+  getDatabaseConnectionString,
+  validateDatabaseUrl,
+} from "./database-config.js";
 
 let adapterPromise: Promise<any> | undefined;
 
 async function getDb(): Promise<any> {
   if (!adapterPromise) {
     adapterPromise = (async () => {
-      if (getDatabaseConnectionString()) {
+      const connectionString = getDatabaseConnectionString();
+      if (connectionString) {
+        const validation = validateDatabaseUrl();
+        if (!validation.valid) throw new Error(validation.message);
         const pg = await import("./pg-database.js");
         await pg.initDb();
         return pg;
@@ -50,6 +56,9 @@ export async function searchCommodities(...args: Parameters<typeof import("./dat
 }
 export async function getDatabaseStats() {
   return (await getDb()).getDatabaseStats();
+}
+export async function acquireMandiSyncLock() {
+  return (await getDb()).acquireMandiSyncLock();
 }
 export async function getRecentSyncLogs(limit = 10) {
   return (await getDb()).getRecentSyncLogs(limit);

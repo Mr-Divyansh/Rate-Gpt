@@ -436,6 +436,8 @@ main {
 .mini-bars { color: var(--green-500); font-size: 20px; }
 .bar-top > b { padding: 7px 14px; border-radius: 20px; color: var(--green-700); background: var(--green-100); font-size: 14px; font-weight: 800; }
 .bar-area { position: relative; display: flex; height: 240px; gap: 12px; background: repeating-linear-gradient(to bottom, transparent 0 28px, #edf1eb 29px 30px); margin-bottom: 12px; }
+.bar-empty-state { align-items: center; justify-content: center; padding: 24px; text-align: center; }
+.bar-empty-state p { max-width: 24rem; margin: 0; color: var(--muted); font-weight: 600; }
 .bar-grid {
   position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(to bottom, transparent 0 28px, #edf1eb 29px 30px);

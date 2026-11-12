@@ -59,6 +59,7 @@ import {
   RawMandiInput,
   upsertMandiPrices,
   insertSyncLog,
+  acquireMandiSyncLock,
 } from "../db/database-factory.js";
 
 export interface UpstreamSyncOptions {
@@ -140,7 +141,7 @@ export function parsePrice(val: any): number | null {
   const normalized = String(val).replace(/,/g, "").trim();
   if (!/^-?\d+(?:\.\d+)?$/.test(normalized)) return null;
   const num = Number(normalized);
-  return Number.isFinite(num) ? num : null;
+  return Number.isFinite(num) && num >= 0 ? num : null;
 }
 
 /**
@@ -172,6 +173,9 @@ export function mapUpstreamRecord(raw: any): RawMandiInput | null {
   const minPrice = parsePrice(raw.min_price ?? raw.Min_Price);
   const maxPrice = parsePrice(raw.max_price ?? raw.Max_Price);
   const modalPrice = parsePrice(raw.modal_price ?? raw.Modal_Price);
+  if (minPrice === null && maxPrice === null && modalPrice === null) {
+    return null;
+  }
 
   return {
     sourceRecordId: raw.id || raw._id || null,
@@ -195,6 +199,27 @@ export function mapUpstreamRecord(raw: any): RawMandiInput | null {
  */
 export async function syncMandiPricesFromUpstream(
   options: UpstreamSyncOptions = {},
+): Promise<SyncResult> {
+  const releaseLock = await acquireMandiSyncLock();
+  if (!releaseLock) {
+    return {
+      success: false,
+      status: "IN_PROGRESS",
+      message: "A mandi synchronization is already in progress.",
+      recordsFetched: 0,
+      recordsInserted: 0,
+      recordsUpdated: 0,
+    };
+  }
+  try {
+    return await runMandiPriceSync(options);
+  } finally {
+    await releaseLock();
+  }
+}
+
+async function runMandiPriceSync(
+  options: UpstreamSyncOptions,
 ): Promise<SyncResult> {
   const startedAt = new Date().toISOString();
   const apiKey = process.env.DATA_GOV_API_KEY;

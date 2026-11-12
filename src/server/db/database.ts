@@ -192,6 +192,7 @@ function openDatabase(Database: any, filePath: string | null): any {
 const Database = await loadBetterSqlite3();
 const resolvedDbPath = dbPath ?? path.resolve(process.cwd(), "rategpt.db");
 const db = openDatabase(Database, resolvedDbPath);
+let syncLockHeld = false;
 
 // Journal mode is left as DELETE (default) so the bundled read-only database
 // does not require -wal/-shm sidecar files on read-only filesystems (Vercel).
@@ -650,6 +651,11 @@ export function getDatabaseStats() {
   const lastSync = db
     .prepare("SELECT * FROM sync_logs ORDER BY started_at DESC LIMIT 1")
     .get() as SyncLogRecord | undefined;
+  const lastSuccessfulSync = db
+    .prepare(
+      "SELECT * FROM sync_logs WHERE status = 'SUCCESS' ORDER BY completed_at DESC LIMIT 1",
+    )
+    .get() as SyncLogRecord | undefined;
   const latestDateRow = db
     .prepare("SELECT MAX(arrival_date) as maxDate FROM mandi_prices")
     .get() as { maxDate: string | null };
@@ -661,6 +667,15 @@ export function getDatabaseStats() {
     statesCount: stateRow.count,
     latestArrivalDate: latestDateRow?.maxDate || null,
     lastSync,
+    lastSuccessfulSync,
+  };
+}
+
+export function acquireMandiSyncLock(): (() => void) | null {
+  if (syncLockHeld) return null;
+  syncLockHeld = true;
+  return () => {
+    syncLockHeld = false;
   };
 }
 

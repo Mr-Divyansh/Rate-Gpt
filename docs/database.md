@@ -1,10 +1,11 @@
 # Database Architecture — Rate-GPT
 
-## Current database
-- **Engine:** SQLite via `better-sqlite3` (synchronous, single-process).
-- **File:** `rategpt.db` (bundled with deployment on Vercel via `includeFiles`).
+## Database selection
+- **Local fallback:** SQLite via `better-sqlite3` (synchronous, single-process) when no PostgreSQL URL is configured.
+- **Production:** PostgreSQL via `DATABASE_URL` or `POSTGRES_URL`. Vercel refuses to start database operations without PostgreSQL because its filesystem is ephemeral/read-only.
+- PostgreSQL initialization and health checks connect to the configured database. A configured URL alone does not prove connectivity.
 - **Tables:** `mandi_prices`, `sync_logs`.
-- **Journal mode:** DELETE (default) for read-only filesystem compatibility.
+- **SQLite journal mode:** DELETE (default).
 
 ## Schema
 
@@ -40,10 +41,11 @@
 - idx_sync_started_at (started_at)
 
 ## Production limitation
-Vercel's bundled filesystem is read-only; `/tmp` is ephemeral. Sync writes cannot persist. See `docs/migrations.md`.
+Vercel's bundled filesystem is read-only; `/tmp` is ephemeral. SQLite writes cannot persist there. Use PostgreSQL. Sync jobs use a process-local lock with SQLite and a PostgreSQL advisory lock across serverless instances.
 
 ## Environment variables (names only)
 - RATEGPT_DB_PATH / DB_PATH (optional override)
 - DATA_GOV_API_KEY
 - ADMIN_SYNC_KEY
-- DATABASE_URL (future, for Postgres)
+- DATABASE_URL / POSTGRES_URL (PostgreSQL connection)
+- CRON_SECRET (Vercel Cron authorization)

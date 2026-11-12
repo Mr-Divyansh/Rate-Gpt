@@ -2,7 +2,10 @@
 import path from "path";
 import os from "os";
 import fs from "fs";
-import { getDatabaseConnectionString } from "../db/database-config.js";
+import {
+  getDatabaseConnectionString,
+  validateDatabaseUrl,
+} from "../db/database-config.js";
 
 let passed = 0;
 let failed = 0;
@@ -48,6 +51,16 @@ async function main() {
     }) === "postgres://vercel",
     "blank DATABASE_URL uses POSTGRES_URL fallback",
   );
+  check(
+    validateDatabaseUrl({
+      DATABASE_URL: "postgresql://user:password@database.example/db",
+    }).valid,
+    "valid PostgreSQL URL accepted",
+  );
+  check(
+    !validateDatabaseUrl({ DATABASE_URL: "https://database.example/db" }).valid,
+    "non-PostgreSQL URL rejected",
+  );
 
   const previousVercel = process.env.VERCEL;
   const previousDatabaseUrl = process.env.DATABASE_URL;
@@ -89,6 +102,8 @@ async function main() {
     getMandiPrices,
     upsertMandiPrices,
     generateDedupKey,
+    insertSyncLog,
+    acquireMandiSyncLock,
   } = await import("../db/database.js");
   const { normalizeArrivalDate, parsePrice, mapUpstreamRecord } =
     await import("../services/mandiDataService.js");
@@ -99,6 +114,7 @@ async function main() {
   check(normalizeArrivalDate(null) === null, "missing date is rejected");
   check(parsePrice("2,450.50") === 2450.5, "formatted numeric price parsing");
   check(parsePrice(null) === null && parsePrice("NA") === null, "missing prices remain null");
+  check(parsePrice("-2") === null, "negative prices are rejected");
 
   const mapped = mapUpstreamRecord({
     state: "Himachal Pradesh", district: "Kangra", market: "Palampur",
@@ -108,6 +124,19 @@ async function main() {
   check(mapped?.arrivalDate === "2026-10-31", "OGD record date mapping");
   check(mapped?.modalPrice === 2000, "OGD price mapping");
   check(mapUpstreamRecord({ state: "Himachal Pradesh" }) === null, "incomplete OGD record rejected");
+  check(
+    mapUpstreamRecord({
+      state: "Himachal Pradesh",
+      district: "Kangra",
+      market: "Palampur",
+      commodity: "Maize",
+      arrival_date: "31/10/2026",
+      min_price: "NA",
+      max_price: "NA",
+      modal_price: "NA",
+    }) === null,
+    "records without a valid price are rejected",
+  );
 
   const unique = `audit-${Date.now()}`;
   const record = {
@@ -126,6 +155,43 @@ async function main() {
   check(getFilterMetadata({ state: "Audit State" }).districts.includes("Audit District"), "state filter metadata works");
   check(generateDedupKey("A", "B", "C", "D", "E", "2026-01-01") === "a|b|c|d|e|2026-01-01", "dedup key normalization");
   check(getDatabaseStats().totalRecords >= 1, "database statistics query works");
+  const firstLock = acquireMandiSyncLock();
+  check(typeof firstLock === "function", "SQLite sync lock is acquired");
+  check(acquireMandiSyncLock() === null, "overlapping SQLite sync is rejected");
+  firstLock?.();
+  const secondLock = acquireMandiSyncLock();
+  check(typeof secondLock === "function", "SQLite sync lock releases");
+  secondLock?.();
+
+  const syncTime = Date.now();
+  insertSyncLog({
+    status: "SUCCESS",
+    requested_date: null,
+    state_filter: "ALL",
+    records_fetched: 1,
+    records_inserted: 1,
+    records_updated: 0,
+    error_message: null,
+    started_at: new Date(syncTime - 1000).toISOString(),
+    completed_at: new Date(syncTime - 500).toISOString(),
+  });
+  insertSyncLog({
+    status: "FAILED",
+    requested_date: null,
+    state_filter: "ALL",
+    records_fetched: 0,
+    records_inserted: 0,
+    records_updated: 0,
+    error_message: "test failure",
+    started_at: new Date(syncTime).toISOString(),
+    completed_at: new Date(syncTime + 100).toISOString(),
+  });
+  const syncStats = getDatabaseStats();
+  check(syncStats.lastSync?.status === "FAILED", "latest attempt reflects failure");
+  check(
+    syncStats.lastSuccessfulSync?.status === "SUCCESS",
+    "last successful sync is tracked separately",
+  );
 
   console.log(`\nResult: ${passed} passed, ${failed} failed`);
   if (failed) process.exitCode = 1;

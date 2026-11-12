@@ -97,4 +97,18 @@ Payload:
 
 ### 8. Synchronization Audit Logs
 `GET /api/v1/admin/logs`
+Headers:
+- `Authorization`: `Bearer <token>` (`ADMIN_SYNC_KEY`)
+
 Returns the recent 20 sync execution records.
+
+### 9. Sync Status
+`GET /api/v1/sync-status`
+Returns the last attempt, last successful sync, freshness, and the backend's
+next scheduled execution timestamp/countdown. The scheduled job is daily at
+00:00 UTC on Vercel; local SQLite mode does not run an automatic scheduler.
+
+### 10. Scheduled Synchronization
+`GET /api/v1/scheduler/sync`
+Protected with `Authorization: Bearer <CRON_SECRET>`. Vercel Cron calls this
+route daily; manual clients should use the admin sync endpoint instead.

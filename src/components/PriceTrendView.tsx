@@ -28,10 +28,10 @@ interface PriceTrendViewProps {
 }
 
 export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
-  initialCommodity = "Wheat",
-  initialMarket = "Lasalgaon",
-  initialState = "Maharashtra",
-  initialDistrict = "Nashik",
+  initialCommodity = "",
+  initialMarket = "",
+  initialState = "",
+  initialDistrict = "",
   unit,
 }) => {
   const [commodity, setCommodity] = useState(initialCommodity);
@@ -50,13 +50,33 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
   const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
 
   useEffect(() => {
-    api
-      .getFilters()
-      .then((m) => {
+    let active = true;
+    Promise.all([
+      api.getFilters(),
+      api.getPrices({ limit: 1, sort: "date_desc" }),
+    ])
+      .then(([m, latest]) => {
+        if (!active) return;
         setAvailableCommodities(m.commodities);
         setAvailableMarkets(m.markets);
+        const latestRecord = latest.records[0];
+        setCommodity((current) =>
+          m.commodities.includes(current)
+            ? current
+            : (latestRecord?.commodity ?? m.commodities[0] ?? ""),
+        );
+        setMarket((current) =>
+          m.markets.includes(current)
+            ? current
+            : (latestRecord?.market ?? m.markets[0] ?? ""),
+        );
+        if (!state && latestRecord) setState(latestRecord.state);
+        if (!district && latestRecord) setDistrict(latestRecord.district);
       })
       .catch(console.error);
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -123,6 +143,7 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
               </label>
               <select
                 value={commodity}
+                disabled={availableCommodities.length === 0}
                 onChange={(e) => setCommodity(e.target.value)}
                 className="py-1 px-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs focus:outline-2 focus:outline-[var(--outline-focus)]"
               >
@@ -131,6 +152,9 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
                     {c}
                   </option>
                 ))}
+                {availableCommodities.length === 0 && (
+                  <option value="">No stored commodities</option>
+                )}
               </select>
             </div>
 
@@ -140,6 +164,7 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
               </label>
               <select
                 value={market}
+                disabled={availableMarkets.length === 0}
                 onChange={(e) => setMarket(e.target.value)}
                 className="py-1 px-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs focus:outline-2 focus:outline-[var(--outline-focus)]"
               >
@@ -148,6 +173,9 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
                     {m}
                   </option>
                 ))}
+                {availableMarkets.length === 0 && (
+                  <option value="">No stored markets</option>
+                )}
               </select>
             </div>
           </div>
@@ -179,9 +207,9 @@ export const PriceTrendView: React.FC<PriceTrendViewProps> = ({
             No stored historical observations found.
           </h3>
           <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-md mx-auto">
-            No stored historical observations were found for {commodity} at{" "}
-            {market}. Trends will accumulate if synchronization is configured
-            and runs successfully.
+            {commodity && market
+              ? `No stored historical observations were found for ${commodity} at ${market}. Trends will accumulate if synchronization is configured and runs successfully.`
+              : "No market records are available to build a trend chart. Trends will appear after synchronization stores valid observations."}
           </p>
         </div>
       ) : (

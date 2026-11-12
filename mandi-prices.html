@@ -4,48 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#174D38">
-  <meta name="description" content="Check crop prices and nearby mandis with Rate-GPT.">
+  <meta name="description" content="Check government-reported crop prices at Indian mandis with Rate-GPT.">
   <title>Mandi Prices | Rate-GPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/mandi-prices.css">
+  <link rel="stylesheet" href="style/global-nav.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="index.html" aria-label="rategpt home">
-        <img src="Images/Logo.jpeg" alt="rategpt logo" />
+      <a class="brand" href="index.html" aria-label="Rate-GPT home">
+        <img src="Images/Logo.jpeg" alt="Rate-GPT logo">
       </a>
-      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="mainNav" aria-expanded="false">
-        <i data-lucide="menu"></i>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mainNav" aria-expanded="false">
+        <span></span><span></span><span></span>
       </button>
       <nav class="main-nav" id="mainNav" aria-label="Main navigation">
         <a href="index.html">Home</a>
-        <a class="active" href="mandi-prices.html">Mandi Prices</a>
+        <a class="active" href="mandi-prices.html" aria-current="page">Mandi Prices</a>
         <a href="calculator.html">Calculator</a>
         <a href="comparison.html">Comparison</a>
         <a href="crops.html">Crops</a>
         <a href="price-trends.html">Price Trends</a>
         <a href="watchlist.html">Watchlist</a>
       </nav>
-      <button class="location-pill" id="changeLocationBtn">
-        <i data-lucide="map-pin"></i><span><small>Your market</small><strong id="headerLocation">Mathura, UP</strong></span>
-        <i data-lucide="chevron-down" class="chevron"></i>
-      </button>
     </div>
   </header>
 
   <main>
     <section class="hero page-container">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-line"></span> FARMER MARKETPLACE</div>
+        <div class="eyebrow"><span class="eyebrow-line"></span> GOVERNMENT-REPORTED MARKET DATA</div>
         <h1>Know your mandi.<br><em>Know your price.</em></h1>
         <p>अपने आसपास की मंडियों में फसलों के भाव देखें और सोच-समझकर अपनी उपज बेचें।</p>
         <div class="hero-meta">
-          <span class="market-open"><span class="pulse"></span> Market information</span>
-          <span class="updated"><i data-lucide="clock-3"></i> Updated: <b id="updatedAt">Demo preview</b></span>
+          <span class="market-open"><span class="pulse"></span><span id="syncFreshness">Checking data freshness…</span></span>
+          <span class="updated"><i data-lucide="clock-3"></i> Last successful sync: <b id="updatedAt">Loading…</b></span>
+          <span class="updated"><i data-lucide="refresh-cw"></i> Next scheduled sync: <b id="nextSyncAt">Checking…</b></span>
         </div>
       </div>
       <div class="hero-art" aria-hidden="true">
@@ -60,276 +58,110 @@
     <section class="page-container location-panel">
       <div class="location-main">
         <div class="location-icon"><i data-lucide="map-pin"></i></div>
-        <div><span class="section-kicker">SHOWING MARKET PRICES FOR</span><h2 id="selectedLocation">Mathura, Uttar Pradesh</h2><p>Choose a market area to explore nearby mandi rates.</p></div>
+        <div>
+          <span class="section-kicker">SELECTED MARKET</span>
+          <h2 id="selectedLocation">Choose a mandi</h2>
+          <p id="locationHint">Select a mandi to view its stored crop prices.</p>
+        </div>
       </div>
-      <button class="btn btn-outline" id="locationAction"><i data-lucide="map-pin"></i> Change location</button>
+      <button class="btn btn-outline" id="locationAction" type="button">
+        <i data-lucide="map-pin"></i> Choose location
+      </button>
     </section>
 
-    <section class="page-container section-block">
+    <section class="page-container section-block mandi-selection" aria-labelledby="mandiHeading">
       <div class="section-heading">
-        <div><span class="section-kicker">MARKETS AROUND YOU</span><h2>Nearby mandis</h2><p>Select a mandi to narrow down the prices below.</p></div>
-        <button class="text-button" id="showAllMandis">View all mandis <i data-lucide="arrow-up-right"></i></button>
+        <div>
+          <span class="section-kicker">MARKETS IN YOUR FILTER</span>
+          <h2 id="mandiHeading">Select one mandi</h2>
+          <p id="mandiHelp" aria-live="polite">Loading mandi locations from stored market data…</p>
+        </div>
+        <button class="text-button" id="changeLocationLink" type="button">
+          Change state or district <i data-lucide="arrow-up-right"></i>
+        </button>
       </div>
-      <div class="mandi-grid" id="mandiGrid">
-        <button class="mandi-card selected" data-mandi="Mathura Mandi"><span class="mandi-card-icon"><i data-lucide="store"></i></span><span class="mandi-card-content"><strong>Mathura Mandi</strong><small>Mathura · Demo distance 4 km</small></span><span class="selected-check"><i data-lucide="check"></i></span></button>
-        <button class="mandi-card" data-mandi="Kosi Kalan Mandi"><span class="mandi-card-icon"><i data-lucide="store"></i></span><span class="mandi-card-content"><strong>Kosi Kalan Mandi</strong><small>Mathura · Demo distance 28 km</small></span><span class="selected-check"><i data-lucide="check"></i></span></button>
-        <button class="mandi-card" data-mandi="Agra Mandi"><span class="mandi-card-icon"><i data-lucide="store"></i></span><span class="mandi-card-content"><strong>Agra Mandi</strong><small>Agra · Demo distance 58 km</small></span><span class="selected-check"><i data-lucide="check"></i></span></button>
-      </div>
+      <div class="mandi-grid" id="mandiGrid" aria-label="Available mandis"></div>
     </section>
 
-    <section class="page-container section-block price-section">
+    <section class="page-container section-block price-section" aria-labelledby="pricesHeading">
       <div class="section-heading price-heading">
-        <div><span class="section-kicker">TODAY'S MARKET BOARD</span><h2>Crop prices</h2><p>Compare minimum, maximum and modal prices at a glance.</p></div>
-        <div class="unit-note"><i data-lucide="info"></i> Prices shown per quintal (₹)</div>
+        <div>
+          <span class="section-kicker">STORED MARKET OBSERVATIONS</span>
+          <h2 id="pricesHeading">Crop prices</h2>
+          <p>Search crops and review the reported minimum, maximum, and modal prices.</p>
+        </div>
+        <div class="unit-note"><i data-lucide="info"></i> Source prices in ₹ per quintal</div>
       </div>
 
       <div class="filter-panel">
-        <label class="search-box"><i data-lucide="search"></i><input id="cropSearch" type="search" placeholder="Search crop, e.g. गेहूं, wheat..." autocomplete="off"><button class="mic-button" id="micBtn" type="button" aria-label="Voice search"><i data-lucide="mic"></i></button><kbd>⌘ K</kbd></label>
-        <label class="select-wrap"><span>Category</span><select id="categoryFilter"><option value="all">All crops</option><option value="Grains">Grains</option><option value="Pulses">Pulses</option><option value="Oilseeds">Oilseeds</option><option value="Vegetables">Vegetables</option></select><i data-lucide="chevron-down"></i></label>
-        <label class="select-wrap"><span>Sort by</span><select id="sortFilter"><option value="default">Recommended</option><option value="low">Modal: low to high</option><option value="high">Modal: high to low</option><option value="name">Crop name</option></select><i data-lucide="chevron-down"></i></label>
-        <button class="clear-button" id="clearFilters">Reset</button>
+        <label class="search-box" for="cropSearch">
+          <i data-lucide="search"></i>
+          <input id="cropSearch" type="search" placeholder="Search crops in English or Hindi…" autocomplete="off" disabled>
+          <kbd>Ctrl K</kbd>
+        </label>
+        <label class="select-wrap">
+          <span>Sort by</span>
+          <select id="sortFilter" disabled>
+            <option value="date_desc">Latest arrival</option>
+            <option value="modal_price_asc">Modal: low to high</option>
+            <option value="modal_price_desc">Modal: high to low</option>
+            <option value="commodity_asc">Crop name</option>
+          </select>
+          <i data-lucide="chevron-down"></i>
+        </label>
+        <button class="clear-button" id="clearFilters" type="button" disabled>Reset</button>
       </div>
 
-      <div class="table-toolbar"><div class="results-count"><strong id="resultCount">6 crops</strong><span>in selected market</span></div><div class="demo-note"><span class="demo-dot"></span> Illustrative demo prices — not live rates</div></div>
+      <div class="table-toolbar">
+        <div class="results-count"><strong id="resultCount" aria-live="polite">0 records</strong><span>in selected mandi</span></div>
+        <p class="demo-note" id="priceMessage" role="status">Select a mandi to load prices.</p>
+      </div>
       <div class="price-table-wrap">
         <table class="price-table">
-          <thead><tr><th>Crop</th><th>Mandi</th><th>Min. price</th><th>Max. price</th><th>Modal price</th><th>Trend</th></tr></thead>
+          <thead>
+            <tr><th>Crop</th><th>Mandi</th><th>Arrival date</th><th>Min. price</th><th>Max. price</th><th>Modal price</th></tr>
+          </thead>
           <tbody id="priceTableBody"></tbody>
         </table>
       </div>
       <div class="mobile-price-list" id="mobilePriceList"></div>
-      <div class="table-footer"><span id="showingText">Showing demo entries</span><button class="text-button" id="loadMore">Load more <i data-lucide="arrow-down"></i></button></div>
+      <div class="table-footer">
+        <span id="showingText" aria-live="polite"></span>
+        <button class="text-button" id="loadMore" type="button" hidden>Load more <i data-lucide="arrow-down"></i></button>
+      </div>
+      <p class="price-error" id="priceError" role="alert" hidden></p>
     </section>
 
     <section class="page-container insight-strip">
       <div class="insight-icon"><i data-lucide="lightbulb"></i></div>
       <div><span class="section-kicker">MARKET SMART TIP</span><h3>Compare before you sell.</h3><p>Prices can vary between mandis. Check transport costs, quality requirements and the latest verified rate before making a decision.</p></div>
-      <span class="insight-decoration">₹</span>
+      <span class="insight-decoration" aria-hidden="true">₹</span>
     </section>
   </main>
 
-  <footer class="site-footer"><div class="page-container footer-inner"><a class="brand footer-brand" href="index.html"><span class="brand-mark"><i data-lucide="sprout"></i></span><span>Rate<span class="brand-accent">-GPT</span><small>SMART AGRICULTURE</small></span></a><p>Better market information for every farmer.</p><span>© <span id="year"></span> Rate-GPT</span></div></footer>
+  <footer class="site-footer">
+    <div class="page-container footer-inner">
+      <a class="brand footer-brand" href="index.html"><span class="brand-mark"><i data-lucide="sprout"></i></span><span>Rate-GPT<small>SMART AGRICULTURE</small></span></a>
+      <p>Government-reported market records, presented clearly.</p>
+      <span>© <span id="year"></span> Rate-GPT</span>
+    </div>
+  </footer>
 
   <dialog class="location-dialog" id="locationDialog">
     <form method="dialog" class="dialog-card">
-      <button class="dialog-close" aria-label="Close"><i data-lucide="x"></i></button>
-      <span class="section-kicker">YOUR MARKET AREA</span><h2>Choose your location</h2><p>Select a demo location for this frontend preview. Live location will be connected by the backend team.</p>
-      <label class="dialog-label">State<select id="stateSelect"><option>Uttar Pradesh</option><option>Rajasthan</option><option>Haryana</option></select></label>
-      <label class="dialog-label">District<select id="districtSelect"><option>Mathura</option><option>Agra</option><option>Aligarh</option><option>Bharatpur</option></select></label>
-      <button class="btn btn-primary dialog-submit" id="applyLocation" value="apply">Apply location <i data-lucide="arrow-right"></i></button>
+      <button class="dialog-close" type="submit" aria-label="Close"><i data-lucide="x"></i></button>
+      <span class="section-kicker">FILTER YOUR MARKET</span>
+      <h2>Choose a location</h2>
+      <p>State and district options are loaded from available mandi records.</p>
+      <label class="dialog-label">State<select id="stateSelect" required disabled></select></label>
+      <label class="dialog-label">District<select id="districtSelect" required disabled></select></label>
+      <button class="btn btn-primary dialog-submit" id="applyLocation" type="button" disabled>
+        Show mandis <i data-lucide="arrow-right"></i>
+      </button>
     </form>
   </dialog>
 
-  <script>/* =========================================================
-   RATE-GPT · MANDI PRICES
-   Frontend demo behaviour. Replace demo providers with API
-   calls once backend contracts are supplied.
-   ========================================================= */
-
-const demoPrices = [
-  { crop: "गेहूं", english: "Wheat", category: "Grains", emoji: "🌾", mandi: "Mathura Mandi", min: 2380, max: 2610, modal: 2520, trend: "up", change: "+1.8%" },
-  { crop: "धान", english: "Paddy", category: "Grains", emoji: "🌾", mandi: "Mathura Mandi", min: 2050, max: 2380, modal: 2260, trend: "flat", change: "Stable" },
-  { crop: "सरसों", english: "Mustard", category: "Oilseeds", emoji: "🌼", mandi: "Kosi Kalan Mandi", min: 5100, max: 5570, modal: 5420, trend: "up", change: "+0.9%" },
-  { crop: "आलू", english: "Potato", category: "Vegetables", emoji: "🥔", mandi: "Mathura Mandi", min: 750, max: 1120, modal: 940, trend: "down", change: "-2.1%" },
-  { crop: "चना", english: "Chickpea", category: "Pulses", emoji: "🫘", mandi: "Agra Mandi", min: 5450, max: 5820, modal: 5660, trend: "up", change: "+1.2%" },
-  { crop: "प्याज", english: "Onion", category: "Vegetables", emoji: "🧅", mandi: "Kosi Kalan Mandi", min: 1050, max: 1540, modal: 1320, trend: "down", change: "-0.7%" }
-];
-
-let selectedMandi = "all";
-let visibleCount = 6;
-let selectedLocation = { district: "Mathura", state: "Uttar Pradesh" };
-
-const $ = (selector) => document.querySelector(selector);
-const formatPrice = (value) => `₹${Number(value).toLocaleString("en-IN")}`;
-
-function getFilteredPrices() {
-  const query = $("#cropSearch").value.trim().toLocaleLowerCase();
-  const category = $("#categoryFilter").value;
-  const sort = $("#sortFilter").value;
-
-  let rows = demoPrices.filter((item) => {
-    const matchesQuery = `${item.crop} ${item.english}`.toLocaleLowerCase().includes(query);
-    const matchesCategory = category === "all" || item.category === category;
-    const matchesMandi = selectedMandi === "all" || item.mandi === selectedMandi;
-    return matchesQuery && matchesCategory && matchesMandi;
-  });
-
-  if (sort === "low") rows.sort((a, b) => a.modal - b.modal);
-  if (sort === "high") rows.sort((a, b) => b.modal - a.modal);
-  if (sort === "name") rows.sort((a, b) => a.crop.localeCompare(b.crop, "hi"));
-  return rows;
-}
-
-function trendMarkup(item) {
-  const icon = item.trend === "up" ? "trending-up" : item.trend === "down" ? "trending-down" : "minus";
-  return `<span class="trend ${item.trend}"><i data-lucide="${icon}"></i>${item.change}</span>`;
-}
-
-function renderTable() {
-  const rows = getFilteredPrices();
-  const shownRows = rows.slice(0, visibleCount);
-  $("#resultCount").textContent = `${rows.length} ${rows.length === 1 ? "crop" : "crops"}`;
-  $("#showingText").textContent = rows.length ? `Showing ${shownRows.length} of ${rows.length} demo entries` : "No demo entries match your filters";
-
-  $("#priceTableBody").innerHTML = shownRows.length ? shownRows.map((item) => `
-    <tr>
-      <td><div class="crop-cell"><span class="crop-avatar">${item.emoji}</span><span class="crop-name"><strong>${item.crop}</strong><small>${item.english}</small></span></div></td>
-      <td class="mandi-name">${item.mandi}</td>
-      <td class="price-value">${formatPrice(item.min)}</td>
-      <td class="price-value">${formatPrice(item.max)}</td>
-      <td class="modal-price">${formatPrice(item.modal)}</td>
-      <td>${trendMarkup(item)}</td>
-    </tr>`).join("") : `<tr><td colspan="6"><div class="empty-state"><i data-lucide="search-x"></i>No crops found. Try another search or reset filters.</div></td></tr>`;
-
-  $("#mobilePriceList").innerHTML = shownRows.length ? shownRows.map((item) => `
-    <article class="mobile-price-card">
-      <div class="mobile-card-top">
-        <div class="crop-cell"><span class="crop-avatar">${item.emoji}</span><span class="crop-name"><strong>${item.crop}</strong><small>${item.english}</small></span></div>
-        ${trendMarkup(item)}
-      </div>
-      <div class="mobile-card-mandi"><i data-lucide="map-pin"></i>${item.mandi}</div>
-      <div class="mobile-price-values">
-        <div><span>Minimum</span><strong>${formatPrice(item.min)}</strong></div>
-        <div><span>Maximum</span><strong>${formatPrice(item.max)}</strong></div>
-        <div class="modal"><span>Modal</span><strong>${formatPrice(item.modal)}</strong></div>
-      </div>
-      <div class="mobile-card-foot"><span>Illustrative demo price</span><span>Per quintal</span></div>
-    </article>`).join("") : `<div class="empty-state"><i data-lucide="search-x"></i>No crops found. Try another search or reset filters.</div>`;
-
-  $("#loadMore").hidden = rows.length <= visibleCount;
-  if (window.lucide) window.lucide.createIcons();
-}
-
-function selectMandi(name) {
-  selectedMandi = name;
-  document.querySelectorAll(".mandi-card").forEach((card) => {
-    const selected = card.dataset.mandi === name;
-    card.classList.toggle("selected", selected);
-    card.setAttribute("aria-pressed", String(selected));
-  });
-  visibleCount = 6;
-  renderTable();
-}
-
-function updateLocationLabels() {
-  const short = `${selectedLocation.district}, ${selectedLocation.state === "Uttar Pradesh" ? "UP" : selectedLocation.state}`;
-  $("#headerLocation").textContent = short;
-  $("#selectedLocation").textContent = `${selectedLocation.district}, ${selectedLocation.state}`;
-}
-
-function resetFilters() {
-  $("#cropSearch").value = "";
-  $("#categoryFilter").value = "all";
-  $("#sortFilter").value = "default";
-  selectedMandi = "all";
-  document.querySelectorAll(".mandi-card").forEach((card) => {
-    card.classList.remove("selected");
-    card.setAttribute("aria-pressed", "false");
-  });
-  visibleCount = 6;
-  renderTable();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  $("#year").textContent = new Date().getFullYear();
-  $("#updatedAt").textContent = "Demo preview";
-  renderTable();
-
-  $("#cropSearch").addEventListener("input", () => { visibleCount = 6; renderTable(); });
-  $("#categoryFilter").addEventListener("change", () => { visibleCount = 6; renderTable(); });
-  $("#sortFilter").addEventListener("change", renderTable);
-  $("#clearFilters").addEventListener("click", resetFilters);
-  $("#loadMore").addEventListener("click", () => { visibleCount += 6; renderTable(); });
-
-  document.querySelectorAll(".mandi-card").forEach((card) => {
-    card.setAttribute("aria-pressed", String(card.classList.contains("selected")));
-    card.addEventListener("click", () => selectMandi(card.dataset.mandi));
-  });
-
-  const dialog = $("#locationDialog");
-  $("#changeLocationBtn").addEventListener("click", () => dialog.showModal());
-  $("#locationAction").addEventListener("click", () => dialog.showModal());
-  $("#applyLocation").addEventListener("click", (event) => {
-    event.preventDefault();
-    selectedLocation = { district: $("#districtSelect").value, state: $("#stateSelect").value };
-    updateLocationLabels();
-    dialog.close();
-  });
-
-  const menuButton = $("#menuToggle");
-  const nav = $("#mainNav");
-  const setMenuOpen = (open) => {
-    nav.classList.toggle("open", open);
-    menuButton.setAttribute("aria-expanded", String(open));
-    menuButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
-    menuButton.innerHTML = `<i data-lucide="${open ? "x" : "menu"}"></i>`;
-    if (window.lucide) window.lucide.createIcons();
-  };
-
-  menuButton.addEventListener("click", () => {
-    setMenuOpen(!nav.classList.contains("open"));
-  });
-  nav.addEventListener("click", (event) => {
-    if (event.target.closest("a")) setMenuOpen(false);
-  });
-  document.addEventListener("click", (event) => {
-    if (!nav.contains(event.target) && !menuButton.contains(event.target)) setMenuOpen(false);
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setMenuOpen(false);
-  });
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 900) setMenuOpen(false);
-  });
-
-  $("#showAllMandis").addEventListener("click", () => selectMandi("all"));
-
-  document.addEventListener("keydown", (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      $("#cropSearch").focus();
-    }
-  });
-
-  const micBtn = $("#micBtn");
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition && micBtn) {
-    let listening = false;
-    const recognition = new SpeechRecognition();
-    recognition.lang = "hi-IN";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => { listening = true; micBtn.classList.add("listening"); };
-    recognition.onend = () => { listening = false; micBtn.classList.remove("listening"); };
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      $("#cropSearch").value = transcript;
-      $("#cropSearch").dispatchEvent(new Event("input"));
-    };
-    recognition.onerror = () => { listening = false; micBtn.classList.remove("listening"); };
-
-    micBtn.addEventListener("click", () => {
-      if (listening) { recognition.stop(); return; }
-      try { recognition.start(); } catch (e) {}
-    });
-  } else if (micBtn) {
-    micBtn.hidden = true;
-  }
-});
-
-/*
- * BACKEND INTEGRATION TODO:
- * Replace these demo data providers with the agreed API contracts.
- * Keep API URL/configuration in one place when backend endpoints are ready.
- *
- * async function fetchNearbyMandis(location) { ... }
- * async function fetchMandiPrices({ location, mandiId, crop, category }) { ... }
- * async function fetchMarketInsights(location) { ... }
- * async function fetchCropPriceHistory({ cropId, mandiId, range }) { ... }
- *
- * Do not treat demoPrices as real or current market prices.
- */
-</script>
+  <script type="module" src="/script/mandi-prices.js"></script>
+  <script type="module" src="/script/global-nav.js"></script>
 </body>
 </html>

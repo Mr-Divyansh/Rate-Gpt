@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.js";
+import { siteNavigation } from "../siteNavigation.js";
 
 interface HeaderProps {
   currentTab:
@@ -69,18 +70,15 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="Site navigation"
             className="hidden lg:flex items-center gap-4 text-xs font-medium text-[var(--text-secondary)]"
           >
-            <a className="hover:text-[var(--text-primary)]" href="/index.html">
-              Home
-            </a>
-            <a
-              className="hover:text-[var(--text-primary)]"
-              href="/mandiPrice.html"
-            >
-              Mandi prices
-            </a>
-            <a className="hover:text-[var(--text-primary)]" href="/about.html">
-              About
-            </a>
+            {siteNavigation.map(({ label, href }) => (
+              <a
+                className="whitespace-nowrap hover:text-[var(--text-primary)]"
+                href={href}
+                key={href}
+              >
+                {label}
+              </a>
+            ))}
           </nav>
 
           {/* Quick status & Theme toggle */}
@@ -159,29 +157,18 @@ export const Header: React.FC<HeaderProps> = ({
         <nav
           id="mobile-site-navigation"
           aria-label="Site navigation"
-          className={`${isMobileMenuOpen ? "flex" : "hidden"} lg:hidden flex-col gap-3 border-t border-[var(--border-color)] py-3 text-xs font-medium text-[var(--text-secondary)]`}
+          className={`${isMobileMenuOpen ? "grid" : "hidden"} lg:hidden grid-cols-2 sm:grid-cols-3 gap-3 border-t border-[var(--border-color)] py-3 text-xs font-medium text-[var(--text-secondary)]`}
         >
-          <a
-            className="hover:text-[var(--text-primary)]"
-            href="/index.html"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Home
-          </a>
-          <a
-            className="hover:text-[var(--text-primary)]"
-            href="/mandiPrice.html"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Mandi prices
-          </a>
-          <a
-            className="hover:text-[var(--text-primary)]"
-            href="/about.html"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            About
-          </a>
+          {siteNavigation.map(({ label, href }) => (
+            <a
+              className="hover:text-[var(--text-primary)]"
+              href={href}
+              key={href}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {label}
+            </a>
+          ))}
         </nav>
 
         {/* Navigation Tabs */}

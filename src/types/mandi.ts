@@ -74,6 +74,16 @@ export interface SyncLogItem {
   completed_at: string | null;
 }
 
+export interface SyncStatusResponse {
+  freshnessStatus: string;
+  lastSyncAttempt: SyncLogItem | null;
+  lastSuccessfulSync: SyncLogItem | null;
+  schedulerEnabled: boolean;
+  nextScheduledAt: string;
+  countdownMs: number;
+  timestamp: string;
+}
+
 export interface ApiEnvelope<T> {
   success: boolean;
   data: T;

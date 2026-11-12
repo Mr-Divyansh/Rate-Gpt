@@ -164,12 +164,12 @@ export default function App() {
   }, []);
 
   // Comparison & Trend targeted commodity/market
-  const [compareCommodity, setCompareCommodity] = useState<string>("Wheat");
+  const [compareCommodity, setCompareCommodity] = useState<string>("");
   const [trendTarget, setTrendTarget] = useState({
-    commodity: "Wheat",
-    market: "Lasalgaon",
-    state: "Maharashtra",
-    district: "Nashik",
+    commodity: "",
+    market: "",
+    state: "",
+    district: "",
   });
 
   // System & Health stats

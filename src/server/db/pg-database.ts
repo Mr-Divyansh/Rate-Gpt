@@ -134,10 +134,14 @@ export async function getMandiPrices(params: GetPricesParams): Promise<{
     values.push(params.commodity);
     conditions.push(`commodity = $${paramIdx++}`);
   }
+  if (params.variety) {
+    values.push(params.variety);
+    conditions.push(`variety = $${paramIdx++}`);
+  }
   if (params.search) {
     values.push(`%${params.search}%`);
     conditions.push(
-      `(commodity ILIKE $${paramIdx} OR market ILIKE $${paramIdx})`,
+      `(commodity ILIKE $${paramIdx} OR market ILIKE $${paramIdx} OR district ILIKE $${paramIdx} OR state ILIKE $${paramIdx})`,
     );
     paramIdx++;
   }
@@ -219,6 +223,7 @@ export interface GetPricesParams {
   district?: string;
   market?: string;
   commodity?: string;
+  variety?: string;
   search?: string;
   date?: string;
   sort?: string;
@@ -354,7 +359,7 @@ async function getPool(): Promise<Pool> {
     }
     pool = new Pool({
       connectionString,
-      ssl: { rejectUnauthorized: false },
+      ssl: { rejectUnauthorized: true },
       max: 5,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,
@@ -461,6 +466,7 @@ export async function getDatabaseStats(): Promise<{
   statesCount: number;
   latestArrivalDate: string | null;
   lastSync: SyncLogRecord | undefined;
+  lastSuccessfulSync: SyncLogRecord | undefined;
 }> {
   const pool = await getPool();
   const totalRes = await pool.query(
@@ -481,6 +487,9 @@ export async function getDatabaseStats(): Promise<{
   const syncRes = await pool.query(
     "SELECT * FROM sync_logs ORDER BY started_at DESC LIMIT 1",
   );
+  const successfulSyncRes = await pool.query(
+    "SELECT * FROM sync_logs WHERE status = 'SUCCESS' ORDER BY completed_at DESC LIMIT 1",
+  );
 
   return {
     totalRecords: parseInt(totalRes.rows[0].count, 10),
@@ -489,7 +498,39 @@ export async function getDatabaseStats(): Promise<{
     statesCount: parseInt(stateRes.rows[0].count, 10),
     latestArrivalDate: latestRes.rows[0]?.maxdate || null,
     lastSync: syncRes.rows[0] ? (syncRes.rows[0] as SyncLogRecord) : undefined,
+    lastSuccessfulSync: successfulSyncRes.rows[0]
+      ? (successfulSyncRes.rows[0] as SyncLogRecord)
+      : undefined,
   };
+}
+
+export async function acquireMandiSyncLock(): Promise<(() => Promise<void>) | null> {
+  const pool = await getPool();
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      "SELECT pg_try_advisory_lock($1, $2) AS locked",
+      [77343291, 1],
+    );
+    if (!result.rows[0]?.locked) {
+      client.release();
+      return null;
+    }
+
+    let released = false;
+    return async () => {
+      if (released) return;
+      released = true;
+      try {
+        await client.query("SELECT pg_advisory_unlock($1, $2)", [77343291, 1]);
+      } finally {
+        client.release();
+      }
+    };
+  } catch (error) {
+    client.release();
+    throw error;
+  }
 }
 
 export async function getRecentSyncLogs(

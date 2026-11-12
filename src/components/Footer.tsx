@@ -1,5 +1,6 @@
 import React from "react";
 import { useLanguage } from "../context/LanguageContext.js";
+import { siteNavigation } from "../siteNavigation.js";
 
 export const Footer: React.FC = () => {
   const { t } = useLanguage();
@@ -30,7 +31,26 @@ export const Footer: React.FC = () => {
             </code>
             ).
           </p>
+          <a
+            className="mt-2 inline-block text-[11px] hover:text-[var(--text-primary)]"
+            href="https://data.gov.in/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Data source: data.gov.in
+          </a>
         </div>
+
+        <nav
+          aria-label="Footer navigation"
+          className="flex flex-wrap gap-x-4 gap-y-2 md:max-w-sm"
+        >
+          {siteNavigation.map(({ label, href }) => (
+            <a className="hover:text-[var(--text-primary)]" href={href} key={href}>
+              {label}
+            </a>
+          ))}
+        </nav>
 
         <div className="max-w-md text-[11px] text-[var(--text-secondary)] space-y-1">
           <p>

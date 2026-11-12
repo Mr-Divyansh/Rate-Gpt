@@ -22,6 +22,14 @@ import { openApiSpec } from "../openapi.js";
 
 const router = Router();
 
+function hasValidToken(providedToken: unknown, expectedKey: string): boolean {
+  if (typeof providedToken !== "string") return false;
+  const providedBuffer = Buffer.from(providedToken);
+  const expectedBuffer = Buffer.from(expectedKey);
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+}
+
 // Admin authentication helper (timing-safe)
 function requireAdminAuth(req: Request, res: Response): boolean {
   const expectedKey = process.env.ADMIN_SYNC_KEY;
@@ -40,14 +48,10 @@ function requireAdminAuth(req: Request, res: Response): boolean {
     return false;
   }
 
-  const authHeader = req.headers.authorization;
-  const providedToken = authHeader
-    ? authHeader.replace(/^Bearer\s+/i, "")
-    : req.body?.adminKey;
-  if (
-    typeof providedToken !== "string" ||
-    providedToken.length !== expectedKey.length
-  ) {
+  const providedToken = /^Bearer\s+(.+)$/i.exec(
+    req.headers.authorization || "",
+  )?.[1];
+  if (!hasValidToken(providedToken, expectedKey)) {
     sendError(
       res,
       "UNAUTHORIZED",
@@ -56,15 +60,25 @@ function requireAdminAuth(req: Request, res: Response): boolean {
     );
     return false;
   }
-  const providedBuf = Buffer.from(providedToken);
-  const expectedBuf = Buffer.from(expectedKey);
-  if (!crypto.timingSafeEqual(providedBuf, expectedBuf)) {
+  return true;
+}
+
+function requireCronAuth(req: Request, res: Response): boolean {
+  const expectedSecret = process.env.CRON_SECRET;
+  if (!expectedSecret || expectedSecret.length < 32) {
     sendError(
       res,
-      "UNAUTHORIZED",
-      "Invalid or missing admin synchronization token",
-      401,
+      "SERVICE_UNAVAILABLE",
+      "Scheduled synchronization is disabled: CRON_SECRET is not configured.",
+      503,
     );
+    return false;
+  }
+  const providedToken = /^Bearer\s+(.+)$/i.exec(
+    req.headers.authorization || "",
+  )?.[1];
+  if (!hasValidToken(providedToken, expectedSecret)) {
+    sendError(res, "UNAUTHORIZED", "Invalid scheduled sync token", 401);
     return false;
   }
   return true;
@@ -141,11 +155,15 @@ router.get("/health", async (req: Request, res: Response) => {
       "Backend operational",
     );
   } catch (err: any) {
+    console.error("[Route /health] Database health check failed", {
+      name: err?.name,
+      code: err?.code,
+    });
     return sendError(
       res,
       "INTERNAL_ERROR",
-      err.message || "Database health check failed",
-      500,
+      "Database health check failed",
+      503,
     );
   }
 });
@@ -230,15 +248,14 @@ router.get("/prices", async (req: Request, res: Response) => {
     const { records, meta } = await getMandiPrices(parsed.data);
     return sendSuccess(res, records, meta, "Prices fetched successfully");
   } catch (err: any) {
-    // Safe diagnostic logging (no secrets).
-    console.error("[Route /prices] Operation=getMandiPrices failed");
-    console.error("[Route /prices] Error name:", err?.name);
-    console.error("[Route /prices] Error message:", err?.message);
-    console.error("[Route /prices] Stack:", err?.stack);
+    console.error("[Route /prices] Operation=getMandiPrices failed", {
+      name: err?.name,
+      code: err?.code,
+    });
     return sendError(
       res,
       "INTERNAL_ERROR",
-      err?.message || "Failed to fetch mandi prices",
+      "Failed to fetch mandi prices",
       500,
     );
   }
@@ -372,14 +389,20 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
 /**
  * 7. Admin Data Sync Endpoint
  * POST /api/v1/admin/sync
- * Protected via ADMIN_SYNC_KEY (or simple token)
+ * Protected via the ADMIN_SYNC_KEY Bearer token.
  */
 const syncBodySchema = z.object({
-  state: z.string().optional(),
-  district: z.string().optional(),
-  market: z.string().optional(),
-  commodity: z.string().optional(),
-  arrivalDate: z.string().optional(),
+  state: z.string().trim().min(1).max(100).optional(),
+  district: z.string().trim().min(1).max(100).optional(),
+  market: z.string().trim().min(1).max(100).optional(),
+  commodity: z.string().trim().min(1).max(100).optional(),
+  arrivalDate: z
+    .string()
+    .trim()
+    .regex(
+      /^(?:\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{4})$/,
+    )
+    .optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 
@@ -407,10 +430,49 @@ router.post("/admin/sync", async (req: Request, res: Response) => {
       result.success ? 200 : 207,
     );
   } catch (err: any) {
+    console.error("[Route /admin/sync] Synchronization failed", {
+      name: err?.name,
+      code: err?.code,
+    });
     return sendError(
       res,
       "SYNC_FAILED",
-      err.message || "Internal error during synchronization",
+      "Internal error during synchronization",
+      500,
+    );
+  }
+});
+
+/**
+ * Vercel Cron entry point. The platform sends a GET request with
+ * Authorization: Bearer <CRON_SECRET>.
+ */
+router.get("/scheduler/sync", async (req: Request, res: Response) => {
+  if (!requireCronAuth(req, res)) return;
+  try {
+    const result = await syncMandiPricesFromUpstream();
+    if (result.status === "IN_PROGRESS") {
+      return sendError(res, "SYNC_IN_PROGRESS", result.message, 409);
+    }
+    if (!result.success) {
+      return sendError(
+        res,
+        "SYNC_FAILED",
+        result.message,
+        503,
+        { status: result.status },
+      );
+    }
+    return sendSuccess(res, result, undefined, result.message);
+  } catch (err: any) {
+    console.error("[Route /scheduler/sync] Synchronization failed", {
+      name: err?.name,
+      code: err?.code,
+    });
+    return sendError(
+      res,
+      "SYNC_FAILED",
+      "Scheduled synchronization failed.",
       500,
     );
   }
@@ -443,4 +505,52 @@ router.get("/docs", async (_req: Request, res: Response) => {
   return res.status(200).json(openApiSpec);
 });
 
+/***
+ * 10. Sync Status & Freshness Endpoint
+ * GET /api/v1/sync-status
+ * Returns last successful refresh timestamp and data freshness status
+ */
+router.get("/sync-status", async (req: Request, res: Response) => {
+  try {
+    const stats = await getDatabaseStats();
+    const now = new Date();
+    const nextScheduledAt = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + 1,
+      ),
+    );
+    const intervalMs = 24 * 60 * 60 * 1000;
+    const lastSuccessfulSync = stats.lastSuccessfulSync || null;
+    const lastSuccessfulTime = lastSuccessfulSync?.completed_at
+      ? new Date(lastSuccessfulSync.completed_at).getTime()
+      : Number.NaN;
+    const successfulSyncIsFresh =
+      Number.isFinite(lastSuccessfulTime) &&
+      now.getTime() - lastSuccessfulTime < intervalMs;
+
+    return sendSuccess(res, {
+      freshnessStatus: !lastSuccessfulSync
+        ? "No successful sync"
+        : successfulSyncIsFresh
+          ? "Fresh data"
+          : "Data is outdated",
+      lastSyncAttempt: stats.lastSync || null,
+      lastSuccessfulSync,
+      schedulerEnabled: Boolean(
+        process.env.VERCEL && (process.env.CRON_SECRET || "").length >= 32,
+      ),
+      nextScheduledAt: nextScheduledAt.toISOString(),
+      countdownMs: Math.max(0, nextScheduledAt.getTime() - now.getTime()),
+      timestamp: now.toISOString(),
+    });
+  } catch (err: any) {
+    console.error("[Route /sync-status] Failed to read sync status", {
+      name: err?.name,
+      code: err?.code,
+    });
+    return sendError(res, "INTERNAL_ERROR", "Failed to get sync status", 500);
+  }
+});
 export default router;

@@ -111,6 +111,9 @@ async function setupTestDatabase() {
   }
 
   dbSetup = true;
+  delete process.env.DATABASE_URL;
+  delete process.env.POSTGRES_URL;
+  delete process.env.VERCEL;
   process.env.RATEGPT_DB_PATH = tmpDb;
   process.env.NODE_ENV = "test";
   // server.ts only auto-starts its standalone listener when it is the actual
@@ -119,6 +122,8 @@ async function setupTestDatabase() {
   // setting it would make database-factory.ts refuse to fall back to SQLite.
   process.env.ADMIN_SYNC_KEY =
     "integration-test-admin-sync-key-not-a-real-secret";
+  process.env.CRON_SECRET =
+    "integration-test-cron-secret-not-a-real-secret";
 }
 
 async function cleanupTestDatabase() {
@@ -162,11 +167,16 @@ function assert(cond: boolean, name: string, detail?: string) {
   }
 }
 
-async function request(method: string, p: string, body?: any) {
+async function request(
+  method: string,
+  p: string,
+  body?: any,
+  headers: Record<string, string> = {},
+) {
   return new Promise<{ status: number; headers: any; json: any; text: string }>(
     (resolve, reject) => {
       const url = new URL(p, base);
-      const opts: any = { method, headers: {} };
+      const opts: any = { method, headers: { ...headers } };
       let data: string | undefined;
       if (body) {
         data = JSON.stringify(body);
@@ -214,6 +224,26 @@ async function run() {
     "health has records",
   );
   assert(Boolean(h.headers["x-request-id"]), "health has X-Request-Id");
+
+  // 1a. Synchronization schedule status
+  const syncStatus = await request("GET", "/api/v1/sync-status");
+  const nextSync = new Date(syncStatus.json?.data?.nextScheduledAt);
+  assert(syncStatus.status === 200, "sync status returns 200");
+  assert(
+    typeof syncStatus.json?.data?.schedulerEnabled === "boolean" &&
+      Number.isFinite(nextSync.getTime()),
+    "sync status exposes scheduler state and next execution",
+  );
+  assert(
+    nextSync.getUTCHours() === 0 && nextSync.getUTCMinutes() === 0,
+    "next scheduled execution matches daily UTC schedule",
+  );
+
+  const cronNoAuth = await request("GET", "/api/v1/scheduler/sync");
+  assert(
+    cronNoAuth.status === 401,
+    "scheduled sync rejects unauthenticated requests",
+  );
 
   // 2. Filters
   console.log("\n2. Filters:");
@@ -291,6 +321,15 @@ async function run() {
     "admin sync rejects unauthenticated",
     `status=${sync.status}`,
   );
+  const invalidSyncBody = await request("POST", "/api/v1/admin/sync", {
+    state: "x".repeat(101),
+  }, {
+    Authorization: "Bearer integration-test-admin-sync-key-not-a-real-secret",
+  });
+  assert(
+    invalidSyncBody.status === 400,
+    "admin sync validates filter lengths before executing",
+  );
 
   // 11. Docs
   console.log("\n11. OpenAPI docs:");
@@ -342,6 +381,20 @@ async function run() {
     "admin logs with invalid creds rejected",
     `status=${logsBad.status}`,
   );
+  const unicodeToken = "é".repeat(
+    "integration-test-admin-sync-key-not-a-real-secret".length,
+  );
+  const logsUnicode = await request(
+    "GET",
+    "/api/v1/admin/logs",
+    undefined,
+    { Authorization: `Bearer ${unicodeToken}` },
+  );
+  assert(
+    logsUnicode.status === 401,
+    "admin logs safely rejects same-character-length Unicode tokens",
+    `status=${logsUnicode.status}`,
+  );
   const logsOk = await new Promise<any>((resolve) => {
     const url = new URL("/api/v1/admin/logs", base);
     const r = http.request(
@@ -386,6 +439,10 @@ async function run() {
     "admin sync without creds rejected",
     `status=${syncNoAuth.status}`,
   );
+  const bodyKey = await request("POST", "/api/v1/admin/sync", {
+    adminKey: "integration-test-admin-sync-key-not-a-real-secret",
+  });
+  assert(bodyKey.status === 401, "admin key is not accepted in request body");
   const syncBad = await new Promise<any>((resolve) => {
     const url = new URL("/api/v1/admin/sync", base);
     const r = http.request(

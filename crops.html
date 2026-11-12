@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style/crops.css">
+<link rel="stylesheet" href="style/global-nav.css">
 </head>
 <body>
 <header class="site-header anim-slide-in-down anim-delay-1">
@@ -28,9 +29,9 @@
       <a href="price-trends.html">Price Trends</a>
       <a href="watchlist.html">Watchlist</a>
     </nav>
-    <div class="location-pill" aria-label="Your market: Mathura, Uttar Pradesh">
+    <div class="location-pill" aria-label="Market data source">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-      <span><small>Your market</small><strong>Mathura, UP</strong></span>
+      <span><small>Market coverage</small><strong>Stored records</strong></span>
       <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </div>
   </div>
@@ -61,66 +62,26 @@
           </div>
         </div>
         <div class="hero-visual">
-          <!-- Bar graph price chart -->
           <section class="bar-graph-section anim-fade-in-up anim-delay-9">
             <div class="section-head anim-slide-in-up anim-delay-9">
-              <h2>Crop Price Comparison</h2>
-              <span class="result-count">Average mandi price &bull; Per quintal</span>
+              <h2>Crop Price Records</h2>
+              <span class="result-count">Prices depend on available market records</span>
             </div>
             <div class="bar-card anim-float anim-delay-1">
               <div class="bar-top">
-                <h3><span class="mini-bars">▥</span> Top Crops by Price</h3>
+                <h3><span class="mini-bars">▥</span> Verified mandi observations</h3>
                 <b class="anim-bounce anim-delay-2">₹/Quintal</b>
               </div>
-              <div class="bar-area">
-                <div class="bar-y-labels"><span>₹8k</span><span>₹6k</span><span>₹4k</span><span>₹2k</span><span>₹0</span></div>
-                <div class="bar-grid"></div>
-                <svg class="bar-chart" viewBox="0 0 700 300" preserveAspectRatio="none" role="img" aria-label="Crop price bar chart">
-                  <defs>
-                    <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#399667"/>
-                      <stop offset="100%" stop-color="#174d38"/>
-                    </linearGradient>
-                    <linearGradient id="barFillGold" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#e9a23b"/>
-                      <stop offset="100%" stop-color="#b87a24"/>
-                    </linearGradient>
-                    <filter id="barGlow">
-                      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                      <feMerge>
-                        <feMergeNode in="coloredBlur"/>
-                        <feMergeNode in="SourceGraphic"/>
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <rect class="bar bar-1 anim-grow anim-delay-1" x="60" y="220" width="80" height="80" fill="url(#barFill)" filter="url(#barGlow)" rx="8"/>
-                  <rect class="bar bar-2 anim-grow anim-delay-2" x="160" y="160" width="80" height="140" fill="url(#barFill)" filter="url(#barGlow)" rx="8"/>
-                  <rect class="bar bar-3 anim-grow anim-delay-3" x="260" y="100" width="80" height="200" fill="url(#barFillGold)" filter="url(#barGlow)" rx="8"/>
-                  <rect class="bar bar-4 anim-grow anim-delay-4" x="360" y="140" width="80" height="160" fill="url(#barFill)" filter="url(#barGlow)" rx="8"/>
-                  <rect class="bar bar-5 anim-grow anim-delay-5" x="460" y="180" width="80" height="120" fill="url(#barFill)" filter="url(#barGlow)" rx="8"/>
-                  <rect class="bar bar-6 anim-grow anim-delay-6" x="560" y="120" width="80" height="180" fill="url(#barFillGold)" filter="url(#barGlow)" rx="8"/>
-                  <text class="bar-value anim-fade-in anim-delay-1" x="100" y="205" text-anchor="middle" fill="#174d38" font-weight="800" font-size="13">₹2,425</text>
-                  <text class="bar-value anim-fade-in anim-delay-2" x="200" y="145" text-anchor="middle" fill="#174d38" font-weight="800" font-size="13">₹2,250</text>
-                  <text class="bar-value anim-fade-in anim-delay-3" x="300" y="85" text-anchor="middle" fill="#b87a24" font-weight="800" font-size="13">₹5,550</text>
-                  <text class="bar-value anim-fade-in anim-delay-4" x="400" y="125" text-anchor="middle" fill="#174d38" font-weight="800" font-size="13">₹4,600</text>
-                  <text class="bar-value anim-fade-in anim-delay-5" x="500" y="165" text-anchor="middle" fill="#174d38" font-weight="800" font-size="13">₹1,950</text>
-                  <text class="bar-value anim-fade-in anim-delay-6" x="600" y="105" text-anchor="middle" fill="#b87a24" font-weight="800" font-size="13">₹6,550</text>
-                  <text class="bar-label" x="100" y="285" text-anchor="middle" fill="#66736b" font-size="12">Wheat</text>
-                  <text class="bar-label" x="200" y="285" text-anchor="middle" fill="#66736b" font-size="12">Rice</text>
-                  <text class="bar-label" x="300" y="285" text-anchor="middle" fill="#66736b" font-size="12">Mustard</text>
-                  <text class="bar-label" x="400" y="285" text-anchor="middle" fill="#66736b" font-size="12">Soybean</text>
-                  <text class="bar-label" x="500" y="285" text-anchor="middle" fill="#66736b" font-size="12">Maize</text>
-                  <text class="bar-label" x="600" y="285" text-anchor="middle" fill="#66736b" font-size="12">Cotton</text>
-                </svg>
-                <div class="bar-shimmer"></div>
+              <div class="bar-area bar-empty-state">
+                <p>Choose a mandi to view prices from stored market records.</p>
               </div>
-              <div class="bar-insight anim-fade-in anim-delay-7">
+              <div class="bar-insight">
                 <span class="insight-dot"></span>
-                <span>Mustard leads at ₹5,550/qtl &bull; Cotton at ₹6,550/qtl highest</span>
+                <a href="mandi-prices.html">Browse verified mandi prices</a>
               </div>
             </div>
           </section>
-          <img class="hero-farmer anim-fade-in-up anim-delay-8" src="Images/farmer.png" alt="Indian farmer" />
+          <img class="hero-farmer anim-fade-in-up anim-delay-8" src="./Images/farmer.png" alt="Indian farmer" />
         </div>
       </div>
     </section>
@@ -264,5 +225,6 @@ document.addEventListener("keydown", e => {
 document.getElementById("year").textContent = new Date().getFullYear();
 renderCrops();
 </script>
+<script type="module" src="/script/global-nav.js"></script>
 </body>
 </html>

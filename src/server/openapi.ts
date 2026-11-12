@@ -80,7 +80,24 @@ export const openApiSpec = {
     "/admin/logs": {
       get: {
         summary: "Recent sync logs (admin)",
+        security: [{ bearerAuth: [] }],
         responses: { "200": { description: "OK" } },
+      },
+    },
+    "/sync-status": {
+      get: {
+        summary: "Last successful sync and next scheduled execution",
+        responses: { "200": { description: "OK" } },
+      },
+    },
+    "/scheduler/sync": {
+      get: {
+        summary: "Daily scheduled synchronization (Vercel Cron)",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": { description: "Synchronization completed" },
+          "401": { description: "Unauthorized" },
+        },
       },
     },
   },

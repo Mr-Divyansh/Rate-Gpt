@@ -12,6 +12,7 @@ import {
   MandiRecord,
   PaginationMeta,
   SyncLogItem,
+  SyncStatusResponse,
 } from "../types/mandi.js";
 
 const BASE_URL = "/api/v1";
@@ -167,20 +168,37 @@ export const api = {
     recordsInserted: number;
     recordsUpdated: number;
   }> {
+    const { adminKey, ...syncOptions } = options;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (adminKey) headers.Authorization = `Bearer ${adminKey}`;
     const res = await fetch(`${BASE_URL}/admin/sync`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(options),
+      headers,
+      body: JSON.stringify(syncOptions),
     });
-    const payload = await handleResponse<any>(res);
+    const payload = await handleResponse<{
+      message: string;
+      success: boolean;
+      recordsFetched: number;
+      recordsInserted: number;
+      recordsUpdated: number;
+    }>(res);
     return payload.data;
   },
 
-  async getSyncLogs(): Promise<SyncLogItem[]> {
-    const res = await fetch(`${BASE_URL}/admin/logs`);
+  async getSyncLogs(adminKey: string): Promise<SyncLogItem[]> {
+    const res = await fetch(`${BASE_URL}/admin/logs`, {
+      headers: { Authorization: `Bearer ${adminKey}` },
+    });
     const payload = await handleResponse<SyncLogItem[]>(res);
+    return payload.data;
+  },
+
+  async getSyncStatus(signal?: AbortSignal): Promise<SyncStatusResponse> {
+    const res = await fetch(`${BASE_URL}/sync-status`, { signal });
+    const payload = await handleResponse<SyncStatusResponse>(res);
     return payload.data;
   },
 };

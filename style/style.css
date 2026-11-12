@@ -410,6 +410,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 .mini-bars { color:var(--secondary); font-size:19px; margin-right:6px; }
 .chart-top > b { padding:7px 12px; border-radius:20px; color:var(--secondary); background:var(--surface-green); font-size:12px; white-space:nowrap; }
 .chart-area { display:flex; height:125px; gap:8px; background:repeating-linear-gradient(to bottom,transparent 0 30px,#edf1eb 31px 32px); }
+.chart-empty { display:grid; width:100%; place-items:center; padding:16px; color:var(--text-secondary); font-size:12px; text-align:center; }
 .y-labels { display:flex; flex-direction:column; justify-content:space-between; color:#9aa69d; font-size:9px; padding-bottom:2px; }
 .trend-chart { width:100%; height:100%; overflow:visible; }
 .x-labels { display:flex; justify-content:space-between; padding:8px 3px 0 22px; color:#87938a; font-size:10px; }
@@ -453,11 +454,23 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
   .brand-mark { width:38px; height:38px; }
   .nav-links { gap:4px; }
   .nav-links a { padding-inline:10px; font-size:14px; }
-  .hero { grid-template-columns:minmax(330px,.85fr) minmax(480px,1.15fr); padding-inline:4%; }
+  .hero { grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); padding-inline:4%; }
   .hero h1 { font-size:clamp(50px,5.8vw,66px); letter-spacing:-3px; }
   .dashboard { width:97%; padding:14px; }
   .farmer-photo { transform:scale(.83); transform-origin:bottom left; left:8%; }
   .ai-card { right:0; width:225px; }
+}
+
+@media (max-width: 900px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    min-height: auto;
+    padding-inline: 6%;
+  }
+  .hero-panel { width: 100%; max-width: 100%; min-width: 0; }
 }
 
 /* MOBILE */

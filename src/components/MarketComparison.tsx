@@ -27,7 +27,7 @@ interface MarketComparisonProps {
 }
 
 export const MarketComparison: React.FC<MarketComparisonProps> = ({
-  initialCommodity = "Wheat",
+  initialCommodity = "",
   unit,
   onSelectTrend,
 }) => {
@@ -42,7 +42,12 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
   useEffect(() => {
     api
       .getFilters()
-      .then((m) => setAvailableCommodities(m.commodities))
+      .then((m) => {
+        setAvailableCommodities(m.commodities);
+        setCommodity((current) =>
+          m.commodities.includes(current) ? current : (m.commodities[0] ?? ""),
+        );
+      })
       .catch(console.error);
   }, []);
 
@@ -99,6 +104,7 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
             </label>
             <select
               value={commodity}
+              disabled={availableCommodities.length === 0}
               onChange={(e) => setCommodity(e.target.value)}
               className="py-1.5 px-3 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm font-medium focus:outline-2 focus:outline-[var(--outline-focus)]"
             >
@@ -107,6 +113,9 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
                   {c}
                 </option>
               ))}
+              {availableCommodities.length === 0 && (
+                <option value="">No stored commodities</option>
+              )}
             </select>
           </div>
         </div>
@@ -183,7 +192,9 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
       ) : records.length === 0 ? (
         <div className="p-8 text-center border border-[var(--border-color)] bg-[var(--bg-surface)]">
           <p className="text-sm text-[var(--text-secondary)]">
-            No market comparison data currently available for {commodity}.
+            {commodity
+              ? `No market comparison data currently available for ${commodity}.`
+              : "No stored market records are available to compare."}
           </p>
         </div>
       ) : (

@@ -188,7 +188,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('Images/farmer.png') no-repeat right center/cover;
+  background: url('../Images/farmer.png') no-repeat right center/cover;
   opacity: 0.15;
   z-index: 0;
 }

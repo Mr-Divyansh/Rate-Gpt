@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../services/apiClient.js";
-import { SyncLogItem, HealthResponse } from "../types/mandi.js";
+import {
+  SyncLogItem,
+  HealthResponse,
+  SyncStatusResponse,
+} from "../types/mandi.js";
 import {
   RefreshCw,
   CheckCircle2,
@@ -37,18 +41,60 @@ export const SyncStatusView: React.FC<SyncStatusViewProps> = ({
     inserted?: number;
     updated?: number;
   } | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatusResponse | null>(null);
+  const [countdownMs, setCountdownMs] = useState(0);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [logsError, setLogsError] = useState<string | null>(null);
 
-  const loadLogs = () => {
+  const loadLogs = (key = adminKey) => {
+    if (!key.trim()) {
+      setLogs([]);
+      setLogsError(null);
+      return;
+    }
     setLoadingLogs(true);
     api
-      .getSyncLogs()
-      .then(setLogs)
-      .catch(console.error)
+      .getSyncLogs(key)
+      .then((items) => {
+        setLogs(items);
+        setLogsError(null);
+      })
+      .catch((err: unknown) => {
+        setLogsError(
+          err instanceof Error ? err.message : "Failed to load sync logs.",
+        );
+      })
       .finally(() => setLoadingLogs(false));
   };
 
+  const loadSyncStatus = async () => {
+    try {
+      const status = await api.getSyncStatus();
+      if (!Number.isFinite(new Date(status.nextScheduledAt).getTime())) {
+        throw new Error("The server returned an invalid sync schedule.");
+      }
+      setSyncStatus(status);
+      setCountdownMs(Math.max(0, status.countdownMs));
+      setStatusError(null);
+    } catch (err: unknown) {
+      console.error("Failed to load sync status:", err);
+      setStatusError(
+        err instanceof Error ? err.message : "Failed to load sync status.",
+      );
+    }
+  };
+
   useEffect(() => {
-    loadLogs();
+    loadSyncStatus();
+    const refreshInterval = setInterval(loadSyncStatus, 60_000);
+    const countdownInterval = setInterval(
+      () => setCountdownMs((remaining) => Math.max(0, remaining - 1000)),
+      1000,
+    );
+    return () => {
+      clearInterval(refreshInterval);
+      clearInterval(countdownInterval);
+    };
   }, []);
 
   const handleTriggerSync = async (e: React.FormEvent) => {
@@ -70,12 +116,16 @@ export const SyncStatusView: React.FC<SyncStatusViewProps> = ({
         updated: res.recordsUpdated,
       });
 
-      loadLogs();
       onRefreshHealth();
-    } catch (err: any) {
+      loadLogs(adminKey);
+      await loadSyncStatus();
+    } catch (err: unknown) {
       setSyncResult({
         success: false,
-        message: err.message || "Synchronization request failed",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Synchronization request failed",
       });
     } finally {
       setIsSyncing(false);
@@ -102,6 +152,7 @@ export const SyncStatusView: React.FC<SyncStatusViewProps> = ({
             onClick={() => {
               onRefreshHealth();
               loadLogs();
+              loadSyncStatus();
             }}
             className="px-3 py-1.5 border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-surface)] text-xs text-[var(--text-primary)] transition-colors flex items-center space-x-1.5 self-start sm:self-auto"
           >
@@ -109,6 +160,47 @@ export const SyncStatusView: React.FC<SyncStatusViewProps> = ({
             <span>{t("sync.refresh")}</span>
           </button>
         </div>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="border border-[var(--border-color)] p-3">
+            <div className="text-[var(--text-secondary)]">Sync freshness</div>
+            <strong className="mt-1 block text-[var(--text-primary)]">
+              {syncStatus?.freshnessStatus ?? (statusError ? "Unavailable" : "Loading…")}
+            </strong>
+          </div>
+          <div className="border border-[var(--border-color)] p-3">
+            <div className="text-[var(--text-secondary)]">Last successful sync</div>
+            <strong className="mt-1 block text-[var(--text-primary)]">
+              {syncStatus?.lastSuccessfulSync?.completed_at
+                ? new Date(
+                    syncStatus.lastSuccessfulSync.completed_at,
+                  ).toLocaleString()
+                : "No successful sync recorded"}
+            </strong>
+          </div>
+          <div className="border border-[var(--border-color)] p-3">
+            <div className="text-[var(--text-secondary)]">
+              {syncStatus?.schedulerEnabled
+                ? "Next scheduled execution"
+                : "Scheduler"}
+            </div>
+            <strong className="mt-1 block text-[var(--text-primary)]">
+              {syncStatus?.schedulerEnabled
+                ? `${Math.floor(countdownMs / 3_600_000)}h ${Math.floor((countdownMs % 3_600_000) / 60_000)}m ${Math.floor((countdownMs % 60_000) / 1000)}s`
+                : "Vercel Cron is not enabled"}
+            </strong>
+            {syncStatus?.schedulerEnabled && (
+              <span className="mt-1 block text-[var(--text-secondary)]">
+                {new Date(syncStatus.nextScheduledAt).toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+        {statusError && (
+          <p role="alert" className="mt-3 text-xs text-rose-600">
+            {statusError}
+          </p>
+        )}
 
         {/* Configuration Specs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs font-mono">
@@ -322,9 +414,15 @@ export const SyncStatusView: React.FC<SyncStatusViewProps> = ({
           <div className="p-6 text-center text-xs text-[var(--text-secondary)] font-mono">
             {t("sync.loadingLogs")}
           </div>
+        ) : logsError ? (
+          <div role="alert" className="p-6 text-center text-xs text-rose-600">
+            {logsError}
+          </div>
         ) : logs.length === 0 ? (
           <div className="p-6 text-center text-xs text-[var(--text-secondary)]">
-            {t("sync.noLogs")}
+            {adminKey
+              ? t("sync.noLogs")
+              : "Enter an admin sync key, then refresh to view audit logs."}
           </div>
         ) : (
           <div className="overflow-x-auto">
