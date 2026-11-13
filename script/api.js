@@ -71,14 +71,6 @@ export async function fetchPrices(params, { signal } = {}) {
 }
 
 
-export async function fetchPriceTrend(params, { signal } = {}) {
-  const query = new URLSearchParams(params);
-  const payload = await requestJson(`/api/v1/prices/trend?${query}`, { signal });
-  if (!Array.isArray(payload.data) || !payload.data.every(isPriceRecord)) {
-    throw new Error("The price history service returned invalid records.");
-  }
-  return payload.data;
-}
 
 export async function fetchSyncStatus() {
   const { data } = await requestJson("/api/v1/sync-status");
