@@ -60,7 +60,11 @@ import {
   upsertMandiPrices,
   insertSyncLog,
   acquireMandiSyncLock,
+  getDatabaseStats,
+  generateDedupKey,
 } from "../db/database-factory.js";
+
+import http from "http";
 
 export interface UpstreamSyncOptions {
   state?: string;
@@ -78,7 +82,13 @@ export interface SyncResult {
   recordsFetched: number;
   recordsInserted: number;
   recordsUpdated: number;
-  status?: "SUCCESS" | "PARTIAL" | "FAILED" | "IN_PROGRESS" | "NOT_CONFIGURED";
+  status:
+    | "QUEUED"
+    | "IN_PROGRESS"
+    | "PARTIAL"
+    | "SUCCESS"
+    | "FAILED"
+    | "NOT_CONFIGURED";
   isMockFallback?: boolean;
   error?: string;
   pagesFetched?: number;
@@ -86,6 +96,26 @@ export interface SyncResult {
   validRecords?: number;
   invalidRecordsSkipped?: number;
   paginationComplete?: boolean;
+  syncRunId?: string;
+}
+
+export interface SyncState {
+  sync_run_id: string;
+  status: "QUEUED" | "IN_PROGRESS" | "PARTIAL" | "SUCCESS" | "FAILED" | "NOT_CONFIGURED";
+  state_filter: string | null;
+  current_offset: number;
+  upstream_reported_total: number | null;
+  pages_completed: number;
+  records_fetched: number;
+  valid_records: number;
+  invalid_records_skipped: number;
+  records_inserted: number;
+  records_updated: number;
+  last_successful_batch: number | null;
+  started_at: string;
+  updated_at: string;
+  completed_at: string | null;
+  last_error: string | null;
 }
 
 /**
@@ -289,7 +319,8 @@ async function runMandiPriceSync(
   let totalAvailable = Infinity;
   let upstreamReportedTotal: number | null = null;
   let paginationComplete = false;
-  const MAX_PAGES = 200; // safety cap (supports full India dataset ~14k records)
+let pagesInThisBatch = 0;
+  const PAGES_PER_BATCH = 10; // safety cap (supports full India dataset ~14k records)
   let pagesFetched = 0;
 
   console.log(
@@ -297,7 +328,7 @@ async function runMandiPriceSync(
   );
 
   try {
-    while (offset < totalAvailable && pagesFetched < MAX_PAGES) {
+    while (pagesInThisBatch < PAGES_PER_BATCH && !paginationComplete) {
       const url = new URL(`${baseUrl}/${resourceId}`);
       url.searchParams.set("api-key", apiKey);
       url.searchParams.set("format", "json");
@@ -398,80 +429,65 @@ async function runMandiPriceSync(
     // Upsert only normalized source records; never invent fallback prices.
     const { inserted, updated } = await upsertMandiPrices(validRecords);
     const completedAt = new Date().toISOString();
-    const paginationCapped = !paginationComplete && pagesFetched >= MAX_PAGES;
+    syncState.updated_at = new Date().toISOString;
 
-    const status = validRecords.length > 0 && paginationComplete ? "SUCCESS" : "PARTIAL";
+    syncState.status = "SUCCESS";
+    syncState.completed_at = new Date().toISOString;
+
     await insertSyncLog({
-      status,
+      id: syncRunId,
+      status: syncState.status,
       requested_date: options.arrivalDate || null,
       state_filter: options.state || "ALL",
-      records_fetched: allRawRecords.length,
-      records_inserted: inserted,
-      records_updated: updated,
-      error_message: paginationCapped
-        ? `Pagination safety cap reached after ${MAX_PAGES} pages; sync may be incomplete.`
-        : validRecords.length > 0
-          ? null
-          : "No valid records returned from upstream.",
-      started_at: startedAt,
-      completed_at: completedAt,
+      records_fetched: syncState.records_fetched,
+      records_inserted: syncState.records_inserted,
+      records_updated: syncState.records_updated,
+      error_message: syncState.last_error,
+      started_at: syncState.started_at,
+      completed_at: syncState.completed_at,
     });
 
     return {
-      success: validRecords.length > 0 && paginationComplete,
-      status,
-      message: paginationCapped
-        ? `Partially synced ${validRecords.length} records (${inserted} new, ${updated} updated) across ${pagesFetched} page(s); the pagination safety cap was reached.`
-        : `Synced ${validRecords.length} records (${inserted} new, ${updated} updated) across ${pagesFetched} page(s).`,
-      recordsFetched: allRawRecords.length,
-      recordsInserted: inserted,
-      recordsUpdated: updated,
-      pagesFetched,
-      upstreamReportedTotal,
-      validRecords: validRecords.length,
-      invalidRecordsSkipped: allRawRecords.length - validRecords.length,
-      paginationComplete,
+      success: syncState.status === "SUCCESS",
+      status: syncState.status,
+      message: "",
+      recordsFetched: syncState.records_fetched,
+      recordsInserted: syncState.records_inserted,
+      recordsUpdated: syncState.records_updated,
+      pagesFetched: syncState.pages_completed,
+      upstreamReportedTotal: syncState.upstream_reported_total,
+      validRecords: syncState.valid_records,
+      invalidRecordsSkipped: syncState.invalid_records_skipped,
+      paginationComplete: syncState.status === "SUCCESS",
+      syncRunId: syncRunId,
     };
   } catch (err: any) {
-    const errorMessage =
-      err?.name === "AbortError"
-        ? "Upstream request timed out after 30 seconds."
-        : "Upstream network request failed. Check connectivity and server configuration.";
+    console.error("[Sync] Unexpected error:", err);
 
-    const cause = err?.cause;
-    console.error(`[Sync Error] ${errorMessage}`, {
-      name: typeof err?.name === "string" ? err.name : "UnknownError",
-      code: typeof err?.code === "string" ? err.code : undefined,
-      causeName: cause instanceof Error ? cause.name : undefined,
-      causeCode:
-        typeof cause === "object" &&
-        cause !== null &&
-        "code" in cause &&
-        typeof cause.code === "string"
-          ? cause.code
-          : undefined,
-    });
-
-    await insertSyncLog({
-      status: "FAILED",
-      requested_date: options.arrivalDate || null,
-      state_filter: options.state || "ALL",
-      records_fetched: 0,
-      records_inserted: 0,
-      records_updated: 0,
-      error_message: errorMessage,
-      started_at: startedAt,
-      completed_at: new Date().toISOString(),
-    });
+    try {
+      await insertSyncLog({
+        status: "FAILED",
+        requested_date: options.arrivalDate || null,
+        state_filter: options.state || "ALL",
+        records_fetched: 0,
+        records_inserted: 0,
+        records_updated: 0,
+        error_message: err?.message ?? "Unexpected sync error",
+        started_at: new Date().toISOString(),
+        completed_at: new Date().toISOString,
+      });
+    } catch (dbErr) {
+      console.error("[Sync] Failed to write error sync log:", dbErr);
+    }
 
     return {
       success: false,
       status: "FAILED",
-      message: "Synchronization failed due to network or upstream error.",
+      message: "Synchronization failed due to unexpected error.",
       recordsFetched: 0,
       recordsInserted: 0,
       recordsUpdated: 0,
-      error: errorMessage,
+      error: err?.message ?? "Unknown error",
     };
   }
 }
