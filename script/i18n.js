@@ -141,6 +141,15 @@ const STRINGS = {
     "about.step3.t": "Compare the rates",
     "about.step3.d": "Read the minimum, maximum and modal price with the arrival date. Prices are in ₹ per quintal.",
     "about.process.kicker": "A simple way to compare",
+    "about.journey.kicker": "The story so far",
+    "about.journey.title": "A practical idea, built step by step",
+    "about.journey.intro": "Rate-GPT is being shaped around a simple challenge: useful mandi information should be easier to find and compare.",
+    "about.journey.one.title": "Start with the real problem",
+    "about.journey.one.body": "Market prices can be spread across locations, crops and dates. The first step is bringing those records into one clear place.",
+    "about.journey.two.title": "Make information easier to use",
+    "about.journey.two.body": "Search, location filters and price comparisons are designed to help people explore the records without needing to understand the data system behind them.",
+    "about.journey.three.title": "Keep improving with transparency",
+    "about.journey.three.body": "The project continues to evolve. Accuracy, clear arrival dates and honest explanations of missing or older data matter more than making unsupported promises.",
     "about.data.kicker": "Where the numbers come from",
     "about.data.note": "Use the data thoughtfully",
     "about.src.title": "Data source and transparency",
@@ -156,10 +165,12 @@ const STRINGS = {
     "about.team.title": "Built by a small team",
     "about.team.repo": "View project on GitHub",
     "about.member.role": "Project contributor",
-    "about.member1.name": "Mr Divyansh",
-    "about.member1.bio": "Project development, design and technology.",
+    "about.member1.name": "Divyansh Kumar",
+    "about.member1.bio": "A BCA student, full-stack developer, founder of D Web Studio and creator behind DG2BOSS, focused on product direction and building the Rate-GPT experience.",
+    "about.member1.focus": "Product direction · Full-stack development · D Web Studio · DG2BOSS",
     "about.member2.name": "Abhay Web Dev",
-    "about.member2.bio": "Collaborative development and project improvements."
+    "about.member2.bio": "A project teammate contributing to collaborative development, implementation and ongoing improvements to Rate-GPT.",
+    "about.member2.focus": "Collaborative development · Implementation · Improvements"
   },
   hi: {
     "nav.skip": "मुख्य सामग्री पर जाएँ",
@@ -302,6 +313,15 @@ const STRINGS = {
     "about.step3.t": "भाव की तुलना करें",
     "about.step3.d": "आवक की तारीख के साथ न्यूनतम, अधिकतम और मॉडल भाव पढ़ें। भाव ₹ प्रति क्विंटल में हैं।",
     "about.process.kicker": "तुलना करने का आसान तरीका",
+    "about.journey.kicker": "अब तक की कहानी",
+    "about.journey.title": "एक काम का विचार, कदम-दर-कदम तैयार होता हुआ",
+    "about.journey.intro": "Rate-GPT एक सीधी समस्या को ध्यान में रखकर बनाया जा रहा है: मंडी की उपयोगी जानकारी को खोजना और उसकी तुलना करना आसान होना चाहिए।",
+    "about.journey.one.title": "असली समस्या से शुरुआत",
+    "about.journey.one.body": "बाज़ार के भाव अलग-अलग जगहों, फसलों और तारीखों में बँटे हो सकते हैं। पहला कदम उन रिकॉर्ड को एक साफ़ जगह पर लाना है।",
+    "about.journey.two.title": "जानकारी को इस्तेमाल करना आसान बनाना",
+    "about.journey.two.body": "खोज, जगह के फ़िल्टर और भाव की तुलना लोगों को रिकॉर्ड समझने में मदद करते हैं—बिना डेटा सिस्टम की तकनीकी जानकारी के।",
+    "about.journey.three.title": "पारदर्शिता के साथ लगातार सुधार",
+    "about.journey.three.body": "प्रोजेक्ट लगातार बेहतर हो रहा है। बिना आधार के वादे करने से ज़्यादा ज़रूरी है सही जानकारी, आवक की साफ़ तारीख और पुराने या गायब डेटा के बारे में ईमानदारी।",
     "about.data.kicker": "आँकड़े कहाँ से आते हैं",
     "about.data.note": "आँकड़ों को समझदारी से देखें",
     "about.src.title": "डेटा स्रोत और पारदर्शिता",
@@ -317,10 +337,12 @@ const STRINGS = {
     "about.team.title": "एक छोटी टीम द्वारा निर्मित",
     "about.team.repo": "GitHub पर प्रोजेक्ट देखें",
     "about.member.role": "प्रोजेक्ट सहयोगी",
-    "about.member1.name": "मिस्टर दिव्यांश",
-    "about.member1.bio": "प्रोजेक्ट विकास, डिज़ाइन और तकनीक।",
+    "about.member1.name": "दिव्यांश कुमार",
+    "about.member1.bio": "BCA के छात्र, फुल-स्टैक डेवलपर, D Web Studio के संस्थापक और DG2BOSS नाम से क्रिएटर। Rate-GPT की दिशा और प्रोडक्ट अनुभव पर काम करते हैं।",
+    "about.member1.focus": "प्रोडक्ट दिशा · फुल-स्टैक डेवलपमेंट · D Web Studio · DG2BOSS",
     "about.member2.name": "अभय वेब डेवलपर",
-    "about.member2.bio": "सहयोगी विकास और प्रोजेक्ट में सुधार।"
+    "about.member2.bio": "Rate-GPT के विकास, इम्प्लीमेंटेशन और लगातार सुधार में टीम के साथ मिलकर योगदान।",
+    "about.member2.focus": "टीम के साथ विकास · इम्प्लीमेंटेशन · सुधार"
   }
 };
 
