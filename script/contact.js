@@ -13,7 +13,7 @@ function localize(){
   if(status) status.textContent="";
 }
 localize(); onLangChange(localize);
-form.addEventListener("submit",async event=>{
+if(form) form.addEventListener("submit",async event=>{
   event.preventDefault();
   const lang=getLang();
   if(!email.value.trim()&&!phone.value.trim()){
