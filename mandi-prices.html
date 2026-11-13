@@ -82,6 +82,29 @@
         <button class="btn" id="clearFilters" type="button" disabled data-i18n="results.reset">Reset</button>
       </div>
 
+
+      <section class="trend-panel" aria-labelledby="trendTitle">
+        <div class="trend-head">
+          <div>
+            <p class="trend-kicker">MARKET HISTORY</p>
+            <h3 id="trendTitle">Price movement</h3>
+            <p class="trend-description">Track how the modal mandi price has changed across recorded arrival dates.</p>
+          </div>
+          <label class="trend-crop-field" for="trendCropSelect">Crop
+            <select id="trendCropSelect" disabled><option value="">Select crop</option></select>
+          </label>
+        </div>
+        <div class="trend-controls" id="trendRange" role="group" aria-label="History period">
+          <button type="button" data-days="7" aria-pressed="false">7 days</button>
+          <button type="button" data-days="30" aria-pressed="true">30 days</button>
+          <button type="button" data-days="90" aria-pressed="false">90 days</button>
+        </div>
+        <div class="trend-stats" id="trendStats"></div>
+        <div class="trend-chart" id="trendChart"></div>
+        <p class="trend-status" id="trendStatus" role="status">Choose a mandi and crop to view its price history.</p>
+        <p class="trend-footnote">Source: stored government-reported mandi observations. Missing dates are not estimated or filled.</p>
+      </section>
+
       <p class="sr-only" id="priceMessage" role="status"></p>
 
       <div class="table-wrap">
