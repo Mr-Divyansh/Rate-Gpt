@@ -122,6 +122,18 @@ export function normalizeArrivalDate(
   return null;
 }
 
+/**
+ * OGD may serialize its total as either a number or a decimal string.
+ * Accept comma-grouped strings too: parseInt("13,181", 10) incorrectly returns 13.
+ */
+export function parseReportedTotal(value: unknown): number | null {
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  const normalized = String(value).trim().replace(/,/g, "");
+  if (!/^\d+$/.test(normalized)) return null;
+  const total = Number(normalized);
+  return Number.isSafeInteger(total) && total >= 0 ? total : null;
+}
+
 function validIsoDate(year: number, month: number, day: number): string | null {
   const candidate = new Date(Date.UTC(year, month - 1, day));
   if (
@@ -345,16 +357,14 @@ async function runMandiPriceSync(
       allRawRecords.push(...rawRecords);
       pagesFetched++;
 
-      const reportedTotal =
-        typeof data.total === "number"
-          ? data.total
-          : typeof data.total === "string"
-            ? parseInt(data.total, 10)
-            : NaN;
-      if (Number.isFinite(reportedTotal)) {
+      const reportedTotal = parseReportedTotal(data.total);
+      // Never trust a total smaller than the records already returned. Some
+      // upstream responses serialize grouped totals (for example "13,181");
+      // a malformed/truncated value must not terminate pagination early.
+      if (reportedTotal !== null && reportedTotal >= offset + rawRecords.length) {
         totalAvailable = reportedTotal;
       } else if (rawRecords.length === 0) {
-        totalAvailable = allRawRecords.length; // stop if no total reported
+        totalAvailable = allRawRecords.length; // stop if no usable total reported
       }
 
       console.log(
