@@ -1,6 +1,8 @@
 import { applyI18n, getLang, setLang, onLangChange, t } from "./i18n.js";
 import { hydrateIcons, icon } from "./icons.js";
 
+const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
+
 const LINKS = [
   ["nav.home", "index.html"],
   ["nav.prices", "mandi-prices.html"],
@@ -26,7 +28,7 @@ function brand(className) {
   const mark = document.createElement("span");
   mark.className = "brand-mark";
   const img = document.createElement("img");
-  img.src = "Images/Logo.webp";
+  img.src = LOGO_URL;
   img.alt = "Rate-GPT logo";
   img.width = 70;
   img.height = 70;
