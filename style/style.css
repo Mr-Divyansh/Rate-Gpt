@@ -454,3 +454,5 @@
 /* Keep the shared site footer available on the home page too. */
 .page-home .site-footer { display:block; }
 .page-home #main-content { min-height:calc(100vh - 68px); }
+
+@media (max-width:720px) { .page-home .site-header.menu-open { z-index:100; } }
