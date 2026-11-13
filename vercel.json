@@ -5,12 +5,6 @@
       "regions": ["bom1"]
     }
   },
-  "crons": [
-    {
-      "path": "/api/v1/scheduler/sync",
-      "schedule": "0 0 * * *"
-    }
-  ],
   "redirects": [
     { "source": "/app", "destination": "/mandi-prices.html", "permanent": true },
     {

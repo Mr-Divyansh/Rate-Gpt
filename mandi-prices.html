@@ -24,7 +24,7 @@
       </div>
       <p class="sync" id="syncChip">
         <span class="sync-dot" id="syncDot" data-state="none" aria-hidden="true"></span>
-        <span id="syncText">…</span>
+        <span id="syncText" data-i18n="sync.onSearch">Government daily reports · fetched when requested</span>
       </p>
     </section>
 
@@ -66,9 +66,23 @@
           <label class="sr-only" for="cropSearch" data-i18n="results.search">Search crops</label>
           <span class="search-wrap">
             <span data-icon="search" data-size="18"></span>
-            <input id="cropSearch" name="cropSearch" type="search" autocomplete="off" disabled data-i18n-attr="placeholder:results.placeholder" placeholder="Search a crop, e.g. wheat or गेहूँ">
+            <input id="cropSearch" name="cropSearch" type="search" list="fruitSuggestions" autocomplete="off" disabled data-i18n-attr="placeholder:results.placeholder" placeholder="Search a crop, e.g. wheat or गेहूँ">
+            <datalist id="fruitSuggestions">
+              <option value="Apple"></option><option value="सेब"></option>
+              <option value="Banana"></option><option value="केला"></option>
+              <option value="Mango"></option><option value="आम"></option>
+              <option value="Guava"></option><option value="अमरूद"></option>
+              <option value="Pomegranate"></option><option value="अनार"></option>
+              <option value="Orange"></option><option value="संतरा"></option>
+              <option value="Grapes"></option><option value="अंगूर"></option>
+              <option value="Papaya"></option><option value="पपीता"></option>
+            </datalist>
             <kbd aria-hidden="true">Ctrl K</kbd>
           </span>
+        </div>
+        <div class="field date-field">
+          <label for="arrivalDate" data-i18n="results.date">Arrival date</label>
+          <input id="arrivalDate" name="date" type="date" disabled>
         </div>
         <div class="field sort-field">
           <label for="sortFilter" data-i18n="results.sort">Sort by</label>

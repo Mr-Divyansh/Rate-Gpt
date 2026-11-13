@@ -1,15 +1,20 @@
 # Rate-GPT
 
-Rate-GPT is an agricultural mandi-price discovery platform. It presents records stored by the backend and uses the Government of India Open Government Data (OGD) / AGMARKNET resource as its intended upstream source.
+Rate-GPT is an agricultural mandi-price discovery platform. It fetches filtered mandi records on demand from the Government of India Open Government Data (OGD) / AGMARKNET resource.
 
 **Important:** the application does not fabricate replacement prices. If the backend or source is unavailable, the UI shows an error or unavailable state. Government data availability and update frequency are controlled by the source; the product must not be described as real-time unless the source actually supports that claim.
+
+**Data policy:** the application does not bulk-download or permanently store
+government mandi-price records. Each search goes through the backend; the
+government key is never sent to the browser. Published daily market data is not
+guaranteed real-time trading data.
 
 ## Public website pages
 
 The public website has three pages:
 
-- `index.html` — landing page with a preview of the latest stored mandi price record.
-- `mandi-prices.html` — searchable market and crop selection with stored price records from `/api/v1`.
+- `index.html` — landing page with a preview of recent government mandi records.
+- `mandi-prices.html` — searchable state, district, market, crop, and arrival-date filters using `/api/v1`.
 - `about.html` — platform purpose, data-source context, and limitations.
 
 ## Stack
@@ -23,8 +28,7 @@ The public website has three pages:
 
 - Node.js 20 or newer.
 - npm.
-- A valid OGD API key to run upstream sync. Browsing stored records does not require the key; a fresh sync does.
-- `ADMIN_SYNC_KEY` to enable protected manual sync.
+- A valid OGD API key for live prices and filtered location metadata.
 
 ## Run locally in VS Code
 
@@ -50,7 +54,7 @@ The public website has three pages:
    cp .env.example .env
    ```
 
-5. Edit `.env` and set `DATA_GOV_API_KEY` to your own key from [data.gov.in](https://data.gov.in/). Set `ADMIN_SYNC_KEY` to a long random secret if you need manual synchronization. Never commit `.env`.
+5. Edit `.env` and set `DATA_GOV_API_KEY` to your own key from [data.gov.in](https://data.gov.in/). Never commit `.env`.
 6. Start the development server:
 
    ```bash
@@ -86,8 +90,7 @@ See `.env.example`. Keep credentials server-side only:
 - `DATA_GOV_API_KEY` — OGD API key.
 - `DATA_GOV_API_BASE_URL` — defaults to `https://api.data.gov.in/resource`.
 - `DATA_GOV_RESOURCE_ID` — defaults to the AGMARKNET resource ID above.
-- `ADMIN_SYNC_KEY` — secret for protected sync endpoints.
-- `DATABASE_URL` — optional PostgreSQL connection string; when set, API reads and writes use the PostgreSQL adapter.
+- `DATABASE_URL` — optional PostgreSQL connection string for retained legacy history endpoints.
 - `POSTGRES_URL` — fallback PostgreSQL connection string used when `DATABASE_URL` is unset, including Vercel Postgres's standard pooled URL.
 - `PORT` — local server port (default `3000`).
 
@@ -97,16 +100,17 @@ Do not paste secrets into issues, logs, frontend code, or source control.
 
 - The UI shows values returned by the backend, with missing prices rendered as a dash rather than zero.
 - The arrival date is the market-data date; a backend sync timestamp is not the same thing as the latest arrival date.
-- Cached/stored data may be older than the latest source publication.
+- Results are fetched from the government source when requested; source publication may still lag current trading conditions.
 - No price trend or live market statistic should be inferred from sample records.
-- The OGD API key is used only by the server-side synchronization service.
+- The OGD API key is used only by the server-side live proxy.
 
 ## Deployment notes and known limitations
 
 - The database factory selects PostgreSQL when `DATABASE_URL` or `POSTGRES_URL` is configured and SQLite otherwise. PostgreSQL end-to-end connectivity still requires a valid database URL and deployment-side verification. SQLite is local-only for durable use; serverless filesystems may be ephemeral or read-only.
 - On Vercel, add a pooled Neon/Postgres connection string as `DATABASE_URL` in **Project Settings → Environment Variables** (or connect Vercel Postgres to provide `POSTGRES_URL`). Apply it to Production and any Preview environments that need the API, then redeploy. The server initializes the PostgreSQL schema on first use; never commit the connection string.
-- Upstream sync requires a valid API key and the OGD endpoint to be available.
-- No scheduled sync is configured by default.
+- Price pages are bounded to 100 records per request and transient upstream failures receive a small, bounded retry count.
+- Bulk sync routes and the daily cron have been removed. Live price/filter routes do not write to PostgreSQL or SQLite.
+- Existing production database rows are left untouched. See [docs/live-mandi-migration.md](./docs/live-mandi-migration.md) before considering any cleanup.
 - The UI reports backend status and does not claim data is real-time.
 
 ## Source

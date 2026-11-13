@@ -63,12 +63,8 @@ export function isPriceRecord(record) {
   }
 
   const prices = [record.min_price, record.max_price, record.modal_price];
-  // Match the backend mapper: missing individual price fields are allowed,
-  // but at least one real non-negative price must exist on the record.
-  return (
-    prices.every(validPrice) &&
-    prices.some((value) => value !== null && value !== undefined)
-  );
+  // Missing values are valid government data and remain null in the response.
+  return prices.every(validPrice);
 }
 
 export async function fetchPrices(params, { signal } = {}) {
