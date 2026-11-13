@@ -546,7 +546,6 @@ async function showLocationDialog() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  byId("year").textContent = String(new Date().getFullYear());
   byId("locationAction").addEventListener("click", showLocationDialog);
   byId("changeLocationLink").addEventListener("click", showLocationDialog);
   byId("sortFilter").addEventListener("change", (event) => {

@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#174D38">
+  <meta name="theme-color" content="#F7F7F0">
   <meta name="description" content="Explore government-reported crop prices at Indian mandis. Filter by state, district and market with Rate-GPT.">
-  <link rel="preload" as="image" href="./Images/Farmer Marketplace Sunrise Banner.png" fetchpriority="high">
+  <link rel="preload" as="image" href="./Images/Farmer Marketplace Sunrise Banner.webp" fetchpriority="high">
   <title>Mandi Prices | Rate-GPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/mandi-prices.css">
   <link rel="stylesheet" href="style/global-nav.css">
   <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="site-header">
     <div class="header-inner">
       <a class="brand" href="index.html" aria-label="Rate-GPT home">
@@ -31,7 +33,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="hero page-container">
       <div class="hero-copy">
         <div class="eyebrow"><span class="eyebrow-line"></span> GOVERNMENT-REPORTED MARKET DATA</div>
@@ -39,8 +41,8 @@
         <p>अपने आसपास की मंडियों में फसलों के भाव देखें और सोच-समझकर अपनी उपज बेचें।</p>
         <div class="hero-meta">
           <span class="market-open"><span class="pulse"></span><span id="syncFreshness">Checking data freshness…</span></span>
-          <span class="updated"><i data-lucide="clock-3"></i> Last successful sync: <b id="updatedAt">Loading…</b></span>
-          <span class="updated"><i data-lucide="refresh-cw"></i> Next scheduled sync: <b id="nextSyncAt">Checking…</b></span>
+          <span class="updated"><i data-lucide="clock-3" aria-hidden="true"></i> Last successful sync: <b id="updatedAt">Loading…</b></span>
+          <span class="updated"><i data-lucide="refresh-cw" aria-hidden="true"></i> Next scheduled sync: <b id="nextSyncAt">Checking…</b></span>
         </div>
       </div>
       <div class="hero-art" aria-hidden="true">
@@ -48,13 +50,13 @@
         <div class="art-sun"></div>
         <div class="art-field field-back"></div><div class="art-field field-front"></div>
         <div class="art-stem stem-one">✦</div><div class="art-stem stem-two">✧</div>
-        <div class="art-label"><i data-lucide="wheat"></i><span>From farm<br>to market</span></div>
+        <div class="art-label"><i data-lucide="wheat" aria-hidden="true"></i><span>From farm<br>to market</span></div>
       </div>
     </section>
 
     <section class="page-container location-panel">
       <div class="location-main">
-        <div class="location-icon"><i data-lucide="map-pin"></i></div>
+        <div class="location-icon"><i data-lucide="map-pin" aria-hidden="true"></i></div>
         <div>
           <span class="section-kicker">SELECTED MARKET</span>
           <h2 id="selectedLocation">Choose a mandi</h2>
@@ -62,7 +64,7 @@
         </div>
       </div>
       <button class="btn btn-outline" id="locationAction" type="button">
-        <i data-lucide="map-pin"></i> Choose location
+        <i data-lucide="map-pin" aria-hidden="true"></i> Choose location
       </button>
     </section>
 
@@ -74,7 +76,7 @@
           <p id="mandiHelp" aria-live="polite">Loading mandi locations from stored market data…</p>
         </div>
         <button class="text-button" id="changeLocationLink" type="button">
-          Change state or district <i data-lucide="arrow-up-right"></i>
+          Change state or district <i data-lucide="arrow-up-right" aria-hidden="true"></i>
         </button>
       </div>
       <div class="mandi-grid" id="mandiGrid" aria-label="Available mandis"></div>
@@ -87,24 +89,24 @@
           <h2 id="pricesHeading">Crop prices</h2>
           <p>Search crops and review the reported minimum, maximum, and modal prices.</p>
         </div>
-        <div class="unit-note"><i data-lucide="info"></i> Source prices in ₹ per quintal</div>
+        <div class="unit-note"><i data-lucide="info" aria-hidden="true"></i> Source prices in ₹ per quintal</div>
       </div>
 
       <div class="filter-panel">
         <label class="search-box" for="cropSearch">
-          <i data-lucide="search"></i>
-          <input id="cropSearch" type="search" placeholder="Search crops in English or Hindi…" autocomplete="off" disabled>
+          <i data-lucide="search" aria-hidden="true"></i>
+          <input id="cropSearch" name="cropSearch" type="search" placeholder="Search crops in English or Hindi…" autocomplete="off" disabled>
           <kbd>Ctrl K</kbd>
         </label>
         <label class="select-wrap">
           <span>Sort by</span>
-          <select id="sortFilter" disabled>
+          <select id="sortFilter" name="sort" disabled>
             <option value="date_desc">Latest arrival</option>
             <option value="modal_price_asc">Modal: low to high</option>
             <option value="modal_price_desc">Modal: high to low</option>
             <option value="commodity_asc">Crop name</option>
           </select>
-          <i data-lucide="chevron-down"></i>
+          <i data-lucide="chevron-down" aria-hidden="true"></i>
         </label>
         <button class="clear-button" id="clearFilters" type="button" disabled>Reset</button>
       </div>
@@ -124,13 +126,13 @@
       <div class="mobile-price-list" id="mobilePriceList"></div>
       <div class="table-footer">
         <span id="showingText" aria-live="polite"></span>
-        <button class="text-button" id="loadMore" type="button" hidden>Load more <i data-lucide="arrow-down"></i></button>
+        <button class="text-button" id="loadMore" type="button" hidden>Load more <i data-lucide="arrow-down" aria-hidden="true"></i></button>
       </div>
       <p class="price-error" id="priceError" role="alert" hidden></p>
     </section>
 
     <section class="page-container insight-strip">
-      <div class="insight-icon"><i data-lucide="lightbulb"></i></div>
+      <div class="insight-icon"><i data-lucide="lightbulb" aria-hidden="true"></i></div>
       <div><span class="section-kicker">MARKET SMART TIP</span><h3>Compare before you sell.</h3><p>Prices can vary between mandis. Check transport costs, quality requirements and the latest verified rate before making a decision.</p></div>
       <span class="insight-decoration" aria-hidden="true">₹</span>
     </section>
@@ -138,7 +140,7 @@
 
   <footer class="site-footer">
     <div class="page-container footer-inner">
-      <a class="brand footer-brand" href="index.html"><span class="brand-mark"><i data-lucide="sprout"></i></span><span>Rate-GPT<small>SMART AGRICULTURE</small></span></a>
+      <a class="brand footer-brand" href="index.html"><span class="brand-mark"><i data-lucide="sprout" aria-hidden="true"></i></span><span>Rate-GPT<small>SMART AGRICULTURE</small></span></a>
       <p>Government-reported market records, presented clearly.</p>
       <span>© <span id="year"></span> Rate-GPT</span>
     </div>
@@ -146,14 +148,14 @@
 
   <dialog class="location-dialog" id="locationDialog">
     <form method="dialog" class="dialog-card">
-      <button class="dialog-close" type="submit" aria-label="Close"><i data-lucide="x"></i></button>
+      <button class="dialog-close" type="submit" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button>
       <span class="section-kicker">FILTER YOUR MARKET</span>
       <h2>Choose a location</h2>
       <p>State and district options are loaded from available mandi records.</p>
-      <label class="dialog-label">State<select id="stateSelect" required disabled></select></label>
-      <label class="dialog-label">District<select id="districtSelect" required disabled></select></label>
+      <label class="dialog-label">State<select id="stateSelect" name="state" required disabled></select></label>
+      <label class="dialog-label">District<select id="districtSelect" name="district" required disabled></select></label>
       <button class="btn btn-primary dialog-submit" id="applyLocation" type="button" disabled>
-        Show mandis <i data-lucide="arrow-right"></i>
+        Show mandis <i data-lucide="arrow-right" aria-hidden="true"></i>
       </button>
     </form>
   </dialog>
