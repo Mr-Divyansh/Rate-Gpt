@@ -340,3 +340,71 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
 @media (max-width: 720px) {
   body:has(.site-header.menu-open) { overflow: hidden; }
 }
+
+
+/* ---------- visual refinement: consistent, restrained, responsive UI ---------- */
+:root {
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 18px;
+  --shadow-soft: 0 8px 26px rgba(23, 55, 38, .055);
+  --shadow-card: 0 14px 36px rgba(23, 55, 38, .075);
+}
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  color: var(--ink);
+  background: var(--ivory);
+  line-height: 1.55;
+  overflow-x: clip;
+}
+.wrap { width: min(calc(100% - 48px), var(--wrap)); margin-inline: auto; }
+:where(button, input, select, textarea) { font: inherit; }
+:where(button, a, input, select, textarea) { -webkit-tap-highlight-color: transparent; }
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(40, 122, 82, .38);
+  outline-offset: 3px;
+}
+.site-header {
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid rgba(229,233,226,.9);
+}
+.header-inner { min-height: 72px; }
+.brand { gap: 10px; }
+.brand-mark { border-radius: 10px; overflow: hidden; }
+.site-nav a { transition: color .16s ease, background-color .16s ease; }
+.site-nav a:hover { color: var(--forest); }
+.lang-toggle { border-radius: 9px; padding: 3px; background: #f1f4ef; }
+.lang-toggle button { min-width: 38px; min-height: 34px; border-radius: 7px; }
+.btn {
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 700;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+}
+.btn:active { transform: translateY(1px); }
+input, select, textarea {
+  min-height: 46px;
+  border-radius: 9px;
+  border-color: #d7dfd7;
+  background-color: #fff;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(40,122,82,.11);
+  outline: none;
+}
+.site-footer { margin-top: clamp(48px, 7vw, 88px); }
+@media (max-width: 720px) {
+  .wrap { width: min(calc(100% - 32px), var(--wrap)); }
+  .header-inner { min-height: 64px; }
+  .brand-mark { width: 40px; height: 40px; }
+  .site-nav { padding-top: 84px; }
+  .site-footer { margin-top: 48px; }
+}
+@media (max-width: 380px) {
+  .wrap { width: calc(100% - 24px); }
+  .header-inner { column-gap: 8px; }
+  .brand-text strong { font-size: 1.05rem; }
+  .header-actions { gap: 7px; }
+  .menu-toggle { width: 40px; height: 40px; }
+}
