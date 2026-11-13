@@ -107,6 +107,7 @@ async function main() {
   } = await import("../db/database.js");
   const { normalizeArrivalDate, parsePrice, mapUpstreamRecord, parseReportedTotal } =
     await import("../services/mandiDataService.js");
+  const { isPriceRecord } = await import("../../../script/api.js");
 
   check(normalizeArrivalDate("30/10/2026") === "2026-10-30", "DD/MM/YYYY normalization");
   check(normalizeArrivalDate("05-11-2026") === "2026-11-05", "DD-MM-YYYY normalization");
@@ -119,6 +120,26 @@ async function main() {
   check(parseReportedTotal("13181") === 13181, "string upstream total parsing");
   check(parseReportedTotal("13,181") === 13181, "comma-grouped upstream total parsing");
   check(parseReportedTotal("not-a-total") === null, "invalid upstream total rejected");
+  const validPriceRecord = {
+    commodity: "Apple", market: "Shimla", min_price: 5000, max_price: 7000, modal_price: 6000,
+  };
+  check(isPriceRecord(validPriceRecord), "complete mandi price record accepted");
+  check(
+    isPriceRecord({ ...validPriceRecord, min_price: null }),
+    "record with one unavailable price accepted",
+  );
+  check(
+    isPriceRecord({ ...validPriceRecord, min_price: null, max_price: null }),
+    "record with only modal price accepted",
+  );
+  check(
+    !isPriceRecord({ ...validPriceRecord, min_price: null, max_price: null, modal_price: null }),
+    "record with no available prices rejected",
+  );
+  check(
+    !isPriceRecord({ ...validPriceRecord, min_price: "not-a-price" }),
+    "record with malformed price rejected",
+  );
 
   const mapped = mapUpstreamRecord({
     state: "Himachal Pradesh", district: "Kangra", market: "Palampur",
