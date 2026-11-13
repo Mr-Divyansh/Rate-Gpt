@@ -78,29 +78,83 @@ function renderHeader(header) {
   mq.addEventListener?.("change", e => { if (e.matches) close(); });
 }
 function renderFooter(footer) {
-  footer.replaceChildren(); footer.classList.add("site-footer");
-  const inner = document.createElement("div"); inner.className = "footer-inner wrap";
-  const about = document.createElement("div"); about.className = "footer-about";
-  const blurb = document.createElement("p"); blurb.dataset.i18n = "footer.blurb";
-  about.append(brand("brand"), blurb);
-  const nav = document.createElement("nav"); nav.className = "footer-nav"; nav.dataset.i18nAttr = "aria-label:footer.explore";
-  LINKS.slice(0,3).forEach(item => nav.append(navLink(item)));
-  const contact = navLink(["footer.contact","contact.html"]); nav.append(contact);
-  for (const [key,href] of [["footer.privacy","privacy.html"],["footer.terms","terms.html"]]) nav.append(navLink([key,href]));
-  const source = document.createElement("a"); source.href="https://data.gov.in/"; source.target="_blank"; source.rel="noopener noreferrer";
-  const sourceText=document.createElement("span"); sourceText.dataset.i18n="footer.source"; source.append(sourceText,icon("external",14)); nav.append(source);
-  const help = document.createElement("section"); help.className="footer-help";
-  const heading=document.createElement("h2"); heading.dataset.i18n="footer.farmerHelp";
-  const desc=document.createElement("p"); desc.dataset.i18n="footer.farmerHelpText";
-  const phone=document.createElement("a"); phone.href="tel:18001801551"; phone.className="footer-helpline"; phone.textContent="1800-180-1551";
-  const hours=document.createElement("small"); hours.dataset.i18n="footer.farmerHours";
-  const govt=document.createElement("a"); govt.href="https://dackkms.gov.in/account/aboutus.aspx"; govt.target="_blank"; govt.rel="noopener noreferrer"; govt.dataset.i18n="footer.officialInfo";
-  help.append(heading,desc,phone,hours,govt);
-  const bottom=document.createElement("div"); bottom.className="footer-bottom";
-  const rights=document.createElement("span"); rights.dataset.year=String(new Date().getFullYear());
-  const note=document.createElement("span"); note.dataset.i18n="footer.note"; bottom.append(rights,note);
-  const renderRights=()=>rights.textContent=t("footer.rights",{year:rights.dataset.year});
-  inner.append(about,nav,help,bottom); footer.append(inner); renderRights(); onLangChange(renderRights);
+  footer.replaceChildren();
+  footer.classList.add("site-footer");
+
+  const inner = document.createElement("div");
+  inner.className = "footer-inner wrap";
+
+  const about = document.createElement("section");
+  about.className = "footer-about";
+  about.setAttribute("aria-label", "Rate-GPT");
+  const blurb = document.createElement("p");
+  blurb.dataset.i18n = "footer.blurb";
+
+  const source = document.createElement("a");
+  source.className = "footer-source";
+  source.href = "https://data.gov.in/";
+  source.target = "_blank";
+  source.rel = "noopener noreferrer";
+  const sourceText = document.createElement("span");
+  sourceText.dataset.i18n = "footer.source";
+  source.append(sourceText, icon("external", 14));
+  about.append(brand("brand"), blurb, source);
+
+  const linksSection = document.createElement("section");
+  linksSection.className = "footer-links-section";
+  const linksHeading = document.createElement("h2");
+  linksHeading.className = "footer-heading";
+  linksHeading.dataset.i18n = "footer.explore";
+  const nav = document.createElement("nav");
+  nav.className = "footer-nav";
+  nav.dataset.i18nAttr = "aria-label:footer.explore";
+  LINKS.forEach(item => nav.append(navLink(item)));
+  for (const [key, href] of [["footer.privacy", "privacy.html"], ["footer.terms", "terms.html"]]) {
+    nav.append(navLink([key, href]));
+  }
+  linksSection.append(linksHeading, nav);
+
+  const help = document.createElement("section");
+  help.className = "footer-help";
+  help.setAttribute("aria-labelledby", "footerHelpTitle");
+  const heading = document.createElement("h2");
+  heading.className = "footer-heading";
+  heading.id = "footerHelpTitle";
+  heading.dataset.i18n = "footer.farmerHelp";
+  const desc = document.createElement("p");
+  desc.className = "footer-help-text";
+  desc.dataset.i18n = "footer.farmerHelpText";
+  const phone = document.createElement("a");
+  phone.href = "tel:18001801551";
+  phone.className = "footer-helpline";
+  phone.textContent = "1800-180-1551";
+  const hours = document.createElement("small");
+  hours.className = "footer-hours";
+  hours.dataset.i18n = "footer.farmerHours";
+  const govt = document.createElement("a");
+  govt.className = "footer-official-link";
+  govt.href = "https://dackkms.gov.in/account/aboutus.aspx";
+  govt.target = "_blank";
+  govt.rel = "noopener noreferrer";
+  govt.dataset.i18n = "footer.officialInfo";
+  help.append(heading, desc, phone, hours, govt);
+
+  const bottom = document.createElement("div");
+  bottom.className = "footer-bottom";
+  const rights = document.createElement("span");
+  rights.dataset.year = String(new Date().getFullYear());
+  const note = document.createElement("span");
+  note.dataset.i18n = "footer.note";
+  bottom.append(rights, note);
+
+  const renderRights = () => {
+    rights.textContent = t("footer.rights", { year: rights.dataset.year });
+  };
+
+  inner.append(about, linksSection, help, bottom);
+  footer.append(inner);
+  renderRights();
+  onLangChange(renderRights);
 }
 const header=document.querySelector("header.site-header"); if(header) renderHeader(header);
 let footer=document.querySelector("footer.site-footer");
