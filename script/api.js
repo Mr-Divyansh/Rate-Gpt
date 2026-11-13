@@ -51,14 +51,23 @@ function validPrice(value) {
 }
 
 export function isPriceRecord(record) {
+  if (
+    record === null ||
+    typeof record !== "object" ||
+    typeof record.commodity !== "string" ||
+    !record.commodity.trim() ||
+    typeof record.market !== "string" ||
+    !record.market.trim()
+  ) {
+    return false;
+  }
+
+  const prices = [record.min_price, record.max_price, record.modal_price];
+  // Match the backend mapper: missing individual price fields are allowed,
+  // but at least one real non-negative price must exist on the record.
   return (
-    record !== null &&
-    typeof record === "object" &&
-    typeof record.commodity === "string" &&
-    typeof record.market === "string" &&
-    validPrice(record.min_price) &&
-    validPrice(record.max_price) &&
-    validPrice(record.modal_price)
+    prices.every(validPrice) &&
+    prices.some((value) => value !== null && value !== undefined)
   );
 }
 
