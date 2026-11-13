@@ -105,7 +105,7 @@ async function main() {
     insertSyncLog,
     acquireMandiSyncLock,
   } = await import("../db/database.js");
-  const { normalizeArrivalDate, parsePrice, mapUpstreamRecord } =
+  const { normalizeArrivalDate, parsePrice, mapUpstreamRecord, parseReportedTotal } =
     await import("../services/mandiDataService.js");
 
   check(normalizeArrivalDate("30/10/2026") === "2026-10-30", "DD/MM/YYYY normalization");
@@ -115,6 +115,10 @@ async function main() {
   check(parsePrice("2,450.50") === 2450.5, "formatted numeric price parsing");
   check(parsePrice(null) === null && parsePrice("NA") === null, "missing prices remain null");
   check(parsePrice("-2") === null, "negative prices are rejected");
+  check(parseReportedTotal(13181) === 13181, "numeric upstream total parsing");
+  check(parseReportedTotal("13181") === 13181, "string upstream total parsing");
+  check(parseReportedTotal("13,181") === 13181, "comma-grouped upstream total parsing");
+  check(parseReportedTotal("not-a-total") === null, "invalid upstream total rejected");
 
   const mapped = mapUpstreamRecord({
     state: "Himachal Pradesh", district: "Kangra", market: "Palampur",
