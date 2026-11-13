@@ -1,57 +1,50 @@
-# Rate GPT — System Architecture
+# Rate-GPT — System Architecture
 
-## 1. Data flow
+## Data flow
+
 ```text
 Government OGD / AGMARKNET API
           ↓
-Node.js data-fetch / sync service
+Server-side sync service
           ↓
-Validation and normalization
+Validation, normalization and deduplication
           ↓
-PostgreSQL
+SQLite locally / PostgreSQL when configured
           ↓
-Express REST API
+Express REST API (/api/v1)
           ↓
-Next.js frontend
+Static multi-page frontend (HTML, CSS and JavaScript)
 ```
-The browser must never call the Government API with the private API key.
 
-## 2. Planned stack
-- Frontend: React, TypeScript, Vite, Tailwind CSS.
-- Backend: Node.js, Express.js, TypeScript, Zod.
-- Database: SQLite (better-sqlite3). Prisma/PostgreSQL is not used in the current implementation.
-- Security: Helmet, express-rate-limit.
-- Charts: Recharts.
+The browser calls only Rate-GPT endpoints. The Government API key stays on the
+server. Missing prices remain null and are displayed as unavailable; source
+arrival dates are kept distinct from synchronization timestamps.
 
-## 3. Backend responsibilities
-Keep API key server-side, fetch source pages, validate and normalize records, handle upstream errors, upsert without duplicates, log sync attempts and serve paginated endpoints.
+## Stack
 
-## 4. Frontend responsibilities
-Render filters and prices, call only Rate GPT endpoints, handle loading/empty/error states and provide the two approved themes.
+- Frontend: HTML, CSS and JavaScript; Vite builds the three public pages.
+- Backend: Node.js, Express and TypeScript with Zod request validation.
+- Storage: `better-sqlite3` locally, or PostgreSQL through `pg` when
+  `DATABASE_URL` or `POSTGRES_URL` is configured.
+- Security: Helmet, rate limiting, parameterized SQL, and bearer-token
+  authorization for manual and scheduled synchronization.
 
-## 5. Database outline
-### MandiPrice
-id, sourceRecordId (nullable), state, district, market, commodity, variety, grade, arrivalDate, minPrice, maxPrice, modalPrice, sourceUnit, createdAt, updatedAt.
+## Public pages
 
-### SyncLog
-id, status, requestedDate, stateFilter, recordsFetched, recordsInserted, recordsUpdated, errorMessage, startedAt, completedAt.
+- `index.html` — latest stored-record preview.
+- `mandi-prices.html` — location selection, crop search and paginated prices.
+- `about.html` — data-source context and limitations.
 
-Confirm exact source schema and stable identity before defining unique constraints.
+The shared navigation script renders the same header and footer on all pages.
+Previous `/app` and `/market-price` routes redirect to the Mandi Prices page.
 
-## 6. Candidate indexes
-- `(state, district, market)`
-- `(commodity)`
-- `(arrivalDate)`
-- `(state, commodity, arrivalDate)`
-- `(market, commodity, arrivalDate)`
+## Database and synchronization
 
-Review indexes against actual query patterns.
+The database factory selects PostgreSQL when a connection URL is present and
+SQLite otherwise. Vercel requires PostgreSQL; it does not fall back to
+ephemeral SQLite storage. The `mandi_prices` table uses a normalized composite
+`dedup_key` to prevent duplicate observations. Synchronization validates
+upstream fields, preserves null prices and records each attempt in `sync_logs`.
 
-## 7. Sync strategy
-Use bounded retries and timeouts. Fetch all required pages, validate records, upsert idempotently and record completion. Keep source arrival date separate from sync time. Do not assume a scheduled run means new source data exists.
-
-## 8. Historical trends
-Trend endpoint reads stored records over a date range. History accumulates through successful syncs. Never invent or interpolate missing prices.
-
-## 9. Security and deployment
-Use environment variables, exclude `.env` from Git, validate inputs, rate-limit public endpoints, protect admin sync, avoid logging secrets, use HTTPS and configure backups and monitoring.
+The trend endpoint reads stored observations only. No prices or historical
+values are fabricated or interpolated.

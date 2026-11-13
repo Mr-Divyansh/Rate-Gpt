@@ -14,9 +14,12 @@
 - Secrets server-side only (`DATA_GOV_API_KEY`, `ADMIN_SYNC_KEY`).
 
 ## Known issues
-- Admin sync cannot persist in production (read-only SQLite) — documented blocker.
-- `NODE_ENV` may be unset on Vercel — manual check required.
-- Express 4 deprecation (DEP0169) — deferred.
+- Production database connectivity depends on a valid PostgreSQL URL configured
+  in the deployment environment; a configured URL alone does not prove that the
+  database is reachable. The public health endpoint checks database access.
+- Upstream synchronization and scheduled runs require their respective
+  server-side credentials (`DATA_GOV_API_KEY`, `ADMIN_SYNC_KEY`, and
+  `CRON_SECRET`); live synchronization was not exercised by local tests.
 
 ## Rules
 - Never commit `.env` or `.env.local`.

@@ -638,6 +638,75 @@ a:focus-visible, button:focus-visible { outline: 3px solid #79b996; outline-offs
 
 .anim-delay-1 { animation-delay: 0.3s; }
 .anim-delay-2 { animation-delay: 0.6s; }
+
+/* Keep the foreground photo beside, rather than behind, the dashboard. */
+.farmer-photo {
+  z-index: 5;
+  left: -10%;
+  bottom: -24px;
+  width: min(48%, 360px);
+}
+
+.dashboard {
+  z-index: 4;
+}
+
+.price-card > strong {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-history-value {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 767px) {
+  .hero-visual {
+    min-height: 510px;
+  }
+
+  .farmer-photo {
+    left: 0;
+    bottom: 0;
+    width: min(56%, 230px);
+  }
+
+  .dashboard {
+    width: 100%;
+  }
+
+  .ai-card {
+    width: min(48%, 230px);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+  .hero-visual {
+    min-height: 650px;
+  }
+
+  .farmer-photo {
+    left: 0;
+    bottom: 0;
+    width: min(45%, 360px);
+  }
+
+  .dashboard {
+    width: min(90%, 620px);
+  }
+}
+
+@media (max-width: 390px) {
+  .hero-visual {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 320px) {
+  .hero-visual {
+    min-height: 520px;
+  }
+}
 .anim-delay-3 { animation-delay: 0.9s; }
 .anim-delay-4 { animation-delay: 1.2s; }
 

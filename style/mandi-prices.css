@@ -427,3 +427,24 @@ select:focus-visible {
   color: var(--ink);
   font-size: 13px;
 }
+
+.price-table th:nth-child(n + 4),
+.price-table td:nth-child(n + 4) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-value,
+.modal-price,
+.mobile-price-values strong {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.mobile-price-values > div {
+  text-align: right;
+}
+
+#loadMore[hidden] {
+  display: none;
+}

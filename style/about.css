@@ -355,10 +355,6 @@
   content: "";
 }
 
-.about-page .global-site-footer {
-  margin-top: 0;
-}
-
 @media (max-width: 760px) {
   .about-hero {
     width: calc(100% - 24px);
