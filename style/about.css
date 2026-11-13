@@ -483,3 +483,54 @@
   .team-card { grid-template-columns: 84px minmax(0,1fr); }
   .team-logo { width: 84px; }
 }
+
+
+/* ---------- expanded project story ---------- */
+.about-journey {
+  display: grid;
+  grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr);
+  gap: clamp(28px, 7vw, 92px);
+  padding-top: clamp(28px, 4vw, 48px);
+  border-top: 1px solid var(--line);
+}
+.journey-content { display: grid; gap: 22px; }
+.journey-intro {
+  max-width: 62ch;
+  color: #27382f;
+  font-size: clamp(1.08rem, 1.6vw, 1.3rem);
+  line-height: 1.6;
+}
+.journey-points { display: grid; gap: 0; }
+.journey-point {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 16px;
+  padding: 19px 0;
+  border-top: 1px solid #e5eae3;
+}
+.journey-point-mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: #e9f1e8;
+  color: #216b45;
+  font-size: .78rem;
+  font-weight: 800;
+}
+.journey-point h3 { color: #193d2d; font-size: 1.08rem; }
+.journey-point p { max-width: 60ch; margin-top: 5px; color: var(--muted); font-size: .94rem; line-height: 1.65; }
+.team-focus {
+  margin-top: 9px;
+  color: #287a52;
+  font-size: .76rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  .about-journey { grid-template-columns: 1fr; gap: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-point { transition: none; }
+}
