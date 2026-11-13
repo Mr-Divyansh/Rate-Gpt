@@ -408,3 +408,67 @@ input:focus, select:focus, textarea:focus {
   .header-actions { gap: 7px; }
   .menu-toggle { width: 40px; height: 40px; }
 }
+
+
+/* ---------- premium shared footer finish ---------- */
+.site-footer {
+  position: relative;
+  margin-top: clamp(64px, 9vw, 112px);
+  overflow: hidden;
+  border-top: 0;
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(94, 153, 111, .2), transparent 34%),
+    linear-gradient(135deg, #103f2e, #0b3326 72%, #102f25);
+  color: #edf4eb;
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: max(24px, calc((100vw - var(--wrap)) / 2));
+  width: 64px;
+  height: 3px;
+  background: #e5b24c;
+}
+.site-footer .footer-inner {
+  position: relative;
+  grid-template-columns: minmax(0, 1.25fr) minmax(150px, .7fr) minmax(240px, .9fr);
+  align-items: start;
+  gap: 34px clamp(24px, 4vw, 58px);
+  padding-block: 54px 26px;
+}
+.site-footer .brand-text strong { color: #fff; }
+.site-footer .brand-text small { color: #c5d8c9; }
+.site-footer .footer-about p,
+.site-footer .footer-hours,
+.site-footer .footer-help-text { color: #c4d5c8; }
+.site-footer .footer-source,
+.site-footer .footer-nav a,
+.site-footer .footer-official-link { color: #e3eee3; }
+.site-footer .footer-heading { color: #fff; margin: 2px 0 10px; }
+.site-footer .footer-nav a { min-height: 34px; }
+.site-footer .footer-nav a:hover,
+.site-footer .footer-source:hover,
+.site-footer .footer-official-link:hover { color: #f3c96e; }
+.site-footer .footer-help {
+  padding: 22px;
+  border: 1px solid rgba(226, 240, 226, .18);
+  border-radius: 14px;
+  background: rgba(255,255,255,.075);
+}
+.site-footer .footer-help .footer-heading { color: #fff; }
+.site-footer .footer-helpline { color: #f4ce78; }
+.site-footer .footer-bottom {
+  padding-top: 20px;
+  border-top: 1px solid rgba(231, 241, 231, .18);
+  color: #b7cbbb;
+}
+@media (max-width: 900px) {
+  .site-footer .footer-inner { grid-template-columns: minmax(0, 1fr) minmax(150px, .7fr); }
+  .site-footer .footer-help { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .site-footer .footer-inner { grid-template-columns: 1fr; gap: 26px; padding-block: 42px 22px; }
+  .site-footer .footer-help { grid-column: auto; }
+  .site-footer .footer-bottom { flex-direction: column; }
+}
