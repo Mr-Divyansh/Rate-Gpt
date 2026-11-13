@@ -73,7 +73,25 @@ function renderHeader(header) {
   toggle.addEventListener("click", () => toggle.getAttribute("aria-expanded")==="true" ? close() : open());
   backdrop.addEventListener("click", close);
   nav.addEventListener("click", e => { if (e.target.closest("a")) close(); });
-  document.addEventListener("keydown", e => { if (e.key==="Escape") { close(); toggle.focus(); } });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && nav.classList.contains("is-open")) {
+      close();
+      toggle.focus();
+      return;
+    }
+    if (e.key !== "Tab" || !nav.classList.contains("is-open")) return;
+    const focusable = [...nav.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !nav.contains(document.activeElement))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || !nav.contains(document.activeElement))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
   const mq = window.matchMedia("(min-width: 721px)");
   mq.addEventListener?.("change", e => { if (e.matches) close(); });
 }
