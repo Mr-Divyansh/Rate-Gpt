@@ -105,4 +105,31 @@ function renderFooter(footer) {
 const header=document.querySelector("header.site-header"); if(header) renderHeader(header);
 let footer=document.querySelector("footer.site-footer");
 if(!footer){footer=document.createElement("footer");document.body.append(footer);}
-renderFooter(footer); applyI18n(); hydrateIcons();
+renderFooter(footer);
+applyI18n();
+function applySharedTranslations() {
+  const hi = getLang() === "hi";
+  const labels = {
+    "nav.contact": hi ? "संपर्क करें" : "Contact",
+    "footer.contact": hi ? "संपर्क करें" : "Contact",
+    "footer.privacy": hi ? "गोपनीयता नीति" : "Privacy Policy",
+    "footer.terms": hi ? "नियम और शर्तें" : "Terms & Conditions",
+    "footer.farmerHelp": hi ? "किसान सहायता" : "Farmer support",
+    "footer.farmerHelpText": hi ? "खेती से जुड़ी सलाह के लिए भारत सरकार के किसान कॉल सेंटर से संपर्क करें।" : "For agriculture-related guidance, contact the Government of India Kisan Call Centre.",
+    "footer.farmerHours": hi ? "टोल-फ्री · सुबह 6 से रात 10 बजे · सप्ताह के सातों दिन" : "Toll-free · 6 AM–10 PM · 7 days a week",
+    "footer.officialInfo": hi ? "आधिकारिक जानकारी ↗" : "Official information ↗",
+    "nav.label": hi ? "मुख्य मेनू" : "Main navigation",
+    "footer.explore": hi ? "लिंक और जानकारी" : "Explore and support"
+  };
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const value = labels[el.dataset.i18n];
+    if (value) el.textContent = value;
+  });
+  document.querySelectorAll("[data-i18n-attr]").forEach(el => {
+    if (el.dataset.i18nAttr.includes("aria-label:nav.label")) el.setAttribute("aria-label", labels["nav.label"]);
+    if (el.dataset.i18nAttr.includes("aria-label:footer.explore")) el.setAttribute("aria-label", labels["footer.explore"]);
+  });
+}
+applySharedTranslations();
+onLangChange(applySharedTranslations);
+hydrateIcons();
