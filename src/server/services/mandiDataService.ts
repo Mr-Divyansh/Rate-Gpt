@@ -81,6 +81,11 @@ export interface SyncResult {
   status?: "SUCCESS" | "PARTIAL" | "FAILED" | "IN_PROGRESS" | "NOT_CONFIGURED";
   isMockFallback?: boolean;
   error?: string;
+  pagesFetched?: number;
+  upstreamReportedTotal?: number | null;
+  validRecords?: number;
+  invalidRecordsSkipped?: number;
+  paginationComplete?: boolean;
 }
 
 /**
@@ -282,6 +287,8 @@ async function runMandiPriceSync(
   const allRawRecords: any[] = [];
   let offset = startOffset;
   let totalAvailable = Infinity;
+  let upstreamReportedTotal: number | null = null;
+  let paginationComplete = false;
   const MAX_PAGES = 200; // safety cap (supports full India dataset ~14k records)
   let pagesFetched = 0;
 
@@ -363,6 +370,7 @@ async function runMandiPriceSync(
       // a malformed/truncated value must not terminate pagination early.
       if (reportedTotal !== null && reportedTotal >= offset + rawRecords.length) {
         totalAvailable = reportedTotal;
+        upstreamReportedTotal = reportedTotal;
       } else if (rawRecords.length === 0) {
         totalAvailable = allRawRecords.length; // stop if no usable total reported
       }
@@ -371,8 +379,12 @@ async function runMandiPriceSync(
         `[Sync] Page ${pagesFetched}: received ${rawRecords.length} records (total so far: ${allRawRecords.length}/${Number.isFinite(totalAvailable) ? totalAvailable : "?"})`,
       );
 
-      if (rawRecords.length === 0) break;
+      if (rawRecords.length === 0) {
+        paginationComplete = true;
+        break;
+      }
       offset += rawRecords.length;
+      if (offset >= totalAvailable) paginationComplete = true;
       await new Promise((r) => setTimeout(r, 1500)); // delay to avoid rate limiting
     }
 
@@ -386,9 +398,9 @@ async function runMandiPriceSync(
     // Upsert only normalized source records; never invent fallback prices.
     const { inserted, updated } = await upsertMandiPrices(validRecords);
     const completedAt = new Date().toISOString();
-    const paginationCapped = pagesFetched >= MAX_PAGES && offset < totalAvailable;
+    const paginationCapped = !paginationComplete && pagesFetched >= MAX_PAGES;
 
-    const status = validRecords.length > 0 && !paginationCapped ? "SUCCESS" : "PARTIAL";
+    const status = validRecords.length > 0 && paginationComplete ? "SUCCESS" : "PARTIAL";
     await insertSyncLog({
       status,
       requested_date: options.arrivalDate || null,
@@ -406,7 +418,7 @@ async function runMandiPriceSync(
     });
 
     return {
-      success: validRecords.length > 0,
+      success: validRecords.length > 0 && paginationComplete,
       status,
       message: paginationCapped
         ? `Partially synced ${validRecords.length} records (${inserted} new, ${updated} updated) across ${pagesFetched} page(s); the pagination safety cap was reached.`
@@ -414,6 +426,11 @@ async function runMandiPriceSync(
       recordsFetched: allRawRecords.length,
       recordsInserted: inserted,
       recordsUpdated: updated,
+      pagesFetched,
+      upstreamReportedTotal,
+      validRecords: validRecords.length,
+      invalidRecordsSkipped: allRawRecords.length - validRecords.length,
+      paginationComplete,
     };
   } catch (err: any) {
     const errorMessage =
