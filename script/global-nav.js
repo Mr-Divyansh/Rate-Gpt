@@ -122,7 +122,7 @@ function renderFooter(footer) {
   linksSection.className = "footer-links-section";
   const linksHeading = document.createElement("h2");
   linksHeading.className = "footer-heading";
-  linksHeading.dataset.i18n = "footer.explore";
+  linksHeading.dataset.i18n = "footer.linksHeading";
   const nav = document.createElement("nav");
   nav.className = "footer-nav";
   nav.dataset.i18nAttr = "aria-label:footer.explore";
