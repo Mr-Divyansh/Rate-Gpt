@@ -27,7 +27,7 @@ function brand(className) {
   mark.className = "brand-mark";
   const img = document.createElement("img");
   img.src = "Images/Logo.webp";
-  img.alt = "";
+  img.alt = "Rate-GPT logo";
   img.width = 70;
   img.height = 70;
   img.decoding = "async";
