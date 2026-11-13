@@ -2,9 +2,8 @@
 .page-home {
   --hero-ink: #101c19;
   --hero-green: #075e3d;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   background:
@@ -451,3 +450,7 @@
   .page-home *::before,
   .page-home *::after { scroll-behavior: auto !important; }
 }
+
+/* Keep the shared site footer available on the home page too. */
+.page-home .site-footer { display:block; }
+.page-home #main-content { min-height:calc(100vh - 68px); }
