@@ -172,6 +172,9 @@ async function chooseDistrict(name, { market = "" } = {}) {
 
 function selectMandi(market) {
   state.market = market;
+  state.trendController?.abort();
+  state.trendCrop = "";
+  state.trend = [];
   const entry = { ...state.location, market };
   saveLocation(entry);
   pushRecent(entry);
@@ -378,13 +381,15 @@ function addTrendOptions() {
   const crops = [...new Set(state.records.map((record) => record.commodity).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b));
   const preferred = crops.includes(state.trendCrop) ? state.trendCrop : crops[0] || "";
+  const changed = preferred !== state.trendCrop;
   state.trendCrop = preferred;
   select.replaceChildren(new Option("Select crop", ""));
   for (const crop of crops) select.add(new Option(crop, crop));
   select.value = preferred;
   select.disabled = crops.length === 0 || !state.market;
-  if (preferred) loadTrend();
-  else {
+  if (preferred && changed) loadTrend();
+  else if (!preferred) {
+    state.trendController?.abort();
     state.trend = [];
     renderTrend();
   }
