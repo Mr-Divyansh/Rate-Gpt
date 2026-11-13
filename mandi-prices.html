@@ -5,162 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#F7F7F0">
   <meta name="description" content="Explore government-reported crop prices at Indian mandis. Filter by state, district and market with Rate-GPT.">
-  <link rel="preload" as="image" href="./Images/Farmer Marketplace Sunrise Banner.webp" fetchpriority="high">
-  <title>Mandi Prices | Rate-GPT</title>
+  <title data-i18n="prices.doc">Mandi Prices | Rate-GPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/mandi-prices.css">
-  <link rel="stylesheet" href="style/global-nav.css">
-  <script src="https://unpkg.com/lucide@latest" defer></script>
 </head>
-<body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="brand" href="index.html" aria-label="Rate-GPT home">
-        <img src="Images/Logo.webp" alt="Rate-GPT logo" width="42" height="42">
-      </a>
-      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mainNav" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <nav class="main-nav" id="mainNav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a class="active" href="mandi-prices.html" aria-current="page">Mandi Prices</a>
-        <a href="about.html">About Us</a>
-      </nav>
-    </div>
-  </header>
+<body class="page-prices">
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  <header class="site-header"></header>
 
   <main id="main-content" tabindex="-1">
-    <section class="hero page-container">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-line"></span> GOVERNMENT-REPORTED MARKET DATA</div>
-        <h1>Know your mandi.<br><em>Know your price.</em></h1>
-        <p>अपने आसपास की मंडियों में फसलों के भाव देखें और सोच-समझकर अपनी उपज बेचें।</p>
-        <div class="hero-meta">
-          <span class="market-open"><span class="pulse"></span><span id="syncFreshness">Checking data freshness…</span></span>
-          <span class="updated"><i data-lucide="clock-3" aria-hidden="true"></i> Last successful sync: <b id="updatedAt">Loading…</b></span>
-          <span class="updated"><i data-lucide="refresh-cw" aria-hidden="true"></i> Next scheduled sync: <b id="nextSyncAt">Checking…</b></span>
+    <section class="page-head wrap">
+      <div class="page-head-copy">
+        <h1 data-i18n="prices.title">Mandi prices</h1>
+        <p class="lede" data-i18n="prices.lede">Choose a mandi to see the prices recorded there. Search by crop name in English or Hindi.</p>
+      </div>
+      <p class="sync" id="syncChip">
+        <span class="sync-dot" id="syncDot" data-state="none" aria-hidden="true"></span>
+        <span id="syncText">…</span>
+      </p>
+    </section>
+
+    <!-- Step 1: pick a mandi (inline, no dialog) -->
+    <section class="finder-panel wrap" aria-labelledby="finderTitle">
+      <h2 class="sr-only" id="finderTitle" data-i18n="finder.title">Choose your mandi</h2>
+      <div class="recent" id="recentWrap" hidden>
+        <span class="recent-label" data-i18n="finder.recent">Recent</span>
+        <div class="chips" id="recentList"></div>
+      </div>
+      <div class="finder-selects">
+        <div class="field">
+          <label for="stateSelect" data-i18n="field.state">State</label>
+          <select id="stateSelect" name="state" disabled></select>
+        </div>
+        <div class="field">
+          <label for="districtSelect" data-i18n="field.district">District</label>
+          <select id="districtSelect" name="district" disabled></select>
         </div>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
-        <div class="art-sun"></div>
-        <div class="art-field field-back"></div><div class="art-field field-front"></div>
-        <div class="art-stem stem-one">✦</div><div class="art-stem stem-two">✧</div>
-        <div class="art-label"><i data-lucide="wheat" aria-hidden="true"></i><span>From farm<br>to market</span></div>
+      <div class="mandi-block">
+        <p class="mandi-help" id="mandiHelp" aria-live="polite"></p>
+        <div class="chips" id="mandiGrid" role="group" aria-labelledby="mandiHelp"></div>
       </div>
     </section>
 
-    <section class="page-container location-panel">
-      <div class="location-main">
-        <div class="location-icon"><i data-lucide="map-pin" aria-hidden="true"></i></div>
+    <!-- Step 2: read the prices -->
+    <section class="results wrap" aria-labelledby="pricesHeading">
+      <header class="results-head">
         <div>
-          <span class="section-kicker">SELECTED MARKET</span>
-          <h2 id="selectedLocation">Choose a mandi</h2>
-          <p id="locationHint">Select a mandi to view its stored crop prices.</p>
+          <h2 id="pricesHeading" data-i18n="results.titleNone">Crop prices</h2>
+          <p class="count" id="resultCount" aria-live="polite"></p>
         </div>
-      </div>
-      <button class="btn btn-outline" id="locationAction" type="button">
-        <i data-lucide="map-pin" aria-hidden="true"></i> Choose location
-      </button>
-    </section>
+        <p class="unit-note"><span data-icon="info" data-size="16"></span><span data-i18n="results.unit">Prices in ₹ per quintal</span></p>
+      </header>
 
-    <section class="page-container section-block mandi-selection" aria-labelledby="mandiHeading">
-      <div class="section-heading">
-        <div>
-          <span class="section-kicker">MARKETS IN YOUR FILTER</span>
-          <h2 id="mandiHeading">Select one mandi</h2>
-          <p id="mandiHelp" aria-live="polite">Loading mandi locations from stored market data…</p>
+      <div class="toolbar">
+        <div class="field search-field">
+          <label class="sr-only" for="cropSearch" data-i18n="results.search">Search crops</label>
+          <span class="search-wrap">
+            <span data-icon="search" data-size="18"></span>
+            <input id="cropSearch" name="cropSearch" type="search" autocomplete="off" disabled data-i18n-attr="placeholder:results.placeholder" placeholder="Search a crop, e.g. wheat or गेहूँ">
+            <kbd aria-hidden="true">Ctrl K</kbd>
+          </span>
         </div>
-        <button class="text-button" id="changeLocationLink" type="button">
-          Change state or district <i data-lucide="arrow-up-right" aria-hidden="true"></i>
-        </button>
-      </div>
-      <div class="mandi-grid" id="mandiGrid" aria-label="Available mandis"></div>
-    </section>
-
-    <section class="page-container section-block price-section" aria-labelledby="pricesHeading">
-      <div class="section-heading price-heading">
-        <div>
-          <span class="section-kicker">STORED MARKET OBSERVATIONS</span>
-          <h2 id="pricesHeading">Crop prices</h2>
-          <p>Search crops and review the reported minimum, maximum, and modal prices.</p>
-        </div>
-        <div class="unit-note"><i data-lucide="info" aria-hidden="true"></i> Source prices in ₹ per quintal</div>
-      </div>
-
-      <div class="filter-panel">
-        <label class="search-box" for="cropSearch">
-          <i data-lucide="search" aria-hidden="true"></i>
-          <input id="cropSearch" name="cropSearch" type="search" placeholder="Search crops in English or Hindi…" autocomplete="off" disabled>
-          <kbd>Ctrl K</kbd>
-        </label>
-        <label class="select-wrap">
-          <span>Sort by</span>
+        <div class="field sort-field">
+          <label for="sortFilter" data-i18n="results.sort">Sort by</label>
           <select id="sortFilter" name="sort" disabled>
-            <option value="date_desc">Latest arrival</option>
-            <option value="modal_price_asc">Modal: low to high</option>
-            <option value="modal_price_desc">Modal: high to low</option>
-            <option value="commodity_asc">Crop name</option>
+            <option value="date_desc" data-i18n="sort.date_desc">Latest arrival</option>
+            <option value="modal_price_asc" data-i18n="sort.modal_price_asc">Modal price: low to high</option>
+            <option value="modal_price_desc" data-i18n="sort.modal_price_desc">Modal price: high to low</option>
+            <option value="commodity_asc" data-i18n="sort.commodity_asc">Crop name A–Z</option>
           </select>
-          <i data-lucide="chevron-down" aria-hidden="true"></i>
-        </label>
-        <button class="clear-button" id="clearFilters" type="button" disabled>Reset</button>
+        </div>
+        <button class="btn" id="clearFilters" type="button" disabled data-i18n="results.reset">Reset</button>
       </div>
 
-      <div class="table-toolbar">
-        <div class="results-count"><strong id="resultCount" aria-live="polite">0 records</strong><span>in selected mandi</span></div>
-        <p class="demo-note" id="priceMessage" role="status">Select a mandi to load prices.</p>
-      </div>
-      <div class="price-table-wrap">
+      <p class="sr-only" id="priceMessage" role="status"></p>
+
+      <div class="table-wrap">
         <table class="price-table">
+          <caption class="sr-only" data-i18n="results.caption">Crop prices at the selected mandi</caption>
           <thead>
-            <tr><th>Crop</th><th>Mandi</th><th>Arrival date</th><th>Min. price</th><th>Max. price</th><th>Modal price</th></tr>
+            <tr>
+              <th scope="col" data-i18n="col.crop">Crop</th>
+              <th scope="col" data-i18n="col.arrival">Arrival date</th>
+              <th scope="col" data-i18n="col.range">Min – Max</th>
+              <th scope="col" class="num" data-i18n="col.modal">Modal price</th>
+              <th scope="col" data-i18n="col.change">Since last arrival</th>
+            </tr>
           </thead>
           <tbody id="priceTableBody"></tbody>
         </table>
       </div>
-      <div class="mobile-price-list" id="mobilePriceList"></div>
-      <div class="table-footer">
+      <div class="mobile-list" id="mobilePriceList"></div>
+
+      <div class="results-foot">
         <span id="showingText" aria-live="polite"></span>
-        <button class="text-button" id="loadMore" type="button" hidden>Load more <i data-lucide="arrow-down" aria-hidden="true"></i></button>
+        <button class="btn" id="loadMore" type="button" hidden data-i18n="results.more">Show more</button>
       </div>
-      <p class="price-error" id="priceError" role="alert" hidden></p>
+      <div class="error" id="priceError" role="alert" hidden></div>
+      <p class="next-sync" id="nextSyncAt"></p>
     </section>
 
-    <section class="page-container insight-strip">
-      <div class="insight-icon"><i data-lucide="lightbulb" aria-hidden="true"></i></div>
-      <div><span class="section-kicker">MARKET SMART TIP</span><h3>Compare before you sell.</h3><p>Prices can vary between mandis. Check transport costs, quality requirements and the latest verified rate before making a decision.</p></div>
-      <span class="insight-decoration" aria-hidden="true">₹</span>
-    </section>
+    <aside class="note wrap">
+      <h2 data-i18n="note.title">Compare before you sell</h2>
+      <p data-i18n="note.body">Prices differ between mandis. Check transport costs, quality and the latest arrival date before you decide.</p>
+    </aside>
   </main>
 
-  <footer class="site-footer">
-    <div class="page-container footer-inner">
-      <a class="brand footer-brand" href="index.html"><span class="brand-mark"><i data-lucide="sprout" aria-hidden="true"></i></span><span>Rate-GPT<small>SMART AGRICULTURE</small></span></a>
-      <p>Government-reported market records, presented clearly.</p>
-      <span>© <span id="year"></span> Rate-GPT</span>
-    </div>
-  </footer>
+  <footer class="site-footer"></footer>
 
-  <dialog class="location-dialog" id="locationDialog">
-    <form method="dialog" class="dialog-card">
-      <button class="dialog-close" type="submit" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button>
-      <span class="section-kicker">FILTER YOUR MARKET</span>
-      <h2>Choose a location</h2>
-      <p>State and district options are loaded from available mandi records.</p>
-      <label class="dialog-label">State<select id="stateSelect" name="state" required disabled></select></label>
-      <label class="dialog-label">District<select id="districtSelect" name="district" required disabled></select></label>
-      <button class="btn btn-primary dialog-submit" id="applyLocation" type="button" disabled>
-        Show mandis <i data-lucide="arrow-right" aria-hidden="true"></i>
-      </button>
-    </form>
-  </dialog>
-
-  <script type="module" src="/script/mandi-prices.js"></script>
   <script type="module" src="/script/global-nav.js"></script>
+  <script type="module" src="/script/mandi-prices.js"></script>
 </body>
 </html>

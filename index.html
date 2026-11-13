@@ -4,128 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#F7F7F0">
-  <meta name="description" content="Explore stored, government-reported mandi prices by crop and location. Compare minimum, maximum and modal rates with arrival dates and clear data context.">
-  <title>Rate-GPT | Mandi Price Discovery</title>
+  <meta name="description" content="Explore government-reported mandi prices by crop and location. Compare minimum, maximum and modal rates with arrival dates and clear data context.">
+  <title data-i18n="home.doc">Rate-GPT | Mandi Price Discovery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/style.css">
-  <link rel="stylesheet" href="style/global-nav.css">
 </head>
-<body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="rategpt home">
-      <img src="Images/Logo.webp" alt="Rate-GPT logo" width="42" height="42" />
-    </a>
-
-    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="navLinks" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <nav class="nav-links" id="navLinks">
-      <a class="active" href="index.html" aria-current="page">Home</a>
-      <a href="mandi-prices.html">Mandi Prices</a>
-      <a href="about.html">About Us</a>
-    </nav>
-  </header>
+<body class="page-home">
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  <header class="site-header"></header>
 
   <main id="main-content" tabindex="-1">
-    <section class="hero">
+    <!-- Hero: find your mandi + the rate board -->
+    <section class="hero wrap">
       <div class="hero-copy">
-        <h1 class="anim-fade-in-up">Discover Prices.<br><em>Compare Markets.</em><br>Sell Smarter<span class="period">.</span></h1>
-        <div class="headline-swoosh anim-fade-in-up"></div>
+        <h1 data-i18n="home.title">What are crops selling for at your mandi?</h1>
+        <p class="lede" data-i18n="home.lede">Pick your state and district to see government-reported minimum, maximum and modal prices, with the date each crop arrived.</p>
 
-        <p class="hero-description anim-fade-in-up anim-delay-2">Explore recorded mandi prices by crop and location, then use the latest arrival date to make a more informed selling decision.</p>
-
-        <div class="hero-actions anim-zoom-in">
-          <a class="button button-primary" href="mandi-prices.html">Explore Mandi Prices <span aria-hidden="true">→</span></a>
-          <a class="button button-outline" href="about.html">About Rate-GPT <span aria-hidden="true">→</span></a>
-        </div>
-
-        <div class="trust-line anim-fade-in-up anim-delay-3">
-          <span class="trust-shield" aria-hidden="true">✓</span>
-          <span>Government-reported market records</span>
-          <i></i>
-          <span>Arrival dates shown for context</span>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <!-- Ivory background layer -->
-        <div class="card-bg"></div>
-        <img class="farmer-photo" src="./Images/farmer.webp" alt="Farmer checking market information on a phone" width="1536" height="1024" fetchpriority="high" decoding="async">
-
-        <div class="dashboard anim-float" id="prices">
-          <div class="dashboard-top">
-            <div class="market-name" id="homeMarketName" aria-live="polite">
-              <span class="pin" aria-hidden="true">●</span> Loading stored mandi prices…
-            </div>
-            <a class="updated dashboard-market-link" href="/mandi-prices.html">Choose a mandi <span aria-hidden="true">↗</span></a>
+        <form class="finder" id="homeFinder" action="mandi-prices.html">
+          <div class="field">
+            <label for="homeState" data-i18n="field.state">State</label>
+            <select id="homeState" name="state" required disabled></select>
           </div>
-
-          <div class="price-cards">
-            <article class="price-card anim-bounce anim-delay-1">
-              <div class="crop-row"><span class="crop-symbol wheat-symbol">—</span><b>Minimum</b></div>
-              <strong id="homeMinimum">— <small>/Quintal</small></strong>
-              <span class="increase" id="homeMinimumContext">Loading latest record…</span>
-            </article>
-            <article class="price-card anim-bounce anim-delay-1">
-              <div class="crop-row"><span class="crop-symbol mustard-symbol">—</span><b>Maximum</b></div>
-              <strong id="homeMaximum">— <small>/Quintal</small></strong>
-              <span class="increase" id="homeMaximumContext">Loading latest record…</span>
-            </article>
-            <article class="price-card anim-bounce anim-delay-1">
-              <div class="crop-row"><span class="crop-symbol soybean-symbol">—</span><b>Modal</b></div>
-              <strong id="homeModal">— <small>/Quintal</small></strong>
-              <span class="increase" id="homeModalContext">Loading latest record…</span>
-            </article>
+          <div class="field">
+            <label for="homeDistrict" data-i18n="field.district">District</label>
+            <select id="homeDistrict" name="district" required disabled></select>
           </div>
-
-          <article class="chart-card" id="insights">
-            <div class="chart-top">
-              <h3><span class="mini-bars" aria-hidden="true">▥</span> Modal price history</h3>
-              <b id="homeHistoryCaption">By arrival date</b>
-            </div>
-            <div class="chart-area" id="homePriceHistory" role="img" aria-label="Loading stored price history">
-              <div class="chart-empty">Loading stored price history…</div>
-            </div>
-            <p class="home-data-message" id="homeDataMessage" role="status" aria-live="polite"></p>
-          </article>
-        </div>
-
-        <aside class="ai-card anim-float anim-delay-2">
-          <div class="ai-heading"><span aria-hidden="true">✦</span><b>Price Data Information</b><strong aria-hidden="true">↗</strong></div>
-          <p>Prices are based on recorded mandi transactions. Always check the latest arrival date before making a selling decision.</p>
-        </aside>
-
-        <div class="art-leaf leaf-a anim-wiggle anim-delay-1"></div>
-        <div class="art-leaf leaf-b anim-wiggle anim-delay-2"></div>
+          <button class="btn btn-primary" type="submit" id="homeGo" disabled>
+            <span data-i18n="home.go">See prices</span><span data-icon="arrow"></span>
+          </button>
+        </form>
+        <p class="fine" data-i18n="home.fine">Prices are in ₹ per quintal. They are recorded sales, not offers.</p>
       </div>
+
+      <section class="board on-forest" id="rateBoard" aria-labelledby="boardTitle" aria-busy="true">
+        <header class="board-head">
+          <div>
+            <h2 id="boardTitle" data-i18n="board.loading">Loading latest records…</h2>
+            <p class="board-meta" id="boardMeta"></p>
+          </div>
+          <span class="board-unit" data-i18n="board.unit">₹ per quintal</span>
+        </header>
+        <ul class="board-rows" id="boardRows" aria-live="polite">
+          <li class="board-row"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></li>
+          <li class="board-row"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></li>
+          <li class="board-row"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></li>
+        </ul>
+        <div class="board-trend" id="boardTrend" hidden>
+          <p id="boardTrendTitle"></p>
+          <div id="boardSpark"></div>
+          <div class="board-trend-ends"><span id="boardTrendFrom"></span><span id="boardTrendTo"></span></div>
+        </div>
+        <p class="board-status" id="boardStatus" role="status" hidden></p>
+        <footer class="board-foot">
+          <a id="boardLink" href="mandi-prices.html"><span data-i18n="board.open">Open this mandi’s full list</span><span data-icon="arrow"></span></a>
+        </footer>
+      </section>
     </section>
 
-    <section class="benefits" aria-label="What you can do with Rate-GPT">
-      <div class="benefit-item anim-slide-in-left anim-delay-1">
-        <span class="benefit-icon" aria-hidden="true">↗</span>
-        <p>Explore recorded<br><b>mandi prices</b></p>
+    <!-- How to read a rate -->
+    <section class="read wrap" aria-labelledby="readTitle">
+      <div class="read-copy">
+        <h2 id="readTitle" data-i18n="read.title">How to read a mandi rate</h2>
+        <p class="lede" data-i18n="read.lead">Each record gives three prices for one crop on one arrival date. Start with the modal price.</p>
+        <div class="tips">
+          <h3 data-i18n="tips.title">Before you sell</h3>
+          <ul>
+            <li><span data-icon="clock"></span><span data-i18n="tip.date">Check the arrival date. An old record may not match today’s market.</span></li>
+            <li><span data-icon="pin"></span><span data-i18n="tip.compare">Compare two or three nearby mandis, then subtract transport costs.</span></li>
+            <li><span data-icon="check"></span><span data-i18n="tip.quality">Quality and moisture in your crop change the price you get.</span></li>
+          </ul>
+        </div>
       </div>
-      <div class="benefit-item anim-slide-in-left anim-delay-2">
-        <span class="benefit-icon" aria-hidden="true">▥</span>
-        <p>Filter by crop and<br><b>market location</b></p>
-      </div>
-      <div class="benefit-item anim-slide-in-left anim-delay-3">
-        <span class="benefit-icon" aria-hidden="true">₹</span>
-        <p>Review minimum, maximum<br>and <b>modal prices</b></p>
-      </div>
-      <div class="benefit-item anim-slide-in-left anim-delay-4">
-        <span class="benefit-icon" aria-hidden="true">◷</span>
-        <p>Check the reported<br><b>arrival date</b></p>
+
+      <figure class="read-figure">
+        <figcaption data-i18n="read.example">Example: wheat, ₹ per quintal</figcaption>
+        <div class="example-range" role="img" aria-label="Minimum ₹2,200, modal ₹2,400, maximum ₹2,600">
+          <div class="example-track">
+            <span class="example-fill"></span>
+            <span class="example-modal"></span>
+          </div>
+          <div class="example-ticks" aria-hidden="true">
+            <span class="tick tick-min">₹2,200</span>
+            <span class="tick tick-modal">₹2,400</span>
+            <span class="tick tick-max">₹2,600</span>
+          </div>
+        </div>
+        <dl class="example-terms">
+          <div><dt data-i18n="read.min">Minimum</dt><dd data-i18n="read.minD">The lowest price any lot sold for.</dd></div>
+          <div class="is-modal"><dt data-i18n="read.modal">Modal</dt><dd data-i18n="read.modalD">The price most lots sold at. The best single number to compare.</dd></div>
+          <div><dt data-i18n="read.max">Maximum</dt><dd data-i18n="read.maxD">The highest price paid, usually for the best quality.</dd></div>
+        </dl>
+      </figure>
+    </section>
+
+    <!-- Where the data comes from -->
+    <section class="source wrap" aria-labelledby="sourceTitle">
+      <img class="source-photo" src="Images/farmer.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async">
+      <div class="source-copy">
+        <h2 id="sourceTitle" data-i18n="source.title">Where these numbers come from</h2>
+        <p data-i18n="source.body">Rate-GPT stores prices published on the Government of India’s open data platform (AGMARKNET) and shows them as reported. It doesn’t fill in missing values or predict future prices.</p>
+        <dl class="source-status">
+          <div><dt data-i18n="source.status">Data status</dt><dd id="homeFreshness">—</dd></div>
+          <div><dt data-i18n="source.sync">Last sync</dt><dd id="homeSync">—</dd></div>
+        </dl>
+        <div class="source-actions">
+          <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="source.cta">See prices</span><span data-icon="arrow"></span></a>
+          <a class="btn" href="about.html" data-i18n="source.more">About the data</a>
+        </div>
       </div>
     </section>
   </main>
 
-  <script type="module" src="/script/home-market-preview.js"></script>
+  <footer class="site-footer"></footer>
+
   <script type="module" src="/script/global-nav.js"></script>
+  <script type="module" src="/script/home-market-preview.js"></script>
 </body>
 </html>

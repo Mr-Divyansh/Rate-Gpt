@@ -1,260 +1,256 @@
-const numberFormat = new Intl.NumberFormat("en-IN", {
-  maximumFractionDigits: 2,
-});
-const requiredTextFields = [
-  "state",
-  "district",
-  "market",
-  "commodity",
-  "arrival_date",
-];
+import { t, onLangChange } from "./i18n.js";
+import { hydrateIcons } from "./icons.js";
+import {
+  fetchFilters, fetchPrices, fetchSyncStatus, loadLocation, saveLocation,
+} from "./api.js";
+import {
+  spreadAxis, cropNames, createRange, createSparkline, formatDate, formatDateTime, formatPrice, priceNumber,
+} from "./rate-ui.js";
 
-function isPrice(value) {
-  if (value === null) return true;
-  if (
-    (typeof value !== "number" && typeof value !== "string") ||
-    (typeof value === "string" && value.trim() === "")
-  ) {
-    return false;
+const $ = (id) => document.getElementById(id);
+const BOARD_ROWS = 5;
+
+/* ---------------- finder (state → district → prices page) ---------------- */
+const finder = { states: [], districts: [], state: "", district: "" };
+
+function fill(select, values, placeholder, selected = "") {
+  select.replaceChildren(new Option(placeholder, ""));
+  for (const value of values) select.add(new Option(value, value));
+  select.value = values.includes(selected) ? selected : "";
+}
+
+function renderFinder() {
+  const stateSelect = $("homeState");
+  const districtSelect = $("homeDistrict");
+  fill(stateSelect, finder.states, t("field.statePh"), finder.state);
+  fill(districtSelect, finder.districts, t("field.districtPh"), finder.district);
+  stateSelect.disabled = finder.states.length === 0;
+  districtSelect.disabled = !finder.state || finder.districts.length === 0;
+  $("homeGo").disabled = !finder.state || !finder.district;
+}
+
+async function loadDistricts(state) {
+  finder.state = state;
+  finder.district = "";
+  finder.districts = [];
+  renderFinder();
+  if (!state) return;
+  try {
+    finder.districts = (await fetchFilters({ state })).districts;
+  } catch (error) {
+    console.error("[Home] Could not load districts:", error);
   }
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0;
+  renderFinder();
 }
 
-function isArrivalDate(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
+async function initFinder() {
+  try {
+    finder.states = (await fetchFilters()).states;
+  } catch (error) {
+    console.error("[Home] Could not load states:", error);
+    renderFinder();
+    return;
   }
-  const date = new Date(`${value}T00:00:00Z`);
-  return (
-    !Number.isNaN(date.getTime()) &&
-    date.toISOString().slice(0, 10) === value
-  );
-}
+  const saved = loadLocation();
+  if (saved && finder.states.includes(saved.state)) {
+    await loadDistricts(saved.state);
+    if (finder.districts.includes(saved.district)) finder.district = saved.district;
+  }
+  renderFinder();
 
-function isPriceRecord(record) {
-  return (
-    record !== null &&
-    typeof record === "object" &&
-    requiredTextFields.every(
-      (field) => typeof record[field] === "string" && record[field].trim(),
-    ) &&
-    isArrivalDate(record.arrival_date) &&
-    isPrice(record.min_price) &&
-    isPrice(record.max_price) &&
-    isPrice(record.modal_price)
-  );
-}
-
-async function requestPrices(query) {
-  const response = await fetch(`/api/v1/prices?${query}`, {
-    headers: { Accept: "application/json" },
+  $("homeState").addEventListener("change", (e) => loadDistricts(e.currentTarget.value));
+  $("homeDistrict").addEventListener("change", (e) => {
+    finder.district = e.currentTarget.value;
+    $("homeGo").disabled = !finder.state || !finder.district;
   });
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    throw new Error(
-      response.ok
-        ? "The market data service returned an unexpected response."
-        : `The market data service returned HTTP ${response.status}.`,
-    );
-  }
-
-  const payload = await response.json();
-  if (!response.ok || payload?.success !== true) {
-    throw new Error(
-      payload?.error?.message ||
-        `The market data request failed (HTTP ${response.status}).`,
-    );
-  }
-  if (!Array.isArray(payload.data) || !payload.data.every(isPriceRecord)) {
-    throw new Error("The market data service returned invalid price records.");
-  }
-  return payload.data;
+  $("homeFinder").addEventListener("submit", () => {
+    // The form submits normally (GET → mandi-prices.html?state=…&district=…); remember it first.
+    saveLocation({ state: finder.state, district: finder.district });
+  });
 }
 
-function formatPrice(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  const price = Number(value);
-  return Number.isFinite(price) && price >= 0
-    ? `₹${numberFormat.format(price)}`
-    : "—";
-}
+/* ---------------- rate board ---------------- */
+let board = null; // { latest, rows, history } | { error } | { empty: true }
 
-function formatDate(value, options = { day: "2-digit", month: "short" }) {
-  const date = new Date(`${value}T00:00:00Z`);
-  if (
-    Number.isNaN(date.getTime()) ||
-    date.toISOString().slice(0, 10) !== value
-  ) {
-    return "—";
+function pickRows(records) {
+  const hasPrice = (r) =>
+    [r.min_price, r.max_price, r.modal_price].some((v) => priceNumber(v) !== null);
+  const usable = records.filter(hasPrice);
+  const latest = usable[0];
+  if (!latest) return { latest: null, rows: [] };
+  const seen = new Set();
+  const rows = [];
+  for (const record of usable) {
+    if (record.market !== latest.market || record.state !== latest.state) continue;
+    const key = `${record.commodity}|${record.variety ?? ""}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push(record);
+    if (rows.length === BOARD_ROWS) break;
   }
-  return date.toLocaleDateString("en-IN", { ...options, timeZone: "UTC" });
+  return { latest, rows };
 }
 
-function setPriceValue(id, value) {
-  const element = document.getElementById(id);
-  element.replaceChildren(document.createTextNode(formatPrice(value)));
-  const unit = document.createElement("small");
-  unit.textContent = "/Quintal";
-  element.append(" ", unit);
-}
+function boardRow(record, axis) {
+  const li = document.createElement("li");
+  li.className = "board-row";
 
-function setUnavailable(message) {
-  document.getElementById("homeMarketName").textContent =
-    "Stored mandi prices unavailable";
-  for (const id of ["homeMinimum", "homeMaximum", "homeModal"]) {
-    setPriceValue(id, null);
+  const names = cropNames(record.commodity);
+  const crop = document.createElement("div");
+  crop.className = "crop-name";
+  const strong = document.createElement("strong");
+  strong.textContent = names.primary;
+  crop.append(strong);
+  const second = [names.secondary, record.variety].filter(Boolean).join(" · ");
+  if (second) {
+    const small = document.createElement("small");
+    small.textContent = second;
+    crop.append(small);
   }
-  for (const id of [
-    "homeMinimumContext",
-    "homeMaximumContext",
-    "homeModalContext",
-  ]) {
-    document.getElementById(id).textContent = "No live value shown";
-  }
-  document.getElementById("homeHistoryCaption").textContent =
-    "Stored arrivals";
-  const history = document.getElementById("homePriceHistory");
-  history.setAttribute("aria-label", message);
-  const empty = document.createElement("div");
-  empty.className = "chart-empty";
-  empty.textContent = message;
-  history.replaceChildren(empty);
-  const status = document.getElementById("homeDataMessage");
-  status.classList.add("is-error");
-  status.textContent = "Open Mandi Prices to retry or choose a market.";
+
+  const modal = document.createElement("div");
+  modal.className = "board-modal";
+  const price = document.createElement("strong");
+  price.textContent = formatPrice(record.modal_price);
+  const label = document.createElement("small");
+  label.textContent = t("board.modal");
+  modal.append(price, label);
+
+  li.append(crop, createRange(record, axis), modal);
+  return li;
 }
 
-function renderHistory(records, record) {
-  const history = document.getElementById("homePriceHistory");
-  const observations = records
-    .filter((item) => item.modal_price !== null && item.modal_price !== "")
-    .slice(0, 8);
+function renderBoard() {
+  const root = $("rateBoard");
+  const rows = $("boardRows");
+  const status = $("boardStatus");
+  const trend = $("boardTrend");
+  const title = $("boardTitle");
+  root.setAttribute("aria-busy", "false");
+  status.hidden = true;
+  status.replaceChildren();
+  trend.hidden = true;
 
-  if (observations.length === 0) {
-    history.setAttribute(
-      "aria-label",
-      `No modal-price history is available for ${record.commodity} at ${record.market}.`,
-    );
-    const empty = document.createElement("div");
-    empty.className = "chart-empty";
-    empty.textContent = "No modal-price history is available for this crop and mandi.";
-    history.replaceChildren(empty);
-    document.getElementById("homeHistoryCaption").textContent =
-      "No stored arrivals";
+  if (!board) return;
+
+  if (board.error || board.empty) {
+    title.textContent = t("board.titleNone");
+    $("boardLink").hidden = true;
+    $("boardMeta").textContent = "";
+    rows.replaceChildren();
+    status.hidden = false;
+    status.textContent = board.error
+      ? t("board.error", { reason: board.error })
+      : t("board.empty");
+    if (board.error) {
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "btn";
+      retry.textContent = t("board.retry");
+      retry.addEventListener("click", () => {
+        board = null;
+        root.setAttribute("aria-busy", "true");
+        loadBoard();
+      });
+      status.append(document.createElement("br"), retry);
+    }
     return;
   }
 
-  const prices = observations.map((item) => Number(item.modal_price));
-  const maximum = Math.max(...prices);
-  history.setAttribute(
-    "aria-label",
-    `Modal prices for ${record.commodity} at ${record.market}, by arrival date.`,
-  );
-  const fragment = document.createDocumentFragment();
-  observations.forEach((item, index) => {
-    const point = document.createElement("div");
-    point.className = "home-history-point";
-    point.setAttribute(
-      "aria-label",
-      `${formatDate(item.arrival_date, {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })}: ${formatPrice(item.modal_price)} per quintal`,
-    );
-
-    const value = document.createElement("span");
-    value.className = "home-history-value";
-    value.textContent = formatPrice(item.modal_price);
-
-    const bar = document.createElement("span");
-    bar.className = "home-history-bar";
-    const height = maximum > 0 ? (prices[index] / maximum) * 70 : 0;
-    bar.style.height = `${Math.max(12, height)}px`;
-    bar.setAttribute("aria-hidden", "true");
-
-    const date = document.createElement("span");
-    date.className = "home-history-date";
-    date.textContent = formatDate(item.arrival_date);
-    point.append(value, bar, date);
-    fragment.append(point);
+  $("boardLink").hidden = false;
+  const { latest, rows: records, history } = board;
+  title.textContent = t("board.title", { market: latest.market });
+  $("boardMeta").textContent = t("board.meta", {
+    district: latest.district,
+    state: latest.state,
+    date: formatDate(latest.arrival_date),
   });
-  history.replaceChildren(fragment);
-  document.getElementById("homeHistoryCaption").textContent =
-    `${observations.length} stored arrival${observations.length === 1 ? "" : "s"}`;
-}
+  rows.replaceChildren(...records.map((r) => boardRow(r, spreadAxis(r))));
 
-async function loadMarketPreview() {
-  const status = document.getElementById("homeDataMessage");
-  status.classList.remove("is-error");
-  status.textContent = "";
-  try {
-    const latestRecords = await requestPrices(
-      new URLSearchParams({ limit: "30", sort: "date_desc" }),
-    );
-    const latest = latestRecords.find(
-      (record) =>
-        record.min_price !== null && record.min_price !== undefined ||
-        record.max_price !== null && record.max_price !== undefined ||
-        record.modal_price !== null && record.modal_price !== undefined,
-    );
-    if (!latest) {
-      setUnavailable("No stored mandi price records are available yet.");
-      return;
-    }
+  const params = new URLSearchParams({
+    state: latest.state, district: latest.district, market: latest.market,
+  });
+  $("boardLink").href = `mandi-prices.html?${params}`;
 
-    document.getElementById("homeMarketName").textContent =
-      `${latest.market} · ${latest.district}, ${latest.state}`;
-    setPriceValue("homeMinimum", latest.min_price);
-    setPriceValue("homeMaximum", latest.max_price);
-    setPriceValue("homeModal", latest.modal_price);
-    const context = `${latest.commodity} · ${formatDate(latest.arrival_date, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })}`;
-    for (const id of [
-      "homeMinimumContext",
-      "homeMaximumContext",
-      "homeModalContext",
-    ]) {
-      document.getElementById(id).textContent = context;
-    }
-
-    try {
-      const query = new URLSearchParams({
-        state: latest.state,
-        district: latest.district,
-        market: latest.market,
-        commodity: latest.commodity,
-        limit: "8",
-        sort: "date_desc",
-      });
-      const history = await requestPrices(query);
-      renderHistory(history, latest);
-    } catch (error) {
-      console.error("[Home] Could not load modal price history:", error);
-      const history = document.getElementById("homePriceHistory");
-      history.setAttribute("aria-label", "Stored price history is unavailable.");
-      const empty = document.createElement("div");
-      empty.className = "chart-empty";
-      empty.textContent = "Price history is temporarily unavailable.";
-      history.replaceChildren(empty);
-      document.getElementById("homeHistoryCaption").textContent =
-        "History unavailable";
-      status.classList.add("is-error");
-      status.textContent =
-        "The latest stored price is shown; its history could not be loaded.";
-    }
-  } catch (error) {
-    console.error("[Home] Could not load stored mandi prices:", error);
-    setUnavailable(
-      error instanceof Error
-        ? error.message
-        : "Unable to load stored mandi prices.",
-    );
+  trend.hidden = false;
+  const spark = $("boardSpark");
+  if (history && history.length >= 2) {
+    $("boardTrendTitle").textContent = t("board.trend", {
+      n: history.length,
+      crop: cropNames(latest.commodity).primary,
+    });
+    spark.replaceChildren(createSparkline(history));
+    $("boardTrendFrom").textContent = `${formatDate(history[0].date, { day: "numeric", month: "short" })} · ${formatPrice(history[0].value)}`;
+    $("boardTrendTo").textContent = `${formatDate(history.at(-1).date, { day: "numeric", month: "short" })} · ${formatPrice(history.at(-1).value)}`;
+  } else {
+    $("boardTrendTitle").textContent = t("board.trendEmpty");
+    spark.replaceChildren();
+    $("boardTrendFrom").textContent = "";
+    $("boardTrendTo").textContent = "";
   }
 }
 
-loadMarketPreview();
+async function loadBoard() {
+  try {
+    const { data } = await fetchPrices({ limit: "40", sort: "date_desc" });
+    const { latest, rows } = pickRows(data);
+    if (!latest) {
+      board = { empty: true };
+      renderBoard();
+      return;
+    }
+    board = { latest, rows, history: null };
+    renderBoard();
+    try {
+      const { data: past } = await fetchPrices({
+        state: latest.state, district: latest.district, market: latest.market,
+        commodity: latest.commodity, limit: "8", sort: "date_desc",
+      });
+      board.history = past
+        .filter((r) => priceNumber(r.modal_price) !== null)
+        .map((r) => ({ date: r.arrival_date, value: priceNumber(r.modal_price) }))
+        .reverse();
+    } catch (error) {
+      console.error("[Home] Could not load price history:", error);
+    }
+    renderBoard();
+  } catch (error) {
+    console.error("[Home] Could not load stored mandi prices:", error);
+    board = { error: error instanceof Error ? error.message : "Unknown error." };
+    renderBoard();
+  }
+}
+
+/* ---------------- data status ---------------- */
+let sync = null;
+function renderSync() {
+  if (!sync) return;
+  $("homeFreshness").textContent = sync.freshnessStatus
+    ? t(`fresh.${sync.freshnessStatus}`) === `fresh.${sync.freshnessStatus}`
+      ? sync.freshnessStatus
+      : t(`fresh.${sync.freshnessStatus}`)
+    : "—";
+  $("homeSync").textContent = sync.lastSuccessfulSync?.completed_at
+    ? formatDateTime(sync.lastSuccessfulSync.completed_at)
+    : t("sync.never");
+}
+async function loadSync() {
+  try {
+    sync = await fetchSyncStatus();
+    renderSync();
+  } catch (error) {
+    console.error("[Home] Could not load sync status:", error);
+    $("homeFreshness").textContent = t("sync.none");
+  }
+}
+
+onLangChange(() => {
+  renderFinder();
+  renderBoard();
+  renderSync();
+  hydrateIcons();
+});
+
+initFinder();
+loadBoard();
+loadSync();

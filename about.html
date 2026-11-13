@@ -1,112 +1,71 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f7f7f0">
-    <meta name="description" content="Learn how Rate-GPT presents stored mandi price records, what the data can tell you, and where its limitations are.">
-    <title>About Us | Rate-GPT</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/global-nav.css">
-    <link rel="stylesheet" href="style/about.css">
-  </head>
-  <body class="about-page">
-    <a class="skip-link" href="#main-content">Skip to main content</a>
-    <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Rate-GPT home">
-        <img src="Images/Logo.webp" alt="Rate-GPT" width="42" height="42">
-      </a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="mandi-prices.html">Mandi Prices</a>
-        <a class="active" href="about.html" aria-current="page">About Us</a>
-      </nav>
-    </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f0">
+  <meta name="description" content="Learn how Rate-GPT presents stored mandi price records, what the data can tell you, and where its limitations are.">
+  <title data-i18n="about.doc">About | Rate-GPT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/base.css">
+  <link rel="stylesheet" href="style/about.css">
+</head>
+<body class="page-about">
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  <header class="site-header"></header>
 
-    <main id="main-content" tabindex="-1">
-      <section class="about-hero">
-        <div class="about-hero-inner">
-          <div class="about-hero-copy">
-            <span class="about-eyebrow"><span aria-hidden="true"></span> A CLEARER VIEW OF MARKET RECORDS</span>
-            <h1>Better information<br>for a more <em>informed</em> sale.</h1>
-            <p>Rate-GPT makes stored mandi price records easier to explore by crop and location, so farmers and other visitors can review market information in one place.</p>
-            <a class="about-button" href="mandi-prices.html">Explore mandi prices <span aria-hidden="true">→</span></a>
-          </div>
-          <div class="about-hero-note">
-            <span class="note-mark" aria-hidden="true">₹</span>
-            <p>Market prices are observations, not promises. Check the arrival date, compare your local conditions and confirm details at the mandi.</p>
-          </div>
-        </div>
-      </section>
+  <main id="main-content" tabindex="-1">
+    <section class="about-hero wrap">
+      <div class="about-hero-copy">
+        <h1 data-i18n="about.title">Better information, better sale.</h1>
+        <p class="lede" data-i18n="about.lede">Rate-GPT makes recorded mandi prices easy to search by crop and location, so you can compare markets in one place.</p>
+        <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="about.cta">Explore mandi prices</span><span data-icon="arrow"></span></a>
+      </div>
+      <p class="about-note" data-i18n="about.note">Market prices are observations, not promises. Check the arrival date and confirm details at the mandi.</p>
+    </section>
 
-      <section class="about-content about-intro" aria-labelledby="purpose-heading">
-        <div class="about-section-label">WHY RATE-GPT EXISTS</div>
-        <div class="about-intro-grid">
-          <h2 id="purpose-heading">Useful market information should be easier to find and understand.</h2>
-          <div class="about-body-copy">
-            <p>Mandi prices are reported across different markets and dates. Rate-GPT is designed to bring those records into a searchable view, helping visitors find observations for a crop, state, district and mandi.</p>
-            <p>The aim is practical price discovery—not to predict what a crop will sell for or replace a farmer’s judgement. Use the records as one input alongside crop quality, transport costs, local demand and current market advice.</p>
-          </div>
-        </div>
-      </section>
+    <section class="about-block wrap" aria-labelledby="whyTitle">
+      <h2 id="whyTitle" data-i18n="about.why.title">Why Rate-GPT exists</h2>
+      <div class="prose">
+        <p data-i18n="about.why.p1">Mandi prices are reported across many markets and dates, which makes them hard to compare. Rate-GPT brings those records into one searchable view for any crop, state, district and mandi.</p>
+        <p data-i18n="about.why.p2">The goal is practical price discovery. Rate-GPT doesn’t predict what a crop will sell for or replace your own judgement. Use the records alongside crop quality, transport costs and local demand.</p>
+      </div>
+    </section>
 
-      <section class="about-content about-process" aria-labelledby="process-heading">
-        <div class="about-section-heading">
-          <div>
-            <div class="about-section-label">HOW THE PRICE VIEW WORKS</div>
-            <h2 id="process-heading">From market record to a clearer comparison.</h2>
-          </div>
-          <p>Browse only the information the service has received and stored.</p>
-        </div>
-        <div class="about-step-grid">
-          <article class="about-step">
-            <span class="step-number">01</span>
-            <h3>Choose a location</h3>
-            <p>Filter available records by state and district, then select a mandi from the returned results.</p>
-          </article>
-          <article class="about-step">
-            <span class="step-number">02</span>
-            <h3>Find a crop</h3>
-            <p>Search the selected mandi’s stored observations and sort the available results.</p>
-          </article>
-          <article class="about-step">
-            <span class="step-number">03</span>
-            <h3>Review the details</h3>
-            <p>See minimum, maximum and modal prices with the recorded arrival date. Prices are displayed in rupees per quintal.</p>
-          </article>
-        </div>
-      </section>
+    <section class="about-block wrap" aria-labelledby="howTitle">
+      <h2 id="howTitle" data-i18n="about.how.title">How it works</h2>
+      <ol class="steps">
+        <li><span class="step-n" aria-hidden="true">1</span><div><h3 data-i18n="about.step1.t">Choose a location</h3><p data-i18n="about.step1.d">Pick a state and district, then a mandi from the list.</p></div></li>
+        <li><span class="step-n" aria-hidden="true">2</span><div><h3 data-i18n="about.step2.t">Find a crop</h3><p data-i18n="about.step2.d">Search the mandi’s stored records and sort them by date or price.</p></div></li>
+        <li><span class="step-n" aria-hidden="true">3</span><div><h3 data-i18n="about.step3.t">Compare the rates</h3><p data-i18n="about.step3.d">Read the minimum, maximum and modal price with the arrival date. Prices are in ₹ per quintal.</p></div></li>
+      </ol>
+    </section>
 
-      <section class="about-content about-source" aria-labelledby="source-heading">
-        <div class="source-panel">
-          <div class="source-icon" aria-hidden="true">↗</div>
-          <div>
-            <div class="about-section-label">DATA SOURCE &amp; TRANSPARENCY</div>
-            <h2 id="source-heading">Records are served by the Rate-GPT backend.</h2>
-            <p>The project identifies the Government of India Open Government Data (OGD) platform and AGMARKNET resource as its intended upstream source. The backend stores records from successful synchronizations and the website displays the values it returns.</p>
-            <p>Availability and freshness depend on the upstream source and successful syncs. A sync time is not the same as a market arrival date; use the date shown with each price record. Missing values are shown as unavailable rather than estimated.</p>
-            <a class="source-link" href="https://data.gov.in/" target="_blank" rel="noopener noreferrer">Visit data.gov.in <span aria-hidden="true">↗</span></a>
-          </div>
+    <section class="about-block wrap" aria-labelledby="srcTitle">
+      <div class="panel">
+        <h2 id="srcTitle" data-i18n="about.src.title">Data source and transparency</h2>
+        <div class="prose">
+          <p data-i18n="about.src.p1">The intended source is the Government of India Open Government Data platform (AGMARKNET). Rate-GPT stores records from successful syncs and shows the values it holds.</p>
+          <p data-i18n="about.src.p2">Freshness depends on the source and on successful syncs. A sync time is not an arrival date, so use the date on each record. Missing values show as unavailable and are never estimated.</p>
+          <a class="btn" href="https://data.gov.in/" target="_blank" rel="noopener noreferrer"><span data-i18n="about.src.link">Visit data.gov.in</span><span data-icon="external" data-size="16"></span></a>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="about-content about-limitations" aria-labelledby="limits-heading">
-        <div>
-          <div class="about-section-label">A NOTE ON LIMITATIONS</div>
-          <h2 id="limits-heading">Use records as a guide, not a guarantee.</h2>
-        </div>
-        <ul>
-          <li>Prices reflect reported records for a specific crop, market and arrival date; they may not match a current offer.</li>
-          <li>Not every mandi, crop or date will have data available.</li>
-          <li>Rate-GPT does not guarantee a sale price and does not account for quality, fees, transport or negotiation.</li>
-          <li>Confirm current rates and trading conditions with the relevant mandi before making a decision.</li>
-        </ul>
-      </section>
-    </main>
+    <section class="about-block wrap" aria-labelledby="limitsTitle">
+      <h2 id="limitsTitle" data-i18n="about.limits.title">Limits to keep in mind</h2>
+      <ul class="limits">
+        <li data-i18n="about.limit1">Prices are reported for one crop, market and arrival date. They may not match a current offer.</li>
+        <li data-i18n="about.limit2">Not every mandi, crop or date has data.</li>
+        <li data-i18n="about.limit3">Rate-GPT doesn’t guarantee a sale price and doesn’t account for quality, fees, transport or negotiation.</li>
+        <li data-i18n="about.limit4">Confirm current rates with the mandi before you decide.</li>
+      </ul>
+    </section>
+  </main>
 
-    <footer class="site-footer"></footer>
-    <script type="module" src="/script/global-nav.js"></script>
-  </body>
+  <footer class="site-footer"></footer>
+  <script type="module" src="/script/global-nav.js"></script>
+</body>
 </html>
