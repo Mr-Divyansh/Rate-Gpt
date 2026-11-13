@@ -129,7 +129,7 @@ export function normalizeArrivalDate(
 export function parseReportedTotal(value: unknown): number | null {
   if (typeof value !== "number" && typeof value !== "string") return null;
   const normalized = String(value).trim().replace(/,/g, "");
-  if (!/^\\d+$/.test(normalized)) return null;
+  if (!/^\d+$/.test(normalized)) return null;
   const total = Number(normalized);
   return Number.isSafeInteger(total) && total >= 0 ? total : null;
 }
