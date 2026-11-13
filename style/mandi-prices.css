@@ -100,3 +100,84 @@
   .search-wrap kbd { display: none; }
   .search-wrap input { padding-right: 14px; }
 }
+
+
+/* ---------- mandi finder and results: practical, responsive polish ---------- */
+.page-prices { background: #f7f8f4; }
+.page-prices .page-head { padding-top: clamp(30px, 4.5vw, 52px); }
+.page-prices .page-head h1 {
+  color: #173c2c;
+  font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+  letter-spacing: -.035em;
+}
+.page-prices .page-head .lede { color: #58665e; line-height: 1.55; }
+.page-prices .sync {
+  border-radius: 9px;
+  padding: 9px 12px;
+  box-shadow: none;
+  font-size: .86rem;
+}
+.page-prices .finder-panel {
+  gap: 20px;
+  border: 1px solid #e2e8e0;
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+.page-prices .finder-selects { grid-template-columns: repeat(2, minmax(0, 300px)); }
+.page-prices .chip { border-radius: 9px; min-height: 42px; }
+.page-prices .chip[aria-pressed="true"] { background: #174d38; }
+.page-prices .results { gap: 16px; }
+.page-prices .results-head h2 { color: #173c2c; font-size: clamp(1.55rem, 3vw, 2rem); }
+.page-prices .toolbar { gap: 10px; }
+.page-prices .toolbar .btn { border-radius: 9px; }
+.page-prices .table-wrap {
+  border: 1px solid #e1e7df;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+.page-prices .price-table th {
+  padding-block: 15px;
+  background: #f0f4ef;
+  color: #45564b;
+  font-size: .84rem;
+  letter-spacing: .015em;
+}
+.page-prices .price-table td { padding-block: 15px; }
+.page-prices .price-table tbody tr:nth-child(even) { background: #fcfdfb; }
+.page-prices .price-table tbody tr:hover { background: #f1f6f0; }
+.page-prices .modal-price strong { box-shadow: none; color: #12613e; }
+.page-prices .price-card {
+  gap: 12px;
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(23,55,38,.045);
+}
+.page-prices .note {
+  border-left-width: 3px;
+  border-radius: 12px;
+  background: #edf3eb;
+}
+@media (max-width: 820px) {
+  .page-prices .results { padding-top: 34px; }
+  .page-prices .price-card { padding: 15px; }
+}
+@media (max-width: 640px) {
+  .page-prices .page-head { align-items: flex-start; gap: 12px; padding-block: 28px 18px; }
+  .page-prices .page-head-copy { gap: 7px; }
+  .page-prices .page-head h1 { font-size: clamp(2rem, 9vw, 2.7rem); }
+  .page-prices .page-head .lede { font-size: .98rem; }
+  .page-prices .finder-panel { padding: 15px; gap: 16px; }
+  .page-prices .finder-selects { grid-template-columns: 1fr; gap: 12px; }
+  .page-prices .chips { gap: 7px; }
+  .page-prices .chip { min-height: 40px; padding-inline: 12px; font-size: .9rem; }
+  .page-prices .results-head { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .page-prices .toolbar { grid-template-columns: minmax(0,1fr); }
+  .page-prices .search-field, .page-prices .sort-field, .page-prices .toolbar .btn { grid-column: 1; }
+  .page-prices .toolbar .btn { width: 100%; }
+  .page-prices .price-card-top { align-items: flex-start; }
+  .page-prices .price-card .modal-price strong { font-size: 1.25rem; }
+  .page-prices .note { margin-top: 34px; padding: 19px; }
+}
+@media (max-width: 360px) {
+  .page-prices .price-card { padding: 12px; }
+  .page-prices .price-card-meta { font-size: .85rem; }
+}
