@@ -16,7 +16,7 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       success: false,
-      error: { code: 'FUNCTION_ERROR', message: String(err?.message || err) },
+      error: { code: 'FUNCTION_ERROR', message: 'The service is temporarily unavailable. Please try again later.' },
     }));
   }
 }
