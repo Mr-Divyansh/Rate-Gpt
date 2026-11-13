@@ -418,7 +418,7 @@ async function runMandiPriceSync(
     });
 
     return {
-      success: validRecords.length > 0,
+      success: validRecords.length > 0 && paginationComplete,
       status,
       message: paginationCapped
         ? `Partially synced ${validRecords.length} records (${inserted} new, ${updated} updated) across ${pagesFetched} page(s); the pagination safety cap was reached.`
