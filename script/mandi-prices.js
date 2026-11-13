@@ -1,7 +1,7 @@
 import { t, tCount, onLangChange } from "./i18n.js";
 import { hydrateIcons, icon } from "./icons.js";
 import {
-  fetchFilters, fetchPrices, fetchPriceTrend, fetchSyncStatus,
+  fetchFilters, fetchPrices, fetchSyncStatus,
   loadLocation, saveLocation, loadRecent, pushRecent,
 } from "./api.js";
 import {
@@ -25,12 +25,6 @@ const state = {
   controller: null,
   sync: null,
   syncReceivedAt: 0,
-  trend: [],
-  trendCrop: "",
-  trendRange: 30,
-  trendLoading: false,
-  trendError: "",
-  trendController: null,
 };
 let navToken = 0; // guards async state → district → mandi chains against fast re-selection
 
@@ -172,9 +166,6 @@ async function chooseDistrict(name, { market = "" } = {}) {
 
 function selectMandi(market) {
   state.market = market;
-  state.trendController?.abort();
-  state.trendCrop = "";
-  state.trend = [];
   const entry = { ...state.location, market };
   saveLocation(entry);
   pushRecent(entry);
@@ -370,190 +361,9 @@ function renderResults() {
   $("loadMore").disabled = state.loading;
   $("priceMessage").textContent = announcement;
   renderError();
-  addTrendOptions();
 }
 
 
-/* ============================ historical trend ============================ */
-function addTrendOptions() {
-  const select = $("trendCropSelect");
-  if (!select) return;
-  const crops = [...new Set(state.records.map((record) => record.commodity).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b));
-  const preferred = crops.includes(state.trendCrop) ? state.trendCrop : crops[0] || "";
-  const changed = preferred !== state.trendCrop;
-  state.trendCrop = preferred;
-  select.replaceChildren(new Option("Select crop", ""));
-  for (const crop of crops) select.add(new Option(crop, crop));
-  select.value = preferred;
-  select.disabled = crops.length === 0 || !state.market;
-  if (preferred && changed) loadTrend();
-  else if (!preferred) {
-    state.trendController?.abort();
-    state.trend = [];
-    renderTrend();
-  }
-}
-
-function trendDate(daysAgo) {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() - daysAgo);
-  return date.toISOString().slice(0, 10);
-}
-
-function renderTrend() {
-  const chart = $("trendChart");
-  const status = $("trendStatus");
-  const stats = $("trendStats");
-  if (!chart || !status || !stats) return;
-  chart.replaceChildren();
-  stats.replaceChildren();
-  const records = state.trend
-    .filter((record) => Number.isFinite(Number(record.modal_price)) && record.modal_price !== null)
-    .sort((a, b) => String(a.arrival_date).localeCompare(String(b.arrival_date)));
-  if (state.trendLoading) {
-    status.textContent = "Loading recorded price history…";
-    return;
-  }
-  if (state.trendError) {
-    status.textContent = state.trendError;
-    return;
-  }
-  if (!state.market || !state.trendCrop) {
-    status.textContent = "Choose a mandi and crop to view its price history.";
-    return;
-  }
-  if (!records.length) {
-    status.textContent = "No historical records are stored for this crop and mandi yet. The chart will grow as verified daily records are collected.";
-    return;
-  }
-
-  const values = records.map((record) => Number(record.modal_price));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const first = values[0];
-  const last = values[values.length - 1];
-  const change = last - first;
-  const changePct = first > 0 ? (change / first) * 100 : null;
-  const number = (value) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
-  const metric = (label, value, detail = "") => {
-    const item = document.createElement("div");
-    item.className = "trend-stat";
-    const name = document.createElement("span");
-    name.textContent = label;
-    const strong = document.createElement("strong");
-    strong.textContent = value;
-    item.append(name, strong);
-    if (detail) {
-      const small = document.createElement("small");
-      small.textContent = detail;
-      item.append(small);
-    }
-    stats.append(item);
-  };
-  metric("Latest modal price", `₹${number(last)}`, formatDate(records.at(-1).arrival_date));
-  metric("Period high", `₹${number(max)}`);
-  metric("Period low", `₹${number(min)}`);
-  metric("Change", `${change > 0 ? "+" : ""}₹${number(change)}`, changePct === null ? "" : `${changePct > 0 ? "+" : ""}${changePct.toFixed(1)}% across recorded dates`);
-
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 720 250");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", `${state.trendCrop} modal price history at ${state.market}`);
-  svg.classList.add("trend-svg");
-  const left = 58, right = 690, top = 18, bottom = 194;
-  const spread = Math.max(max - min, Math.abs(max) * 0.04, 1);
-  const low = min - spread * 0.14;
-  const high = max + spread * 0.14;
-  const x = (index) => records.length === 1 ? (left + right) / 2 : left + (index / (records.length - 1)) * (right - left);
-  const y = (value) => bottom - ((value - low) / (high - low)) * (bottom - top);
-  for (let i = 0; i < 4; i += 1) {
-    const yy = top + (i / 3) * (bottom - top);
-    const grid = document.createElementNS(ns, "line");
-    grid.setAttribute("x1", left); grid.setAttribute("x2", right);
-    grid.setAttribute("y1", yy); grid.setAttribute("y2", yy);
-    grid.setAttribute("class", "trend-grid");
-    svg.append(grid);
-    const label = document.createElementNS(ns, "text");
-    label.setAttribute("x", left - 10); label.setAttribute("y", yy + 4);
-    label.setAttribute("text-anchor", "end"); label.setAttribute("class", "trend-axis-label");
-    label.textContent = number(high - (i / 3) * (high - low));
-    svg.append(label);
-  }
-  if (records.length > 1) {
-    const area = document.createElementNS(ns, "path");
-    const points = records.map((record, index) => `${x(index)},${y(Number(record.modal_price))}`);
-    area.setAttribute("d", `M ${points[0]} L ${points.slice(1).join(" L ")} L ${right},${bottom} L ${left},${bottom} Z`);
-    area.setAttribute("class", "trend-area");
-    svg.append(area);
-    const line = document.createElementNS(ns, "path");
-    line.setAttribute("d", `M ${points.join(" L ")}`);
-    line.setAttribute("class", "trend-line");
-    svg.append(line);
-  }
-  records.forEach((record, index) => {
-    const dot = document.createElementNS(ns, "circle");
-    dot.setAttribute("cx", x(index)); dot.setAttribute("cy", y(Number(record.modal_price)));
-    dot.setAttribute("r", records.length === 1 ? "6" : "4");
-    dot.setAttribute("class", "trend-point");
-    const title = document.createElementNS(ns, "title");
-    title.textContent = `${formatDate(record.arrival_date)}: ₹${number(Number(record.modal_price))}/quintal`;
-    dot.append(title);
-    svg.append(dot);
-  });
-  [records[0], records[Math.floor((records.length - 1) / 2)], records.at(-1)]
-    .filter((record, index, list) => list.findIndex((item) => item.arrival_date === record.arrival_date) === index)
-    .forEach((record, index, list) => {
-      const recordIndex = records.indexOf(record);
-      const label = document.createElementNS(ns, "text");
-      label.setAttribute("x", x(recordIndex));
-      label.setAttribute("y", 226);
-      label.setAttribute("text-anchor", index === 0 ? "start" : index === list.length - 1 ? "end" : "middle");
-      label.setAttribute("class", "trend-axis-label");
-      label.textContent = formatDate(record.arrival_date);
-      svg.append(label);
-    });
-  chart.append(svg);
-  status.textContent = records.length === 1
-    ? "1 verified arrival date is available. More points will appear after additional daily records are collected."
-    : `Showing ${records.length} verified arrival records. Prices are modal prices in ₹ per quintal.`;
-}
-
-async function loadTrend() {
-  if (!state.market || !state.trendCrop) {
-    state.trend = [];
-    renderTrend();
-    return;
-  }
-  state.trendController?.abort();
-  const controller = new AbortController();
-  state.trendController = controller;
-  state.trendLoading = true;
-  state.trendError = "";
-  renderTrend();
-  try {
-    const records = await fetchPriceTrend({
-      commodity: state.trendCrop,
-      market: state.market,
-      state: state.location.state,
-      district: state.location.district,
-      from: trendDate(state.trendRange),
-      to: new Date().toISOString().slice(0, 10),
-    }, { signal: controller.signal });
-    if (controller.signal.aborted) return;
-    state.trend = records;
-  } catch (error) {
-    if (controller.signal.aborted) return;
-    state.trendError = errorText(error, "Unable to load price history.");
-  } finally {
-    if (state.trendController === controller) {
-      state.trendLoading = false;
-      renderTrend();
-    }
-  }
-}
 
 function renderError() {
   const box = $("priceError");
@@ -678,14 +488,6 @@ function bind() {
     state.sort = "date_desc";
     loadPrices();
   });
-  $("trendCropSelect")?.addEventListener("change", (event) => { state.trendCrop = event.currentTarget.value; loadTrend(); });
-  $("trendRange")?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-days]");
-    if (!button) return;
-    state.trendRange = Number(button.dataset.days);
-    $("trendRange").querySelectorAll("button").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
-    loadTrend();
-  });
   $("loadMore").addEventListener("click", () => {
     state.meta.offset += state.meta.limit;
     loadPrices({ append: true });
@@ -704,7 +506,6 @@ function bind() {
   onLangChange(() => {
     renderFinder();
     renderResults();
-    renderTrend();
     renderSync();
     hydrateIcons();
   });
