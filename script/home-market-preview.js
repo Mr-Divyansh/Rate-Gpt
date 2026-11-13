@@ -1,16 +1,19 @@
 import { t, onLangChange } from "./i18n.js";
 import { hydrateIcons } from "./icons.js";
 import {
-  fetchFilters, fetchPrices, fetchSyncStatus, loadLocation, saveLocation,
+  fetchFilters, fetchPrices, loadLocation, saveLocation,
 } from "./api.js";
 import {
-  spreadAxis, cropNames, createRange, createSparkline, formatDate, formatDateTime, formatPrice, priceNumber,
+  spreadAxis, cropNames, createRange, createSparkline, formatDate, formatPrice, priceNumber,
 } from "./rate-ui.js";
 
 const $ = (id) => document.getElementById(id);
 const BOARD_ROWS = 5;
 
 /* ---------------- finder (state → district → prices page) ---------------- */
+const locationDialog = $("locationDialog");
+$("locationOpen").addEventListener("click", () => locationDialog.showModal());
+
 const finder = { states: [], districts: [], state: "", district: "" };
 
 function fill(select, values, placeholder, selected = "") {
@@ -125,7 +128,7 @@ function renderBoard() {
   const rows = $("boardRows");
   const status = $("boardStatus");
   const trend = $("boardTrend");
-  const title = $("boardTitle");
+  const title = $("boardTitleText") || $("boardTitle");
   root.setAttribute("aria-busy", "false");
   status.hidden = true;
   status.replaceChildren();
@@ -221,36 +224,11 @@ async function loadBoard() {
   }
 }
 
-/* ---------------- data status ---------------- */
-let sync = null;
-function renderSync() {
-  if (!sync) return;
-  $("homeFreshness").textContent = sync.freshnessStatus
-    ? t(`fresh.${sync.freshnessStatus}`) === `fresh.${sync.freshnessStatus}`
-      ? sync.freshnessStatus
-      : t(`fresh.${sync.freshnessStatus}`)
-    : "—";
-  $("homeSync").textContent = sync.lastSuccessfulSync?.completed_at
-    ? formatDateTime(sync.lastSuccessfulSync.completed_at)
-    : t("sync.never");
-}
-async function loadSync() {
-  try {
-    sync = await fetchSyncStatus();
-    renderSync();
-  } catch (error) {
-    console.error("[Home] Could not load sync status:", error);
-    $("homeFreshness").textContent = t("sync.none");
-  }
-}
-
 onLangChange(() => {
   renderFinder();
   renderBoard();
-  renderSync();
   hydrateIcons();
 });
 
 initFinder();
 loadBoard();
-loadSync();
