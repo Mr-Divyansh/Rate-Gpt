@@ -336,3 +336,7 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
   .footer-help { grid-column: auto; padding: 20px; }
   .footer-bottom { flex-direction: column; gap: 6px; }
 }
+
+@media (max-width: 720px) {
+  body:has(.site-header.menu-open) { overflow: hidden; }
+}
