@@ -465,3 +465,21 @@
   .step-card,
   .source-link { transition: none; }
 }
+
+/* Restrained visual finish and compact mobile rhythm */
+.page-about { background: #f7f8f4; }
+.about-hero { gap: clamp(28px, 5vw, 72px); }
+.about-hero h1 { line-height: 1.02; letter-spacing: -.035em; }
+.about-hero-actions .btn { border-radius: 10px; }
+.about-visual { border-radius: 16px; box-shadow: var(--shadow-card); }
+.step-card { border-radius: 12px; box-shadow: 0 6px 20px rgba(23,55,38,.045); }
+.source-card { border-radius: 14px; box-shadow: none; }
+.limits-card, .team-card { border-radius: 14px; box-shadow: var(--shadow-soft); }
+@media (max-width: 760px) {
+  .about-hero { padding-block: 36px 30px; gap: 22px; }
+  .about-hero h1 { font-size: clamp(2.55rem, 10vw, 3.6rem); }
+  .about-visual { min-height: 250px; }
+  .about-story, .about-data, .about-team { margin-top: 34px; }
+  .team-card { grid-template-columns: 84px minmax(0,1fr); }
+  .team-logo { width: 84px; }
+}
