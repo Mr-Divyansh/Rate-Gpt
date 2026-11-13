@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f7f0">
-  <meta name="description" content="Learn how Rate-GPT presents stored mandi price records, what the data can tell you, and where its limitations are.">
+  <meta name="description" content="Learn how Rate-GPT helps farmers explore mandi prices, understand the data and meet the people behind the project.">
   <title data-i18n="about.doc">About | Rate-GPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,167 +17,137 @@
   <header class="site-header"></header>
 
   <main id="main-content" tabindex="-1">
-    <section class="about-hero wrap">
+    <section class="about-hero wrap" aria-labelledby="aboutTitle">
       <div class="about-hero-copy">
-        <h1 data-i18n="about.title">Better information, better sale.</h1>
-        <p class="lede" data-i18n="about.lede">Rate-GPT makes recorded mandi prices easy to search by crop and location, so you can compare markets in one place.</p>
-        <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="about.cta">Explore mandi prices</span><span data-icon="arrow"></span></a>
+        <p class="about-eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span><span data-i18n="about.kicker">About Rate-GPT</span></p>
+        <h1 id="aboutTitle" data-i18n="about.title">Better information, better sale.</h1>
+        <p class="about-lede" data-i18n="about.lede">Rate-GPT makes recorded mandi prices easy to search by crop and location, so you can compare markets in one place.</p>
+        <div class="about-hero-actions">
+          <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="about.cta">Explore mandi prices</span><span data-icon="arrow"></span></a>
+          <a class="about-text-link" href="#team"><span data-i18n="about.team.cta">Meet the team</span><span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="about-note"><span class="note-mark" aria-hidden="true">i</span><span data-i18n="about.note">Market prices are observations, not promises. Check the arrival date and confirm details at the mandi.</span></p>
       </div>
-      <p class="about-note" data-i18n="about.note">Market prices are observations, not promises. Check the arrival date and confirm details at the mandi.</p>
+
+      <aside class="about-visual" aria-label="Rate-GPT brand">
+        <span class="visual-orbit orbit-one" aria-hidden="true"></span>
+        <span class="visual-orbit orbit-two" aria-hidden="true"></span>
+        <img src="Images/Logo.webp" alt="Rate-GPT — Smart Mandi Price Discovery" width="256" height="256" fetchpriority="high">
+        <p class="visual-caption" data-i18n="about.visual.caption">Clear mandi prices. Better-informed decisions.</p>
+      </aside>
     </section>
 
-    <section class="about-block wrap" aria-labelledby="whyTitle">
-      <h2 id="whyTitle" data-i18n="about.why.title">Why Rate-GPT exists</h2>
-      <div class="prose">
-        <p data-i18n="about.why.p1">Mandi prices are reported across many markets and dates, which makes them hard to compare. Rate-GPT brings those records into one searchable view for any crop, state, district and mandi.</p>
-        <p data-i18n="about.why.p2">The goal is practical price discovery. Rate-GPT doesn’t predict what a crop will sell for or replace your own judgement. Use the records alongside crop quality, transport costs and local demand.</p>
+    <section class="about-story wrap" aria-labelledby="whyTitle">
+      <div class="section-heading">
+        <span class="section-index" aria-hidden="true">01</span>
+        <div>
+          <p class="section-kicker" data-i18n="about.story.kicker">The purpose</p>
+          <h2 id="whyTitle" data-i18n="about.why.title">Why Rate-GPT exists</h2>
+        </div>
+      </div>
+      <div class="story-content">
+        <p class="story-lead" data-i18n="about.why.p1">Mandi prices are reported across many markets and dates, which makes them hard to compare. Rate-GPT brings those records into one searchable view for any crop, state, district and mandi.</p>
+        <p class="story-detail" data-i18n="about.why.p2">The goal is practical price discovery. Rate-GPT doesn’t predict what a crop will sell for or replace your own judgement. Use the records alongside crop quality, transport costs and local demand.</p>
       </div>
     </section>
 
-    <section class="about-block wrap" aria-labelledby="howTitle">
-      <h2 id="howTitle" data-i18n="about.how.title">How it works</h2>
+    <section class="about-process wrap" aria-labelledby="howTitle">
+      <div class="section-heading">
+        <span class="section-index" aria-hidden="true">02</span>
+        <div>
+          <p class="section-kicker" data-i18n="about.process.kicker">A simple way to compare</p>
+          <h2 id="howTitle" data-i18n="about.how.title">How it works</h2>
+        </div>
+      </div>
       <ol class="steps">
-        <li><span class="step-n" aria-hidden="true">1</span><div><h3 data-i18n="about.step1.t">Choose a location</h3><p data-i18n="about.step1.d">Pick a state and district, then a mandi from the list.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">2</span><div><h3 data-i18n="about.step2.t">Find a crop</h3><p data-i18n="about.step2.d">Search the mandi’s stored records and sort them by date or price.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">3</span><div><h3 data-i18n="about.step3.t">Compare the rates</h3><p data-i18n="about.step3.d">Read the minimum, maximum and modal price with the arrival date. Prices are in ₹ per quintal.</p></div></li>
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div><h3 data-i18n="about.step1.t">Choose a location</h3><p data-i18n="about.step1.d">Pick a state and district, then a mandi from the list.</p></div>
+          <span class="step-arrow" aria-hidden="true">↗</span>
+        </li>
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div><h3 data-i18n="about.step2.t">Find a crop</h3><p data-i18n="about.step2.d">Search the mandi’s stored records and sort them by date or price.</p></div>
+          <span class="step-arrow" aria-hidden="true">↗</span>
+        </li>
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div><h3 data-i18n="about.step3.t">Compare the rates</h3><p data-i18n="about.step3.d">Read the minimum, maximum and modal price with the arrival date. Prices are in ₹ per quintal.</p></div>
+          <span class="step-arrow" aria-hidden="true">↗</span>
+        </li>
       </ol>
     </section>
 
-    <section class="about-block wrap" aria-labelledby="srcTitle">
-      <div class="panel">
-        <h2 id="srcTitle" data-i18n="about.src.title">Data source and transparency</h2>
-        <div class="prose">
-          <p data-i18n="about.src.p1">The intended source is the Government of India Open Government Data platform (AGMARKNET). Rate-GPT stores records from successful syncs and shows the values it holds.</p>
-          <p data-i18n="about.src.p2">Freshness depends on the source and on successful syncs. A sync time is not an arrival date, so use the date on each record. Missing values show as unavailable and are never estimated.</p>
-          <a class="btn" href="https://data.gov.in/" target="_blank" rel="noopener noreferrer"><span data-i18n="about.src.link">Visit data.gov.in</span><span data-icon="external" data-size="16"></span></a>
+    <section class="about-data wrap" aria-labelledby="sourceTitle">
+      <article class="source-card">
+        <div class="source-card-top">
+          <span class="source-icon" aria-hidden="true">↗</span>
+          <p class="section-kicker" data-i18n="about.data.kicker">Where the numbers come from</p>
         </div>
-      </div>
+        <h2 id="sourceTitle" data-i18n="about.src.title">Data source and transparency</h2>
+        <p data-i18n="about.src.p1">The intended source is the Government of India Open Government Data platform (AGMARKNET). Rate-GPT stores records from successful syncs and shows the values it holds.</p>
+        <p data-i18n="about.src.p2">Freshness depends on the source and on successful syncs. A sync time is not an arrival date, so use the date on each record. Missing values show as unavailable and are never estimated.</p>
+        <a class="source-link" href="https://data.gov.in/" target="_blank" rel="noopener noreferrer"><span data-i18n="about.src.link">Visit data.gov.in</span><span data-icon="external" data-size="16"></span></a>
+      </article>
+
+      <aside class="limits-card" aria-labelledby="limitsTitle">
+        <p class="section-kicker" data-i18n="about.data.note">Use the data thoughtfully</p>
+        <h2 id="limitsTitle" data-i18n="about.limits.title">Limits to keep in mind</h2>
+        <ul class="limits">
+          <li data-i18n="about.limit1">Prices are reported for one crop, market and arrival date. They may not match a current offer.</li>
+          <li data-i18n="about.limit2">Not every mandi, crop or date has data.</li>
+          <li data-i18n="about.limit3">Rate-GPT doesn’t guarantee a sale price and doesn’t account for quality, fees, transport or negotiation.</li>
+          <li data-i18n="about.limit4">Confirm current rates with the mandi before you decide.</li>
+        </ul>
+      </aside>
     </section>
 
-    <section class="about-block wrap" aria-labelledby="limitsTitle">
-      <h2 id="limitsTitle" data-i18n="about.limits.title">Limits to keep in mind</h2>
-      <ul class="limits">
-        <li data-i18n="about.limit1">Prices are reported for one crop, market and arrival date. They may not match a current offer.</li>
-        <li data-i18n="about.limit2">Not every mandi, crop or date has data.</li>
-        <li data-i18n="about.limit3">Rate-GPT doesn’t guarantee a sale price and doesn’t account for quality, fees, transport or negotiation.</li>
-        <li data-i18n="about.limit4">Confirm current rates with the mandi before you decide.</li>
-      </ul>
-    </section>
-</section>
-
-  <section class="about-block wrap" aria-labelledby="aboutTitle">
-    <h2 id="aboutTitle" data-i18n="about.title">About Rate-GPT</h2>
-    <div class="prose">
-      <p>Rate-GPT is an agricultural market intelligence platform created to help farmers access and understand mandi price information more easily. The platform allows users to explore crop prices, compare minimum, maximum and modal rates, check market arrival dates, and discover agricultural market information. Our goal is to make agricultural market information easier to access, understand and use so that farmers can make more informed selling decisions.</p>
-    </div>
-  </section>
-
-  <section class="about-block wrap" aria-labelledby="missionTitle">
-    <h2 id="missionTitle" data-i18n="about.mission.title">Our Mission</h2>
-    <div class="prose">
-      <p>Our mission is to make agricultural market information more accessible through technology and provide farmers with useful information for better market decisions.</p>
-    </div>
-  </section>
-
-  <section class="about-block wrap" aria-labelledby="howTitle">
-    <h2 id="howTitle" data-i18n="about.how.title">How Rate-GPT Works</h2>
-    <ol class="steps">
-      <li><span class="step-n" aria-hidden="true">1</span><div><h3>Crop-based mandi price discovery</h3><p>Search and explore mandi prices by selecting a crop, state, district, and mandi to find recorded prices for your produce.</p></div></li>
-      <li><span class="step-n" aria-hidden="true">2</span><div><h3>Minimum price information</h3><p>View the minimum price recorded for a crop at a specific mandi, providing the floor rate for the produce in that market.</p></div></li>
-      <li><span class="step-n" aria-hidden="true">3</span><div><h3>Maximum price information</h3><p>View the maximum price recorded for a crop at a specific mandi, providing the highest rate observed in that market.</p></div></li>
-      <li><span class="step-n" aria-hidden="true">4</span><div><h3>Modal price information</h3><p>View the modal (most frequent) price for a crop at a specific mandi, representing the most common price range for the produce.</p></div></li>
-      <li><span class="step-n" aria-hidden="true">5</span><div><h3>Market arrival dates</h3><p>Check the market arrival date for each price record, showing when the crop arrived at the mandi, helping you plan around recent arrivals.</p></div></li>
-      <li><span class="step-n" aria-hidden="true">6</span><div><h3>Mandi and market comparisons</h3><p>Compare prices across different mandis and markets for the same crop, helping you identify the best selling opportunities based on recorded data.</p></div></li>
-    </ol>
-  </section>
-
-  <section class="about-block wrap" aria-labelledby="teamTitle">
-    <h2 id="teamTitle" data-i18n="about.team.title">Our Team</h2>
-    <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 16px;">
-      <div class="team-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 24px; text-align: center; transition: box-shadow 0.15s;">
-        <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--line);">
-          <span style="color: var(--muted); font-size: 2rem; display: block;">DK</span>
-        </div>
-        <h3 style="margin-bottom: 8px;">Divyansh Kumar</h3>
-        <p style="color: var(--muted); font-size: 0.9375rem; margin-bottom: 16px;">Rate-GPT Team Member</p>
-        <p style="color: var(--ink); font-size: 0.9375rem; line-height: 1.5;">Project development, design and technology.</p>
-      </div>
-      <div class="team-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 24px; text-align: center; transition: box-shadow 0.15s;">
-        <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--line);">
-          <span style="color: var(--muted); font-size: 2rem; display: blank;">AW</span>
-        </div>
-        <h3 style="margin-bottom: 8px;">Abhay</h3>
-        <p style="color: var(--muted); font-size: 0.9375rem; margin-bottom: 16px;">Rate-GPT Team Member</p>
-        <p style="color: var(--ink); font-size: 0.9375rem; line-height: 1.5;">Collaborative development and project improvements.</p>
-      </div>
-    </div>
-  </section>
-  <div class="about-hero-copy">
-        <h1 data-i18n="about.title">Better information, better sale.</h1>
-        <p class="lede" data-i18n="about.lede">Rate-GPT makes recorded mandi prices easy to search by crop and location, so you can compare markets in one place.</p>
-        <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="about.cta">Explore mandi prices</span><span data-icon="arrow"></span></a>
-      </div>
-      <p class="about-note" data-i18n="about.note">Market prices are observations, not promises. Check the arrival date and confirm details at the mandi.</p>
-    </section>
-
-    <section class="about-block wrap" aria-labelledby="aboutTitle">
-      <h2 id="aboutTitle" data-i18n="about.title">About Rate-GPT</h2>
-      <div class="prose">
-        <p>Rate-GPT is an agricultural market intelligence platform created to help farmers access and understand mandi price information more easily. The platform allows users to explore crop prices, compare minimum, maximum and modal rates, check market arrival dates, and discover agricultural market information. Our goal is to make agricultural market information easier to access, understand and use so that farmers can make more informed selling decisions.</p>
-      </div>
-    </section>
-
-    <section class="about-block wrap" aria-labelledby="missionTitle">
-      <h2 id="missionTitle" data-i18n="about.mission.title">Our Mission</h2>
-      <div class="prose">
-        <p>Our mission is to make agricultural market information more accessible through technology and provide farmers with useful information for better market decisions.</p>
-      </div>
-    </section>
-
-    <section class="about-block wrap" aria-labelledby="howTitle">
-      <h2 id="howTitle" data-i18n="about.how.title">How Rate-GPT Works</h2>
-      <ol class="steps">
-        <li><span class="step-n" aria-hidden="true">1</span><div><h3>Crop-based mandi price discovery</h3><p>Search and explore mandi prices by selecting a crop, state, district, and mandi to find recorded prices for your produce.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">2</span><div><h3>Minimum price information</h3><p>View the minimum price recorded for a crop at a specific mandi, providing the floor rate for the produce in that market.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">3</span><div><h3>Maximum price information</h3><p>View the maximum price recorded for a crop at a specific mandi, providing the highest rate observed in that market.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">4</span><div><h3>Modal price information</h3><p>View the modal (most frequent) price for a crop at a specific mandi, representing the most common price range for the produce.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">5</span><div><h3>Market arrival dates</h3><p>Check the market arrival date for each price record, showing when the crop arrived at the mandi, helping you plan around recent arrivals.</p></div></li>
-        <li><span class="step-n" aria-hidden="true">6</span><div><h3>Mandi and market comparisons</h3><p>Compare prices across different mandis and markets for the same crop, helping you identify the best selling opportunities based on recorded data.</p></div></li>
-      </ol>
-    </section>
-
-    <section class="about-block wrap" aria-labelledby="teamTitle">
-      <h2 id="teamTitle" data-i18n="about.team.title">Our Team</h2>
-      <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 16px;">
-        <div class="team-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 24px; text-align: center; transition: box-shadow 0.15s;">
-          <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--line);">
-            <span style="color: var(--muted); font-size: 2rem; display: block;">DK</span>
+    <section class="about-team wrap" id="team" aria-labelledby="teamTitle">
+      <div class="team-heading">
+        <div class="section-heading">
+          <span class="section-index" aria-hidden="true">03</span>
+          <div>
+            <p class="section-kicker" data-i18n="about.team.kicker">The people behind the project</p>
+            <h2 id="teamTitle" data-i18n="about.team.title">Built by a small team</h2>
           </div>
-          <h3 style="margin-bottom: 8px;">Divyansh Kumar</h3>
-          <p style="color: var(--muted); font-size: 0.9375rem; margin-bottom: 16px;">Rate-GPT Team Member</p>
-          <p style="color: var(--ink); font-size: 0.9375rem; line-height: 1.5;">Project development, design and technology.</p>
         </div>
-        <div class="team-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 24px; text-align: center; transition: box-shadow 0.15s;">
-          <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--line);">
-            <span style="color: var(--muted); font-size: 2rem; display: blank;">AW</span>
+        <a class="team-repo-link" href="https://github.com/Mr-Divyansh/Rate-Gpt" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="about.team.repo">View project on GitHub</span><span data-icon="external" data-size="16"></span>
+        </a>
+      </div>
+
+      <div class="team-grid">
+        <article class="team-card">
+          <div class="team-logo team-logo-studio">
+            <img src="Images/DWebStudioLogo.png" alt="D Web Studio logo" width="1024" height="1024" loading="lazy" decoding="async">
           </div>
-          <h3 style="margin-bottom: 8px;">Abhay</h3>
-          <p style="color: var(--muted); font-size: 0.9375rem; margin-bottom: 16px;">Rate-GPT Team Member</p>
-          <p style="color: var(--ink); font-size: 0.9375rem; line-height: 1.5;">Collaborative development and project improvements.</p>
-        </div>
+          <div class="team-info">
+            <p class="team-role" data-i18n="about.member.role">Project contributor</p>
+            <h3 data-i18n="about.member1.name">Mr Divyansh</h3>
+            <p class="team-bio" data-i18n="about.member1.bio">Project development, design and technology.</p>
+            <a class="team-profile" href="https://github.com/Mr-Divyansh" target="_blank" rel="noopener noreferrer" aria-label="Mr Divyansh on GitHub">
+              <span class="github-mark" aria-hidden="true">GH</span><span>github.com/Mr-Divyansh</span><span data-icon="external" data-size="15"></span>
+            </a>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-logo team-logo-abhay">
+            <img src="Images/AbhayWebDev.jpeg" alt="Abhay Web Dev logo" width="1024" height="1024" loading="lazy" decoding="async">
+          </div>
+          <div class="team-info">
+            <p class="team-role" data-i18n="about.member.role">Project contributor</p>
+            <h3 data-i18n="about.member2.name">Abhay Web Dev</h3>
+            <p class="team-bio" data-i18n="about.member2.bio">Collaborative development and project improvements.</p>
+            <a class="team-profile" href="https://github.com/AbhayWebWorld" target="_blank" rel="noopener noreferrer" aria-label="Abhay Web Dev on GitHub">
+              <span class="github-mark" aria-hidden="true">GH</span><span>github.com/AbhayWebWorld</span><span data-icon="external" data-size="15"></span>
+            </a>
+          </div>
+        </article>
       </div>
     </section>
-<section class="about-block wrap" style="background: var(--surface); border-top: 1px solid var(--line); margin-top: 32px; padding-top: 32px;">
-    <div class="prose" style="max-width: 64ch;">
-      <p><strong>Project:</strong> Rate-GPT</p>
-      <p><strong>Website:</strong> <a href="rate-gpt.vercel.app" target="_blank" rel="noopener noreferrer">rate-gpt.vercel.app</a></p>
-      <p><strong>GitHub:</strong> <a href="https://github.com/Mr-Divyansh/Rate-Gpt" target="_blank" rel="noopener noreferrer">Mr-Divyansh/Rate-Gpt</a></p>
-      <p><strong>Category:</strong> Agricultural Technology</p>
-      <p><strong>Platform:</strong> Web Application</p>
-      <p><strong>Team:</strong> Divyansh Kumar & Abhay</p>
-    </div>
-  </section>
   </main>
+
   <footer class="site-footer"></footer>
   <script type="module" src="/script/global-nav.js"></script>
 </body>

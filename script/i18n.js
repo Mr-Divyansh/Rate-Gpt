@@ -122,10 +122,14 @@ const STRINGS = {
     "note.body": "Prices differ between mandis. Check transport costs, quality and the latest arrival date before you decide.",
 
     "about.doc": "About | Rate-GPT",
+    "about.kicker": "About Rate-GPT",
     "about.title": "Better information, better sale.",
     "about.lede": "Rate-GPT makes recorded mandi prices easy to search by crop and location, so you can compare markets in one place.",
     "about.cta": "Explore mandi prices",
     "about.note": "Market prices are observations, not promises. Check the arrival date and confirm details at the mandi.",
+    "about.team.cta": "Meet the team",
+    "about.visual.caption": "Clear mandi prices. Better-informed decisions.",
+    "about.story.kicker": "The purpose",
     "about.why.title": "Why Rate-GPT exists",
     "about.why.p1": "Mandi prices are reported across many markets and dates, which makes them hard to compare. Rate-GPT brings those records into one searchable view for any crop, state, district and mandi.",
     "about.why.p2": "The goal is practical price discovery. Rate-GPT doesn’t predict what a crop will sell for or replace your own judgement. Use the records alongside crop quality, transport costs and local demand.",
@@ -136,6 +140,9 @@ const STRINGS = {
     "about.step2.d": "Search the mandi’s stored records and sort them by date or price.",
     "about.step3.t": "Compare the rates",
     "about.step3.d": "Read the minimum, maximum and modal price with the arrival date. Prices are in ₹ per quintal.",
+    "about.process.kicker": "A simple way to compare",
+    "about.data.kicker": "Where the numbers come from",
+    "about.data.note": "Use the data thoughtfully",
     "about.src.title": "Data source and transparency",
     "about.src.p1": "The intended source is the Government of India Open Government Data platform (AGMARKNET). Rate-GPT stores records from successful syncs and shows the values it holds.",
     "about.src.p2": "Freshness depends on the source and on successful syncs. A sync time is not an arrival date, so use the date on each record. Missing values show as unavailable and are never estimated.",
@@ -144,7 +151,15 @@ const STRINGS = {
     "about.limit1": "Prices are reported for one crop, market and arrival date. They may not match a current offer.",
     "about.limit2": "Not every mandi, crop or date has data.",
     "about.limit3": "Rate-GPT doesn’t guarantee a sale price and doesn’t account for quality, fees, transport or negotiation.",
-    "about.limit4": "Confirm current rates with the mandi before you decide."
+    "about.limit4": "Confirm current rates with the mandi before you decide.",
+    "about.team.kicker": "The people behind the project",
+    "about.team.title": "Built by a small team",
+    "about.team.repo": "View project on GitHub",
+    "about.member.role": "Project contributor",
+    "about.member1.name": "Mr Divyansh",
+    "about.member1.bio": "Project development, design and technology.",
+    "about.member2.name": "Abhay Web Dev",
+    "about.member2.bio": "Collaborative development and project improvements."
   },
   hi: {
     "nav.skip": "मुख्य सामग्री पर जाएँ",
@@ -268,10 +283,14 @@ const STRINGS = {
     "note.body": "अलग-अलग मंडियों में भाव अलग होते हैं। फैसला लेने से पहले ढुलाई का खर्च, क्वालिटी और आवक की ताज़ा तारीख देखें।",
 
     "about.doc": "हमारे बारे में | Rate-GPT",
+    "about.kicker": "Rate-GPT के बारे में",
     "about.title": "बेहतर जानकारी, बेहतर बिक्री।",
     "about.lede": "Rate-GPT दर्ज मंडी भाव को फसल और जगह के हिसाब से खोजना आसान बनाता है, ताकि आप सभी बाज़ार एक ही जगह देख सकें।",
     "about.cta": "मंडी भाव देखें",
     "about.note": "मंडी भाव दर्ज अवलोकन हैं, वादा नहीं। आवक की तारीख देखें और मंडी में जाकर पुष्टि करें।",
+    "about.team.cta": "टीम से मिलें",
+    "about.visual.caption": "स्पष्ट मंडी भाव। बेहतर जानकारी वाले फैसले।",
+    "about.story.kicker": "हमारा उद्देश्य",
     "about.why.title": "Rate-GPT क्यों बना",
     "about.why.p1": "मंडी भाव कई बाज़ारों और तारीखों में दर्ज होते हैं, इसलिए उनकी तुलना मुश्किल है। Rate-GPT इन रिकॉर्ड को एक खोजने लायक जगह पर लाता है: किसी भी फसल, राज्य, ज़िले और मंडी के लिए।",
     "about.why.p2": "मकसद काम का भाव-ज्ञान है। Rate-GPT यह अनुमान नहीं लगाता कि फसल किस भाव बिकेगी, और आपके अपने फैसले की जगह नहीं लेता। रिकॉर्ड को फसल की क्वालिटी, ढुलाई के खर्च और स्थानीय माँग के साथ देखें।",
@@ -282,6 +301,9 @@ const STRINGS = {
     "about.step2.d": "मंडी के सहेजे रिकॉर्ड में खोजें और तारीख या भाव से क्रम बदलें।",
     "about.step3.t": "भाव की तुलना करें",
     "about.step3.d": "आवक की तारीख के साथ न्यूनतम, अधिकतम और मॉडल भाव पढ़ें। भाव ₹ प्रति क्विंटल में हैं।",
+    "about.process.kicker": "तुलना करने का आसान तरीका",
+    "about.data.kicker": "आँकड़े कहाँ से आते हैं",
+    "about.data.note": "आँकड़ों को समझदारी से देखें",
     "about.src.title": "डेटा स्रोत और पारदर्शिता",
     "about.src.p1": "तय स्रोत भारत सरकार का ओपन गवर्नमेंट डेटा प्लेटफ़ॉर्म (AGMARKNET) है। Rate-GPT सफल सिंक के रिकॉर्ड सहेजता है और जो आँकड़े उसके पास हैं वही दिखाता है।",
     "about.src.p2": "ताज़गी स्रोत और सफल सिंक पर निर्भर करती है। सिंक का समय आवक की तारीख नहीं है, इसलिए हर रिकॉर्ड पर दी गई तारीख देखें। जो आँकड़ा नहीं है वह “उपलब्ध नहीं” दिखता है, अनुमान से नहीं भरा जाता।",
@@ -290,7 +312,15 @@ const STRINGS = {
     "about.limit1": "भाव एक फसल, एक बाज़ार और एक आवक-तारीख के लिए दर्ज होते हैं। वे मौजूदा प्रस्ताव से अलग हो सकते हैं।",
     "about.limit2": "हर मंडी, फसल या तारीख का डेटा उपलब्ध नहीं होता।",
     "about.limit3": "Rate-GPT बिक्री के भाव की गारंटी नहीं देता और क्वालिटी, शुल्क, ढुलाई या मोल-भाव का हिसाब नहीं रखता।",
-    "about.limit4": "फैसला लेने से पहले मंडी से मौजूदा भाव की पुष्टि करें।"
+    "about.limit4": "फैसला लेने से पहले मंडी से मौजूदा भाव की पुष्टि करें।",
+    "about.team.kicker": "इस प्रोजेक्ट के पीछे की टीम",
+    "about.team.title": "एक छोटी टीम द्वारा निर्मित",
+    "about.team.repo": "GitHub पर प्रोजेक्ट देखें",
+    "about.member.role": "प्रोजेक्ट सहयोगी",
+    "about.member1.name": "मिस्टर दिव्यांश",
+    "about.member1.bio": "प्रोजेक्ट विकास, डिज़ाइन और तकनीक।",
+    "about.member2.name": "अभय वेब डेवलपर",
+    "about.member2.bio": "सहयोगी विकास और प्रोजेक्ट में सुधार।"
   }
 };
 
