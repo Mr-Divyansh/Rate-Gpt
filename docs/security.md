@@ -1,30 +1,34 @@
 # Security — Rate-GPT
 
-## Measures in place
-- Helmet security headers.
-- express-rate-limit (300 req/15min general, 20 req/15min admin).
-- Zod input validation on all endpoints.
-- Parameterized SQL (better-sqlite3 prepared statements).
-- Timing-safe admin key comparison (`crypto.timingSafeEqual`).
-- Admin sync disabled if `ADMIN_SYNC_KEY` unset/placeholder (returns 503).
-- Admin logs endpoint requires `ADMIN_SYNC_KEY`.
-- No stack traces in production error responses.
-- Request IDs (`X-Request-Id`) for tracing.
-- Cache-Control: no-store for admin/mutations; 30s public for GET prices.
-- Secrets server-side only (`DATA_GOV_API_KEY`, `ADMIN_SYNC_KEY`).
+## Current implementation (source-reviewed 14 November 2026)
 
-- Contact submissions are accepted only through the versioned server endpoint, validated, rate-limited separately, and forwarded to Web3Forms using a server-side sensitive environment variable.
-- Public API documentation is not served; read-only price and filter endpoints remain public because the website browser must call them. The government API key and contact-provider key stay server-side.
+- Express uses Helmet with Content Security Policy disabled in application middleware (`helmet({ contentSecurityPolicy: false })`). A production CSP has not been verified and is not claimed as active.
+- Rate limits in `server.ts`:
+  - General `/api`: 300 requests per 15 minutes.
+  - Live price, filter metadata, and commodity search routes: 100 requests per 15 minutes.
+  - Contact submissions: 5 requests per 15 minutes.
+- Request bodies are parsed as JSON / URL-encoded data. Query and contact inputs use Zod schemas on the corresponding routes.
+- Production error responses avoid returning stack traces and internal exception messages. Request IDs are returned in `X-Request-Id`.
+- Every `/api` response currently receives `Cache-Control: no-store`. This includes public GET routes; there is no 30-second public API cache configured in the current server middleware.
+- Government API and Web3Forms credentials are read from server-side environment variables and are not intentionally included in frontend bundles.
+- Contact consent is required by the server schema (`consent: true`). Contact submissions are forwarded server-to-server to Web3Forms.
+- Legacy database modules use prepared/parameterized statements. The live mandi price/filter request path does not use the legacy price tables.
+- The current API router does not expose the former admin sync/log endpoints. Bulk sync and scheduled sync are disabled according to the current API and migration documentation.
 
-## Known issues
-- Production database connectivity depends on a valid PostgreSQL URL configured
-  in the deployment environment; a configured URL alone does not prove that the
-  database is reachable. The public health endpoint checks database access.
-- Upstream synchronization and scheduled runs require their respective
-  server-side credentials (`DATA_GOV_API_KEY`, `ADMIN_SYNC_KEY`, and
-  `CRON_SECRET`); live synchronization was not exercised by local tests.
+## Important verification gaps
+
+- `server.ts` explicitly disables Helmet's CSP. Do not claim CSP protection until a compatible policy has been tested against all pages and required third-party resources. Begin with report-only monitoring before enforcement.
+- Actual production response headers have not been inspected in this source audit. Verify HTML/static responses and API responses separately at the deployed domain.
+- No explicit CORS middleware is configured in `server.ts`. Verify actual deployment behavior and ensure no unnecessary cross-origin access is introduced.
+- The public `/api/v1/health` handler returns a minimal service status; it does not prove PostgreSQL connectivity. Database connectivity must be tested through the actual database-dependent code path or a separately designed, safe readiness check.
+- PostgreSQL connectivity depends on a valid deployment-side `DATABASE_URL` or `POSTGRES_URL`. A configured URL alone does not prove that the database is reachable.
+- Web3Forms is a third-party recipient of contact form personal data. Confirm the account's retention and processing settings before making specific retention promises in the privacy policy.
+- No live penetration test, header scan, or production secret/configuration review was performed as part of this source-only pass.
 
 ## Rules
+
 - Never commit `.env` or `.env.local`.
-- Never use `VITE_`/`NEXT_PUBLIC_` prefixes for secrets.
-- Never print secret values.
+- Never use `VITE_` / `NEXT_PUBLIC_` prefixes for secrets.
+- Never print secret values in logs, responses, documentation, or issue reports.
+- Do not enable an enforcing CSP until the application's inline scripts, styles, fonts, images, and API connections have been inventoried and tested.
+- Do not perform production database migrations or cleanup without explicit approval and a verified backup.
