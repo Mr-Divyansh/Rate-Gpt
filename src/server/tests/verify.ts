@@ -226,6 +226,21 @@ async function main() {
   check(livePage.meta.hasNext && livePage.meta.nextOffset === 2, "live page metadata points to next upstream offset");
   check(livePage.meta.cacheStatus === "live" && livePage.records.length === 1, "live response deduplicates records and reports live status");
   check(livePage.records[0].modal_price === null, "missing prices are not fabricated");
+  const exactDatePage = await fetchLivePrices({
+    state: "Maharashtra", district: "Pune", market: "Pune",
+    arrivalDate: "2026-11-14", limit: 2,
+  }, async () => mockPage([upstreamRecord], { total: "1", limit: 2 }));
+  check(exactDatePage.records.length === 0, "records from neighbouring dates are never shown for an exact date filter");
+  let futureRequestMade = false;
+  try {
+    await fetchLivePrices({ arrivalDate: "2099-01-01", limit: 2 }, async () => {
+      futureRequestMade = true;
+      return mockPage([]);
+    });
+    check(false, "future date request is rejected");
+  } catch (error) {
+    check(error instanceof GovernmentApiError && error.httpStatus === 400 && !futureRequestMade, "future date is rejected before upstream request");
+  }
   check(!JSON.stringify(livePage).includes("test-only-government-key"), "upstream key is absent from live response");
 
   let requestedOffset: string | null = null;
