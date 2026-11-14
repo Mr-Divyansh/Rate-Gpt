@@ -159,6 +159,20 @@ async function main() {
       .then((r) => r.json());
     assert(search.success && search.data.includes("Grapes"), "Hindi fruit search discovers the English fruit suggestion");
 
+    const comparison = await fetch(
+      `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
+    ).then((r) => r.json());
+    const comparisonRequest = upstreamRequests.at(-1)!;
+    assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
+    assert(comparisonRequest.searchParams.get("filters[Commodity]") === "Apple", "live comparison forwards commodity filter");
+    assert(comparisonRequest.searchParams.get("filters[Arrival_Date]") === "13/11/2026", "live comparison forwards requested arrival date");
+    assert(comparison.meta.source === "Government of India OGD / AGMARKNET", "live comparison identifies government source");
+
+    const historicalTrend = await fetch(
+      `${base}/api/v1/prices/trend?commodity=Apple&market=Pune%20Market`,
+    );
+    assert(historicalTrend.status === 410, "historical trends are explicitly disabled when no history is retained");
+
     const status = await fetch(`${base}/api/v1/sync-status`).then((r) => r.json());
     assert(status.data.mode === "on-demand" && !status.data.bulkSyncEnabled, "sync status confirms bulk sync is disabled");
     assert(status.data.schedulerEnabled === false, "sync status confirms no scheduler");
