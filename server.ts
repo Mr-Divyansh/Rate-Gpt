@@ -40,8 +40,9 @@ export function createApiApp() {
 
   // Request ID + structured logging context
   app.use((req, res, next) => {
-    const requestId =
-      (req.headers["x-request-id"] as string) || crypto.randomUUID();
+    // Never reflect a caller-supplied request ID: generate a trusted,
+    // bounded identifier for logs and support diagnostics.
+    const requestId = crypto.randomUUID();
     (req as any).requestId = requestId;
     res.setHeader("X-Request-Id", requestId);
     next();
@@ -89,8 +90,10 @@ export function createApiApp() {
   });
   app.use("/api/v1/contact", contactLimiter);
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // Contact messages are capped at 5 KB; keep the transport limit modest
+  // to reject oversized payloads before they reach route handlers.
+  app.use(express.json({ limit: "32kb" }));
+  app.use(express.urlencoded({ extended: true, limit: "32kb", parameterLimit: 100 }));
 
   app.use((req, res, next) => {
     const start = Date.now();
@@ -126,11 +129,25 @@ export function createApiApp() {
         message: err?.message || err,
         stack: process.env.NODE_ENV === "production" ? undefined : err?.stack,
       });
-      res.status(500).json({
+      const status =
+        Number.isInteger(err?.status) && err.status >= 400 && err.status < 500
+          ? err.status
+          : 500;
+      const isPayloadTooLarge = status === 413;
+      const isBadRequest = status === 400;
+      res.status(status).json({
         success: false,
         error: {
-          code: "INTERNAL_SERVER_ERROR",
-          message: "An unexpected internal server error occurred",
+          code: isPayloadTooLarge
+            ? "PAYLOAD_TOO_LARGE"
+            : isBadRequest
+              ? "BAD_REQUEST"
+              : "INTERNAL_SERVER_ERROR",
+          message: isPayloadTooLarge
+            ? "Request body is too large"
+            : isBadRequest
+              ? "Invalid request body"
+              : "An unexpected internal server error occurred",
         },
         requestId,
       });
