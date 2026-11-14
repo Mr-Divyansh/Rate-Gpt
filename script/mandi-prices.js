@@ -12,6 +12,17 @@ import {
 const PAGE_SIZE = 50;
 const $ = (id) => document.getElementById(id);
 
+function indiaTodayIsoDate() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 const state = {
   states: [], districts: [], markets: [],
   location: { state: "", district: "" },
@@ -543,8 +554,16 @@ function bind() {
     const previousOffset = state.pageOffsets[state.pageOffsets.length - 1] ?? 0;
     loadPrices({ offset: previousOffset });
   });
+  $("arrivalDate").max = indiaTodayIsoDate();
   $("arrivalDate").addEventListener("change", (event) => {
-    state.arrivalDate = event.currentTarget.value;
+    const selectedDate = event.currentTarget.value;
+    const today = indiaTodayIsoDate();
+    if (selectedDate && selectedDate > today) {
+      event.currentTarget.value = today;
+      state.arrivalDate = today;
+    } else {
+      state.arrivalDate = selectedDate;
+    }
     loadPrices();
   });
   let timer;
