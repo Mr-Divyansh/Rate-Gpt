@@ -13,7 +13,6 @@ import {
   GovernmentApiError,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
-import { openApiSpec } from "../openapi.js";
 
 const router = Router();
 
@@ -53,28 +52,8 @@ function sendError(
  * 1. Health & System Status Endpoint
  * GET /api/v1/health
  */
-router.get("/health", async (req: Request, res: Response) => {
-  const apiKey = process.env.DATA_GOV_API_KEY?.trim();
-  const apiKeyConfigured = Boolean(
-    apiKey &&
-    apiKey !== "your_data_gov_in_api_key_here" &&
-    apiKey !== "MY_DATA_GOV_API_KEY",
-  );
-  return sendSuccess(
-    res,
-    {
-      status: "healthy",
-      version: "1.0.0",
-      upstreamSource: {
-        name: "Government of India OGD / AGMARKNET",
-        apiKeyConfigured,
-      },
-      priceStorage: "disabled",
-      serverTime: new Date().toISOString(),
-    },
-    undefined,
-    "Backend operational",
-  );
+router.get("/health", (_req: Request, res: Response) => {
+  return sendSuccess(res, { status: "ok" }, undefined, "Service available");
 });
 
 /**
@@ -297,12 +276,63 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * 9. OpenAPI documentation (JSON)
- * GET /api/v1/docs
- */
-router.get("/docs", async (_req: Request, res: Response) => {
-  return res.status(200).json(openApiSpec);
+
+// Contact form: personal data is validated and forwarded server-to-server.
+// The Web3Forms access key is never included in browser code or responses.
+const contactSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  email: z.union([z.string().trim().email().max(254), z.literal("")]).optional(),
+  phone: z.string().trim().max(24).optional(),
+  message: z.string().trim().min(1).max(5000),
+  consent: z.literal(true),
+  botcheck: z.union([z.string(), z.null()]).optional(),
+}).refine((value) => Boolean(value.email || value.phone), {
+  message: "An email address or phone number is required.",
+  path: ["email"],
+});
+
+router.post("/contact", async (req: Request, res: Response) => {
+  if (typeof req.body?.botcheck === "string" && req.body.botcheck.trim()) {
+    return sendSuccess(res, { accepted: true }, undefined, "Message received");
+  }
+  const parsed = contactSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return sendError(res, "VALIDATION_ERROR", "Please check the contact form and required consent.", 400);
+  }
+  const accessKey = process.env.WEB3FORMS_ACCESS_KEY?.trim();
+  if (!accessKey) {
+    return sendError(res, "CONTACT_UNAVAILABLE", "The contact form is temporarily unavailable.", 503);
+  }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let upstream: globalThis.Response;
+    try {
+      upstream = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: accessKey,
+          subject: "New Rate-GPT Contact Request",
+          from_name: "Rate-GPT Contact Form",
+          name: parsed.data.name,
+          email: parsed.data.email || "",
+          phone: parsed.data.phone || "",
+          message: parsed.data.message,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+    const result = await upstream.json().catch(() => null);
+    if (!upstream.ok || result?.success !== true) {
+      return sendError(res, "CONTACT_DELIVERY_FAILED", "The message could not be delivered. Please try again later.", 502);
+    }
+    return sendSuccess(res, { accepted: true }, undefined, "Message received");
+  } catch {
+    return sendError(res, "CONTACT_DELIVERY_FAILED", "The message could not be delivered. Please try again later.", 502);
+  }
 });
 
 router.get("/sync-status", (_req: Request, res: Response) => {
