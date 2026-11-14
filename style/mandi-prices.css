@@ -220,3 +220,29 @@
   .page-prices .price-card-meta { font-size: .85rem; }
 }
 
+
+
+/* Refined arrival date control (calendar popup is browser-native). */
+.page-prices .date-field { gap: 7px; }
+.page-prices .date-field > label { color: var(--forest); font-weight: 750; }
+.page-prices .date-field input[type="date"] {
+  min-height: 54px; padding: 0 15px; border: 1.5px solid #cbd9ce;
+  border-radius: 12px; background: linear-gradient(180deg, #fff 0%, #f8fbf7 100%);
+  color: #174d38; color-scheme: light; font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; box-shadow: 0 3px 12px rgba(23, 77, 56, .045);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.page-prices .date-field input[type="date"]:hover:not(:disabled) {
+  border-color: #287a52; box-shadow: 0 5px 16px rgba(23, 77, 56, .09);
+}
+.page-prices .date-field input[type="date"]:focus-visible {
+  outline: 0; border-color: #176b49;
+  box-shadow: 0 0 0 4px rgba(40, 122, 82, .15), 0 5px 16px rgba(23, 77, 56, .08);
+}
+.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 20px; height: 20px; padding: 5px; margin-left: 8px;
+  border-radius: 7px; cursor: pointer; opacity: .9; background-color: #eaf3ec;
+}
+.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator:hover { background-color: #dcecdf; }
+.page-prices .date-field .date-hint { color: #718078; font-size: .78rem; line-height: 1.25; }
+@media (max-width: 680px) { .page-prices .date-field input[type="date"] { min-height: 50px; } }
