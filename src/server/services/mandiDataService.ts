@@ -305,8 +305,8 @@ function upstreamSort(sort?: string): { field: string; order: string } | null {
     market_desc: { field: "Market", order: "desc" },
     commodity_asc: { field: "Commodity", order: "asc" },
     commodity_desc: { field: "Commodity", order: "desc" },
-    date_asc: { field: "Arrival_Date", order: "asc" },
-    date_desc: { field: "Arrival_Date", order: "desc" },
+    // Arrival_Date is not sortable in the current AGMARKNET OGD index mapping.
+    // Leave date sorting to the upstream default; do not send a query that fails.
   };
   return sort ? map[sort] ?? null : null;
 }
