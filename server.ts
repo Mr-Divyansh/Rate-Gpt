@@ -112,7 +112,6 @@ export function createApiApp() {
   });
 
   app.use("/api/v1", apiRouter);
-  app.use("/api", apiRouter);
 
   app.use(
     (
