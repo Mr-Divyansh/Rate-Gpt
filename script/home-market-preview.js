@@ -84,7 +84,6 @@ function pickRows(records) {
   const seen = new Set();
   const rows = [];
   for (const record of usable) {
-    if (record.market !== latest.market || record.state !== latest.state) continue;
     const key = `${record.commodity}|${record.variety ?? ""}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -104,7 +103,7 @@ function boardRow(record, axis) {
   const strong = document.createElement("strong");
   strong.textContent = names.primary;
   crop.append(strong);
-  const second = [names.secondary, record.variety].filter(Boolean).join(" · ");
+  const second = [names.secondary, record.variety, record.market, record.district].filter(Boolean).join(" · ");
   if (second) {
     const small = document.createElement("small");
     small.textContent = second;
@@ -162,7 +161,7 @@ function renderBoard() {
 
   $("boardLink").hidden = false;
   const { latest, rows: records, history } = board;
-  title.textContent = t("board.title", { market: latest.market });
+  title.textContent = t("board.titleNone");
   $("boardMeta").textContent = t("board.meta", {
     district: latest.district,
     state: latest.state,

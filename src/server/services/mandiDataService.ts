@@ -537,12 +537,30 @@ export async function fetchLiveFilters(options: {
       commodities: [],
     };
   }
-  const { records } = await fetchLivePrices({
-    ...options,
-    limit: MAX_PAGE_SIZE,
-    offset: 0,
-    sort: "date_desc",
-  });
+  // A single 100-row page can contain only one or two districts/markets,
+  // making the location selectors appear empty or incomplete. Walk a bounded
+  // number of live pages for the selected state/district, without persisting
+  // any mandi price records.
+  const records: MandiRecord[] = [];
+  const seen = new Set<string>();
+  const FILTER_PAGE_LIMIT = 10;
+  for (let page = 0; page < FILTER_PAGE_LIMIT; page += 1) {
+    const offset = page * MAX_PAGE_SIZE;
+    const result = await fetchLivePrices({
+      ...options,
+      limit: MAX_PAGE_SIZE,
+      offset,
+    });
+    for (const record of result.records) {
+      const key = [record.state, record.district, record.market, record.commodity]
+        .join("|").toLocaleLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        records.push(record);
+      }
+    }
+    if (!result.meta.hasNext || result.records.length < MAX_PAGE_SIZE) break;
+  }
   return {
     states: uniqueSorted([...STATES_AND_UTS, ...records.map((record) => record.state)]),
     districts: uniqueSorted(records.map((record) => record.district)),
