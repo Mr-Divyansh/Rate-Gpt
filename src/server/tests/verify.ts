@@ -107,6 +107,7 @@ async function main() {
   } = await import("../db/database.js");
   const {
     normalizeArrivalDate,
+    isFutureArrivalDate,
     parsePrice,
     mapUpstreamRecord,
     parseReportedTotal,
@@ -120,6 +121,9 @@ async function main() {
   check(normalizeArrivalDate("05-11-2026") === "2026-11-05", "DD-MM-YYYY normalization");
   check(normalizeArrivalDate("2026-10-31") === "2026-10-31", "ISO date preservation");
   check(normalizeArrivalDate(null) === null, "missing date is rejected");
+  check(!isFutureArrivalDate("2026-11-14", new Date("2026-11-14T05:00:00.000Z")), "today in India is selectable");
+  check(isFutureArrivalDate("2026-11-15", new Date("2026-11-14T05:00:00.000Z")), "future arrival date is rejected using India calendar date");
+  check(!isFutureArrivalDate("2026-11-13", new Date("2026-11-14T05:00:00.000Z")), "past arrival date remains selectable");
   check(parsePrice("2,450.50") === 2450.5, "formatted numeric price parsing");
   check(parsePrice(null) === null && parsePrice("NA") === null, "missing prices remain null");
   check(parsePrice("-2") === null, "negative prices are rejected");
