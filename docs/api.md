@@ -5,7 +5,7 @@ Base path: `/api/v1`. All successful responses use `{ success: true, data, meta?
 ## Endpoints
 
 - `GET /health` — minimal process availability check.
-- `GET /meta/filters?state=&district=&market=` — Indian state/UT names and source-observed districts, markets, and commodities. For a selected location, discovery reads at most two live upstream pages, so returned location values may be partial.
+- `GET /meta/filters?state=&district=&market=` — Indian state/UT names and source-observed districts, markets, and commodities. For a selected location, discovery reads at most ten live upstream pages (1,000 rows), so returned location values may still be partial and are not a nationwide catalogue.
 - `GET /prices?state=&district=&market=&commodity=&date=&search=&limit=&offset=&sort=` — live normalized records. `limit` is 1–100; `offset` is 0–1,000,000. Missing prices are `null`, never zero. `date` is an exact arrival date and future dates are rejected.
 - `GET /commodities/search?q=&limit=` — source-derived commodity names from a live upstream response. A suggestion is not emitted merely because it exists in a local catalogue.
 - `GET /prices/compare?commodity=&date=` — a bounded live comparison page. `meta.comparisonMayBePartial` is true when the upstream source indicates more records.

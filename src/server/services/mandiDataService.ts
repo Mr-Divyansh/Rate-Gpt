@@ -603,7 +603,7 @@ type LiveFilterMetadata = {
 // process memory; mandi price records are never cached or written to the DB.
 const FILTER_CACHE_TTL_MS = 60_000;
 const FILTER_CACHE_MAX_ENTRIES = 64;
-const FILTER_PAGE_LIMIT = 2;
+const FILTER_PAGE_LIMIT = 10;
 const liveFilterCache = new Map<string, { expiresAt: number; value: LiveFilterMetadata }>();
 const liveFilterInFlight = new Map<string, Promise<LiveFilterMetadata>>();
 
@@ -642,8 +642,9 @@ export async function fetchLiveFilters(options: {
     const records: MandiRecord[] = [];
     const seen = new Set<string>();
 
-    // Keep selector discovery inexpensive: two pages maximum per selection.
-    // The result is explicitly partial, while price search remains paginated.
+    // Discover up to ten live pages (1,000 upstream rows) for dependent selectors.
+    // This improves district/market coverage while keeping requests bounded;
+    // the returned options are still explicitly partial, not a nationwide catalogue.
     for (let page = 0; page < FILTER_PAGE_LIMIT; page += 1) {
       const result = await fetchLivePrices({
         ...options,
