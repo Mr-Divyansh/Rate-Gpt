@@ -45,13 +45,11 @@ Mobile-first, centered content, simple header, compact filter section, search fi
 - Desktop price table.
 - Mobile stacked price cards.
 - Pagination.
-- Source attribution and last successful sync.
+- Source attribution and the last on-demand fetch time.
 
-### Price trend
-- Selected crop and market.
-- Arrival date and price summary.
-- Trend chart only when historical records exist.
-- Note explaining that history reflects records stored by Rate GPT.
+### Price history
+- Historical charts are unavailable because Rate-GPT does not store price observations.
+- The interface explains the source arrival date and on-demand fetch context instead.
 
 ## 6. Components
 Header, ThemeToggle, LocationFilters, CommoditySearch, PriceTable, PriceCard, PriceSummary, TrendChart, Pagination, LoadingState, EmptyState, ErrorState, DataFreshness.

@@ -460,6 +460,12 @@ export async function fetchLivePrices(
     });
   }
 
+  // The OGD index does not support Arrival_Date sorting. Sort the validated
+  // records in this response page so the UI never labels an arbitrary upstream
+  // order as "latest". Pagination still follows the upstream raw offset; this
+  // is intentionally a per-page ordering, not a fabricated global ranking.
+  sortLivePage(records, options.sort);
+
   const nextOffset = offset + rawCount;
   return {
     records,
@@ -476,6 +482,46 @@ export async function fetchLivePrices(
         "Government-published daily market data; not guaranteed real-time trading prices.",
     },
   };
+}
+
+function sortLivePage(records: MandiRecord[], sort?: string): void {
+  const stringOrder = (left: string, right: string) =>
+    left.localeCompare(right, "en", { sensitivity: "base" });
+  const priceOrder = (left: number | null, right: number | null, descending: boolean) => {
+    if (left === null && right === null) return 0;
+    if (left === null) return 1;
+    if (right === null) return -1;
+    return descending ? right - left : left - right;
+  };
+
+  switch (sort) {
+    case "date_asc":
+      records.sort((left, right) => stringOrder(left.arrival_date, right.arrival_date));
+      break;
+    case "date_desc":
+      records.sort((left, right) => stringOrder(right.arrival_date, left.arrival_date));
+      break;
+    case "modal_price_asc":
+      records.sort((left, right) => priceOrder(left.modal_price, right.modal_price, false));
+      break;
+    case "modal_price_desc":
+      records.sort((left, right) => priceOrder(left.modal_price, right.modal_price, true));
+      break;
+    case "market_asc":
+      records.sort((left, right) => stringOrder(left.market, right.market));
+      break;
+    case "market_desc":
+      records.sort((left, right) => stringOrder(right.market, left.market));
+      break;
+    case "commodity_asc":
+      records.sort((left, right) => stringOrder(left.commodity, right.commodity));
+      break;
+    case "commodity_desc":
+      records.sort((left, right) => stringOrder(right.commodity, left.commodity));
+      break;
+    default:
+      break;
+  }
 }
 
 async function requestGovernmentPage(
@@ -613,7 +659,10 @@ export async function fetchLiveFilters(options: {
           records.push(record);
         }
       }
-      if (!result.meta.hasNext || result.records.length < MAX_PAGE_SIZE) break;
+      // `records` may be smaller than a full upstream page after invalid rows
+      // and duplicates are removed. Only upstream pagination can safely tell
+      // us that there are no more records to inspect.
+      if (!result.meta.hasNext) break;
     }
 
     const value: LiveFilterMetadata = {
@@ -655,10 +704,9 @@ export async function searchLiveCommodities(
   const matches = records
     .map((record) => record.commodity)
     .filter((commodity) => commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
-  const fruitSuggestions = FRUIT_NAMES
-    .map((fruit) => fruit.english)
-    .filter((name) => name.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
-  return uniqueSorted([...matches, ...fruitSuggestions]).slice(0, Math.min(limit, 50));
+  // Suggestions must be observed upstream commodities, never a hand-written
+  // crop catalogue that could imply unsupported price coverage.
+  return uniqueSorted(matches).slice(0, Math.min(limit, 50));
 }
 
 function uniqueSorted(values: string[]): string[] {

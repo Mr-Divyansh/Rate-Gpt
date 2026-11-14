@@ -11,13 +11,7 @@ coverage/
 .env.*
 !.env.example
 
-# Local databases and backups
-*.sqlite
-*.sqlite3
-*.db
-*.db-shm
-*.db-wal
-*.db-journal
+# Local backups and editor swaps
 *.bak
 *.backup
 *.swp
@@ -37,10 +31,6 @@ errors.txt
 output.txt
 filelist.txt
 filebackup.txt
-current_db.txt
-current_db_content.txt
-database_*
-backup_db.txt
 
 # Python
 __pycache__/
@@ -50,4 +40,3 @@ __pycache__/
 # Editor and OS
 .vscode/*
 !.vscode/extensions.json
-.env 

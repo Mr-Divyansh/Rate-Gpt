@@ -1,69 +1,20 @@
-# Rate GPT — REST API
+# Rate-GPT API
 
-**Base URL:** `/api/v1`
-
-Government data requests are made only by the backend. `DATA_GOV_API_KEY` is
-never returned to the browser. Live responses use `Cache-Control: no-store`;
-Rate-GPT does not persist fetched price pages.
+Base path: `/api/v1`. All successful responses use `{ success: true, data, meta?, message }`; errors use `{ success: false, error: { code, message } }`. The browser never receives the government API key.
 
 ## Endpoints
 
-### `GET /health`
-Reports API health, whether the upstream key is configured (boolean only), the
-OGD/AGMARKNET source, and that price storage is disabled.
+- `GET /health` — minimal process availability check.
+- `GET /meta/filters?state=&district=&market=` — Indian state/UT names and source-observed districts, markets, and commodities. For a selected location, discovery reads at most ten live upstream pages (1,000 rows), so returned location values may still be partial and are not a nationwide catalogue.
+- `GET /prices?state=&district=&market=&commodity=&date=&search=&limit=&offset=&sort=` — live normalized records. `limit` is 1–100; `offset` is 0–1,000,000. Missing prices are `null`, never zero. `date` is an exact arrival date and future dates are rejected.
+- `GET /commodities/search?q=&limit=` — source-derived commodity names from a live upstream response. A suggestion is not emitted merely because it exists in a local catalogue.
+- `GET /prices/compare?commodity=&date=` — a bounded live comparison page. `meta.comparisonMayBePartial` is true when the upstream source indicates more records.
+- `GET /prices/trend` — returns HTTP 410 with `HISTORICAL_STORAGE_DISABLED`; Rate-GPT does not store price history.
+- `GET /sync-status` — describes the on-demand, no-storage data mode; it does not represent a database sync.
+- `POST /contact` — validates a consented contact request and forwards it server-to-server to Web3Forms when `WEB3FORMS_ACCESS_KEY` is configured.
 
-### `GET /meta/filters`
-Optional `state`, `district`, and `market` filters. Returns the configured
-Indian state/UT names and distinct locations/commodities seen in a bounded
-100-record live page for a selected location. District and market choices may
-therefore be partial; the API does not crawl the national dataset to populate
-filter lists.
+`/prices` metadata includes the upstream `total` where available, the next raw upstream offset, source attribution, and an ISO `fetchedAt` timestamp. API data uses `Cache-Control: no-store`.
 
-### `GET /prices`
-Optional `state`, `district`, `market`, `commodity`, `date` (`YYYY-MM-DD`),
-and `search` filters; `limit` (1–100, default 50), `offset` (0–1,000,000),
-and `sort`. Each call requests only that page from OGD/AGMARKNET.
+## Failure behavior
 
-The success envelope includes `data` and `meta`:
-
-```json
-{
-  "success": true,
-  "data": [],
-  "meta": {
-    "limit": 50,
-    "offset": 0,
-    "nextOffset": 50,
-    "total": 123,
-    "hasNext": true,
-    "source": "Government of India OGD / AGMARKNET",
-    "fetchedAt": "2026-11-13T00:00:00.000Z",
-    "cacheStatus": "live",
-    "freshnessStatus": "Government-published daily market data; not guaranteed real-time trading prices."
-  },
-  "message": "Live prices fetched successfully"
-}
-```
-
-`total` is `null` if OGD omits it. Missing prices remain `null`; records are
-never assigned fallback values. `502`, `503`, and `504` errors describe
-upstream failures without returning credentials or response bodies.
-
-### `GET /commodities/search?q=...&limit=10`
-Searches live government records and provides the eight fruit names as
-autocomplete suggestions. Suggestions do not imply that a mandi price exists;
-only `/prices` results are price data.
-
-### `GET /sync-status`
-Reports `mode: "on-demand"`, `bulkSyncEnabled: false`, and
-`schedulerEnabled: false`. It does not report a database sync as data freshness.
-
-### Legacy historical endpoints
-`GET /prices/trend` and `GET /prices/compare` remain read-only compatibility
-routes over any pre-existing database observations. The live prices/filter
-routes do not read from or write to those tables.
-
-## Removed routes
-
-`POST /admin/sync`, `GET /admin/logs`, and `GET /scheduler/sync` have been
-removed. There is no daily cron or bulk database synchronization.
+Validation failures return 400. Upstream rejection or invalid upstream content returns 502; an unavailable or rate-limited source returns 503; a timed-out upstream request returns 504. The server does not return credentials, upstream response bodies, or stack traces in production error responses.

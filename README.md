@@ -1,123 +1,53 @@
 # Rate-GPT
 
-Rate-GPT is an agricultural mandi-price discovery platform. It fetches filtered mandi records on demand from the Government of India Open Government Data (OGD) / AGMARKNET resource.
+Rate-GPT is a mandi-price discovery website for Indian farmers, traders, students, and researchers. It retrieves available records on demand from the Government of India Open Government Data (OGD) / AGMARKNET resource and presents the source's minimum, maximum, modal, and arrival-date values clearly.
 
-**Important:** the application does not fabricate replacement prices. If the backend or source is unavailable, the UI shows an error or unavailable state. Government data availability and update frequency are controlled by the source; the product must not be described as real-time unless the source actually supports that claim.
+Rate-GPT is not a price-prediction service. A successful fetch means the source was queried; it does not mean the observation is a real-time trading quote. Always check the arrival date and confirm a current offer with the relevant mandi.
 
-**Data policy:** the application does not bulk-download or permanently store
-government mandi-price records. Each search goes through the backend; the
-government key is never sent to the browser. Published daily market data is not
-guaranteed real-time trading data.
+## Architecture
 
-## Public website pages
+```text
+Browser → Rate-GPT Express API → data.gov.in / AGMARKNET
+              validation, normalization, page-safe deduplication
+Browser ← live response with source and fetch-time context
+```
 
-The public website has six pages:
+There is no SQLite, PostgreSQL, Neon, Redis, file storage, bulk synchronisation, or historical price store. Price records are requested for each search and API responses use `Cache-Control: no-store`. A bounded 60-second in-memory cache is used only for non-price filter metadata.
 
-- `index.html` — landing page with a preview of recent government mandi records.
-- `mandi-prices.html` — searchable state, district, market, crop, and arrival-date filters using `/api/v1`.
-- `about.html` — platform purpose, data-source context, and limitations.
-- `contact.html` — contact form with explicit consent and server-side delivery.
-- `privacy.html` — privacy disclosures.
-- `terms.html` — service terms and data-use limitations.
+## Prerequisites
 
-## Stack
+- Node.js 20 or newer
+- npm
+- An OGD API key with access to resource `9ef84268-d588-465a-a308-a864a43d0070`
 
-- Frontend: HTML, CSS, JavaScript, and Vite.
-- Backend: Node.js, Express, TypeScript, Zod.
-- Data storage: SQLite for local development when `DATABASE_URL` is unset; PostgreSQL when `DATABASE_URL` is configured. Both are accessed through `src/server/db/database-factory.ts`.
-- Upstream: Government of India OGD / AGMARKNET resource `9ef84268-d588-465a-a308-a864a43d0070`.
-
-## Requirements
-
-- Node.js 20 or newer.
-- npm.
-- A valid OGD API key for live prices and filtered location metadata.
-
-## Run locally in VS Code
-
-1. Extract the project and open its folder in VS Code.
-2. Install Node.js 20+ if needed.
-3. In the integrated terminal, run:
-
-   ```bash
-   npm ci
-   ```
-
-4. Create a local `.env` from the template:
-
-   **Windows PowerShell**
-
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-
-   **macOS / Linux**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-5. Edit `.env` and set `DATA_GOV_API_KEY` to your own key from [data.gov.in](https://data.gov.in/). Never commit `.env`.
-6. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-7. Open:
-   - Landing page: `http://localhost:3000/`
-   - Mandi prices: `http://localhost:3000/mandi-prices.html`
-   - About: `http://localhost:3000/about.html`
-   - API health: `http://localhost:3000/api/v1/health`
-
-Previous `/app` and `/market-price` URLs redirect to the Mandi Prices page.
-
-The development server may choose the next port if port 3000 is already occupied; read the terminal output for the actual URL.
-
-## Useful commands
+## Local setup
 
 ```bash
 npm ci
-npm run lint
-npm test
-npm run build
-npm run preview
+Copy-Item .env.example .env # PowerShell
+npm run dev
 ```
 
-`npm run lint` runs the TypeScript compiler in no-emit mode. `npm test` runs the database/service verification script. Run these commands in your own environment and review the reported output; passing a frontend build alone does not prove the upstream government API is reachable.
+Set `DATA_GOV_API_KEY` in `.env`; do not commit the file or put the key in browser code. `WEB3FORMS_ACCESS_KEY` is needed only to enable the contact form.
 
-## Environment variables
+The local API and site are available at `http://localhost:3000`. Use `/api/v1/health` for a basic process check; it does not verify a particular government-data request.
 
-See `.env.example`. Keep credentials server-side only:
+## Verification
 
-- `DATA_GOV_API_KEY` — OGD API key.
-- `DATA_GOV_API_BASE_URL` — defaults to `https://api.data.gov.in/resource`.
-- `DATA_GOV_RESOURCE_ID` — defaults to the AGMARKNET resource ID above.
-- `DATABASE_URL` — optional PostgreSQL connection string for retained legacy history endpoints.
-- `POSTGRES_URL` — fallback PostgreSQL connection string used when `DATABASE_URL` is unset, including Vercel Postgres's standard pooled URL.
-- `PORT` — local server port (default `3000`).
+```bash
+npm test
+npm run test:integration
+npm run test:site
+npm run lint
+npm run build
+```
 
-Do not paste secrets into issues, logs, frontend code, or source control.
+`npm test` uses deterministic source-response fixtures and makes no network calls. `npm run test:integration` starts an isolated mock upstream and verifies the public API flow. Neither command exposes or requires a database.
 
-## Data integrity
+## Documentation
 
-- The UI shows values returned by the backend, with missing prices rendered as a dash rather than zero.
-- The arrival date is the market-data date; a backend sync timestamp is not the same thing as the latest arrival date.
-- Results are fetched from the government source when requested; source publication may still lag current trading conditions.
-- No price trend or live market statistic should be inferred from sample records.
-- The OGD API key is used only by the server-side live proxy.
-
-## Deployment notes and known limitations
-
-- The database factory selects PostgreSQL when `DATABASE_URL` or `POSTGRES_URL` is configured and SQLite otherwise. PostgreSQL end-to-end connectivity still requires a valid database URL and deployment-side verification. SQLite is local-only for durable use; serverless filesystems may be ephemeral or read-only.
-- On Vercel, add a pooled Neon/Postgres connection string as `DATABASE_URL` in **Project Settings → Environment Variables** (or connect Vercel Postgres to provide `POSTGRES_URL`). Apply it to Production and any Preview environments that need the API, then redeploy. The server initializes the PostgreSQL schema on first use; never commit the connection string.
-- Price pages are bounded to 100 records per request and transient upstream failures receive a small, bounded retry count.
-- Bulk sync routes and the daily cron have been removed. Live price/filter routes do not write to PostgreSQL or SQLite.
-- Existing production database rows are left untouched. See [docs/live-mandi-migration.md](./docs/live-mandi-migration.md) before considering any cleanup.
-- The UI reports backend status and does not claim data is real-time.
-
-## Source
-
-Government of India Open Government Data Platform: [https://data.gov.in/](https://data.gov.in/)
-
-AGMARKNET resource ID: `9ef84268-d588-465a-a308-a864a43d0070`.
+- [Architecture](docs/architecture.md)
+- [API contract](docs/api.md)
+- [Environment](docs/environment.md)
+- [Security](docs/security.md)
+- [Deployment](docs/deployment.md)

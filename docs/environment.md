@@ -1,26 +1,14 @@
-# Environment Variables — Rate-GPT
+# Environment variables
 
-## Required for the relevant feature
-- `DATA_GOV_API_KEY` — OGD/AGMARKNET API key (server-side); upstream sync is
-  disabled if missing or set to a placeholder. Browsing stored records does not
-  require this key.
-- `ADMIN_SYNC_KEY` — server-side bearer token; required to enable manual sync
-  and protected sync logs.
-- `CRON_SECRET` — server-side bearer token; required to authorize scheduled
-  sync requests.
-- `DATABASE_URL` or `POSTGRES_URL` — PostgreSQL URL required on Vercel for
-  persistent API data. Local development uses SQLite when neither is set.
+Use `.env.example` as the template. Keep `.env` local and never use a public client-side prefix for a secret.
 
-## Optional
-- `NODE_ENV` — should be `production` on Vercel.
-- `PORT` — local dev server port (default 3000).
-- `RATEGPT_DB_PATH` / `DB_PATH` — override the local SQLite file path.
-- `DATA_GOV_API_BASE_URL` — override upstream base (default https://api.data.gov.in/resource).
-- `DATA_GOV_RESOURCE_ID` — override resource ID (default 9ef84268-d588-465a-a308-a864a43d0070).
-- `VERCEL` — set by Vercel platform.
+| Variable | Required | Purpose |
+|---|---:|---|
+| `DATA_GOV_API_KEY` | Yes for live data | Server-side credential for OGD / AGMARKNET. |
+| `DATA_GOV_API_BASE_URL` | No | Defaults to `https://api.data.gov.in/resource`. Useful for isolated tests. |
+| `DATA_GOV_RESOURCE_ID` | No | Defaults to AGMARKNET resource `9ef84268-d588-465a-a308-a864a43d0070`. |
+| `WEB3FORMS_ACCESS_KEY` | Only for contact delivery | Server-side Web3Forms credential. Without it, the contact API returns 503. |
+| `PORT` | No | Local server port; defaults to 3000. |
+| `NODE_ENV` | No | Use `production` in production. |
 
-## Rules
-- Never commit `.env` or `.env.local`.
-- Never use `VITE_` or `NEXT_PUBLIC_` prefixes for secrets.
-- `.env.example` contains placeholder values only.
-- Do not commit `.env`; database URLs and API/admin/cron keys must stay server-side.
+No database URL, storage path, sync secret, cron secret, or Neon configuration is used by this application.
