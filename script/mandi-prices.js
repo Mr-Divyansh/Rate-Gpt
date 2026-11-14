@@ -21,6 +21,7 @@ const state = {
   meta: { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false },
   pageOffsets: [0],
   sort: "date_desc",
+  priceUnit: "quintal",
   loading: false,
   error: "",
   finderError: "",
@@ -329,6 +330,9 @@ function renderResults() {
     : t("results.titleNone");
 
   const busy = state.loading && state.records.length === 0;
+  const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
+  const unitControl = $("priceUnit");
+  if (unitControl) unitControl.value = state.priceUnit;
   let announcement = "";
 
   if (busy) {
@@ -349,9 +353,16 @@ function renderResults() {
     $("resultCount").textContent = tCount("results.count", 0);
     announcement = t("results.none");
   } else {
-    const ctx = buildContext(state.records);
-    body.replaceChildren(...state.records.map((r) => tableRow(r, ctx)));
-    list.replaceChildren(...state.records.map((r) => cardFor(r, ctx)));
+    const divisor = state.priceUnit === "kg" ? 100 : 1;
+    const displayRecords = state.records.map((record) => ({
+      ...record,
+      min_price: record.min_price === null ? null : record.min_price / divisor,
+      max_price: record.max_price === null ? null : record.max_price / divisor,
+      modal_price: record.modal_price === null ? null : record.modal_price / divisor,
+    }));
+    const ctx = buildContext(displayRecords);
+    body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx)));
+    list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx)));
     $("resultCount").textContent = state.meta.total === null
       ? tCount("results.count", state.records.length)
       : tCount("results.count", state.meta.total);
@@ -368,6 +379,8 @@ function renderResults() {
   $("loadPrevious").hidden = state.pageOffsets.length < 2;
   $("loadPrevious").disabled = state.loading;
   $("priceMessage").textContent = announcement;
+  const unitNote = document.querySelector(".unit-field label");
+  if (unitNote) unitNote.textContent = `Price unit (${unitLabel})`;
   renderError();
 }
 
@@ -503,6 +516,10 @@ async function loadSync() {
 
 /* ============================ boot ============================ */
 function bind() {
+  $("priceUnit").addEventListener("change", (event) => {
+    state.priceUnit = event.currentTarget.value === "kg" ? "kg" : "quintal";
+    renderResults();
+  });
   $("stateSelect").addEventListener("change", (e) => chooseState(e.currentTarget.value));
   $("districtSelect").addEventListener("change", (e) => chooseDistrict(e.currentTarget.value));
   $("sortFilter").addEventListener("change", (e) => {
