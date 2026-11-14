@@ -32,12 +32,12 @@
   <main id="main-content" tabindex="-1">
     <section class="page-head wrap">
       <div class="page-head-copy">
-        <h1 data-i18n="prices.title">Mandi prices</h1>
+        <h1 data-i18n="prices.title">Latest government-reported mandi prices</h1>
         <p class="lede" data-i18n="prices.lede">Choose a mandi to see the prices recorded there. Search by crop name in English or Hindi.</p>
       </div>
       <p class="sync" id="syncChip">
         <span class="sync-dot" id="syncDot" data-state="none" aria-hidden="true"></span>
-        <span id="syncText" data-i18n="sync.onSearch">Government daily reports · fetched when requested</span>
+        <span id="syncText" data-i18n="sync.onSearch">Latest government-reported mandi prices · fetched on demand</span>
       </p>
     </section>
 
@@ -91,8 +91,8 @@
           <label for="sortFilter" data-i18n="results.sort">Sort by</label>
           <select id="sortFilter" name="sort" disabled>
             <option value="date_desc" data-i18n="sort.date_desc">Latest arrival</option>
-            <option value="modal_price_asc" data-i18n="sort.modal_price_asc">Modal price: low to high</option>
-            <option value="modal_price_desc" data-i18n="sort.modal_price_desc">Modal price: high to low</option>
+            <option value="modal_price_asc" data-i18n="sort.modal_price_asc">Modal price in this page: low to high</option>
+            <option value="modal_price_desc" data-i18n="sort.modal_price_desc">Modal price in this page: high to low</option>
             <option value="commodity_asc" data-i18n="sort.commodity_asc">Crop name A–Z</option>
           </select>
         </div>

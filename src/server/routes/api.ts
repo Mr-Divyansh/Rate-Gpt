@@ -105,7 +105,7 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
 });
 
 /**
- * 3. Latest Mandi Prices Endpoint
+ * 3. Latest government-reported mandi prices endpoint
  * GET /api/v1/prices
  */
 const pricesQuerySchema = z.object({
@@ -149,7 +149,7 @@ router.get("/prices", async (req: Request, res: Response) => {
       ...filters,
       arrivalDate: date,
     });
-    return sendSuccess(res, records, meta, "Live prices fetched successfully");
+    return sendSuccess(res, records, meta, "Latest government-reported prices fetched successfully");
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {
       return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
@@ -232,7 +232,7 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
           "Compare only records with matching variety and source unit; this endpoint returns observations and does not calculate price differences.",
         scope: "One live government API page for the requested commodity and arrival date; use pagination for more records.",
       },
-      "Live market comparison fetched",
+      "Latest government-reported market observations retrieved",
     );
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {
@@ -275,7 +275,7 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
         source: "Government of India OGD / AGMARKNET",
         sourceDerived: true,
       },
-      "Live commodity search completed",
+      "Government-reported commodity search completed",
     );
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {

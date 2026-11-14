@@ -40,6 +40,8 @@ export async function fetchFilters({ state = "", district = "" } = {}) {
     !["catalogue", "complete", "partial"].includes(data.coverage.status) ||
     !Number.isInteger(data.coverage.pagesScanned) ||
     !Number.isInteger(data.coverage.recordsScanned) ||
+    !Number.isInteger(data.coverage.maxOffset) ||
+    data.coverage.maxOffset < 0 ||
     (data.coverage.total !== null &&
       (!Number.isInteger(data.coverage.total) || data.coverage.total < 0))
   ) {
@@ -72,7 +74,8 @@ export function isPriceRecord(record) {
     !/^\d{4}-\d{2}-\d{2}$/.test(record.arrival_date) ||
     typeof record.source_unit !== "string" ||
     !record.source_unit.trim() ||
-    (record.variety !== null && typeof record.variety !== "string")
+    (record.variety !== null && record.variety !== undefined && typeof record.variety !== "string") ||
+    (record.grade !== null && record.grade !== undefined && typeof record.grade !== "string")
   ) {
     return false;
   }
@@ -86,6 +89,14 @@ export async function fetchPrices(params, { signal } = {}) {
   const payload = await requestJson(`/api/v1/prices?${new URLSearchParams(params)}`, { signal });
   if (!Array.isArray(payload.data) || !payload.data.every(isPriceRecord)) {
     throw new Error("The market data service returned invalid price records.");
+  }
+  const updatedAt = payload.meta?.upstreamUpdatedAt;
+  if (
+    updatedAt !== null &&
+    updatedAt !== undefined &&
+    (typeof updatedAt !== "string" || Number.isNaN(Date.parse(updatedAt)))
+  ) {
+    throw new Error("The market data service returned an invalid source update timestamp.");
   }
   return payload;
 }

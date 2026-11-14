@@ -94,12 +94,18 @@ function renderMandis() {
   }
   if (state.markets.length === 0) {
     help.textContent = state.filterCoverage?.status === "partial"
-      ? t("finder.partialEmpty", { pages: state.filterCoverage.pagesScanned })
+      ? t("finder.partialEmpty", {
+          records: state.filterCoverage.recordsScanned.toLocaleString("en-IN"),
+          maxOffset: state.filterCoverage.maxOffset.toLocaleString("en-IN"),
+        })
       : t("finder.none");
     return;
   }
   const coverageNote = state.filterCoverage?.status === "partial"
-    ? ` · ${t("finder.partial", { pages: state.filterCoverage.pagesScanned })}`
+    ? ` · ${t("finder.partial", {
+        records: state.filterCoverage.recordsScanned.toLocaleString("en-IN"),
+        maxOffset: state.filterCoverage.maxOffset.toLocaleString("en-IN"),
+      })}`
     : "";
   help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}${coverageNote}`;
   for (const market of state.markets) {
@@ -246,7 +252,7 @@ function updateControls() {
 
 function buildContext(records) {
   const keyOf = (r) => [
-    r.state, r.district, r.market, r.commodity, r.variety ?? "", r.source_unit,
+    r.state, r.district, r.market, r.commodity, r.variety ?? "", r.grade ?? "", r.source_unit,
   ].map((value) => String(value ?? "").trim().toLocaleLowerCase()).join("|");
   const groups = new Map();
   for (const r of records) {
@@ -270,7 +276,11 @@ function cropBlock(record) {
   const strong = document.createElement("strong");
   strong.textContent = names.primary;
   wrap.append(strong);
-  const second = [names.secondary, typeof record.variety === "string" ? record.variety.trim() : ""]
+  const second = [
+    names.secondary,
+    typeof record.variety === "string" ? record.variety.trim() : "",
+    typeof record.grade === "string" ? record.grade.trim() : "",
+  ]
     .filter(Boolean)
     .join(" · ");
   if (second) {
@@ -596,6 +606,7 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
       ...(state.sync && state.sync !== "error" ? state.sync : {}),
       source: meta.source,
       fetchedAt: meta.fetchedAt,
+      upstreamUpdatedAt: meta.upstreamUpdatedAt ?? null,
       cacheStatus: meta.cacheStatus,
       freshnessStatus: meta.freshnessStatus,
     };
@@ -630,13 +641,17 @@ function renderSync() {
     ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
     : t("sync.onSearch");
   dot.dataset.state = data.fetchedAt ? "live" : "none";
-  next.textContent = data.fetchedAt
+  const transparency = data.fetchedAt
     ? t("sync.transparency", {
         source: data.source || "Government of India OGD / AGMARKNET",
         mode: data.cacheStatus === "temporary-cache" ? t("sync.temporaryCache") : t("sync.liveApi"),
         freshness: data.freshnessStatus || "",
       })
     : t("sync.noFetchYet");
+  const upstreamUpdated = data.upstreamUpdatedAt
+    ? t("sync.upstreamUpdated", { time: formatDateTime(data.upstreamUpdatedAt) })
+    : "";
+  next.textContent = [transparency, upstreamUpdated].filter(Boolean).join(" · ");
 }
 
 async function loadSync() {

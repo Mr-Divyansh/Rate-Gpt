@@ -7,6 +7,7 @@ export function buildPreviousObservationIndex(records) {
       record.market,
       record.commodity,
       record.variety ?? "",
+      record.grade ?? "",
       record.source_unit,
     ];
     if (keyParts.some((value) => typeof value !== "string" || !value.trim())) continue;

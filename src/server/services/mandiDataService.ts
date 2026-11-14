@@ -7,7 +7,6 @@ const REQUEST_TIMEOUT_MS = 8_000;
 const MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 200;
 const RETRY_MAX_DELAY_MS = 2_000;
-const MAX_FILTER_DISCOVERY_PAGES = 100;
 const FILTER_DISCOVERY_PAGE_DELAY_MS = 100;
 
 const FRUIT_NAMES = [
@@ -186,6 +185,22 @@ export function parseReportedTotal(value: unknown): number | null {
   return Number.isSafeInteger(total) && total >= 0 ? total : null;
 }
 
+export function parseUpstreamUpdatedAt(value: unknown): string | null {
+  if (typeof value === "number" || (typeof value === "string" && /^\d+(?:\.\d+)?$/.test(value.trim()))) {
+    const timestamp = Number(value);
+    if (!Number.isFinite(timestamp)) return null;
+    const milliseconds = timestamp < 1_000_000_000_000 ? timestamp * 1000 : timestamp;
+    try {
+      return new Date(milliseconds).toISOString();
+    } catch {
+      return null;
+    }
+  }
+  if (typeof value !== "string" || !value.trim()) return null;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : new Date(parsed).toISOString();
+}
+
 function validIsoDate(year: number, month: number, day: number): string | null {
   const candidate = new Date(Date.UTC(year, month - 1, day));
   if (
@@ -315,12 +330,11 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
 
 function upstreamSort(sort?: string): { field: string; order: string } | null {
   const map: Record<string, { field: string; order: string }> = {
-    modal_price_asc: { field: "Modal_Price", order: "asc" },
-    modal_price_desc: { field: "Modal_Price", order: "desc" },
     market_asc: { field: "Market", order: "asc" },
     market_desc: { field: "Market", order: "desc" },
     commodity_asc: { field: "Commodity", order: "asc" },
     commodity_desc: { field: "Commodity", order: "desc" },
+    // OGD does not map Modal_Price for sorting; price order is applied locally per page.
     // Arrival_Date is not sortable in the current AGMARKNET OGD index mapping.
     // Leave date sorting to the upstream default; do not send a query that fails.
   };
@@ -375,6 +389,7 @@ export async function fetchLivePrices(
     truncated: boolean;
     source: string;
     fetchedAt: string;
+    upstreamUpdatedAt: string | null;
     cacheStatus: "live";
     freshnessStatus: string;
   };
@@ -400,12 +415,12 @@ export async function fetchLivePrices(
         ? payload.data as unknown[]
         : null;
   if (!rawRecords) {
-    const upstreamMessage = [payload.message, payload.error, payload.detail]
-      .find((value) => typeof value === "string" && value.trim());
-    const safeMessage = typeof upstreamMessage === "string"
-      ? upstreamMessage.replace(/((?:api[-_ ]?key|token)\s*[:=]\s*)\S+/gi, "$1[redacted]").slice(0, 240)
-      : "";
-    const normalizedMessage = safeMessage.toLocaleLowerCase();
+    const upstreamErrorText = [payload.message, payload.error, payload.detail]
+      .map((value) => typeof value === "string" ? value : JSON.stringify(value ?? ""))
+      .join(" ")
+      .slice(0, 2_000)
+      .toLocaleLowerCase();
+    const normalizedMessage = upstreamErrorText;
     if (/api.?key|unauthori[sz]ed|forbidden|credential/.test(normalizedMessage)) {
       throw new GovernmentApiError("Government data API rejected its configured key. Check DATA_GOV_API_KEY in the server environment.", 503);
     }
@@ -413,9 +428,7 @@ export async function fetchLivePrices(
       throw new GovernmentApiError("Government data API rate limit or quota reached. Please retry later.", 503);
     }
     throw new GovernmentApiError(
-      safeMessage
-        ? `Government API did not return a records array: ${safeMessage}`
-        : "Government API response did not contain a records array. Check the upstream resource, API key, and response format.",
+      "Government API returned an invalid response. Please retry later.",
       502,
     );
   }
@@ -503,6 +516,7 @@ export async function fetchLivePrices(
       truncated: upstreamHasNext && !hasNext,
       source: "Government of India OGD / AGMARKNET",
       fetchedAt: new Date().toISOString(),
+      upstreamUpdatedAt: parseUpstreamUpdatedAt(payload.updated ?? payload.updated_date),
       cacheStatus: "live",
       freshnessStatus:
         "Government-published daily market data; not guaranteed real-time trading prices.",
@@ -643,7 +657,7 @@ type LiveFilterMetadata = {
     pagesScanned: number;
     recordsScanned: number;
     total: number | null;
-    maxPages: number;
+    maxOffset: number;
     message: string;
   };
 };
@@ -652,7 +666,6 @@ type LiveFilterMetadata = {
 // process memory; mandi price records are never cached or written to the DB.
 const FILTER_CACHE_TTL_MS = 60_000;
 const FILTER_CACHE_MAX_ENTRIES = 64;
-const FILTER_PAGE_LIMIT = 10;
 const liveFilterCache = new Map<string, { expiresAt: number; value: LiveFilterMetadata }>();
 const liveFilterInFlight = new Map<string, Promise<LiveFilterMetadata>>();
 
@@ -680,7 +693,7 @@ export async function fetchLiveFilters(options: {
         pagesScanned: 0,
         recordsScanned: 0,
         total: null,
-        maxPages: 0,
+        maxOffset: MAX_OFFSET,
         message: "State and union-territory names are an administrative selector; availability is determined by live source records.",
       },
     };
@@ -705,7 +718,8 @@ export async function fetchLiveFilters(options: {
     let reportedTotal: number | null = null;
     let upstreamHasNext = false;
 
-    while (pagesScanned < MAX_FILTER_DISCOVERY_PAGES) {
+    while (true) {
+      const requestedOffset = offset;
       const result = await fetchLivePrices({
         ...options,
         limit: MAX_PAGE_SIZE,
@@ -734,10 +748,15 @@ export async function fetchLiveFilters(options: {
       if (reportedTotal !== null) {
         upstreamHasNext = offset < reportedTotal;
       }
-      if (!upstreamHasNext || result.meta.truncated) break;
-      if (pagesScanned < MAX_FILTER_DISCOVERY_PAGES) {
-        await delay(FILTER_DISCOVERY_PAGE_DELAY_MS);
+      if (!upstreamHasNext) break;
+      if (result.meta.truncated) break;
+      if (offset <= requestedOffset) {
+        throw new GovernmentApiError(
+          "Government API pagination stopped advancing while discovering filters.",
+          502,
+        );
       }
+      await delay(FILTER_DISCOVERY_PAGE_DELAY_MS);
     }
 
     const complete = !upstreamHasNext;
@@ -751,10 +770,10 @@ export async function fetchLiveFilters(options: {
         pagesScanned,
         recordsScanned,
         total: reportedTotal,
-        maxPages: MAX_FILTER_DISCOVERY_PAGES,
+        maxOffset: MAX_OFFSET,
         message: complete
           ? "Options were discovered from all pages reported by the upstream source."
-          : `Options may be incomplete: filter discovery stopped after ${MAX_FILTER_DISCOVERY_PAGES} pages.`,
+          : `Options may be incomplete: the application offset limit (${MAX_OFFSET}) was reached while upstream records remained.`,
       },
     };
 
