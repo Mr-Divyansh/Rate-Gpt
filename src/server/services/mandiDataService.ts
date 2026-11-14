@@ -325,6 +325,17 @@ export function normalizeCommoditySearch(query: string): string {
   return hindiCrop?.[1] ?? query.trim();
 }
 
+function indiaTodayIsoDate(now = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 export async function fetchLivePrices(
   options: LiveQueryOptions = {},
   fetcher: typeof fetch = fetch,
@@ -344,6 +355,13 @@ export async function fetchLivePrices(
 }> {
   const limit = options.limit ?? 50;
   const offset = options.offset ?? 0;
+  if (options.arrivalDate) {
+    const requestedDate = normalizeArrivalDate(options.arrivalDate);
+    if (!requestedDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
+    if (requestedDate > indiaTodayIsoDate()) {
+      throw new GovernmentApiError("Future arrival dates are not available. Choose today or an earlier date.", 400);
+    }
+  }
   const url = buildUrl(options, getApiKey());
   const payload = await requestGovernmentPage(url, fetcher);
   // data.gov.in normally returns { records: [...] }. Some upstream error
@@ -405,6 +423,9 @@ export async function fetchLivePrices(
   for (const raw of rawRecords) {
     const mapped = mapUpstreamRecord(raw);
     if (!mapped) continue;
+    // Never display a neighbouring arrival date if the upstream index ignores
+    // or loosely applies its date filter. A date selection is an exact match.
+    if (options.arrivalDate && mapped.arrivalDate !== normalizeArrivalDate(options.arrivalDate)) continue;
     const key = mapped.sourceRecordId
       ? `id:${mapped.sourceRecordId}`
       : [
