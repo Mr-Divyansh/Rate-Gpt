@@ -551,10 +551,10 @@
 .demo-dialog-head p:last-child { color: var(--muted); max-width: 65ch; }
 .demo-dialog .dialog-eyebrow { color: var(--green); font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
 .demo-dialog .dialog-close { flex: none; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: white; color: var(--forest); font-size: 1.6rem; line-height: 1; }
-.demo-frame { display: block; width: 100%; height: min(58vh, 590px); min-height: 340px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+.demo-video-placeholder { display: block; width: 100%; aspect-ratio: 16 / 9; min-height: 260px; max-height: min(58vh, 590px); border: 1px solid #26382e; border-radius: 14px; background: #101813; }
 .demo-dialog-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 14px; color: var(--muted); font-size: .9rem; }
 @media (max-width: 620px) {
   .demo-dialog { width: calc(100vw - 18px); padding: 14px; border-radius: 16px; }
-  .demo-frame { min-height: 400px; height: 52vh; }
+  .demo-video-placeholder { min-height: 190px; max-height: 52vh; }
   .demo-dialog-foot { align-items: flex-start; flex-direction: column; }
 }
