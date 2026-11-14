@@ -202,23 +202,12 @@ async function loadBoard() {
       renderBoard();
       return;
     }
+    // Historical price series are intentionally not fetched or retained.
+    // The home board displays only the current live response.
     board = { latest, rows, history: null };
     renderBoard();
-    try {
-      const { data: past } = await fetchPrices({
-        state: latest.state, district: latest.district, market: latest.market,
-        commodity: latest.commodity, limit: "8", sort: "date_desc",
-      });
-      board.history = past
-        .filter((r) => priceNumber(r.modal_price) !== null)
-        .map((r) => ({ date: r.arrival_date, value: priceNumber(r.modal_price) }))
-        .reverse();
-    } catch (error) {
-      console.error("[Home] Could not load price history:", error);
-    }
-    renderBoard();
   } catch (error) {
-    console.error("[Home] Could not load stored mandi prices:", error);
+    console.error("[Home] Could not load live mandi prices:", error);
     board = { error: error instanceof Error ? error.message : "Unknown error." };
     renderBoard();
   }
