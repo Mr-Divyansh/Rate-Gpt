@@ -83,9 +83,9 @@ async function main(): Promise<void> {
     return responseFor([upstreamRecord], input);
   });
   check(filtersUrl?.searchParams.get("filters[state.keyword]") === "Maharashtra", "state filter uses the OGD field id");
-  check(filtersUrl?.searchParams.get("filters[district]") === "Pune", "district filter is forwarded upstream");
-  check(filtersUrl?.searchParams.get("filters[market]") === "Pune Market", "market filter is forwarded upstream");
-  check(filtersUrl?.searchParams.get("filters[commodity]") === "Apple", "commodity filter is forwarded upstream");
+  check(filtersUrl?.searchParams.get("filters[district.keyword]") === "Pune", "district filter uses its exact-match field");
+  check(filtersUrl?.searchParams.get("filters[market.keyword]") === "Pune Market", "market filter uses its exact-match field");
+  check(filtersUrl?.searchParams.get("filters[commodity.keyword]") === "Apple", "commodity filter uses its exact-match field");
   check(filtersUrl?.searchParams.get("filters[arrival_date]") === "2026-11-13", "arrival date filter is normalized upstream");
   check(!JSON.stringify(filtered).includes("deterministic-test-key"), "government credentials never enter responses");
 
