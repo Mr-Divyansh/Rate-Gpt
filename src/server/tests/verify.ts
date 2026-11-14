@@ -212,11 +212,11 @@ async function main() {
     return mockPage([upstreamRecord, upstreamRecord], { total: "13,181" });
   });
   const parsedUrl = new URL(capturedUrl || "https://example.test");
-  check(parsedUrl.searchParams.get("filters[State]") === "Maharashtra", "upstream state filter is forwarded");
-  check(parsedUrl.searchParams.get("filters[District]") === "Pune", "upstream district filter is forwarded");
-  check(parsedUrl.searchParams.get("filters[Market]") === "Pune", "upstream market filter is forwarded");
-  check(parsedUrl.searchParams.get("filters[Commodity]") === "Apple", "upstream commodity filter is forwarded");
-  check(parsedUrl.searchParams.get("filters[Arrival_Date]") === "13/11/2026", "upstream date filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[state.keyword]") === "Maharashtra", "upstream state filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[district]") === "Pune", "upstream district filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[market]") === "Pune", "upstream market filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[commodity]") === "Apple", "upstream commodity filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[arrival_date]") === "2026-11-13", "upstream date filter is forwarded");
   check(parsedUrl.searchParams.get("api-key") === "test-only-government-key", "key is attached only to server-to-server request");
   check(livePage.meta.total === 13181, "comma-separated total is parsed for pagination");
   check(livePage.meta.hasNext && livePage.meta.nextOffset === 2, "live page metadata points to next upstream offset");
