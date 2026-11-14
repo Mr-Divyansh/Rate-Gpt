@@ -8,10 +8,6 @@
 import { Router, Request, Response } from "express";
 import { z } from "zod";
 import {
-  getPriceTrend,
-  getMarketComparison,
-} from "../db/database-factory.js";
-import {
   fetchLiveFilters,
   fetchLivePrices,
   GovernmentApiError,
@@ -193,63 +189,29 @@ router.get("/prices", async (req: Request, res: Response) => {
 });
 
 /**
- * 4. Price Trend Endpoint
- * GET /api/v1/prices/trend
- * Returns actual stored historical observations only.
+ * 4. Historical trend endpoint
+ *
+ * Historical price series are intentionally not retained. The upstream
+ * resource exposes arrival-date observations, not a guaranteed historical
+ * time-series query for arbitrary date ranges. Do not silently read legacy
+ * database rows or present them as live data.
  */
-const trendQuerySchema = z.object({
-  commodity: z.string().min(1, "Commodity name is required"),
-  market: z.string().min(1, "Market/mandi name is required"),
-  state: z.string().optional(),
-  district: z.string().optional(),
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-
-router.get("/prices/trend", async (req: Request, res: Response) => {
-  const parsed = trendQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    return sendError(
-      res,
-      "VALIDATION_ERROR",
-      "Commodity and market are required for price trend",
-      400,
-      parsed.error.format(),
-    );
-  }
-
-  try {
-    const { commodity, market, state, district, from, to } = parsed.data;
-    const records = await getPriceTrend(commodity, market, state, district, from, to);
-    return sendSuccess(
-      res,
-      records,
-      {
-        pointsCount: records.length,
-        commodity,
-        market,
-        dateRange:
-          records.length > 0
-            ? {
-                earliest: records[0].arrival_date,
-                latest: records[records.length - 1].arrival_date,
-              }
-            : null,
-      },
-      "Price trend fetched successfully",
-    );
-  } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Failed to fetch price trend", 500);
-  }
+router.get("/prices/trend", (_req: Request, res: Response) => {
+  return sendError(
+    res,
+    "HISTORICAL_STORAGE_DISABLED",
+    "Historical price charts are unavailable because Rate-GPT does not retain historical mandi prices.",
+    410,
+  );
 });
 
 /**
- * 5. Market Comparison Endpoint
+ * 5. Live market comparison endpoint
  * GET /api/v1/prices/compare?commodity=...&date=...
  */
 const compareQuerySchema = z.object({
-  commodity: z.string().min(1, "Commodity is required"),
-  date: z.string().optional(),
+  commodity: z.string().trim().min(1).max(100),
+  date: z.string().trim().min(1).max(20).optional(),
 });
 
 router.get("/prices/compare", async (req: Request, res: Response) => {
@@ -265,21 +227,32 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
   }
 
   try {
-    const records = await getMarketComparison(
-      parsed.data.commodity,
-      parsed.data.date,
-    );
+    const records = await fetchLivePrices({
+      commodity: parsed.data.commodity,
+      arrivalDate: parsed.data.date,
+      limit: 100,
+      offset: 0,
+      sort: "modal_price_desc",
+    });
     return sendSuccess(
       res,
-      records,
+      records.records,
       {
-        marketsCompared: records.length,
+        ...records.meta,
+        marketsCompared: records.records.length,
         commodity: parsed.data.commodity,
+        comparisonMayBePartial: records.meta.hasNext,
+        scope: "First live government API page only; use pagination for further results.",
       },
-      "Market comparison fetched",
+      "Live market comparison fetched",
     );
   } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Failed to compare markets", 500);
+    if (err instanceof GovernmentApiError) {
+      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
+        upstreamStatus: err.upstreamStatus,
+      });
+    }
+    return sendError(res, "UPSTREAM_ERROR", "Failed to compare live markets", 502);
   }
 });
 
