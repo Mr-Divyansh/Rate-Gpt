@@ -6,6 +6,7 @@ import {
   isFutureArrivalDate,
   mapUpstreamRecord,
   normalizeArrivalDate,
+  parseUpstreamUpdatedAt,
   parsePrice,
   parseReportedTotal,
   normalizeCommoditySearch,
@@ -72,6 +73,11 @@ async function main(): Promise<void> {
   check(parsePrice("1,234.50") === 1234.5, "formatted numeric prices are parsed");
   check(parsePrice("") === null && parsePrice("-1") === null, "missing and negative prices are not fabricated");
   check(parseReportedTotal("1,003") === 1003 && parseReportedTotal("bad") === null, "upstream totals are validated");
+  check(
+    parseUpstreamUpdatedAt(1_794_600_047) === "2026-11-13T20:00:47.000Z" &&
+      parseUpstreamUpdatedAt("not-a-date") === null,
+    "upstream dataset update metadata is normalized without inventing timestamps",
+  );
   check(!isFutureArrivalDate("2026-11-14", new Date("2026-11-14T12:00:00Z")), "today in India is selectable");
   check(isFutureArrivalDate("2026-11-15", new Date("2026-11-14T12:00:00Z")), "future arrival dates are rejected");
   check(normalizeCommoditySearch("अंगू") === "Grapes", "partial Hindi crop search maps to the source commodity");
@@ -102,6 +108,86 @@ async function main(): Promise<void> {
   check(!JSON.stringify(filtered).includes("deterministic-test-key"), "government credentials never enter responses");
   check(filtered.meta.hasNext === false && filtered.meta.upstreamHasNext === false, "pagination metadata separates available pages from upstream coverage");
 
+  const verifiedAndhraMarkets = [
+    {
+      market: "Chintapally APMC",
+      commodity: "Gur(Jaggery)",
+      variety: "Other",
+      grade: "FAQ",
+      price: 5_110,
+    },
+    {
+      market: "Araku Valley APMC",
+      commodity: "Turmeric",
+      variety: "Finger",
+      grade: "Grade Range-1",
+      price: 17_920,
+    },
+    {
+      market: "Paderu APMC",
+      commodity: "Groundnut",
+      variety: "Local",
+      grade: "Grade Range-2",
+      price: 7_300,
+    },
+  ];
+  for (const observation of verifiedAndhraMarkets) {
+    let requestUrl: URL | undefined;
+    const result = await fetchLivePrices({
+      state: "Andhra Pradesh",
+      district: "Alluri Sitharama Raju",
+      market: observation.market,
+      limit: 100,
+      offset: 0,
+    }, async (input) => {
+      requestUrl = new URL(String(input));
+      return new Response(JSON.stringify({
+        title: "Current Daily Price of Various Commodities from Various Markets (Mandi)",
+        updated: 1_794_600_047,
+        total: "1",
+        limit: "100",
+        offset: "0",
+        records: [{
+          state: "Andhra Pradesh",
+          district: "Alluri Sitharama Raju",
+          market: observation.market,
+          commodity: observation.commodity,
+          variety: observation.variety,
+          grade: observation.grade,
+          arrival_date: "13/11/2026",
+          min_price: observation.price,
+          max_price: observation.price,
+          modal_price: observation.price,
+        }],
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    });
+    const record = result.records[0];
+    check(
+      requestUrl?.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
+        requestUrl.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
+        requestUrl.searchParams.get("filters[market.keyword]") === observation.market,
+      `${observation.market} regression preserves exact government location filters`,
+    );
+    check(
+      result.meta.total === 1 &&
+        result.meta.nextOffset === 1 &&
+        !result.meta.upstreamHasNext &&
+        result.records.length === 1 &&
+        record?.market === observation.market &&
+        record.commodity === observation.commodity &&
+        record.variety === observation.variety &&
+        record.grade === observation.grade &&
+        record.arrival_date === "2026-11-13" &&
+        record.modal_price === observation.price,
+      `${observation.market} upstream observation is retained with date, variety, grade, and source price`,
+    );
+    check(
+      result.meta.upstreamUpdatedAt === "2026-11-13T20:00:47.000Z" &&
+        result.meta.fetchedAt !== result.meta.upstreamUpdatedAt,
+      `${observation.market} dataset update and API fetch timestamps remain distinct`,
+    );
+  }
+
   const rawPage = [
     { ...upstreamRecord, id: "duplicate", Arrival_Date: "12/11/2026" },
     { ...upstreamRecord, id: "duplicate", Arrival_Date: "12/11/2026" },
@@ -111,6 +197,42 @@ async function main(): Promise<void> {
   check(page.records.length === 2 && page.meta.nextOffset === 3, "duplicate source records are removed without corrupting pagination");
   check(page.records[0]?.arrival_date === "2026-11-13", "date ordering is applied to the displayed live page");
   check(page.records.some((record) => record.modal_price === null), "partial price records remain available with null values");
+
+  let priceSortUrl: URL | undefined;
+  const priceSorted = await fetchLivePrices({ limit: 2, sort: "modal_price_asc" }, async (input) => {
+    priceSortUrl = new URL(String(input));
+    return responseFor([
+      { ...upstreamRecord, id: "higher-price", Modal_Price: "2,100" },
+      { ...upstreamRecord, id: "lower-price", Modal_Price: "1,100" },
+    ], input);
+  });
+  check(
+    !priceSortUrl?.searchParams.has("sort[Modal_Price]") &&
+      priceSorted.records[0]?.modal_price === 1_100 &&
+      priceSorted.records[1]?.modal_price === 2_100,
+    "modal-price sorting is applied within the page without requesting unsupported OGD sorting",
+  );
+
+  try {
+    await fetchLivePrices({ limit: 1 }, async () =>
+      new Response(JSON.stringify({
+        error: {
+          root_cause: [{
+            reason: "No mapping found for [Modal_Price] in index [private_upstream_index]",
+          }],
+        },
+      }), { status: 200, headers: { "Content-Type": "application/json" } }),
+    );
+    check(false, "malformed upstream payload fails safely");
+  } catch (error) {
+    check(
+      error instanceof GovernmentApiError &&
+        error.httpStatus === 502 &&
+        !error.message.includes("private_upstream_index") &&
+        !error.message.includes("No mapping found"),
+      "upstream query internals are not exposed in malformed-response errors",
+    );
+  }
 
   let retries = 0;
   const retried = await fetchLivePrices({ limit: 1 }, async (input) => {
@@ -165,7 +287,45 @@ async function main(): Promise<void> {
   });
   check(discoveryRequests === 13, "filter discovery paginates beyond 1,000 upstream records");
   check(discovered.markets.length === 1_205, "filter discovery deduplicates values across pages");
-  check(discovered.coverage.status === "complete" && discovered.coverage.total === 1_206, "filter discovery reports complete coverage from the upstream total");
+  check(
+    discovered.coverage.status === "complete" &&
+      discovered.coverage.total === 1_206 &&
+      discovered.coverage.maxOffset === 1_000_000,
+    "filter discovery reports complete coverage and its supported offset boundary",
+  );
+
+  const largeDiscoveryTotal = 10_001;
+  let largeDiscoveryRequests = 0;
+  const largeDiscovery = await fetchLiveFilters({ state: "Beyond Prior Page Bound" }, async (input) => {
+    largeDiscoveryRequests += 1;
+    const url = new URL(String(input));
+    const offset = Number(url.searchParams.get("offset"));
+    const limit = Number(url.searchParams.get("limit"));
+    const count = Math.min(limit, largeDiscoveryTotal - offset);
+    const records = Array.from({ length: count }, (_, index) => {
+      const recordIndex = offset + index;
+      return {
+        ...upstreamRecord,
+        id: `large-discovery-${recordIndex}`,
+        State: "Beyond Prior Page Bound",
+        District: `District ${recordIndex}`,
+        Market: `Market ${recordIndex}`,
+      };
+    });
+    return responseFor(records, input, String(largeDiscoveryTotal));
+  });
+  check(
+    largeDiscoveryRequests === 101 &&
+      largeDiscovery.coverage.pagesScanned === 101 &&
+      largeDiscovery.coverage.recordsScanned === largeDiscoveryTotal,
+    "filter discovery continues past 100 pages without an arbitrary short stop",
+  );
+  check(
+    largeDiscovery.coverage.status === "complete" &&
+      largeDiscovery.coverage.total === largeDiscoveryTotal &&
+      largeDiscovery.markets.length === largeDiscoveryTotal,
+    "large filter discovery completes only after all upstream-reported records are scanned",
+  );
 
   let missingTotalRequests = 0;
   const missingTotals = await fetchLiveFilters({ state: "No Total State" }, async (input) => {
@@ -187,6 +347,18 @@ async function main(): Promise<void> {
   });
   check(missingTotalRequests === 2, "filter discovery reads through a short final page when total is missing");
   check(missingTotals.coverage.status === "complete", "short final page marks unknown-total discovery complete");
+
+  try {
+    await fetchLiveFilters({ state: "No Progress State" }, async (input) =>
+      responseFor([], input, "1"),
+    );
+    check(false, "filter discovery rejects a non-advancing upstream page");
+  } catch (error) {
+    check(
+      error instanceof GovernmentApiError && error.httpStatus === 502,
+      "filter discovery fails explicitly when upstream pagination stops advancing",
+    );
+  }
 
   try {
     await fetchLiveFilters({ state: "Changing Total State" }, async (input) => {
@@ -230,6 +402,7 @@ async function main(): Promise<void> {
   };
   const csv = recordsToCsv([csvRecord]);
   check(csv.startsWith("\uFEFF") && csv.includes('"State, ""North"""'), "CSV includes a UTF-8 BOM and escapes quotes and commas");
+  check(csv.split("\r\n")[0]?.includes('"Variety","Grade","Arrival date"') && csv.includes('"FAQ"'), "CSV includes source variety and grade fields");
   check(csv.includes('"Market\nSecond line"'), "CSV preserves escaped multiline fields");
   check(csv.includes(',"","","0",'), "CSV leaves missing or invalid prices blank and preserves a valid zero");
   check(recordsToCsv([{ ...csvRecord, market: "=HYPERLINK(\"bad\")" }]).includes(`"'=HYPERLINK(""bad"")"`), "CSV neutralizes spreadsheet formula injection");
@@ -339,6 +512,7 @@ async function main(): Promise<void> {
     market: "Pune Market",
     commodity: "Apple",
     variety: "Red",
+    grade: "FAQ",
     arrival_date: "2026-11-10",
     modal_price: 1_000,
     source_unit: "Rs/Quintal",
@@ -348,6 +522,7 @@ async function main(): Promise<void> {
     { ...previous, id: "other-market", market: "Other Market", arrival_date: "2026-11-13" },
     { ...previous, id: "other-crop", commodity: "Mango", arrival_date: "2026-11-13" },
     { ...previous, id: "other-variety", variety: "Green", arrival_date: "2026-11-13" },
+    { ...previous, id: "other-grade", grade: "Grade Range-1", arrival_date: "2026-11-13" },
     { ...previous, id: "other-unit", source_unit: "Rs/Kg", arrival_date: "2026-11-13" },
   ];
   const findPrevious = buildPreviousObservationIndex([previous, latest, ...mismatches]);

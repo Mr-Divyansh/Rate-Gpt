@@ -62,6 +62,42 @@ const sourceRecords = [
     Max_Price: "4,000",
     Modal_Price: "3,500",
   },
+  {
+    State: "Andhra Pradesh",
+    District: "Alluri Sitharama Raju",
+    Market: "Chintapally APMC",
+    Commodity: "Gur(Jaggery)",
+    Variety: "Other",
+    Grade: "FAQ",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "5,110",
+    Max_Price: "5,110",
+    Modal_Price: "5,110",
+  },
+  {
+    State: "Andhra Pradesh",
+    District: "Alluri Sitharama Raju",
+    Market: "Araku Valley APMC",
+    Commodity: "Turmeric",
+    Variety: "Finger",
+    Grade: "Grade Range-1",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "17,920",
+    Max_Price: "17,920",
+    Modal_Price: "17,920",
+  },
+  {
+    State: "Andhra Pradesh",
+    District: "Alluri Sitharama Raju",
+    Market: "Paderu APMC",
+    Commodity: "Groundnut",
+    Variety: "Local",
+    Grade: "Grade Range-2",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "7,300",
+    Max_Price: "7,300",
+    Modal_Price: "7,300",
+  },
 ];
 
 const upstreamRequests: URL[] = [];
@@ -96,6 +132,8 @@ const upstream = http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify({
     status: "ok",
+    title: "Current Daily Price of Various Commodities from Various Markets (Mandi)",
+    updated: 1_794_600_047,
     total: String(records.length),
     count: Math.min(limit, Math.max(0, records.length - offset)),
     limit: String(limit),
@@ -241,12 +279,17 @@ async function main() {
     assert(filteredRequest.searchParams.get("filters[market.keyword]") === "Pune Market", "prices pass market exact-match filter upstream");
     assert(filteredRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "prices pass commodity exact-match filter upstream");
     assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
-    assert(filteredRequest.searchParams.get("sort[Modal_Price]") === "desc", "price sort uses OGD sort[field]=direction syntax");
+    assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
     assert(filtered.meta.total === 2, "upstream result totals are parsed");
     assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
+    assert(
+      filtered.meta.upstreamUpdatedAt === "2026-11-13T20:00:47.000Z" &&
+        filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
+      "upstream dataset update time is returned separately from the successful fetch time",
+    );
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
 
@@ -257,6 +300,39 @@ async function main() {
     assert(secondPage.meta.offset === 2, "second-page response reflects upstream offset");
     assert(firstPage.data.length === 1 && secondPage.data.length === 2, "duplicate records within a page are removed");
     assert(secondPage.data.some((record: any) => record.commodity === "Guava" && record.min_price === null && record.modal_price === null), "missing prices stay null");
+
+    const verifiedAndhraMarkets = [
+      { market: "Chintapally APMC", commodity: "Gur(Jaggery)", grade: "FAQ" },
+      { market: "Araku Valley APMC", commodity: "Turmeric", grade: "Grade Range-1" },
+      { market: "Paderu APMC", commodity: "Groundnut", grade: "Grade Range-2" },
+    ];
+    for (const item of verifiedAndhraMarkets) {
+      const query = new URLSearchParams({
+        state: "Andhra Pradesh",
+        district: "Alluri Sitharama Raju",
+        market: item.market,
+        limit: "100",
+        offset: "0",
+      });
+      const marketResponse = await fetch(`${base}/api/v1/prices?${query}`);
+      const marketPayload = await marketResponse.json();
+      const sourceRequest = upstreamRequests.at(-1)!;
+      assert(
+        marketResponse.status === 200 &&
+          marketPayload.meta.total === 1 &&
+          marketPayload.data.length === 1 &&
+          marketPayload.data[0]?.market === item.market &&
+          marketPayload.data[0]?.commodity === item.commodity &&
+          marketPayload.data[0]?.grade === item.grade,
+        `${item.market} regression preserves the sole matching source observation`,
+      );
+      assert(
+        sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
+          sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
+          sourceRequest.searchParams.get("filters[market.keyword]") === item.market,
+        `${item.market} regression sends exact state, district, and market filters upstream`,
+      );
+    }
 
     const search = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`)
       .then((r) => r.json());

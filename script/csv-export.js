@@ -9,6 +9,7 @@ const CSV_COLUMNS = [
   ["Market", "market"],
   ["Commodity", "commodity"],
   ["Variety", "variety"],
+  ["Grade", "grade"],
   ["Arrival date", "arrival_date"],
   ["Minimum price", "min_price"],
   ["Maximum price", "max_price"],
