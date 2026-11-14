@@ -92,6 +92,14 @@ The following safe changes were implemented on the audit branch after the initia
 - Added integration assertions for server-generated request IDs, oversized request rejection, and malformed JSON handling.
 - Updated `docs/security.md` to describe these controls and the remaining CSP/production-header verification gaps.
 
+### Production build asset inspection
+
+The successful Vite build reported the following generated CSS sizes (not a browser network waterfall):
+- Five route/shared CSS chunks: 53.02 kB raw total; approximately 15.05 kB combined gzip.
+- This source build did not reproduce a 916 KB CSS bundle. The browser report's measurement remains unavailable and may reflect a different page/state/build or transfer grouping.
+- The build also emits a 1,226.20 kB `DWebStudioLogo` PNG asset, referenced on the About team section with `loading="lazy"`. This is a confirmed image-optimization candidate, not CSS. It was not replaced because a safe optimized binary asset was not generated and visually verified in this environment.
+- No Lighthouse score, real-device LCP/CLS/INP, or production network-transfer result is claimed.
+
 ### Static contrast spot-check (not a full WCAG audit)
 
 Computed contrast ratios from the source token values:
@@ -105,9 +113,9 @@ These are calculations for selected token/background pairs only. They do not ver
 
 ### Verification status after implementation
 
-- GitHub Actions on an earlier audit-branch commit completed the existing CI job successfully: dependency install, unit/service tests, API integration tests, TypeScript check, and Vite production build all passed on that earlier commit.
-- Subsequent commits changed SEO metadata, request parsing, server-generated request IDs, and integration tests. Their final CI run must complete successfully before these code changes are marked verified.
-- No local browser automation, Lighthouse, deployed header scan, live CSP validation, or cross-device visual check has been executed in this pass.
+- Final GitHub Actions run on commit `9439507dd30503a0adfe983d514ac27c3f43db9a` completed successfully. It passed `npm ci`, unit/service tests, API integration tests, the new public-site metadata checks (74 passed, 0 failed), TypeScript check, and Vite production build.
+- The same CI run passed the added request-ID, oversized-body (413), and malformed-JSON (400) integration assertions.
+- No local browser automation, Lighthouse, deployed header scan, live CSP validation, or cross-device visual check has been executed in this pass. The Vercel preview is READY, but the available web page-fetch route could not retrieve its content for browser-level inspection.
 - Vercel production remains untouched. PR preview builds are managed by the existing GitHub/Vercel integration; a preview URL is not a production deployment.
 
 ## Not performed / not claimed
