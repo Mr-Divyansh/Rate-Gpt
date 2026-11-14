@@ -1,6 +1,7 @@
 import http from "http";
 import type { AddressInfo } from "net";
 import { createApiApp } from "../../../server.ts";
+import { normalizeArrivalDate } from "../services/mandiDataService.js";
 
 const apiKey = "integration-only-upstream-key";
 const sourceRecords = [
@@ -50,17 +51,38 @@ const sourceRecords = [
     Max_Price: null,
     Modal_Price: null,
   },
+  {
+    id: "grapes-1",
+    State: "Karnataka",
+    District: "Bengaluru Rural",
+    Market: "Bengaluru Market",
+    Commodity: "Grapes",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "3,000",
+    Max_Price: "4,000",
+    Modal_Price: "3,500",
+  },
 ];
 
 const upstreamRequests: URL[] = [];
 const upstream = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
   upstreamRequests.push(url);
-  const filters = ["State", "District", "Market", "Commodity", "Arrival_Date"];
+  const filters = [
+    ["filters[state.keyword]", "State"],
+    ["filters[district]", "District"],
+    ["filters[market]", "Market"],
+    ["filters[commodity]", "Commodity"],
+    ["filters[arrival_date]", "Arrival_Date"],
+  ] as const;
   let records = sourceRecords.filter((record) =>
-    filters.every((field) => {
-      const filter = url.searchParams.get(`filters[${field}]`);
-      return !filter || String(record[field as keyof typeof record] ?? "") === filter;
+    filters.every(([parameter, field]) => {
+      const filter = url.searchParams.get(parameter);
+      const sourceValue = field === "Arrival_Date"
+        ? normalizeArrivalDate(String(record[field])) ?? String(record[field])
+        : String(record[field]);
+      const normalizedFilter = field === "Arrival_Date" ? normalizeArrivalDate(filter) ?? filter : filter;
+      return !filter || sourceValue === normalizedFilter;
     }),
   );
   const query = url.searchParams.get("q")?.toLocaleLowerCase();
@@ -74,7 +96,7 @@ const upstream = http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify({
     status: "ok",
-    total: "1,003",
+    total: String(records.length),
     count: Math.min(limit, Math.max(0, records.length - offset)),
     limit: String(limit),
     offset: String(offset),
@@ -206,7 +228,7 @@ async function main() {
     assert(filteredRequest.searchParams.get("sort[Modal_Price]") === "desc", "price sort uses OGD sort[field]=direction syntax");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
-    assert(filtered.meta.total === 1003, "comma-separated upstream total is parsed");
+    assert(filtered.meta.total === 2, "upstream result totals are parsed");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
@@ -221,7 +243,8 @@ async function main() {
 
     const search = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`)
       .then((r) => r.json());
-    assert(search.success && search.data.includes("Grapes"), "Hindi fruit search discovers the English fruit suggestion");
+    assert(search.success && search.data.length === 1 && search.data[0] === "Grapes", "Hindi commodity search returns an upstream commodity only");
+    assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
 
     const comparison = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
@@ -240,6 +263,7 @@ async function main() {
     const status = await fetch(`${base}/api/v1/sync-status`).then((r) => r.json());
     assert(status.data.mode === "on-demand" && !status.data.bulkSyncEnabled, "sync status confirms bulk sync is disabled");
     assert(status.data.schedulerEnabled === false, "sync status confirms no scheduler");
+    assert(status.data.priceStorage === "disabled", "sync status confirms price storage is disabled");
 
     const invalid = await fetch(`${base}/api/v1/prices?offset=-1`);
     assert(invalid.status === 400, "invalid pagination is rejected");

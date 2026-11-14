@@ -374,9 +374,7 @@ function renderResults() {
     const ctx = buildContext(displayRecords);
     body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx)));
     list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx)));
-    $("resultCount").textContent = state.meta.total === null
-      ? tCount("results.count", state.records.length)
-      : tCount("results.count", state.meta.total);
+    $("resultCount").textContent = tCount("results.count", state.records.length);
     announcement = `${state.market}: ${$("resultCount").textContent}`;
   }
 

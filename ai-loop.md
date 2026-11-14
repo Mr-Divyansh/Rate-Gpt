@@ -31,7 +31,7 @@ Before finishing:
 ```
 
 ## Safety checks
-Never paste the real API key into AI prompts. Use placeholders. Review destructive database, file and deployment commands. Verify Government API behavior instead of assuming it.
+Never paste the real API key into AI prompts. Use placeholders. Review destructive file and deployment commands. Verify Government API behavior instead of assuming it.
 
 ## Definition of done
 The task matches PRD and design, code is readable and typed, validation/error handling exists, tests are reported honestly, docs are updated and no secrets are committed.

@@ -85,7 +85,7 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
       data,
       {
         source: "Government of India OGD / AGMARKNET",
-        scope: "Distinct values from a bounded live result page; market options may be partial.",
+        scope: "Distinct values observed across up to two live government result pages; location options may be partial.",
       },
       "Live filter metadata retrieved",
     );
@@ -173,7 +173,7 @@ router.get("/prices", async (req: Request, res: Response) => {
  * Historical price series are intentionally not retained. The upstream
  * resource exposes arrival-date observations, not a guaranteed historical
  * time-series query for arbitrary date ranges. Do not silently read legacy
- * database rows or present them as live data.
+ * retained rows or present them as live data.
  */
 router.get("/prices/trend", (_req: Request, res: Response) => {
   return sendError(
@@ -264,7 +264,7 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
       {
         count: results.length,
         source: "Government of India OGD / AGMARKNET",
-        fruitSuggestions: true,
+        sourceDerived: true,
       },
       "Live commodity search completed",
     );
