@@ -1,8 +1,6 @@
 import { t, onLangChange } from "./i18n.js";
 import { hydrateIcons } from "./icons.js";
-import {
-  fetchFilters, fetchPrices, loadLocation, saveLocation,
-} from "./api.js";
+import { fetchPrices } from "./api.js";
 import {
   spreadAxis, cropNames, createRange, createSparkline, formatDate, formatPrice, priceNumber,
 } from "./rate-ui.js";
@@ -10,67 +8,13 @@ import {
 const $ = (id) => document.getElementById(id);
 const BOARD_ROWS = 5;
 
-/* ---------------- finder (state → district → prices page) ---------------- */
-const locationDialog = $("locationDialog");
-$("locationOpen").addEventListener("click", () => locationDialog.showModal());
-
-const finder = { states: [], districts: [], state: "", district: "" };
-
-function fill(select, values, placeholder, selected = "") {
-  select.replaceChildren(new Option(placeholder, ""));
-  for (const value of values) select.add(new Option(value, value));
-  select.value = values.includes(selected) ? selected : "";
-}
-
-function renderFinder() {
-  const stateSelect = $("homeState");
-  const districtSelect = $("homeDistrict");
-  fill(stateSelect, finder.states, t("field.statePh"), finder.state);
-  fill(districtSelect, finder.districts, t("field.districtPh"), finder.district);
-  stateSelect.disabled = finder.states.length === 0;
-  districtSelect.disabled = !finder.state || finder.districts.length === 0;
-  $("homeGo").disabled = !finder.state || !finder.district;
-}
-
-async function loadDistricts(state) {
-  finder.state = state;
-  finder.district = "";
-  finder.districts = [];
-  renderFinder();
-  if (!state) return;
-  try {
-    finder.districts = (await fetchFilters({ state })).districts;
-  } catch (error) {
-    console.error("[Home] Could not load districts:", error);
-  }
-  renderFinder();
-}
-
-async function initFinder() {
-  try {
-    finder.states = (await fetchFilters()).states;
-  } catch (error) {
-    console.error("[Home] Could not load states:", error);
-    renderFinder();
-    return;
-  }
-  const saved = loadLocation();
-  if (saved && finder.states.includes(saved.state)) {
-    await loadDistricts(saved.state);
-    if (finder.districts.includes(saved.district)) finder.district = saved.district;
-  }
-  renderFinder();
-
-  $("homeState").addEventListener("change", (e) => loadDistricts(e.currentTarget.value));
-  $("homeDistrict").addEventListener("change", (e) => {
-    finder.district = e.currentTarget.value;
-    $("homeGo").disabled = !finder.state || !finder.district;
-  });
-  $("homeFinder").addEventListener("submit", () => {
-    // The form submits normally (GET → mandi-prices.html?state=…&district=…); remember it first.
-    saveLocation({ state: finder.state, district: finder.district });
-  });
-}
+/* ---------------- interactive product demo ---------------- */
+const demoDialog = $("demoDialog");
+$("watchDemo")?.addEventListener("click", () => demoDialog?.showModal());
+$("demoClose")?.addEventListener("click", () => demoDialog?.close());
+demoDialog?.addEventListener("click", (event) => {
+  if (event.target === demoDialog) demoDialog.close();
+});
 
 /* ---------------- rate board ---------------- */
 let board = null; // { latest, rows, history } | { error } | { empty: true }
@@ -213,10 +157,8 @@ async function loadBoard() {
 }
 
 onLangChange(() => {
-  renderFinder();
   renderBoard();
   hydrateIcons();
 });
 
-initFinder();
 loadBoard();

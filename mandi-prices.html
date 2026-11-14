@@ -82,7 +82,8 @@
         </div>
         <div class="field date-field">
           <label for="arrivalDate" data-i18n="results.date">Arrival date</label>
-          <input id="arrivalDate" name="date" type="date" disabled>
+          <input id="arrivalDate" name="date" type="date" disabled aria-describedby="arrivalDateHint">
+          <small class="date-hint" id="arrivalDateHint">Choose a date up to today. Future dates are unavailable.</small>
         </div>
         <div class="field sort-field">
           <label for="sortFilter" data-i18n="results.sort">Sort by</label>
