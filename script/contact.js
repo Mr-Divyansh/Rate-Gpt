@@ -7,7 +7,11 @@ const phone=document.querySelector("#contactPhone");
 const consent=document.querySelector("#contactConsent");
 function localize(){
   const lang=getLang();
-  document.querySelectorAll("[data-en][data-hi]").forEach(el=>{el.textContent=el.dataset[lang==="hi"?"hi":"en"];});
+  document.querySelectorAll("[data-en][data-hi]").forEach(el=>{
+    const value=el.dataset[lang==="hi"?"hi":"en"];
+    if(el.id==="contactConsentText") el.innerHTML=value;
+    else el.textContent=value;
+  });
   document.documentElement.lang=lang;
   const skip=document.querySelector(".skip-link");
   if(skip) skip.textContent=lang==="hi"?"मुख्य सामग्री पर जाएँ":"Skip to main content";
