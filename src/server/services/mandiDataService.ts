@@ -5,6 +5,10 @@ const MAX_PAGE_SIZE = 100;
 const MAX_OFFSET = 1_000_000;
 const REQUEST_TIMEOUT_MS = 8_000;
 const MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 200;
+const RETRY_MAX_DELAY_MS = 2_000;
+const MAX_FILTER_DISCOVERY_PAGES = 100;
+const FILTER_DISCOVERY_PAGE_DELAY_MS = 100;
 
 const FRUIT_NAMES = [
   { english: "Apple", hindi: "सेब" },
@@ -265,7 +269,19 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   const baseUrl = process.env.DATA_GOV_API_BASE_URL || DEFAULT_BASE_URL;
   let url: URL;
   try {
-    url = new URL(`${baseUrl.replace(/\/+$/, "")}/${RESOURCE_ID}`);
+    const parsedBaseUrl = new URL(baseUrl);
+    if (
+      parsedBaseUrl.username ||
+      parsedBaseUrl.password ||
+      parsedBaseUrl.search ||
+      parsedBaseUrl.hash ||
+      !/^[A-Za-z0-9-]+$/.test(RESOURCE_ID)
+    ) {
+      throw new Error("Invalid government API endpoint configuration.");
+    }
+    url = new URL(
+      `${parsedBaseUrl.toString().replace(/\/+$/, "")}/${RESOURCE_ID}`,
+    );
   } catch {
     throw new GovernmentApiError("Government API endpoint is invalid.", 503);
   }
@@ -315,11 +331,15 @@ export function normalizeCommoditySearch(query: string): string {
   const normalized = query.trim().toLocaleLowerCase();
   const fruit = FRUIT_NAMES.find(
     ({ english, hindi }) =>
-      normalized === english.toLocaleLowerCase() || normalized === hindi,
+      normalized === english.toLocaleLowerCase() ||
+      normalized === hindi ||
+      (normalized.length >= 2 && hindi.startsWith(normalized)),
   );
   if (fruit) return fruit.english;
   const hindiCrop = Object.entries(HINDI_CROP_NAMES).find(
-    ([hindi]) => normalized === hindi,
+    ([hindi]) =>
+      normalized === hindi ||
+      (normalized.length >= 2 && hindi.startsWith(normalized)),
   );
   return hindiCrop?.[1] ?? query.trim();
 }
@@ -351,6 +371,8 @@ export async function fetchLivePrices(
     nextOffset: number;
     total: number | null;
     hasNext: boolean;
+    upstreamHasNext: boolean;
+    truncated: boolean;
     source: string;
     fetchedAt: string;
     cacheStatus: "live";
@@ -466,6 +488,9 @@ export async function fetchLivePrices(
   sortLivePage(records, options.sort);
 
   const nextOffset = offset + rawCount;
+  const upstreamHasNext =
+    total === null ? rawCount === limit : nextOffset < total;
+  const hasNext = upstreamHasNext && nextOffset <= MAX_OFFSET;
   return {
     records,
     meta: {
@@ -473,7 +498,9 @@ export async function fetchLivePrices(
       offset,
       nextOffset,
       total,
-      hasNext: total === null ? rawCount === limit : nextOffset < total,
+      hasNext,
+      upstreamHasNext,
+      truncated: upstreamHasNext && !hasNext,
       source: "Government of India OGD / AGMARKNET",
       fetchedAt: new Date().toISOString(),
       cacheStatus: "live",
@@ -555,8 +582,12 @@ async function requestGovernmentPage(
 
     if (response.status === 429 || response.status >= 500) {
       if (attempt < MAX_ATTEMPTS) {
-        const retryAfter = Number(response.headers.get("retry-after"));
-        await delay(Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 1000) : 200 * attempt);
+        const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
+        const backoff = Math.min(
+          RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
+          RETRY_MAX_DELAY_MS,
+        );
+        await delay(retryAfter ?? backoff);
         continue;
       }
       throw new GovernmentApiError(
@@ -591,11 +622,30 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function retryAfterMilliseconds(value: string | null): number | null {
+  if (!value) return null;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.min(seconds * 1000, RETRY_MAX_DELAY_MS);
+  }
+  const date = Date.parse(value);
+  if (Number.isNaN(date)) return null;
+  return Math.min(Math.max(0, date - Date.now()), RETRY_MAX_DELAY_MS);
+}
+
 type LiveFilterMetadata = {
   states: string[];
   districts: string[];
   markets: string[];
   commodities: string[];
+  coverage: {
+    status: "catalogue" | "complete" | "partial";
+    pagesScanned: number;
+    recordsScanned: number;
+    total: number | null;
+    maxPages: number;
+    message: string;
+  };
 };
 
 // Filter metadata is small and short-lived. Cache only dropdown options in
@@ -618,13 +668,21 @@ export async function fetchLiveFilters(options: {
   state?: string;
   district?: string;
   market?: string;
-} = {}): Promise<LiveFilterMetadata> {
+} = {}, fetcher: typeof fetch = fetch): Promise<LiveFilterMetadata> {
   if (!options.state && !options.district && !options.market) {
     return {
       states: STATES_AND_UTS,
       districts: [],
       markets: [],
       commodities: [],
+      coverage: {
+        status: "catalogue",
+        pagesScanned: 0,
+        recordsScanned: 0,
+        total: null,
+        maxPages: 0,
+        message: "State and union-territory names are an administrative selector; availability is determined by live source records.",
+      },
     };
   }
 
@@ -638,37 +696,66 @@ export async function fetchLiveFilters(options: {
   if (pending) return pending;
 
   const request = (async (): Promise<LiveFilterMetadata> => {
-    const records: MandiRecord[] = [];
-    const seen = new Set<string>();
+    const districts = new Set<string>();
+    const markets = new Set<string>();
+    const commodities = new Set<string>();
+    let pagesScanned = 0;
+    let recordsScanned = 0;
+    let offset = 0;
+    let reportedTotal: number | null = null;
+    let upstreamHasNext = false;
 
-    // Discover up to ten live pages (1,000 upstream rows) for dependent selectors.
-    // This improves district/market coverage while keeping requests bounded;
-    // the returned options are still explicitly partial, not a nationwide catalogue.
-    for (let page = 0; page < FILTER_PAGE_LIMIT; page += 1) {
+    while (pagesScanned < MAX_FILTER_DISCOVERY_PAGES) {
       const result = await fetchLivePrices({
         ...options,
         limit: MAX_PAGE_SIZE,
-        offset: page * MAX_PAGE_SIZE,
-      });
-      for (const record of result.records) {
-        const recordKey = [record.state, record.district, record.market, record.commodity]
-          .join("|").toLocaleLowerCase();
-        if (!seen.has(recordKey)) {
-          seen.add(recordKey);
-          records.push(record);
+        offset,
+      }, fetcher);
+      if (result.meta.total !== null) {
+        if (reportedTotal !== null && reportedTotal !== result.meta.total) {
+          throw new GovernmentApiError(
+            "Government API returned inconsistent totals while discovering filters.",
+            502,
+          );
         }
+        reportedTotal = result.meta.total;
       }
-      // `records` may be smaller than a full upstream page after invalid rows
-      // and duplicates are removed. Only upstream pagination can safely tell
-      // us that there are no more records to inspect.
-      if (!result.meta.hasNext) break;
+
+      pagesScanned += 1;
+      recordsScanned += result.meta.nextOffset - result.meta.offset;
+      for (const record of result.records) {
+        districts.add(record.district);
+        markets.add(record.market);
+        commodities.add(record.commodity);
+      }
+
+      offset = result.meta.nextOffset;
+      upstreamHasNext = result.meta.upstreamHasNext;
+      if (reportedTotal !== null) {
+        upstreamHasNext = offset < reportedTotal;
+      }
+      if (!upstreamHasNext || result.meta.truncated) break;
+      if (pagesScanned < MAX_FILTER_DISCOVERY_PAGES) {
+        await delay(FILTER_DISCOVERY_PAGE_DELAY_MS);
+      }
     }
 
+    const complete = !upstreamHasNext;
     const value: LiveFilterMetadata = {
-      states: uniqueSorted([...STATES_AND_UTS, ...records.map((record) => record.state)]),
-      districts: uniqueSorted(records.map((record) => record.district)),
-      markets: uniqueSorted(records.map((record) => record.market)),
-      commodities: uniqueSorted(records.map((record) => record.commodity)),
+      states: uniqueSorted(STATES_AND_UTS),
+      districts: uniqueSorted([...districts]),
+      markets: uniqueSorted([...markets]),
+      commodities: uniqueSorted([...commodities]),
+      coverage: {
+        status: complete ? "complete" : "partial",
+        pagesScanned,
+        recordsScanned,
+        total: reportedTotal,
+        maxPages: MAX_FILTER_DISCOVERY_PAGES,
+        message: complete
+          ? "Options were discovered from all pages reported by the upstream source."
+          : `Options may be incomplete: filter discovery stopped after ${MAX_FILTER_DISCOVERY_PAGES} pages.`,
+      },
     };
 
     // LRU-like bounded insertion: never allow an unbounded process cache.

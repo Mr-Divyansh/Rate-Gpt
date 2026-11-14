@@ -11,7 +11,10 @@ export default async function handler(req: any, res: any) {
     }
     return appInstance(req, res);
   } catch (err: any) {
-    console.error('[Vercel Function Error]', err?.stack || err?.message || err);
+    console.error('[Vercel Function Error]', {
+      name: err?.name,
+      code: err?.code,
+    });
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({

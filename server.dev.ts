@@ -75,7 +75,7 @@ async function startServerWithRetry(app: any, basePort: number, maxRetries: numb
         currentPort++;
         await wait(100); // Brief delay before retry
       } else {
-        console.log('[Server] Error starting server:', err.code || err.message);
+        console.log('[Server] Error starting server:', err.code || err.name);
         throw err;
       }
     }
@@ -87,9 +87,11 @@ startServerWithRetry(app, PORT).then((actualPort) => {
   console.log('=========================================');
   console.log(`🌾 Rate GPT Server running on http://localhost:${actualPort}`);
   console.log(`📡 API Endpoints available at http://localhost:${actualPort}/api/v1`);
-  console.log(`🏛️ OGD Endpoint: ${process.env.DATA_GOV_API_BASE_URL || 'https://api.data.gov.in/resource'}`);
   console.log(`=========================================`);
 }).catch((err) => {
-  console.log('[Server] Fatal error starting server:', err);
+  console.log('[Server] Fatal error starting server:', {
+    name: err?.name,
+    code: err?.code,
+  });
   process.exit(1);
 });

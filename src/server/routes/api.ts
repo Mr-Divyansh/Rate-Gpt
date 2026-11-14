@@ -11,6 +11,7 @@ import {
   fetchLiveFilters,
   fetchLivePrices,
   GovernmentApiError,
+  normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
 
@@ -85,7 +86,8 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
       data,
       {
         source: "Government of India OGD / AGMARKNET",
-        scope: "Distinct values discovered from up to ten live pages (maximum 1,000 upstream rows); options may still be partial and are not a nationwide catalogue.",
+        scope: data.coverage.message,
+        coverage: data.coverage,
       },
       "Live filter metadata retrieved",
     );
@@ -190,7 +192,7 @@ router.get("/prices/trend", (_req: Request, res: Response) => {
  */
 const compareQuerySchema = z.object({
   commodity: z.string().trim().min(1).max(100),
-  date: z.string().trim().min(1).max(20).optional(),
+  date: z.string().trim().min(1).max(20),
 });
 
 router.get("/prices/compare", async (req: Request, res: Response) => {
@@ -218,10 +220,17 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
       records.records,
       {
         ...records.meta,
-        marketsCompared: records.records.length,
+        marketsReturned: new Set(records.records.map((record) => record.market)).size,
+        recordsReturned: records.records.length,
         commodity: parsed.data.commodity,
-        comparisonMayBePartial: records.meta.hasNext,
-        scope: "First live government API page only; use pagination for further results.",
+        arrivalDate:
+          records.records[0]?.arrival_date ??
+          normalizeArrivalDate(parsed.data.date) ??
+          parsed.data.date,
+        comparisonMayBePartial: records.meta.upstreamHasNext,
+        comparisonRule:
+          "Compare only records with matching variety and source unit; this endpoint returns observations and does not calculate price differences.",
+        scope: "One live government API page for the requested commodity and arrival date; use pagination for more records.",
       },
       "Live market comparison fetched",
     );

@@ -152,6 +152,21 @@ async function main() {
     assert(health.success && health.data.status === "ok", "health returns minimal service status");
     assert(!("upstreamSource" in health.data) && !("apiKeyConfigured" in health.data), "health does not disclose upstream credential configuration");
     assert(!JSON.stringify(health).includes(apiKey), "health never returns government key");
+    const securityHeaders = {
+      csp: healthResponse.headers.get("content-security-policy") || "",
+      hsts: healthResponse.headers.get("strict-transport-security") || "",
+      frame: healthResponse.headers.get("x-frame-options") || "",
+      noSniff: healthResponse.headers.get("x-content-type-options") || "",
+      referrer: healthResponse.headers.get("referrer-policy") || "",
+      permissions: healthResponse.headers.get("permissions-policy") || "",
+    };
+    assert(securityHeaders.csp.includes("default-src 'self'") && !securityHeaders.csp.includes("'unsafe-eval'"), "API uses a restrictive CSP without unsafe-eval");
+    assert(securityHeaders.hsts.includes("max-age="), "API responses enable HSTS");
+    assert(securityHeaders.frame === "DENY", "API responses deny framing");
+    assert(securityHeaders.noSniff === "nosniff", "API responses set nosniff");
+    assert(securityHeaders.referrer === "strict-origin-when-cross-origin", "API responses use a strict referrer policy");
+    assert(securityHeaders.permissions.includes("camera=()") && securityHeaders.permissions.includes("geolocation=()"), "API responses disable unused powerful browser features");
+    assert(healthResponse.headers.get("access-control-allow-origin") === null, "API does not enable cross-origin access");
 
     const docs = await fetch(`${base}/api/v1/docs`);
     assert(docs.status === 404, "OpenAPI documentation endpoint is not publicly exposed");
@@ -210,6 +225,7 @@ async function main() {
       .then((r) => r.json());
     assert(filters.success && filters.data.districts.includes("Pune"), "live filters return selected-state districts");
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
+    assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
     const filterRequest = upstreamRequests.at(-1)!;
     assert(filterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
     assert(filterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
@@ -229,6 +245,7 @@ async function main() {
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
     assert(filtered.meta.total === 2, "upstream result totals are parsed");
+    assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
@@ -254,6 +271,9 @@ async function main() {
     assert(comparisonRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "live comparison forwards commodity exact-match filter");
     assert(comparisonRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "live comparison forwards requested arrival date");
     assert(comparison.meta.source === "Government of India OGD / AGMARKNET", "live comparison identifies government source");
+    assert(comparison.meta.arrivalDate === "2026-11-13" && comparison.meta.comparisonRule.includes("matching variety"), "comparison identifies observation date and matching requirements");
+    const comparisonWithoutDate = await fetch(`${base}/api/v1/prices/compare?commodity=Apple`);
+    assert(comparisonWithoutDate.status === 400, "comparison rejects requests without an observation date");
 
     const historicalTrend = await fetch(
       `${base}/api/v1/prices/trend?commodity=Apple&market=Pune%20Market`,

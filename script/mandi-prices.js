@@ -8,6 +8,10 @@ import {
   axisFor, spreadAxis, cropNames, createDelta, createRange,
   formatDate, formatDateTime, formatPrice,
 } from "./rate-ui.js";
+import { buildPreviousObservationIndex } from "./price-comparison.js";
+import {
+  createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
+} from "./csv-export.js";
 
 const PAGE_SIZE = 50;
 const $ = (id) => document.getElementById(id);
@@ -29,14 +33,21 @@ const state = {
   market: "",
   arrivalDate: "",
   records: [],
-  meta: { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false },
+  meta: {
+    limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0,
+    hasNext: false, upstreamHasNext: false, truncated: false,
+  },
   pageOffsets: [0],
   sort: "date_desc",
   priceUnit: "quintal",
   loading: false,
   error: "",
   finderError: "",
+  filterCoverage: null,
   controller: null,
+  exportController: null,
+  exporting: false,
+  exportStatus: null,
   sync: null,
 };
 let navToken = 0; // guards async state → district → mandi chains against fast re-selection
@@ -82,10 +93,15 @@ function renderMandis() {
     return;
   }
   if (state.markets.length === 0) {
-    help.textContent = t("finder.none");
+    help.textContent = state.filterCoverage?.status === "partial"
+      ? t("finder.partialEmpty", { pages: state.filterCoverage.pagesScanned })
+      : t("finder.none");
     return;
   }
-  help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}`;
+  const coverageNote = state.filterCoverage?.status === "partial"
+    ? ` · ${t("finder.partial", { pages: state.filterCoverage.pagesScanned })}`
+    : "";
+  help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}${coverageNote}`;
   for (const market of state.markets) {
     grid.append(
       chip(market, { pressed: state.market === market, onClick: () => selectMandi(market) }),
@@ -129,6 +145,7 @@ async function chooseState(name, { district = "", market = "" } = {}) {
   state.markets = [];
   state.market = "";
   state.finderError = "";
+  state.filterCoverage = null;
   clearResults();
   renderFinder();
   if (!name) return;
@@ -136,6 +153,7 @@ async function chooseState(name, { district = "", market = "" } = {}) {
     const data = await fetchFilters({ state: name });
     if (token !== navToken) return;
     state.districts = data.districts;
+    state.filterCoverage = data.coverage ?? null;
   } catch (error) {
     if (token !== navToken) return;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
@@ -154,6 +172,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
   state.markets = [];
   state.market = "";
   state.finderError = "";
+  state.filterCoverage = null;
   clearResults();
   renderFinder();
   if (!name) return;
@@ -161,6 +180,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
     const data = await fetchFilters({ state: state.location.state, district: name });
     if (token !== navToken) return;
     state.markets = data.markets;
+    state.filterCoverage = data.coverage ?? null;
   } catch (error) {
     if (token !== navToken) return;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
@@ -192,7 +212,10 @@ function selectMandi(market) {
 function resetResultState() {
   state.controller?.abort();
   state.records = [];
-  state.meta = { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false };
+  state.meta = {
+    limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0,
+    hasNext: false, upstreamHasNext: false, truncated: false,
+  };
   state.pageOffsets = [0];
   state.error = "";
   state.loading = false;
@@ -206,32 +229,37 @@ function clearResults() {
 }
 
 function updateControls() {
-  const on = Boolean(state.market) && !state.loading;
-  $("cropSearch").disabled = !state.market;
-  $("arrivalDate").disabled = !state.market;
+  const locked = state.loading || state.exporting;
+  const on = Boolean(state.market) && !locked;
+  $("stateSelect").disabled = state.exporting || state.states.length === 0;
+  $("districtSelect").disabled = state.exporting || !state.location.state || state.districts.length === 0;
+  $("cropSearch").disabled = !state.market || state.exporting;
+  $("arrivalDate").disabled = !state.market || state.exporting;
   $("sortFilter").disabled = !on;
   $("clearFilters").disabled = !on;
+  $("exportCsv").disabled = !state.market || (state.loading && !state.exporting);
+  $("exportCsv").textContent = t(state.exporting ? "results.exportCancel" : "results.export");
+  $("exportStatus").textContent = state.exportStatus
+    ? t(state.exportStatus.key, state.exportStatus.vars)
+    : "";
 }
 
 function buildContext(records) {
-  const keyOf = (r) => `${r.commodity}|${r.variety ?? ""}`;
+  const keyOf = (r) => [
+    r.state, r.district, r.market, r.commodity, r.variety ?? "", r.source_unit,
+  ].map((value) => String(value ?? "").trim().toLocaleLowerCase()).join("|");
   const groups = new Map();
   for (const r of records) {
     if (!groups.has(keyOf(r))) groups.set(keyOf(r), []);
     groups.get(keyOf(r)).push(r);
   }
-  for (const list of groups.values()) {
-    list.sort((a, b) => String(b.arrival_date).localeCompare(String(a.arrival_date)));
-  }
+  const previous = buildPreviousObservationIndex(records);
   return {
     axis: (r) => {
       const list = groups.get(keyOf(r));
       return list.length > 1 ? axisFor(list) : spreadAxis(r);
     },
-    previous: (r) => {
-      const list = groups.get(keyOf(r));
-      return list[list.indexOf(r) + 1] ?? null;
-    },
+    previous,
   };
 }
 
@@ -383,13 +411,21 @@ function renderResults() {
       ? t("results.showingUnknown", { a: state.records.length.toLocaleString("en-IN") })
       : t("results.showing", { a: state.records.length.toLocaleString("en-IN"), b: state.meta.total.toLocaleString("en-IN") })
     : "";
+  const paginationNotice = $("paginationNotice");
+  paginationNotice.hidden = !state.meta.truncated;
+  paginationNotice.textContent = state.meta.truncated
+    ? t("results.paginationLimit")
+    : "";
   $("loadMore").hidden = !state.meta.hasNext;
-  $("loadMore").disabled = state.loading;
+  $("loadMore").disabled = state.loading || state.exporting;
   $("loadPrevious").hidden = state.pageOffsets.length < 2;
-  $("loadPrevious").disabled = state.loading;
+  $("loadPrevious").disabled = state.loading || state.exporting;
   $("priceMessage").textContent = announcement;
   const unitNote = document.querySelector(".unit-field label");
   if (unitNote) unitNote.textContent = `Price unit (${unitLabel})`;
+  $("exportStatus").textContent = state.exportStatus
+    ? t(state.exportStatus.key, state.exportStatus.vars)
+    : "";
   renderError();
 }
 
@@ -410,14 +446,103 @@ function renderError() {
   box.append(text, retry);
 }
 
-async function loadPrices({ append = false, offset = 0 } = {}) {
+function priceQueryParams() {
+  const params = {
+    state: state.location.state,
+    district: state.location.district,
+    market: state.market,
+    limit: "100",
+    offset: "0",
+    sort: state.sort,
+  };
+  const search = $("cropSearch").value.trim();
+  if (search) params.search = search;
+  if (state.arrivalDate) params.date = state.arrivalDate;
+  return params;
+}
+
+async function exportCsv() {
+  if (state.exporting) {
+    state.exportController?.abort();
+    return;
+  }
+  if (!state.market || state.loading) return;
+
+  const controller = new AbortController();
+  state.exportController = controller;
+  state.exporting = true;
+  state.exportStatus = { key: "results.exportStarted", vars: {} };
+  updateControls();
+
+  try {
+    const result = await fetchAllMatchingRecords({
+      params: priceQueryParams(),
+      fetchPage: fetchPrices,
+      signal: controller.signal,
+      onProgress: ({ records, pages }) => {
+        state.exportStatus = {
+          key: "results.exportProgress",
+          vars: { records: records.toLocaleString("en-IN"), pages },
+        };
+        $("exportStatus").textContent = t(
+          state.exportStatus.key,
+          state.exportStatus.vars,
+        );
+      },
+    });
+    if (controller.signal.aborted) {
+      state.exportStatus = { key: "results.exportCancelled", vars: {} };
+      return;
+    }
+    if (result.records.length === 0) {
+      state.exportStatus = { key: "results.exportEmpty", vars: {} };
+      return;
+    }
+
+    const csv = recordsToCsv(result.records);
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = createCsvFilename(state.market, indiaTodayIsoDate());
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    state.exportStatus = {
+      key: "results.exportSuccess",
+      vars: {
+        records: result.records.length.toLocaleString("en-IN"),
+        pages: result.pages,
+      },
+    };
+  } catch (error) {
+    state.exportStatus = controller.signal.aborted
+      ? { key: "results.exportCancelled", vars: {} }
+      : {
+          key: "results.exportError",
+          vars: { reason: errorText(error, "Unable to export live records.") },
+        };
+  } finally {
+    if (state.exportController === controller) {
+      state.exportController = null;
+      state.exporting = false;
+      updateControls();
+      renderResults();
+    }
+  }
+}
+
+async function loadPrices({ append = false, offset = 0, preserveHistory = false } = {}) {
   if (!state.market) return;
   state.controller?.abort();
   const controller = new AbortController();
   state.controller = controller;
   if (!append) {
     state.records = [];
-    state.meta = { limit: PAGE_SIZE, offset, nextOffset: offset, total: 0, hasNext: false };
+    state.meta = {
+      limit: PAGE_SIZE, offset, nextOffset: offset, total: 0,
+      hasNext: false, upstreamHasNext: false, truncated: false,
+    };
   }
   state.loading = true;
   state.error = "";
@@ -443,7 +568,10 @@ async function loadPrices({ append = false, offset = 0 } = {}) {
       !meta || !Number.isInteger(meta.limit) || meta.limit < 1 || !Number.isInteger(meta.offset) ||
       meta.offset < 0 || (meta.total !== null && (!Number.isInteger(meta.total) || meta.total < 0)) ||
       !Number.isInteger(meta.nextOffset) || meta.nextOffset < meta.offset ||
-      typeof meta.hasNext !== "boolean" || (meta.hasNext && meta.nextOffset <= meta.offset)
+      typeof meta.hasNext !== "boolean" ||
+      typeof meta.upstreamHasNext !== "boolean" ||
+      typeof meta.truncated !== "boolean" ||
+      (meta.hasNext && meta.nextOffset <= meta.offset)
     ) {
       throw new Error("The mandi prices response has invalid pagination data.");
     }
@@ -456,10 +584,12 @@ async function loadPrices({ append = false, offset = 0 } = {}) {
       nextOffset: meta.nextOffset,
       total: meta.total,
       hasNext: meta.hasNext,
+      upstreamHasNext: meta.upstreamHasNext,
+      truncated: meta.truncated,
     };
     if (append) {
       if (!state.pageOffsets.includes(meta.offset)) state.pageOffsets.push(meta.offset);
-    } else {
+    } else if (!preserveHistory) {
       state.pageOffsets = [meta.offset];
     }
     state.sync = {
@@ -543,6 +673,7 @@ function bind() {
     state.sort = "date_desc";
     loadPrices();
   });
+  $("exportCsv").addEventListener("click", exportCsv);
   $("loadMore").addEventListener("click", () => {
     state.meta.offset = state.meta.nextOffset;
     loadPrices({ append: true });
@@ -550,7 +681,7 @@ function bind() {
   $("loadPrevious").addEventListener("click", () => {
     state.pageOffsets.pop();
     const previousOffset = state.pageOffsets[state.pageOffsets.length - 1] ?? 0;
-    loadPrices({ offset: previousOffset });
+    loadPrices({ offset: previousOffset, preserveHistory: true });
   });
   $("arrivalDate").max = indiaTodayIsoDate();
   $("arrivalDate").addEventListener("change", (event) => {
@@ -579,12 +710,18 @@ function bind() {
   // The upstream source publishes daily observations, so this is a re-fetch,
   // not a promise that the government data itself changes every interval.
   window.setInterval(() => {
-    if (document.visibilityState === "visible" && state.market && !state.loading) {
+    if (
+      document.visibilityState === "visible" &&
+      state.market &&
+      !state.loading &&
+      !state.exporting
+    ) {
       loadPrices();
     }
   }, 5 * 60 * 1000);
   onLangChange(() => {
     renderFinder();
+    updateControls();
     renderResults();
     renderSync();
     hydrateIcons();
@@ -598,7 +735,9 @@ async function init() {
   loadSync();
 
   try {
-    state.states = (await fetchFilters()).states;
+    const data = await fetchFilters();
+    state.states = data.states;
+    state.filterCoverage = data.coverage ?? null;
   } catch (error) {
     console.error("[Mandi prices] Unable to load mandi filters:", error);
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
