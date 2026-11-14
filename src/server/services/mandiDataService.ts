@@ -290,8 +290,10 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   if (options.search) url.searchParams.set("q", normalizeCommoditySearch(options.search));
   const sort = upstreamSort(options.sort);
   if (sort) {
-    url.searchParams.set("sort[fields]", sort.field);
-    url.searchParams.set("sort[order]", sort.order);
+    // data.gov.in expects one sort[field]=direction parameter.
+    // sort[fields] + sort[order] is not a valid OGD query and returns
+    // Elasticsearch parsing_exception: [field_sort] failed to parse [order].
+    url.searchParams.set(`sort[${sort.field}]`, sort.order);
   }
   return url;
 }
