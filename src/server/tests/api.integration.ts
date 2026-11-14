@@ -133,20 +133,20 @@ async function main() {
 
     const previousFetch = globalThis.fetch;
     const previousContactKey = process.env.WEB3FORMS_ACCESS_KEY;
-    let forwardedContact: Record<string, unknown> | null = null;
+    const forwardedContact: { value?: Record<string, unknown> } = {};
     process.env.WEB3FORMS_ACCESS_KEY = "integration-only-contact-key";
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       assert(String(input) === "https://api.web3forms.com/submit", "contact is forwarded server-to-server");
-      forwardedContact = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      forwardedContact.value = JSON.parse(String(init?.body)) as Record<string, unknown>;
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
     }) as typeof fetch;
-    const contactResponse = await fetch(`${base}/api/v1/contact`, {
+    const contactResponse = await previousFetch(`${base}/api/v1/contact`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Test User", email: "test@example.com", phone: "", message: "Test request", consent: true, botcheck: "" }),
     });
     const contactPayload = await contactResponse.json();
     assert(contactResponse.status === 200 && contactPayload.success, "valid consented contact form is accepted");
-    assert(forwardedContact?.access_key === "integration-only-contact-key", "contact provider key is attached only on the server");
+    assert(forwardedContact.value?.access_key === "integration-only-contact-key", "contact provider key is attached only on the server");
     assert(!JSON.stringify(contactPayload).includes("integration-only-contact-key"), "contact response never exposes provider key");
     globalThis.fetch = previousFetch;
     if (previousContactKey === undefined) delete process.env.WEB3FORMS_ACCESS_KEY;
