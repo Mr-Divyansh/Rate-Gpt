@@ -277,15 +277,16 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   url.searchParams.set("format", "json");
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
-  if (options.state) url.searchParams.set("filters[State]", options.state);
-  if (options.district) url.searchParams.set("filters[District]", options.district);
-  if (options.market) url.searchParams.set("filters[Market]", options.market);
-  if (options.commodity) url.searchParams.set("filters[Commodity]", options.commodity);
+  // data.gov.in filter keys use the resource's field IDs (lowercase).
+  // State is a text field, so use its exact-match keyword subfield.
+  if (options.state) url.searchParams.set("filters[state.keyword]", options.state);
+  if (options.district) url.searchParams.set("filters[district]", options.district);
+  if (options.market) url.searchParams.set("filters[market]", options.market);
+  if (options.commodity) url.searchParams.set("filters[commodity]", options.commodity);
   if (options.arrivalDate) {
     const isoDate = normalizeArrivalDate(options.arrivalDate);
     if (!isoDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
-    const [year, month, day] = isoDate.split("-");
-    url.searchParams.set("filters[Arrival_Date]", `${day}/${month}/${year}`);
+    url.searchParams.set("filters[arrival_date]", isoDate);
   }
   if (options.search) url.searchParams.set("q", normalizeCommoditySearch(options.search));
   const sort = upstreamSort(options.sort);
