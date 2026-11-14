@@ -27,10 +27,9 @@
           <a class="btn btn-primary" href="mandi-prices.html">
             <span data-i18n="home.go">See prices</span><span data-icon="arrow"></span>
           </a>
-          <button class="btn hero-secondary" type="button" id="locationOpen">
-            <span class="play-mark" aria-hidden="true">⌖</span>
-            <span data-i18n="home.location">Choose a location</span>
-            <span data-icon="arrow"></span>
+          <button class="btn hero-secondary demo-trigger" type="button" id="watchDemo" aria-haspopup="dialog" aria-controls="demoDialog">
+            <span class="play-mark" aria-hidden="true">▶</span>
+            <span>Watch demo</span>
           </button>
         </div>
         <p class="fine"><span class="trust-mark" aria-hidden="true">✓</span><span data-i18n="home.fine">Prices are in ₹ per quintal. They are recorded sales, not offers.</span></p>
@@ -66,30 +65,20 @@
     </section>
   </main>
 
-  <dialog class="location-dialog" id="locationDialog" aria-labelledby="locationTitle">
-    <form class="location-dialog-form" id="homeFinder" action="mandi-prices.html">
-      <div class="dialog-heading">
-        <div>
-          <p class="dialog-eyebrow" data-i18n="brand.tag">Mandi price discovery</p>
-          <h2 id="locationTitle" data-i18n="home.locationTitle">Choose your location</h2>
-        </div>
-        <button class="dialog-close" type="submit" formmethod="dialog" data-i18n-attr="aria-label:home.close">×</button>
+  <dialog class="demo-dialog" id="demoDialog" aria-labelledby="demoTitle">
+    <div class="demo-dialog-head">
+      <div>
+        <p class="dialog-eyebrow">Rate-GPT · Product walkthrough</p>
+        <h2 id="demoTitle">Explore mandi price discovery</h2>
+        <p>See how farmers can find a mandi, search crops and compare government-reported prices.</p>
       </div>
-      <p class="dialog-intro" data-i18n="home.locationLead">Select your state and district to see nearby market prices.</p>
-      <div class="finder-fields">
-        <div class="field">
-          <label for="homeState" data-i18n="field.state">State</label>
-          <select id="homeState" name="state" required disabled></select>
-        </div>
-        <div class="field">
-          <label for="homeDistrict" data-i18n="field.district">District</label>
-          <select id="homeDistrict" name="district" required disabled></select>
-        </div>
-      </div>
-      <button class="btn btn-primary dialog-submit" type="submit" id="homeGo" disabled>
-        <span data-i18n="home.go">See prices</span><span data-icon="arrow"></span>
-      </button>
-    </form>
+      <button class="dialog-close" type="button" id="demoClose" aria-label="Close demo">×</button>
+    </div>
+    <iframe class="demo-frame" src="mandi-prices.html?demo=1" title="Interactive Rate-GPT mandi prices demo" loading="lazy"></iframe>
+    <div class="demo-dialog-foot">
+      <span>Interactive product demo · Uses the latest available government reports</span>
+      <a class="btn btn-primary" href="mandi-prices.html">Explore live prices <span data-icon="arrow"></span></a>
+    </div>
   </dialog>
 
   <script type="module" src="/script/global-nav.js"></script>
