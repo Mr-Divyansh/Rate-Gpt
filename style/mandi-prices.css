@@ -167,6 +167,8 @@
 .page-prices .finder-selects { grid-template-columns: repeat(2, minmax(0, 300px)); }
 .page-prices .chip { border-radius: 9px; min-height: 42px; }
 .page-prices .chip[aria-pressed="true"] { background: #174d38; }
+.india-browse { margin-top: 16px; }
+.crop-name .record-location { font-size: 0.82rem; }
 .page-prices .results { gap: 16px; }
 .page-prices .results-head h2 { color: #173c2c; font-size: clamp(1.55rem, 3vw, 2rem); }
 .page-prices .toolbar { gap: 10px; }

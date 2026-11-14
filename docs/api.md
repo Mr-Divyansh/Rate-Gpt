@@ -15,7 +15,7 @@ Base path: `/api/v1`. All successful responses use `{ success: true, data, meta?
 
 `/prices` metadata includes the upstream `total` where available, the next raw upstream offset, source attribution, an ISO `fetchedAt` timestamp for the successful API request, and `upstreamUpdatedAt` when the source provides its dataset update time. The record's `arrival_date` remains the government-reported arrival date and is not inferred from either timestamp. `upstreamHasNext` reports upstream coverage; `hasNext` is false when the supported offset boundary prevents another request, and `truncated` identifies that case. Date and modal-price sorting apply to each returned page; page offsets still follow upstream order and do not imply a globally ranked result. API data uses `Cache-Control: no-store`.
 
-The Mandi Prices page exports all matching live records client-side, subject to a 5,000-record / 50-page safety bound. Filters are carried across every request; if the export cannot complete, no partial CSV is downloaded. Price records are not stored by the server.
+The Mandi Prices page can browse the unfiltered national feed in upstream pages and exports matching live records client-side, subject to a 25,000-record / 250-page safety bound. Filters are carried across every request; if the export cannot complete, no partial CSV is downloaded. Price records are not stored by the server.
 
 ## Failure behavior
 

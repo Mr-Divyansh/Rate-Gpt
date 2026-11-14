@@ -463,6 +463,35 @@ async function main(): Promise<void> {
     "CSV export preserves the selected location, crop, and date filters on every page",
   );
 
+  const nationalRecords = Array.from({ length: 5_001 }, (_, index) => ({
+    ...page.records[0]!,
+    id: `national-${index}`,
+  }));
+  const nationalExport = await fetchAllMatchingRecords({
+    params: {},
+    fetchPage: async (params: Record<string, string>) => {
+      const offset = Number(params.offset);
+      const data = nationalRecords.slice(offset, offset + 100);
+      const nextOffset = offset + data.length;
+      return {
+        data,
+        meta: {
+          offset,
+          limit: 100,
+          nextOffset,
+          total: nationalRecords.length,
+          hasNext: nextOffset < nationalRecords.length,
+          upstreamHasNext: nextOffset < nationalRecords.length,
+          truncated: false,
+        },
+      };
+    },
+  });
+  check(
+    nationalExport.records.length === 5_001 && nationalExport.pages === 51,
+    "CSV export supports national result sets beyond the former 5,000-record cap",
+  );
+
   for (const [name, fetchPage] of [
     ["failed upstream request", async () => { throw new Error("upstream unavailable"); }],
     ["missing upstream page", async () => ({ data: [], meta: { offset: 0, limit: 100, total: 0, hasNext: false } })],

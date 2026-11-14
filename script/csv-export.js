@@ -1,5 +1,5 @@
-export const MAX_CSV_EXPORT_RECORDS = 5_000;
-export const MAX_CSV_EXPORT_PAGES = 50;
+export const MAX_CSV_EXPORT_RECORDS = 25_000;
+export const MAX_CSV_EXPORT_PAGES = 250;
 const MAX_PAGE_SIZE = 100;
 const MAX_OFFSET = 1_000_000;
 
