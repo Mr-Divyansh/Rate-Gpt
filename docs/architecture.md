@@ -1,40 +1,42 @@
 # Rate-GPT — System Architecture
 
-## Data flow
+## Live price data flow
 
 ```text
-Government OGD / AGMARKNET
-       ↓
-src/server/services/mandiDataService.ts
-       ↓
-Validation, date/price normalization and idempotent upsert
-       ↓
-SQLite (local) or PostgreSQL (configured / Vercel)
-       ↓
-Express API in src/server/routes/api.ts
-       ↓
-Static HTML, CSS and JavaScript pages built with Vite
+Browser → Rate-GPT Express API → Government OGD / AGMARKNET
+                                      ↓
+                         validation + normalization
+                                      ↓
+Browser ← bounded page + source/fetch metadata
 ```
 
-The public pages are `index.html`, `mandi-prices.html` and `about.html`. The
-shared `script/global-nav.js` renders consistent navigation and footer content.
-The frontend requests stored data only through `/api/v1`; the OGD key remains
-server-side.
+The browser never receives the government API key. Live prices, filters, and
+commodity search call the upstream API server-side, with a bounded page size,
+timeouts, and limited retries. Response pages are not written to SQLite or
+PostgreSQL and are not cached by Rate-GPT. The API sets `Cache-Control:
+no-store`.
+
+The application does not describe published daily arrivals as guaranteed
+real-time trading prices. Each price record retains the source arrival date;
+the response reports its fetch timestamp and live-source status.
 
 ## Components
 
-- `server.ts` creates the production Express API app.
-- `server.dev.ts` mounts that API alongside Vite middleware for local
-  multi-page development.
+- `server.ts` configures Express, request limits, security headers, and no-store
+  API responses.
+- `src/server/routes/api.ts` validates user filters and returns live results.
+- `src/server/services/mandiDataService.ts` makes bounded government API calls,
+  validates pagination, normalizes dates/prices, retries transient failures,
+  and removes duplicates within a page.
+- `script/mandi-prices.js` requests data when the user chooses a market or
+  changes crop/date/sort filters; pagination advances by the upstream offset.
 - `api/index.ts` is the Vercel serverless entry point.
-- `src/server/db/database-factory.ts` selects PostgreSQL when
-  `DATABASE_URL`/`POSTGRES_URL` is set and SQLite otherwise. On Vercel, a
-  PostgreSQL URL is required.
-- `src/server/services/mandiDataService.ts` validates upstream records,
-  normalizes dates and nullable prices, and persists successful observations.
-- `src/server/tests/` contains deterministic database and API integration
-  checks.
 
-The `mandi_prices` table uses a normalized composite `dedup_key` for
-idempotency. `sync_logs` records synchronization attempts. Price trends use
-stored records only; missing source values are never replaced with estimates.
+## Existing database records
+
+SQLite/PostgreSQL adapters and their existing rows are retained to avoid
+unapproved destructive changes and to preserve compatibility with the legacy
+read-only trend/comparison endpoints. Live price/filter routes neither consult
+nor update those tables. The old admin/scheduler synchronization routes and
+Vercel cron are removed. A staged, approval-gated cleanup procedure is in
+`docs/live-mandi-migration.md`.

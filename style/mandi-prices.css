@@ -43,7 +43,7 @@
 .count { margin-top: 6px; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
 .unit-note { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.9375rem; }
 
-.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px) auto; gap: 12px; align-items: end; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 220px) minmax(0, 180px) auto; gap: 12px; align-items: end; }
 .search-wrap { position: relative; display: block; }
 .search-wrap > [data-icon] { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; display: grid; }
 .search-wrap input { padding-left: 44px; padding-right: 72px; }
@@ -171,7 +171,7 @@
   .page-prices .chip { min-height: 40px; padding-inline: 12px; font-size: .9rem; }
   .page-prices .results-head { align-items: flex-start; flex-direction: column; gap: 9px; }
   .page-prices .toolbar { grid-template-columns: minmax(0,1fr); }
-  .page-prices .search-field, .page-prices .sort-field, .page-prices .toolbar .btn { grid-column: 1; }
+  .page-prices .search-field, .page-prices .sort-field, .page-prices .date-field, .page-prices .toolbar .btn { grid-column: 1; }
   .page-prices .toolbar .btn { width: 100%; }
   .page-prices .price-card-top { align-items: flex-start; }
   .page-prices .price-card .modal-price strong { font-size: 1.25rem; }

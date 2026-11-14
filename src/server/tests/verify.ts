@@ -105,8 +105,15 @@ async function main() {
     insertSyncLog,
     acquireMandiSyncLock,
   } = await import("../db/database.js");
-  const { normalizeArrivalDate, parsePrice, mapUpstreamRecord, parseReportedTotal } =
-    await import("../services/mandiDataService.js");
+  const {
+    normalizeArrivalDate,
+    parsePrice,
+    mapUpstreamRecord,
+    parseReportedTotal,
+    fetchLivePrices,
+    searchLiveCommodities,
+    GovernmentApiError,
+  } = await import("../services/mandiDataService.js");
   const { isPriceRecord } = await import("../../../script/api.js");
 
   check(normalizeArrivalDate("30/10/2026") === "2026-10-30", "DD/MM/YYYY normalization");
@@ -133,8 +140,8 @@ async function main() {
     "record with only modal price accepted",
   );
   check(
-    !isPriceRecord({ ...validPriceRecord, min_price: null, max_price: null, modal_price: null }),
-    "record with no available prices rejected",
+    isPriceRecord({ ...validPriceRecord, min_price: null, max_price: null, modal_price: null }),
+    "record with all unavailable prices remains valid",
   );
   check(
     !isPriceRecord({ ...validPriceRecord, min_price: "not-a-price" }),
@@ -149,8 +156,7 @@ async function main() {
   check(mapped?.arrivalDate === "2026-10-31", "OGD record date mapping");
   check(mapped?.modalPrice === 2000, "OGD price mapping");
   check(mapUpstreamRecord({ state: "Himachal Pradesh" }) === null, "incomplete OGD record rejected");
-  check(
-    mapUpstreamRecord({
+  const noPrices = mapUpstreamRecord({
       state: "Himachal Pradesh",
       district: "Kangra",
       market: "Palampur",
@@ -159,9 +165,133 @@ async function main() {
       min_price: "NA",
       max_price: "NA",
       modal_price: "NA",
-    }) === null,
-    "records without a valid price are rejected",
+    });
+  check(
+    noPrices !== null && noPrices.minPrice === null && noPrices.modalPrice === null,
+    "missing upstream prices remain null without dropping the record",
   );
+
+  const previousApiKey = process.env.DATA_GOV_API_KEY;
+  const previousBaseUrl = process.env.DATA_GOV_API_BASE_URL;
+  process.env.DATA_GOV_API_KEY = "test-only-government-key";
+  process.env.DATA_GOV_API_BASE_URL = "https://api.data.gov.in/resource";
+  const upstreamRecord = {
+    id: "record-1",
+    State: "Maharashtra",
+    District: "Pune",
+    Market: "Pune",
+    Commodity: "Apple",
+    Arrival_Date: "13/11/2026",
+    Min_Price: null,
+    Max_Price: null,
+    Modal_Price: null,
+  };
+  const mockPage = (
+    records: unknown[],
+    { total = "13,181", offset = 0, limit = 2 }: { total?: unknown; offset?: number; limit?: number } = {},
+  ) => new Response(JSON.stringify({
+    records,
+    total,
+    offset: String(offset),
+    limit: String(limit),
+  }), { status: 200, headers: { "Content-Type": "application/json" } });
+
+  const beforeLiveFetch = getDatabaseStats().totalRecords;
+  let capturedUrl: string | null = null;
+  const livePage = await fetchLivePrices({
+    state: "Maharashtra",
+    district: "Pune",
+    market: "Pune",
+    commodity: "Apple",
+    arrivalDate: "2026-11-13",
+    limit: 2,
+    offset: 0,
+    sort: "date_desc",
+  }, async (input) => {
+    capturedUrl = String(input);
+    return mockPage([upstreamRecord, upstreamRecord], { total: "13,181" });
+  });
+  const parsedUrl = new URL(capturedUrl || "https://example.test");
+  check(parsedUrl.searchParams.get("filters[State]") === "Maharashtra", "upstream state filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[District]") === "Pune", "upstream district filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[Market]") === "Pune", "upstream market filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[Commodity]") === "Apple", "upstream commodity filter is forwarded");
+  check(parsedUrl.searchParams.get("filters[Arrival_Date]") === "13/11/2026", "upstream date filter is forwarded");
+  check(parsedUrl.searchParams.get("api-key") === "test-only-government-key", "key is attached only to server-to-server request");
+  check(livePage.meta.total === 13181, "comma-separated total is parsed for pagination");
+  check(livePage.meta.hasNext && livePage.meta.nextOffset === 2, "live page metadata points to next upstream offset");
+  check(livePage.meta.cacheStatus === "live" && livePage.records.length === 1, "live response deduplicates records and reports live status");
+  check(livePage.records[0].modal_price === null, "missing prices are not fabricated");
+  check(!JSON.stringify(livePage).includes("test-only-government-key"), "upstream key is absent from live response");
+
+  let requestedOffset: string | null = null;
+  const nextLivePage = await fetchLivePrices({ limit: 2, offset: 2 }, async (input) => {
+    requestedOffset = new URL(String(input)).searchParams.get("offset");
+    return mockPage([upstreamRecord], { total: "3", offset: 2, limit: 2 });
+  });
+  check(requestedOffset === "2" && nextLivePage.meta.offset === 2, "next page requests and reflects the requested offset");
+  check(!nextLivePage.meta.hasNext, "last page does not claim another page");
+
+  let retryCount = 0;
+  const recoveredPage = await fetchLivePrices({ limit: 2 }, async () => {
+    retryCount += 1;
+    return retryCount < 3
+      ? new Response("", { status: 429 })
+      : mockPage([upstreamRecord], { total: "1", limit: 2 });
+  });
+  check(retryCount === 3 && recoveredPage.records.length === 1, "HTTP 429 gets bounded retries");
+
+  let serverErrorAttempts = 0;
+  try {
+    await fetchLivePrices({ limit: 2 }, async () => {
+      serverErrorAttempts += 1;
+      return new Response("", { status: 503 });
+    });
+    check(false, "persistent HTTP 5xx reports an upstream error");
+  } catch (error) {
+    check(
+      error instanceof GovernmentApiError &&
+        error.httpStatus === 502 &&
+        error.upstreamStatus === 503 &&
+        serverErrorAttempts === 3,
+      "HTTP 5xx gets bounded retries and a safe upstream error",
+    );
+  }
+
+  try {
+    await fetchLivePrices({ limit: 2 }, (_input, options) =>
+      new Promise<Response>((_resolve, reject) => {
+        options?.signal?.addEventListener("abort", () => reject(new Error("aborted")), {
+          once: true,
+        });
+      }),
+    );
+    check(false, "upstream timeout reports an explicit error");
+  } catch (error) {
+    check(error instanceof GovernmentApiError && error.httpStatus === 504, "upstream timeout is bounded and reported");
+  }
+
+  const fruits = await searchLiveCommodities("अंगूर", 10, async () =>
+    mockPage([], { total: "0", limit: 100 }),
+  );
+  check(fruits.includes("Grapes"), "fruit suggestions include the Hindi Grapes query");
+  check(getDatabaseStats().totalRecords === beforeLiveFetch, "live government pages are not permanently stored");
+
+  const oldTimeout = process.env.DATA_GOV_API_KEY;
+  process.env.DATA_GOV_API_KEY = "";
+  try {
+    await fetchLivePrices({}, async () => mockPage([]));
+    check(false, "missing government API key reports a configuration error");
+  } catch (error) {
+    check(error instanceof GovernmentApiError && error.httpStatus === 503, "missing key fails explicitly");
+  } finally {
+    if (oldTimeout === undefined) delete process.env.DATA_GOV_API_KEY;
+    else process.env.DATA_GOV_API_KEY = oldTimeout;
+  }
+  if (previousApiKey === undefined) delete process.env.DATA_GOV_API_KEY;
+  else process.env.DATA_GOV_API_KEY = previousApiKey;
+  if (previousBaseUrl === undefined) delete process.env.DATA_GOV_API_BASE_URL;
+  else process.env.DATA_GOV_API_BASE_URL = previousBaseUrl;
 
   const unique = `audit-${Date.now()}`;
   const record = {

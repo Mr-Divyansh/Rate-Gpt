@@ -10,7 +10,7 @@ export const openApiSpec = {
   paths: {
     "/health": {
       get: {
-        summary: "Health and database stats",
+        summary: "API health and live-source configuration",
         responses: { "200": { description: "OK" } },
       },
     },
@@ -26,18 +26,24 @@ export const openApiSpec = {
     },
     "/prices": {
       get: {
-        summary: "Latest mandi prices",
+        summary: "On-demand government mandi prices",
         parameters: [
           { name: "state", in: "query" },
           { name: "district", in: "query" },
           { name: "market", in: "query" },
           { name: "commodity", in: "query" },
+          { name: "date", in: "query" },
           { name: "search", in: "query" },
           { name: "limit", in: "query" },
           { name: "offset", in: "query" },
           { name: "sort", in: "query" },
         ],
-        responses: { "200": { description: "OK" } },
+        responses: {
+          "200": { description: "Live government records and upstream pagination metadata" },
+          "502": { description: "Government API error" },
+          "503": { description: "Government API is not configured or rate limited" },
+          "504": { description: "Government API timeout" },
+        },
       },
     },
     "/prices/trend": {
@@ -67,43 +73,11 @@ export const openApiSpec = {
         responses: { "200": { description: "OK" } },
       },
     },
-    "/admin/sync": {
-      post: {
-        summary: "Trigger data sync (admin)",
-        security: [{ bearerAuth: [] }],
-        responses: {
-          "200": { description: "OK" },
-          "401": { description: "Unauthorized" },
-        },
-      },
-    },
-    "/admin/logs": {
-      get: {
-        summary: "Recent sync logs (admin)",
-        security: [{ bearerAuth: [] }],
-        responses: { "200": { description: "OK" } },
-      },
-    },
     "/sync-status": {
       get: {
-        summary: "Last successful sync and next scheduled execution",
+        summary: "Live request mode and bulk-sync status",
         responses: { "200": { description: "OK" } },
       },
-    },
-    "/scheduler/sync": {
-      get: {
-        summary: "Daily scheduled synchronization (Vercel Cron)",
-        security: [{ bearerAuth: [] }],
-        responses: {
-          "200": { description: "Synchronization completed" },
-          "401": { description: "Unauthorized" },
-        },
-      },
-    },
-  },
-  components: {
-    securitySchemes: {
-      bearerAuth: { type: "http", scheme: "bearer" },
     },
   },
 };

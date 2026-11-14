@@ -1,10 +1,31 @@
-# Rate GPT — REST API Specification
+# Rate GPT — REST API
 
 **Base URL:** `/api/v1`
 
-## Standard Envelopes
+Government data requests are made only by the backend. `DATA_GOV_API_KEY` is
+never returned to the browser. Live responses use `Cache-Control: no-store`;
+Rate-GPT does not persist fetched price pages.
 
-### Success Envelope
+## Endpoints
+
+### `GET /health`
+Reports API health, whether the upstream key is configured (boolean only), the
+OGD/AGMARKNET source, and that price storage is disabled.
+
+### `GET /meta/filters`
+Optional `state`, `district`, and `market` filters. Returns the configured
+Indian state/UT names and distinct locations/commodities seen in a bounded
+100-record live page for a selected location. District and market choices may
+therefore be partial; the API does not crawl the national dataset to populate
+filter lists.
+
+### `GET /prices`
+Optional `state`, `district`, `market`, `commodity`, `date` (`YYYY-MM-DD`),
+and `search` filters; `limit` (1–100, default 50), `offset` (0–1,000,000),
+and `sort`. Each call requests only that page from OGD/AGMARKNET.
+
+The success envelope includes `data` and `meta`:
+
 ```json
 {
   "success": true,
@@ -12,103 +33,37 @@
   "meta": {
     "limit": 50,
     "offset": 0,
-    "total": 120,
-    "hasNext": true
+    "nextOffset": 50,
+    "total": 123,
+    "hasNext": true,
+    "source": "Government of India OGD / AGMARKNET",
+    "fetchedAt": "2026-11-13T00:00:00.000Z",
+    "cacheStatus": "live",
+    "freshnessStatus": "Government-published daily market data; not guaranteed real-time trading prices."
   },
-  "message": "Prices fetched successfully"
+  "message": "Live prices fetched successfully"
 }
 ```
 
-### Error Envelope
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid query parameters",
-    "details": {}
-  }
-}
-```
+`total` is `null` if OGD omits it. Missing prices remain `null`; records are
+never assigned fallback values. `502`, `503`, and `504` errors describe
+upstream failures without returning credentials or response bodies.
 
----
+### `GET /commodities/search?q=...&limit=10`
+Searches live government records and provides the eight fruit names as
+autocomplete suggestions. Suggestions do not imply that a mandi price exists;
+only `/prices` results are price data.
 
-## Endpoints
+### `GET /sync-status`
+Reports `mode: "on-demand"`, `bulkSyncEnabled: false`, and
+`schedulerEnabled: false`. It does not report a database sync as data freshness.
 
-### 1. System Health
-`GET /api/v1/health`
-Returns backend health, database counts, and Government API integration status.
+### Legacy historical endpoints
+`GET /prices/trend` and `GET /prices/compare` remain read-only compatibility
+routes over any pre-existing database observations. The live prices/filter
+routes do not read from or write to those tables.
 
-### 2. Cascading Filter Metadata
-`GET /api/v1/meta/filters`
-Query parameters:
-- `state` (optional): Filter districts and markets to this state
-- `district` (optional): Filter markets to this district
-- `search` (optional): Filter commodity list
+## Removed routes
 
-### 3. Mandi Prices Listing
-`GET /api/v1/prices`
-Query parameters:
-- `state`: String
-- `district`: String
-- `market`: String
-- `commodity`: String
-- `variety`: String
-- `date`: String (YYYY-MM-DD)
-- `search`: String (searches commodity, market, district, state)
-- `limit`: Integer (1–100, default 50)
-- `offset`: Integer (default 0)
-- `sort`: `modal_price_asc` | `modal_price_desc` | `market_asc` | `date_desc` | `commodity_asc`
-
-### 4. Price Trends (Historical)
-`GET /api/v1/prices/trend`
-Query parameters:
-- `commodity`: Required
-- `market`: Required
-- `state`: Optional
-- `district`: Optional
-- `from`: Optional (YYYY-MM-DD)
-- `to`: Optional (YYYY-MM-DD)
-
-### 5. Market Price Comparison
-`GET /api/v1/prices/compare`
-Query parameters:
-- `commodity`: Required
-- `date`: Optional
-
-### 6. Commodity Search Autocomplete
-`GET /api/v1/commodities/search`
-Query parameters:
-- `q`: Search string (required)
-- `limit`: Integer (default 10)
-
-### 7. Trigger Upstream Synchronization
-`POST /api/v1/admin/sync`
-Headers:
-- `Authorization`: `Bearer <token>` (if `ADMIN_SYNC_KEY` is configured)
-Payload:
-```json
-{
-  "state": "Maharashtra",
-  "commodity": "Onion",
-  "limit": 100
-}
-```
-
-### 8. Synchronization Audit Logs
-`GET /api/v1/admin/logs`
-Headers:
-- `Authorization`: `Bearer <token>` (`ADMIN_SYNC_KEY`)
-
-Returns the recent 20 sync execution records.
-
-### 9. Sync Status
-`GET /api/v1/sync-status`
-Returns the last attempt, last successful sync, freshness, and the backend's
-next scheduled execution timestamp/countdown. The scheduled job is daily at
-00:00 UTC on Vercel; local SQLite mode does not run an automatic scheduler.
-
-### 10. Scheduled Synchronization
-`GET /api/v1/scheduler/sync`
-Protected with `Authorization: Bearer <CRON_SECRET>`. Vercel Cron calls this
-route daily; manual clients should use the admin sync endpoint instead.
+`POST /admin/sync`, `GET /admin/logs`, and `GET /scheduler/sync` have been
+removed. There is no daily cron or bulk database synchronization.

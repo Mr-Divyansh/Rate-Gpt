@@ -18,12 +18,7 @@ dotenv.config();
 // Basic environment validation (non-fatal warnings)
 if (!process.env.DATA_GOV_API_KEY) {
   console.warn(
-    "[Config] DATA_GOV_API_KEY is not set. Sync from upstream will be disabled.",
-  );
-}
-if (process.env.NODE_ENV === "production" && !process.env.ADMIN_SYNC_KEY) {
-  console.warn(
-    "[Config] ADMIN_SYNC_KEY is not set in production. Admin sync endpoint will reject all requests.",
+    "[Config] DATA_GOV_API_KEY is not set. Live government price requests will be unavailable.",
   );
 }
 
@@ -69,18 +64,22 @@ export function createApiApp() {
   });
   app.use("/api", apiLimiter);
 
-  const adminLimiter = rateLimit({
+  const liveDataLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false,
     message: {
       success: false,
-      error: { code: "RATE_LIMITED", message: "Too many admin requests." },
+      error: {
+        code: "RATE_LIMITED",
+        message: "Too many live market-data requests. Please try again later.",
+      },
     },
   });
-  app.use("/api/v1/admin", adminLimiter);
-  app.use("/api/admin", adminLimiter);
+  app.use("/api/v1/prices", liveDataLimiter);
+  app.use("/api/v1/meta/filters", liveDataLimiter);
+  app.use("/api/v1/commodities/search", liveDataLimiter);
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -98,13 +97,9 @@ export function createApiApp() {
     next();
   });
 
-  // Cache headers for read-only GET API responses (short, must-revalidate)
+  // Government price data is fetched on demand; never serve stale intermediary copies.
   app.use("/api", (req, res, next) => {
-    if (req.method === "GET" && !req.path.includes("/admin")) {
-      res.setHeader("Cache-Control", "public, max-age=30, must-revalidate");
-    } else {
-      res.setHeader("Cache-Control", "no-store");
-    }
+    res.setHeader("Cache-Control", "no-store");
     next();
   });
 

@@ -1,166 +1,179 @@
-/**
- * ======================================================================================
- * RATE GPT — GOVERNMENT MANDI DATA INTEGRATION SERVICE
- * ======================================================================================
- *
- * 1. API ENDPOINT & RESOURCE ID:
- *    Source: Government of India Open Government Data Platform (OGD / AGMARKNET)
- *    Dataset Name: Current Daily Price of Various Commodities from Various Markets (Mandi)
- *    Default Base URL: https://api.data.gov.in/resource
- *    Resource ID: 9ef84268-d588-465a-a308-a864a43d0070
- *    Full Endpoint: https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070
- *
- * 2. API KEY CONFIGURATION:
- *    Environment Variable: DATA_GOV_API_KEY
- *    // TODO(API KEY): Set DATA_GOV_API_KEY in your .env file.
- *    // Never put this key in frontend code, client requests, or commit it to Git.
- *    // Sign up for an API key at https://data.gov.in/
- *
- * 3. UPSTREAM QUERY PARAMETERS:
- *    - `api-key`: Read from process.env.DATA_GOV_API_KEY
- *    - `format`: "json"
- *    - `offset`: page offset (0-indexed)
- *    - `limit`: number of records per page (default 50, maximum recommended 100)
- *    - `filters[state]`: optional state filter
- *    - `filters[district]`: optional district filter
- *    - `filters[market]`: optional market filter
- *    - `filters[commodity]`: optional commodity filter
- *    - `filters[arrival_date]`: optional arrival date filter
- *
- * 4. UPSTREAM RESPONSE SHAPE & MAPPING:
- *    // TODO(RESPONSE MAPPING): Confirm these field names against a real
- *    // data.gov.in response before relying on this mapping in production.
- *    Standard OGD JSON schema returns:
- *    {
- *      "status": "ok",
- *      "total": 1250,
- *      "count": 50,
- *      "limit": "50",
- *      "offset": "0",
- *      "records": [
- *        {
- *          "state": "Maharashtra",
- *          "district": "Nashik",
- *          "market": "Lasalgaon",
- *          "commodity": "Onion",
- *          "variety": "Red",
- *          "grade": "FAQ",
- *          "arrival_date": "30/10/2026",
- *          "min_price": "1800",
- *          "max_price": "2400",
- *          "modal_price": "2150"
- *        }
- *      ]
- *    }
- * ======================================================================================
- */
+const RESOURCE_ID =
+  process.env.DATA_GOV_RESOURCE_ID || "9ef84268-d588-465a-a308-a864a43d0070";
+const DEFAULT_BASE_URL = "https://api.data.gov.in/resource";
+const MAX_PAGE_SIZE = 100;
+const MAX_OFFSET = 1_000_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+const MAX_ATTEMPTS = 3;
 
-import {
-  RawMandiInput,
-  upsertMandiPrices,
-  insertSyncLog,
-  acquireMandiSyncLock,
-  getDatabaseStats,
-  generateDedupKey,
-} from "../db/database-factory.js";
+const FRUIT_NAMES = [
+  { english: "Apple", hindi: "सेब" },
+  { english: "Banana", hindi: "केला" },
+  { english: "Mango", hindi: "आम" },
+  { english: "Guava", hindi: "अमरूद" },
+  { english: "Pomegranate", hindi: "अनार" },
+  { english: "Orange", hindi: "संतरा" },
+  { english: "Grapes", hindi: "अंगूर" },
+  { english: "Papaya", hindi: "पपीता" },
+];
 
-import http from "http";
+const HINDI_CROP_NAMES: Record<string, string> = {
+  गेहूँ: "wheat",
+  गेहूं: "wheat",
+  धान: "paddy",
+  चावल: "rice",
+  मक्का: "maize",
+  बाजरा: "bajra",
+  ज्वार: "jowar",
+  जौ: "barley",
+  रागी: "ragi",
+  सरसों: "mustard",
+  सोयाबीन: "soybean",
+  मूंगफली: "groundnut",
+  सूरजमुखी: "sunflower",
+  चना: "gram",
+  अरहर: "arhar",
+  तूर: "tur",
+  मूंग: "moong",
+  उड़द: "urad",
+  मसूर: "lentil",
+  कपास: "cotton",
+  गन्ना: "sugarcane",
+  जूट: "jute",
+  प्याज: "onion",
+  आलू: "potato",
+  टमाटर: "tomato",
+  लहसुन: "garlic",
+  अदरक: "ginger",
+  फूलगोभी: "cauliflower",
+  पत्तागोभी: "cabbage",
+  बैंगन: "brinjal",
+  भिंडी: "bhindi",
+  मटर: "peas",
+  गाजर: "carrot",
+  मूली: "radish",
+  पालक: "spinach",
+  खीरा: "cucumber",
+  कद्दू: "pumpkin",
+  करेला: "bitter gourd",
+  लौकी: "bottle gourd",
+  "हरी मिर्च": "green chilli",
+  "शिमला मिर्च": "capsicum",
+  नींबू: "lemon",
+  धनिया: "coriander",
+  हल्दी: "turmeric",
+  मशरूम: "mushroom",
+};
 
-export interface UpstreamSyncOptions {
+const STATES_AND_UTS = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chandigarh",
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+];
+
+export interface LiveQueryOptions {
   state?: string;
   district?: string;
   market?: string;
   commodity?: string;
   arrivalDate?: string;
+  search?: string;
+  sort?: string;
   limit?: number;
   offset?: number;
 }
 
-export interface SyncResult {
-  success: boolean;
-  message: string;
-  recordsFetched: number;
-  recordsInserted: number;
-  recordsUpdated: number;
-  status:
-    | "QUEUED"
-    | "IN_PROGRESS"
-    | "PARTIAL"
-    | "SUCCESS"
-    | "FAILED"
-    | "NOT_CONFIGURED";
-  isMockFallback?: boolean;
-  error?: string;
-  pagesFetched?: number;
-  upstreamReportedTotal?: number | null;
-  validRecords?: number;
-  invalidRecordsSkipped?: number;
-  paginationComplete?: boolean;
-  syncRunId?: string;
+export interface MandiRecord {
+  id: string;
+  state: string;
+  district: string;
+  market: string;
+  commodity: string;
+  variety: string | null;
+  grade: string | null;
+  arrival_date: string;
+  min_price: number | null;
+  max_price: number | null;
+  modal_price: number | null;
+  source_unit: string;
 }
 
-export interface SyncState {
-  sync_run_id: string;
-  status: "QUEUED" | "IN_PROGRESS" | "PARTIAL" | "SUCCESS" | "FAILED" | "NOT_CONFIGURED";
-  state_filter: string | null;
-  current_offset: number;
-  upstream_reported_total: number | null;
-  pages_completed: number;
-  records_fetched: number;
-  valid_records: number;
-  invalid_records_skipped: number;
-  records_inserted: number;
-  records_updated: number;
-  last_successful_batch: number | null;
-  started_at: string;
-  updated_at: string;
-  completed_at: string | null;
-  last_error: string | null;
+export class GovernmentApiError extends Error {
+  constructor(
+    message: string,
+    readonly httpStatus: number,
+    readonly upstreamStatus?: number,
+  ) {
+    super(message);
+    this.name = "GovernmentApiError";
+  }
 }
 
-/**
- * Normalizes various arrival date formats from data.gov.in to ISO YYYY-MM-DD
- * e.g. "30/10/2026" -> "2026-10-30"
- * e.g. "30-10-2026" -> "2026-10-30"
- * e.g. "2026-10-30" -> "2026-10-30"
- */
+export interface RawMandiInput {
+  sourceRecordId: string | null;
+  state: string;
+  district: string;
+  market: string;
+  commodity: string;
+  variety: string | null;
+  grade: string | null;
+  arrivalDate: string;
+  minPrice: number | null;
+  maxPrice: number | null;
+  modalPrice: number | null;
+  sourceUnit: string;
+}
+
 export function normalizeArrivalDate(
-  rawDate: string | undefined | null,
+  rawDate: unknown,
 ): string | null {
-  if (!rawDate) {
-    // P0 audit fix: do NOT default missing dates to today; skip such records upstream.
-    return null;
-  }
+  if (typeof rawDate !== "string" || !rawDate.trim()) return null;
   const trimmed = rawDate.trim();
-
-  // DD/MM/YYYY or DD-MM-YYYY
-  const dmyMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  const dmyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
   if (dmyMatch) {
-    const day = Number(dmyMatch[1]);
-    const month = Number(dmyMatch[2]);
-    const year = Number(dmyMatch[3]);
-    return validIsoDate(year, month, day);
+    return validIsoDate(Number(dmyMatch[3]), Number(dmyMatch[2]), Number(dmyMatch[1]));
   }
-
-  // YYYY-MM-DD
-  const ymdMatch = trimmed.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  const ymdMatch = trimmed.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
   if (ymdMatch) {
-    const year = Number(ymdMatch[1]);
-    const month = Number(ymdMatch[2]);
-    const day = Number(ymdMatch[3]);
-    return validIsoDate(year, month, day);
+    return validIsoDate(Number(ymdMatch[1]), Number(ymdMatch[2]), Number(ymdMatch[3]));
   }
-
-  // Accept timestamp formats only when they parse to a real date.
   const parsed = new Date(trimmed);
-  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
-  return null;
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
 }
 
-/**
- * OGD may serialize its total as either a number or a decimal string.
- * Accept comma-grouped strings too: parseInt("13,181", 10) incorrectly returns 13.
- */
 export function parseReportedTotal(value: unknown): number | null {
   if (typeof value !== "number" && typeof value !== "string") return null;
   const normalized = String(value).trim().replace(/,/g, "");
@@ -179,315 +192,359 @@ function validIsoDate(year: number, month: number, day: number): string | null {
   return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-/**
- * Parses numeric price string into clean float or null.
- * Crucial rule: Never convert missing prices to zero!
- */
-export function parsePrice(val: any): number | null {
-  if (val === null || val === undefined || val === "") return null;
-  const normalized = String(val).replace(/,/g, "").trim();
-  if (!/^-?\d+(?:\.\d+)?$/.test(normalized)) return null;
-  const num = Number(normalized);
-  return Number.isFinite(num) && num >= 0 ? num : null;
+export function parsePrice(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const normalized = String(value).replace(/,/g, "").trim();
+  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
+  const price = Number(normalized);
+  return Number.isFinite(price) ? price : null;
 }
 
-/**
- * Safely maps upstream OGD records into verified internal MandiInput shape
- */
-export function mapUpstreamRecord(raw: any): RawMandiInput | null {
+export function mapUpstreamRecord(raw: unknown): RawMandiInput | null {
   if (!raw || typeof raw !== "object") return null;
-
-  // Expected field variations from data.gov.in
-  const state = String(raw.state || raw.State || "").trim();
-  const district = String(raw.district || raw.District || "").trim();
-  const market = String(raw.market || raw.Market || "").trim();
-  const commodity = String(raw.commodity || raw.Commodity || "").trim();
-
-  // Basic validation: state, district, market, and commodity are mandatory
-  if (!state || !district || !market || !commodity) {
-    return null;
-  }
-
-  const variety = raw.variety || raw.Variety || "Other";
-  const grade = raw.grade || raw.Grade || "FAQ";
-  const rawDate = raw.arrival_date ?? raw.Arrival_Date ?? raw.date;
-  const arrivalDate = normalizeArrivalDate(rawDate);
-
-  // P0 audit fix: skip records without a valid arrival date instead of fabricating today's date.
-  if (!arrivalDate) return null;
-
-  // P0 audit fix: use nullish coalescing so a legitimate price of 0 is preserved.
-  const minPrice = parsePrice(raw.min_price ?? raw.Min_Price);
-  const maxPrice = parsePrice(raw.max_price ?? raw.Max_Price);
-  const modalPrice = parsePrice(raw.modal_price ?? raw.Modal_Price);
-  if (minPrice === null && maxPrice === null && modalPrice === null) {
-    return null;
-  }
+  const record = raw as Record<string, unknown>;
+  const field = (lower: string, upper: string) => record[lower] ?? record[upper];
+  const state = String(field("state", "State") ?? "").trim();
+  const district = String(field("district", "District") ?? "").trim();
+  const market = String(field("market", "Market") ?? "").trim();
+  const commodity = String(field("commodity", "Commodity") ?? "").trim();
+  const arrivalDate = normalizeArrivalDate(
+    field("arrival_date", "Arrival_Date") ?? record.date,
+  );
+  if (!state || !district || !market || !commodity || !arrivalDate) return null;
 
   return {
-    sourceRecordId: raw.id || raw._id || null,
+    sourceRecordId: String(record.id ?? record._id ?? "").trim() || null,
     state,
     district,
     market,
     commodity,
-    variety: String(variety).trim(),
-    grade: String(grade).trim(),
+    variety: String(field("variety", "Variety") ?? "").trim() || null,
+    grade: String(field("grade", "Grade") ?? "").trim() || null,
     arrivalDate,
-    minPrice,
-    maxPrice,
-    modalPrice,
+    minPrice: parsePrice(field("min_price", "Min_Price")),
+    maxPrice: parsePrice(field("max_price", "Max_Price")),
+    modalPrice: parsePrice(field("modal_price", "Modal_Price")),
     sourceUnit: "Rs/Quintal",
   };
 }
 
-/**
- * Synchronizes mandi price records from Government of India OGD API.
- * If credentials are not supplied or upstream fails, preserves existing data and logs audit trail.
- */
-export async function syncMandiPricesFromUpstream(
-  options: UpstreamSyncOptions = {},
-): Promise<SyncResult> {
-  const releaseLock = await acquireMandiSyncLock();
-  if (!releaseLock) {
-    return {
-      success: false,
-      status: "IN_PROGRESS",
-      message: "A mandi synchronization is already in progress.",
-      recordsFetched: 0,
-      recordsInserted: 0,
-      recordsUpdated: 0,
-    };
-  }
-  try {
-    return await runMandiPriceSync(options);
-  } finally {
-    await releaseLock();
-  }
+export function parsePageInteger(value: unknown): number | null {
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  const normalized = String(value).trim();
+  if (!/^\d+$/.test(normalized)) return null;
+  const number = Number(normalized);
+  return Number.isSafeInteger(number) ? number : null;
 }
 
-async function runMandiPriceSync(
-  options: UpstreamSyncOptions,
-): Promise<SyncResult> {
-  const startedAt = new Date().toISOString();
-  const apiKey = process.env.DATA_GOV_API_KEY;
-  const baseUrl =
-    process.env.DATA_GOV_API_BASE_URL || "https://api.data.gov.in/resource";
-  const resourceId =
-    process.env.DATA_GOV_RESOURCE_ID || "9ef84268-d588-465a-a308-a864a43d0070";
-
-  // Check if API key is configured
+function getApiKey(): string {
+  const apiKey = process.env.DATA_GOV_API_KEY?.trim();
   if (
     !apiKey ||
     apiKey === "your_data_gov_in_api_key_here" ||
     apiKey === "MY_DATA_GOV_API_KEY"
   ) {
-    const errorMsg =
-      "DATA_GOV_API_KEY is not configured or using default placeholder. Upstream synchronization skipped.";
-    console.warn(`[Sync] ${errorMsg}`);
+    throw new GovernmentApiError(
+      "Government price service is not configured.",
+      503,
+    );
+  }
+  return apiKey;
+}
 
-    await insertSyncLog({
-      status: "NOT_CONFIGURED",
-      requested_date: options.arrivalDate || null,
-      state_filter: options.state || "ALL",
-      records_fetched: 0,
-      records_inserted: 0,
-      records_updated: 0,
-      error_message: errorMsg,
-      started_at: startedAt,
-      completed_at: new Date().toISOString(),
-    });
-
-    return {
-      success: false,
-      status: "NOT_CONFIGURED",
-      message:
-        "Government API key is not configured. No upstream sync was performed; existing stored records were left unchanged.",
-      recordsFetched: 0,
-      recordsInserted: 0,
-      recordsUpdated: 0,
-      isMockFallback: false,
-      error: errorMsg,
-    };
+function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
+  const limit = options.limit ?? 50;
+  const offset = options.offset ?? 0;
+  if (!Number.isInteger(limit) || limit < 1 || limit > MAX_PAGE_SIZE) {
+    throw new GovernmentApiError("Page size is outside the supported range.", 400);
+  }
+  if (!Number.isInteger(offset) || offset < 0 || offset > MAX_OFFSET) {
+    throw new GovernmentApiError("Page offset is outside the supported range.", 400);
   }
 
-  // Construct query parameters (P0 audit fix: paginate through all upstream pages).
-  const limit = Math.min(options.limit || 100, 100);
-  const startOffset = options.offset || 0;
-
-  const allRawRecords: any[] = [];
-  let offset = startOffset;
-  let totalAvailable = Infinity;
-  let upstreamReportedTotal: number | null = null;
-  let paginationComplete = false;
-let pagesInThisBatch = 0;
-  const PAGES_PER_BATCH = 10; // safety cap (supports full India dataset ~14k records)
-  let pagesFetched = 0;
-
-  console.log(
-    `[Sync] Requesting data from OGD platform (Resource: ${resourceId})...`,
-  );
-
+  const baseUrl = process.env.DATA_GOV_API_BASE_URL || DEFAULT_BASE_URL;
+  let url: URL;
   try {
-    while (pagesInThisBatch < PAGES_PER_BATCH && !paginationComplete) {
-      const url = new URL(`${baseUrl}/${resourceId}`);
-      url.searchParams.set("api-key", apiKey);
-      url.searchParams.set("format", "json");
-      url.searchParams.set("limit", String(limit));
-      url.searchParams.set("offset", String(offset));
+    url = new URL(`${baseUrl.replace(/\/+$/, "")}/${RESOURCE_ID}`);
+  } catch {
+    throw new GovernmentApiError("Government API endpoint is invalid.", 503);
+  }
+  if (url.protocol !== "https:" && process.env.NODE_ENV === "production") {
+    throw new GovernmentApiError("Government API must use HTTPS.", 503);
+  }
 
-      if (options.state) url.searchParams.set("filters[state]", options.state);
-      if (options.district)
-        url.searchParams.set("filters[district]", options.district);
-      if (options.market)
-        url.searchParams.set("filters[market]", options.market);
-      if (options.commodity)
-        url.searchParams.set("filters[commodity]", options.commodity);
-      if (options.arrivalDate)
-        url.searchParams.set("filters[arrival_date]", options.arrivalDate);
+  url.searchParams.set("api-key", apiKey);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("offset", String(offset));
+  if (options.state) url.searchParams.set("filters[State]", options.state);
+  if (options.district) url.searchParams.set("filters[District]", options.district);
+  if (options.market) url.searchParams.set("filters[Market]", options.market);
+  if (options.commodity) url.searchParams.set("filters[Commodity]", options.commodity);
+  if (options.arrivalDate) {
+    const isoDate = normalizeArrivalDate(options.arrivalDate);
+    if (!isoDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
+    const [year, month, day] = isoDate.split("-");
+    url.searchParams.set("filters[Arrival_Date]", `${day}/${month}/${year}`);
+  }
+  if (options.search) url.searchParams.set("q", normalizeCommoditySearch(options.search));
+  const sort = upstreamSort(options.sort);
+  if (sort) {
+    url.searchParams.set("sort[fields]", sort.field);
+    url.searchParams.set("sort[order]", sort.order);
+  }
+  return url;
+}
 
-      // P0 audit fix: per-request timeout (30s) instead of a single overall cap.
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s per request
+function upstreamSort(sort?: string): { field: string; order: string } | null {
+  const map: Record<string, { field: string; order: string }> = {
+    modal_price_asc: { field: "Modal_Price", order: "asc" },
+    modal_price_desc: { field: "Modal_Price", order: "desc" },
+    market_asc: { field: "Market", order: "asc" },
+    market_desc: { field: "Market", order: "desc" },
+    commodity_asc: { field: "Commodity", order: "asc" },
+    commodity_desc: { field: "Commodity", order: "desc" },
+    date_asc: { field: "Arrival_Date", order: "asc" },
+    date_desc: { field: "Arrival_Date", order: "desc" },
+  };
+  return sort ? map[sort] ?? null : null;
+}
 
-      let response: Response;
-      try {
-        response = await fetch(url.toString(), {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "User-Agent": "RateGPT-Mandi-Client/1.0",
-          },
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timeoutId);
-      }
+export function normalizeCommoditySearch(query: string): string {
+  const normalized = query.trim().toLocaleLowerCase();
+  const fruit = FRUIT_NAMES.find(
+    ({ english, hindi }) =>
+      normalized === english.toLocaleLowerCase() || normalized === hindi,
+  );
+  if (fruit) return fruit.english;
+  const hindiCrop = Object.entries(HINDI_CROP_NAMES).find(
+    ([hindi]) => normalized === hindi,
+  );
+  return hindiCrop?.[1] ?? query.trim();
+}
 
-      if (!response.ok) {
-        // Do not log upstream response bodies: error payloads may echo request details.
-        const statusMsg = `Upstream API returned HTTP ${response.status}.`;
-        console.error(`[Sync] ${statusMsg}`);
+export async function fetchLivePrices(
+  options: LiveQueryOptions = {},
+  fetcher: typeof fetch = fetch,
+): Promise<{
+  records: MandiRecord[];
+  meta: {
+    limit: number;
+    offset: number;
+    nextOffset: number;
+    total: number | null;
+    hasNext: boolean;
+    source: string;
+    fetchedAt: string;
+    cacheStatus: "live";
+    freshnessStatus: string;
+  };
+}> {
+  const limit = options.limit ?? 50;
+  const offset = options.offset ?? 0;
+  const url = buildUrl(options, getApiKey());
+  const payload = await requestGovernmentPage(url, fetcher);
+  if (!Array.isArray(payload.records)) {
+    throw new GovernmentApiError("Government API returned an invalid records page.", 502);
+  }
+  if (payload.records.length > limit) {
+    throw new GovernmentApiError("Government API exceeded the requested page size.", 502);
+  }
 
-        await insertSyncLog({
-          status: "FAILED",
-          requested_date: options.arrivalDate || null,
-          state_filter: options.state || "ALL",
-          records_fetched: allRawRecords.length,
-          records_inserted: 0,
-          records_updated: 0,
-          error_message: statusMsg,
-          started_at: startedAt,
-          completed_at: new Date().toISOString(),
-        });
+  const upstreamOffset =
+    payload.offset === undefined ? offset : parsePageInteger(payload.offset);
+  const upstreamLimit =
+    payload.limit === undefined ? limit : parsePageInteger(payload.limit);
+  if (upstreamOffset !== offset || upstreamLimit === null || upstreamLimit < 1) {
+    throw new GovernmentApiError("Government API returned invalid pagination data.", 502);
+  }
+  if (upstreamLimit !== limit) {
+    throw new GovernmentApiError("Government API returned an unexpected page size.", 502);
+  }
 
-        return {
-          success: false,
-          message: "Failed to fetch from Government API.",
-          recordsFetched: allRawRecords.length,
-          recordsInserted: 0,
-          recordsUpdated: 0,
-          error: statusMsg,
-        };
-      }
+  const total =
+    payload.total === undefined ? null : parseReportedTotal(payload.total);
+  if (payload.total !== undefined && total === null) {
+    throw new GovernmentApiError("Government API returned an invalid result total.", 502);
+  }
+  const rawCount = payload.records.length;
+  if (total !== null && offset + rawCount > total) {
+    throw new GovernmentApiError("Government API returned inconsistent pagination totals.", 502);
+  }
 
-      const data: any = await response.json();
-      const rawRecords = Array.isArray(data.records) ? data.records : [];
-      allRawRecords.push(...rawRecords);
-      pagesFetched++;
-
-      const reportedTotal = parseReportedTotal(data.total);
-      // Never trust a total smaller than the records already returned. Some
-      // upstream responses serialize grouped totals (for example "13,181");
-      // a malformed/truncated value must not terminate pagination early.
-      if (reportedTotal !== null && reportedTotal >= offset + rawRecords.length) {
-        totalAvailable = reportedTotal;
-        upstreamReportedTotal = reportedTotal;
-      } else if (rawRecords.length === 0) {
-        totalAvailable = allRawRecords.length; // stop if no usable total reported
-      }
-
-      console.log(
-        `[Sync] Page ${pagesFetched}: received ${rawRecords.length} records (total so far: ${allRawRecords.length}/${Number.isFinite(totalAvailable) ? totalAvailable : "?"})`,
-      );
-
-      if (rawRecords.length === 0) {
-        paginationComplete = true;
-        break;
-      }
-      offset += rawRecords.length;
-      if (offset >= totalAvailable) paginationComplete = true;
-      await new Promise((r) => setTimeout(r, 1500)); // delay to avoid rate limiting
-    }
-
-    // Map and sanitize records
-    const validRecords: RawMandiInput[] = [];
-    for (const raw of allRawRecords) {
-      const mapped = mapUpstreamRecord(raw);
-      if (mapped) validRecords.push(mapped);
-    }
-
-    // Upsert only normalized source records; never invent fallback prices.
-    const { inserted, updated } = await upsertMandiPrices(validRecords);
-    const completedAt = new Date().toISOString();
-    syncState.updated_at = new Date().toISOString;
-
-    syncState.status = "SUCCESS";
-    syncState.completed_at = new Date().toISOString;
-
-    await insertSyncLog({
-      id: syncRunId,
-      status: syncState.status,
-      requested_date: options.arrivalDate || null,
-      state_filter: options.state || "ALL",
-      records_fetched: syncState.records_fetched,
-      records_inserted: syncState.records_inserted,
-      records_updated: syncState.records_updated,
-      error_message: syncState.last_error,
-      started_at: syncState.started_at,
-      completed_at: syncState.completed_at,
+  const seen = new Set<string>();
+  const records: MandiRecord[] = [];
+  for (const raw of payload.records) {
+    const mapped = mapUpstreamRecord(raw);
+    if (!mapped) continue;
+    const key = mapped.sourceRecordId
+      ? `id:${mapped.sourceRecordId}`
+      : [
+          mapped.state,
+          mapped.district,
+          mapped.market,
+          mapped.commodity,
+          mapped.variety ?? "",
+          mapped.grade ?? "",
+          mapped.arrivalDate,
+        ].join("|").toLocaleLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    records.push({
+      id: mapped.sourceRecordId ?? key,
+      state: mapped.state,
+      district: mapped.district,
+      market: mapped.market,
+      commodity: mapped.commodity,
+      variety: mapped.variety,
+      grade: mapped.grade,
+      arrival_date: mapped.arrivalDate,
+      min_price: mapped.minPrice,
+      max_price: mapped.maxPrice,
+      modal_price: mapped.modalPrice,
+      source_unit: mapped.sourceUnit,
     });
+  }
 
-    return {
-      success: syncState.status === "SUCCESS",
-      status: syncState.status,
-      message: "",
-      recordsFetched: syncState.records_fetched,
-      recordsInserted: syncState.records_inserted,
-      recordsUpdated: syncState.records_updated,
-      pagesFetched: syncState.pages_completed,
-      upstreamReportedTotal: syncState.upstream_reported_total,
-      validRecords: syncState.valid_records,
-      invalidRecordsSkipped: syncState.invalid_records_skipped,
-      paginationComplete: syncState.status === "SUCCESS",
-      syncRunId: syncRunId,
-    };
-  } catch (err: any) {
-    console.error("[Sync] Unexpected error:", err);
+  const nextOffset = offset + rawCount;
+  return {
+    records,
+    meta: {
+      limit,
+      offset,
+      nextOffset,
+      total,
+      hasNext: total === null ? rawCount === limit : nextOffset < total,
+      source: "Government of India OGD / AGMARKNET",
+      fetchedAt: new Date().toISOString(),
+      cacheStatus: "live",
+      freshnessStatus:
+        "Government-published daily market data; not guaranteed real-time trading prices.",
+    },
+  };
+}
 
+async function requestGovernmentPage(
+  url: URL,
+  fetcher: typeof fetch,
+): Promise<Record<string, unknown>> {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response: Response;
     try {
-      await insertSyncLog({
-        status: "FAILED",
-        requested_date: options.arrivalDate || null,
-        state_filter: options.state || "ALL",
-        records_fetched: 0,
-        records_inserted: 0,
-        records_updated: 0,
-        error_message: err?.message ?? "Unexpected sync error",
-        started_at: new Date().toISOString(),
-        completed_at: new Date().toISOString,
+      response = await fetcher(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "RateGPT-Mandi-Client/1.0",
+        },
+        signal: controller.signal,
       });
-    } catch (dbErr) {
-      console.error("[Sync] Failed to write error sync log:", dbErr);
+    } catch (error) {
+      if (attempt < MAX_ATTEMPTS) {
+        await delay(200 * attempt);
+        continue;
+      }
+      if (controller.signal.aborted) {
+        throw new GovernmentApiError("Government API request timed out.", 504);
+      }
+      throw new GovernmentApiError("Government API could not be reached.", 503);
+    } finally {
+      clearTimeout(timeout);
     }
 
+    if (response.status === 429 || response.status >= 500) {
+      if (attempt < MAX_ATTEMPTS) {
+        const retryAfter = Number(response.headers.get("retry-after"));
+        await delay(Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 1000) : 200 * attempt);
+        continue;
+      }
+      throw new GovernmentApiError(
+        response.status === 429
+          ? "Government API rate limit reached. Please try again shortly."
+          : "Government API is temporarily unavailable.",
+        response.status === 429 ? 503 : 502,
+        response.status,
+      );
+    }
+    if (!response.ok) {
+      throw new GovernmentApiError(
+        "Government API rejected the price request.",
+        502,
+        response.status,
+      );
+    }
+    try {
+      const payload: unknown = await response.json();
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        throw new Error("Invalid JSON object");
+      }
+      return payload as Record<string, unknown>;
+    } catch {
+      throw new GovernmentApiError("Government API returned invalid JSON.", 502);
+    }
+  }
+  throw new GovernmentApiError("Government API could not be reached.", 503);
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+export async function fetchLiveFilters(options: {
+  state?: string;
+  district?: string;
+  market?: string;
+} = {}): Promise<{
+  states: string[];
+  districts: string[];
+  markets: string[];
+  commodities: string[];
+}> {
+  if (!options.state && !options.district && !options.market) {
     return {
-      success: false,
-      status: "FAILED",
-      message: "Synchronization failed due to unexpected error.",
-      recordsFetched: 0,
-      recordsInserted: 0,
-      recordsUpdated: 0,
-      error: err?.message ?? "Unknown error",
+      states: STATES_AND_UTS,
+      districts: [],
+      markets: [],
+      commodities: [],
     };
   }
+  const { records } = await fetchLivePrices({
+    ...options,
+    limit: MAX_PAGE_SIZE,
+    offset: 0,
+    sort: "date_desc",
+  });
+  return {
+    states: uniqueSorted([...STATES_AND_UTS, ...records.map((record) => record.state)]),
+    districts: uniqueSorted(records.map((record) => record.district)),
+    markets: uniqueSorted(records.map((record) => record.market)),
+    commodities: uniqueSorted(records.map((record) => record.commodity)),
+  };
+}
+
+export async function searchLiveCommodities(
+  query: string,
+  limit = 10,
+  fetcher: typeof fetch = fetch,
+): Promise<string[]> {
+  const normalizedQuery = normalizeCommoditySearch(query);
+  const { records } = await fetchLivePrices({
+    search: normalizedQuery,
+    limit: MAX_PAGE_SIZE,
+    offset: 0,
+    sort: "commodity_asc",
+  }, fetcher);
+  const matches = records
+    .map((record) => record.commodity)
+    .filter((commodity) => commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
+  const fruitSuggestions = FRUIT_NAMES
+    .map((fruit) => fruit.english)
+    .filter((name) => name.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
+  return uniqueSorted([...matches, ...fruitSuggestions]).slice(0, Math.min(limit, 50));
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }

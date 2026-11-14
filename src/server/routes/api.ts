@@ -5,84 +5,17 @@
  * consistent response envelopes, and error handling.
  */
 
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { z } from "zod";
-import crypto from "crypto";
 import {
-  getFilterMetadata,
-  getMandiPrices,
-  getPriceTrend,
-  getMarketComparison,
-  searchCommodities,
-  getDatabaseStats,
-  getRecentSyncLogs,
-} from "../db/database-factory.js";
-import { syncMandiPricesFromUpstream } from "../services/mandiDataService.js";
+  fetchLiveFilters,
+  fetchLivePrices,
+  GovernmentApiError,
+  searchLiveCommodities,
+} from "../services/mandiDataService.js";
 import { openApiSpec } from "../openapi.js";
 
 const router = Router();
-
-function hasValidToken(providedToken: unknown, expectedKey: string): boolean {
-  if (typeof providedToken !== "string") return false;
-  const providedBuffer = Buffer.from(providedToken);
-  const expectedBuffer = Buffer.from(expectedKey);
-  if (providedBuffer.length !== expectedBuffer.length) return false;
-  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
-}
-
-// Admin authentication helper (timing-safe)
-function requireAdminAuth(req: Request, res: Response): boolean {
-  const expectedKey = process.env.ADMIN_SYNC_KEY;
-  if (
-    !expectedKey ||
-    expectedKey.length < 32 ||
-    expectedKey === "change_this_to_a_secure_token" ||
-    expectedKey === "replace_with_a_long_random_secret"
-  ) {
-    sendError(
-      res,
-      "SERVICE_UNAVAILABLE",
-      "Admin synchronization is disabled: ADMIN_SYNC_KEY is not configured.",
-      503,
-    );
-    return false;
-  }
-
-  const providedToken = /^Bearer\s+(.+)$/i.exec(
-    req.headers.authorization || "",
-  )?.[1];
-  if (!hasValidToken(providedToken, expectedKey)) {
-    sendError(
-      res,
-      "UNAUTHORIZED",
-      "Invalid or missing admin synchronization token",
-      401,
-    );
-    return false;
-  }
-  return true;
-}
-
-function requireCronAuth(req: Request, res: Response): boolean {
-  const expectedSecret = process.env.CRON_SECRET;
-  if (!expectedSecret || expectedSecret.length < 32) {
-    sendError(
-      res,
-      "SERVICE_UNAVAILABLE",
-      "Scheduled synchronization is disabled: CRON_SECRET is not configured.",
-      503,
-    );
-    return false;
-  }
-  const providedToken = /^Bearer\s+(.+)$/i.exec(
-    req.headers.authorization || "",
-  )?.[1];
-  if (!hasValidToken(providedToken, expectedSecret)) {
-    sendError(res, "UNAUTHORIZED", "Invalid scheduled sync token", 401);
-    return false;
-  }
-  return true;
-}
 
 function sendSuccess<T>(
   res: Response,
@@ -121,51 +54,27 @@ function sendError(
  * GET /api/v1/health
  */
 router.get("/health", async (req: Request, res: Response) => {
-  try {
-    const stats = await getDatabaseStats();
-    const hasApiKey = Boolean(
-      process.env.DATA_GOV_API_KEY &&
-      process.env.DATA_GOV_API_KEY !== "your_data_gov_in_api_key_here" &&
-      process.env.DATA_GOV_API_KEY !== "MY_DATA_GOV_API_KEY",
-    );
-
-    return sendSuccess(
-      res,
-      {
-        status: "healthy",
-        version: "1.0.0",
-        upstreamSource: {
-          name: "Government of India Open Government Data (OGD / AGMARKNET)",
-          resourceId:
-            process.env.DATA_GOV_RESOURCE_ID ||
-            "9ef84268-d588-465a-a308-a864a43d0070",
-          apiKeyConfigured: hasApiKey,
-        },
-        stats: {
-          totalRecords: stats.totalRecords,
-          commoditiesTracked: stats.commoditiesCount,
-          mandisCovered: stats.mandisCount,
-          statesCovered: stats.statesCount,
-          latestArrivalDate: stats.latestArrivalDate,
-          lastSync: stats.lastSync,
-        },
-        serverTime: new Date().toISOString(),
+  const apiKey = process.env.DATA_GOV_API_KEY?.trim();
+  const apiKeyConfigured = Boolean(
+    apiKey &&
+    apiKey !== "your_data_gov_in_api_key_here" &&
+    apiKey !== "MY_DATA_GOV_API_KEY",
+  );
+  return sendSuccess(
+    res,
+    {
+      status: "healthy",
+      version: "1.0.0",
+      upstreamSource: {
+        name: "Government of India OGD / AGMARKNET",
+        apiKeyConfigured,
       },
-      undefined,
-      "Backend operational",
-    );
-  } catch (err: any) {
-    console.error("[Route /health] Database health check failed", {
-      name: err?.name,
-      code: err?.code,
-    });
-    return sendError(
-      res,
-      "INTERNAL_ERROR",
-      "Database health check failed",
-      503,
-    );
-  }
+      priceStorage: "disabled",
+      serverTime: new Date().toISOString(),
+    },
+    undefined,
+    "Backend operational",
+  );
 });
 
 /**
@@ -173,10 +82,9 @@ router.get("/health", async (req: Request, res: Response) => {
  * GET /api/v1/meta/filters?state=...&district=...&search=...
  */
 const filtersQuerySchema = z.object({
-  state: z.string().optional(),
-  district: z.string().optional(),
-  market: z.string().optional(),
-  search: z.string().optional(),
+  state: z.string().trim().min(1).max(100).optional(),
+  district: z.string().trim().min(1).max(100).optional(),
+  market: z.string().trim().min(1).max(100).optional(),
 });
 
 router.get("/meta/filters", async (req: Request, res: Response) => {
@@ -192,14 +100,25 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    const data = await getFilterMetadata(parsed.data);
-    return sendSuccess(res, data, undefined, "Filter metadata retrieved");
+    const data = await fetchLiveFilters(parsed.data);
+    return sendSuccess(
+      res,
+      data,
+      {
+        source: "Government of India OGD / AGMARKNET",
+        scope: "Distinct values from a bounded live result page; market options may be partial.",
+      },
+      "Live filter metadata retrieved",
+    );
   } catch (err: any) {
+    if (err instanceof GovernmentApiError) {
+      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus);
+    }
     return sendError(
       res,
-      "INTERNAL_ERROR",
-      "Failed to retrieve filter metadata",
-      500,
+      "UPSTREAM_ERROR",
+      "Failed to retrieve live filter metadata",
+      502,
     );
   }
 });
@@ -209,15 +128,14 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
  * GET /api/v1/prices
  */
 const pricesQuerySchema = z.object({
-  state: z.string().optional(),
-  district: z.string().optional(),
-  market: z.string().optional(),
-  commodity: z.string().optional(),
-  variety: z.string().optional(),
-  date: z.string().optional(),
-  search: z.string().optional(),
+  state: z.string().trim().min(1).max(100).optional(),
+  district: z.string().trim().min(1).max(100).optional(),
+  market: z.string().trim().min(1).max(100).optional(),
+  commodity: z.string().trim().min(1).max(100).optional(),
+  date: z.string().trim().min(1).max(20).optional(),
+  search: z.string().trim().min(1).max(100).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
+  offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
   sort: z
     .enum([
       "modal_price_asc",
@@ -245,80 +163,55 @@ router.get("/prices", async (req: Request, res: Response) => {
   }
 
   try {
-    const { records, meta } = await getMandiPrices(parsed.data);
-    return sendSuccess(res, records, meta, "Prices fetched successfully");
+    const { date, ...filters } = parsed.data;
+    const { records, meta } = await fetchLivePrices({
+      ...filters,
+      arrivalDate: date,
+    });
+    return sendSuccess(res, records, meta, "Live prices fetched successfully");
   } catch (err: any) {
+    if (err instanceof GovernmentApiError) {
+      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
+        upstreamStatus: err.upstreamStatus,
+      });
+    }
     console.error("[Route /prices] Operation=getMandiPrices failed", {
       name: err?.name,
       code: err?.code,
     });
     return sendError(
       res,
-      "INTERNAL_ERROR",
-      "Failed to fetch mandi prices",
-      500,
+      "UPSTREAM_ERROR",
+      "Failed to fetch live mandi prices",
+      502,
     );
   }
 });
 
 /**
- * 4. Price Trend Endpoint
- * GET /api/v1/prices/trend
- * Returns actual stored historical observations only.
+ * 4. Historical trend endpoint
+ *
+ * Historical price series are intentionally not retained. The upstream
+ * resource exposes arrival-date observations, not a guaranteed historical
+ * time-series query for arbitrary date ranges. Do not silently read legacy
+ * database rows or present them as live data.
  */
-const trendQuerySchema = z.object({
-  commodity: z.string().min(1, "Commodity name is required"),
-  market: z.string().min(1, "Market/mandi name is required"),
-  state: z.string().optional(),
-  district: z.string().optional(),
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-
-router.get("/prices/trend", async (req: Request, res: Response) => {
-  const parsed = trendQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    return sendError(
-      res,
-      "VALIDATION_ERROR",
-      "Commodity and market are required for price trend",
-      400,
-      parsed.error.format(),
-    );
-  }
-
-  try {
-    const { commodity, market, state, district, from, to } = parsed.data;
-    const records = await getPriceTrend(commodity, market, state, district, from, to);
-    return sendSuccess(
-      res,
-      records,
-      {
-        pointsCount: records.length,
-        commodity,
-        market,
-        dateRange:
-          records.length > 0
-            ? {
-                earliest: records[0].arrival_date,
-                latest: records[records.length - 1].arrival_date,
-              }
-            : null,
-      },
-      "Price trend fetched successfully",
-    );
-  } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Failed to fetch price trend", 500);
-  }
+router.get("/prices/trend", (_req: Request, res: Response) => {
+  return sendError(
+    res,
+    "HISTORICAL_STORAGE_DISABLED",
+    "Historical price charts are unavailable because Rate-GPT does not retain historical mandi prices.",
+    410,
+  );
 });
 
 /**
- * 5. Market Comparison Endpoint
+ * 5. Live market comparison endpoint
  * GET /api/v1/prices/compare?commodity=...&date=...
  */
 const compareQuerySchema = z.object({
-  commodity: z.string().min(1, "Commodity is required"),
-  date: z.string().optional(),
+  commodity: z.string().trim().min(1).max(100),
+  date: z.string().trim().min(1).max(20).optional(),
 });
 
 router.get("/prices/compare", async (req: Request, res: Response) => {
@@ -334,21 +227,32 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
   }
 
   try {
-    const records = await getMarketComparison(
-      parsed.data.commodity,
-      parsed.data.date,
-    );
+    const records = await fetchLivePrices({
+      commodity: parsed.data.commodity,
+      arrivalDate: parsed.data.date,
+      limit: 100,
+      offset: 0,
+      sort: "modal_price_desc",
+    });
     return sendSuccess(
       res,
-      records,
+      records.records,
       {
-        marketsCompared: records.length,
+        ...records.meta,
+        marketsCompared: records.records.length,
         commodity: parsed.data.commodity,
+        comparisonMayBePartial: records.meta.hasNext,
+        scope: "First live government API page only; use pagination for further results.",
       },
-      "Market comparison fetched",
+      "Live market comparison fetched",
     );
   } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Failed to compare markets", 500);
+    if (err instanceof GovernmentApiError) {
+      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
+        upstreamStatus: err.upstreamStatus,
+      });
+    }
+    return sendError(res, "UPSTREAM_ERROR", "Failed to compare live markets", 502);
   }
 });
 
@@ -357,7 +261,7 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
  * GET /api/v1/commodities/search?q=tom&limit=10
  */
 const searchCommSchema = z.object({
-  q: z.string().min(1, "Search query is required"),
+  q: z.string().trim().min(1, "Search query is required").max(100),
   limit: z.coerce.number().int().min(1).max(50).default(10),
 });
 
@@ -374,126 +278,22 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
   }
 
   try {
-    const results = await searchCommodities(parsed.data.q, parsed.data.limit);
+    const results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
     return sendSuccess(
       res,
       results,
-      { count: results.length },
-      "Commodity search completed",
+      {
+        count: results.length,
+        source: "Government of India OGD / AGMARKNET",
+        fruitSuggestions: true,
+      },
+      "Live commodity search completed",
     );
   } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Commodity search failed", 500);
-  }
-});
-
-/**
- * 7. Admin Data Sync Endpoint
- * POST /api/v1/admin/sync
- * Protected via the ADMIN_SYNC_KEY Bearer token.
- */
-const syncBodySchema = z.object({
-  state: z.string().trim().min(1).max(100).optional(),
-  district: z.string().trim().min(1).max(100).optional(),
-  market: z.string().trim().min(1).max(100).optional(),
-  commodity: z.string().trim().min(1).max(100).optional(),
-  arrivalDate: z
-    .string()
-    .trim()
-    .regex(
-      /^(?:\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{4})$/,
-    )
-    .optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-router.post("/admin/sync", async (req: Request, res: Response) => {
-  if (!requireAdminAuth(req, res)) return;
-
-  const parsed = syncBodySchema.safeParse(req.body);
-  if (!parsed.success) {
-    return sendError(
-      res,
-      "VALIDATION_ERROR",
-      "Invalid sync request body",
-      400,
-      parsed.error.format(),
-    );
-  }
-
-  try {
-    const result = await syncMandiPricesFromUpstream(parsed.data);
-    return sendSuccess(
-      res,
-      result,
-      undefined,
-      result.message,
-      result.success ? 200 : 207,
-    );
-  } catch (err: any) {
-    console.error("[Route /admin/sync] Synchronization failed", {
-      name: err?.name,
-      code: err?.code,
-    });
-    return sendError(
-      res,
-      "SYNC_FAILED",
-      "Internal error during synchronization",
-      500,
-    );
-  }
-});
-
-/**
- * Vercel Cron entry point. The platform sends a GET request with
- * Authorization: Bearer <CRON_SECRET>.
- */
-router.get("/scheduler/sync", async (req: Request, res: Response) => {
-  if (!requireCronAuth(req, res)) return;
-  try {
-    const result = await syncMandiPricesFromUpstream();
-    if (result.status === "IN_PROGRESS") {
-      return sendError(res, "SYNC_IN_PROGRESS", result.message, 409);
+    if (err instanceof GovernmentApiError) {
+      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus);
     }
-    if (!result.success) {
-      return sendError(
-        res,
-        "SYNC_FAILED",
-        result.message,
-        503,
-        { status: result.status },
-      );
-    }
-    return sendSuccess(res, result, undefined, result.message);
-  } catch (err: any) {
-    console.error("[Route /scheduler/sync] Synchronization failed", {
-      name: err?.name,
-      code: err?.code,
-    });
-    return sendError(
-      res,
-      "SYNC_FAILED",
-      "Scheduled synchronization failed.",
-      500,
-    );
-  }
-});
-
-/**
- * 8. Audit Logs Endpoint
- * GET /api/v1/admin/logs
- */
-router.get("/admin/logs", async (req: Request, res: Response) => {
-  if (!requireAdminAuth(req, res)) return;
-  try {
-    const logs = await getRecentSyncLogs(20);
-    return sendSuccess(
-      res,
-      logs,
-      { count: logs.length },
-      "Sync audit logs retrieved",
-    );
-  } catch (err: any) {
-    return sendError(res, "INTERNAL_ERROR", "Failed to retrieve logs", 500);
+    return sendError(res, "UPSTREAM_ERROR", "Commodity search failed", 502);
   }
 });
 
@@ -505,52 +305,17 @@ router.get("/docs", async (_req: Request, res: Response) => {
   return res.status(200).json(openApiSpec);
 });
 
-/***
- * 10. Sync Status & Freshness Endpoint
- * GET /api/v1/sync-status
- * Returns last successful refresh timestamp and data freshness status
- */
-router.get("/sync-status", async (req: Request, res: Response) => {
-  try {
-    const stats = await getDatabaseStats();
-    const now = new Date();
-    const nextScheduledAt = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate() + 1,
-      ),
-    );
-    const intervalMs = 24 * 60 * 60 * 1000;
-    const lastSuccessfulSync = stats.lastSuccessfulSync || null;
-    const lastSuccessfulTime = lastSuccessfulSync?.completed_at
-      ? new Date(lastSuccessfulSync.completed_at).getTime()
-      : Number.NaN;
-    const successfulSyncIsFresh =
-      Number.isFinite(lastSuccessfulTime) &&
-      now.getTime() - lastSuccessfulTime < intervalMs;
-
-    return sendSuccess(res, {
-      freshnessStatus: !lastSuccessfulSync
-        ? "No successful sync"
-        : successfulSyncIsFresh
-          ? "Fresh data"
-          : "Data is outdated",
-      lastSyncAttempt: stats.lastSync || null,
-      lastSuccessfulSync,
-      schedulerEnabled: Boolean(
-        process.env.VERCEL && (process.env.CRON_SECRET || "").length >= 32,
-      ),
-      nextScheduledAt: nextScheduledAt.toISOString(),
-      countdownMs: Math.max(0, nextScheduledAt.getTime() - now.getTime()),
-      timestamp: now.toISOString(),
-    });
-  } catch (err: any) {
-    console.error("[Route /sync-status] Failed to read sync status", {
-      name: err?.name,
-      code: err?.code,
-    });
-    return sendError(res, "INTERNAL_ERROR", "Failed to get sync status", 500);
-  }
+router.get("/sync-status", (_req: Request, res: Response) => {
+  return sendSuccess(res, {
+    mode: "on-demand",
+    schedulerEnabled: false,
+    bulkSyncEnabled: false,
+    priceStorage: "disabled",
+    source: "Government of India OGD / AGMARKNET",
+    freshnessStatus:
+      "Data is fetched from the government source when requested; published arrival data is not guaranteed real-time.",
+    lastFetchedAt: null,
+    timestamp: new Date().toISOString(),
+  });
 });
 export default router;

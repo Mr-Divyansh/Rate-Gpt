@@ -16,15 +16,17 @@ const state = {
   states: [], districts: [], markets: [],
   location: { state: "", district: "" },
   market: "",
+  arrivalDate: "",
   records: [],
-  meta: { limit: PAGE_SIZE, offset: 0, total: 0, hasNext: false },
+  meta: { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false },
+  pageOffsets: [0],
   sort: "date_desc",
+  priceUnit: "quintal",
   loading: false,
   error: "",
   finderError: "",
   controller: null,
   sync: null,
-  syncReceivedAt: 0,
 };
 let navToken = 0; // guards async state → district → mandi chains against fast re-selection
 
@@ -179,7 +181,8 @@ function selectMandi(market) {
 function resetResultState() {
   state.controller?.abort();
   state.records = [];
-  state.meta = { limit: PAGE_SIZE, offset: 0, total: 0, hasNext: false };
+  state.meta = { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false };
+  state.pageOffsets = [0];
   state.error = "";
   state.loading = false;
 }
@@ -194,6 +197,7 @@ function clearResults() {
 function updateControls() {
   const on = Boolean(state.market) && !state.loading;
   $("cropSearch").disabled = !state.market;
+  $("arrivalDate").disabled = !state.market;
   $("sortFilter").disabled = !on;
   $("clearFilters").disabled = !on;
 }
@@ -326,6 +330,9 @@ function renderResults() {
     : t("results.titleNone");
 
   const busy = state.loading && state.records.length === 0;
+  const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
+  const unitControl = $("priceUnit");
+  if (unitControl) unitControl.value = state.priceUnit;
   let announcement = "";
 
   if (busy) {
@@ -346,20 +353,34 @@ function renderResults() {
     $("resultCount").textContent = tCount("results.count", 0);
     announcement = t("results.none");
   } else {
-    const ctx = buildContext(state.records);
-    body.replaceChildren(...state.records.map((r) => tableRow(r, ctx)));
-    list.replaceChildren(...state.records.map((r) => cardFor(r, ctx)));
-    $("resultCount").textContent = tCount("results.count", state.meta.total);
-    announcement = `${state.market}: ${tCount("results.count", state.meta.total)}`;
+    const divisor = state.priceUnit === "kg" ? 100 : 1;
+    const displayRecords = state.records.map((record) => ({
+      ...record,
+      min_price: record.min_price === null ? null : record.min_price / divisor,
+      max_price: record.max_price === null ? null : record.max_price / divisor,
+      modal_price: record.modal_price === null ? null : record.modal_price / divisor,
+    }));
+    const ctx = buildContext(displayRecords);
+    body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx)));
+    list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx)));
+    $("resultCount").textContent = state.meta.total === null
+      ? tCount("results.count", state.records.length)
+      : tCount("results.count", state.meta.total);
+    announcement = `${state.market}: ${$("resultCount").textContent}`;
   }
 
-  $("showingText").textContent =
-    state.records.length > 0
-      ? t("results.showing", { a: state.records.length.toLocaleString("en-IN"), b: state.meta.total.toLocaleString("en-IN") })
-      : "";
+  $("showingText").textContent = state.records.length > 0
+    ? state.meta.total === null
+      ? t("results.showingUnknown", { a: state.records.length.toLocaleString("en-IN") })
+      : t("results.showing", { a: state.records.length.toLocaleString("en-IN"), b: state.meta.total.toLocaleString("en-IN") })
+    : "";
   $("loadMore").hidden = !state.meta.hasNext;
   $("loadMore").disabled = state.loading;
+  $("loadPrevious").hidden = state.pageOffsets.length < 2;
+  $("loadPrevious").disabled = state.loading;
   $("priceMessage").textContent = announcement;
+  const unitNote = document.querySelector(".unit-field label");
+  if (unitNote) unitNote.textContent = `Price unit (${unitLabel})`;
   renderError();
 }
 
@@ -380,14 +401,14 @@ function renderError() {
   box.append(text, retry);
 }
 
-async function loadPrices({ append = false } = {}) {
+async function loadPrices({ append = false, offset = 0 } = {}) {
   if (!state.market) return;
   state.controller?.abort();
   const controller = new AbortController();
   state.controller = controller;
   if (!append) {
     state.records = [];
-    state.meta.offset = 0;
+    state.meta = { limit: PAGE_SIZE, offset, nextOffset: offset, total: 0, hasNext: false };
   }
   state.loading = true;
   state.error = "";
@@ -402,6 +423,7 @@ async function loadPrices({ append = false } = {}) {
     offset: String(state.meta.offset),
     sort: state.sort,
   };
+  if (state.arrivalDate) params.date = state.arrivalDate;
   const search = $("cropSearch").value.trim();
   if (search) params.search = search;
 
@@ -410,16 +432,39 @@ async function loadPrices({ append = false } = {}) {
     const meta = payload.meta;
     if (
       !meta || !Number.isInteger(meta.limit) || meta.limit < 1 || !Number.isInteger(meta.offset) ||
-      meta.offset < 0 || !Number.isInteger(meta.total) || meta.total < 0 || typeof meta.hasNext !== "boolean"
+      meta.offset < 0 || (meta.total !== null && (!Number.isInteger(meta.total) || meta.total < 0)) ||
+      !Number.isInteger(meta.nextOffset) || meta.nextOffset < meta.offset ||
+      typeof meta.hasNext !== "boolean" || (meta.hasNext && meta.nextOffset <= meta.offset)
     ) {
       throw new Error("The mandi prices response has invalid pagination data.");
     }
-    state.records = append ? [...state.records, ...payload.data] : payload.data;
-    state.meta = { limit: meta.limit, offset: meta.offset, total: meta.total, hasNext: meta.hasNext };
+    state.records = append
+      ? [...state.records, ...payload.data.filter((record) => !state.records.some((seen) => seen.id === record.id))]
+      : payload.data;
+    state.meta = {
+      limit: meta.limit,
+      offset: meta.offset,
+      nextOffset: meta.nextOffset,
+      total: meta.total,
+      hasNext: meta.hasNext,
+    };
+    if (append) {
+      if (!state.pageOffsets.includes(meta.offset)) state.pageOffsets.push(meta.offset);
+    } else {
+      state.pageOffsets = [meta.offset];
+    }
+    state.sync = {
+      ...(state.sync && state.sync !== "error" ? state.sync : {}),
+      source: meta.source,
+      fetchedAt: meta.fetchedAt,
+      cacheStatus: meta.cacheStatus,
+      freshnessStatus: meta.freshnessStatus,
+    };
+    renderSync();
   } catch (error) {
     if (controller.signal.aborted) return;
     state.error = errorText(error, "Unable to load mandi prices.");
-    if (!append) state.meta = { limit: PAGE_SIZE, offset: 0, total: 0, hasNext: false };
+    if (!append) state.meta = { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false };
   } finally {
     if (state.controller === controller) {
       state.loading = false;
@@ -430,13 +475,6 @@ async function loadPrices({ append = false } = {}) {
 }
 
 /* ============================ data status ============================ */
-function formatCountdown(ms) {
-  const minutes = Math.max(0, Math.floor(ms / 60000));
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return h > 0 ? t("time.hm", { h, m }) : t("time.m", { m });
-}
-
 function renderSync() {
   const text = $("syncText");
   const dot = $("syncDot");
@@ -449,24 +487,26 @@ function renderSync() {
     next.textContent = "";
     return;
   }
-  const raw = data.freshnessStatus;
-  const label = t(`fresh.${raw}`) === `fresh.${raw}` ? raw : t(`fresh.${raw}`);
-  const completed = data.lastSuccessfulSync?.completed_at;
-  text.textContent = completed
-    ? t("sync.updated", { status: label, time: formatDateTime(completed) })
-    : t("sync.never");
-  dot.dataset.state = raw === "Fresh data" ? "fresh" : raw === "Data is outdated" ? "stale" : "none";
-
-  const valid = data.schedulerEnabled && Number.isFinite(data.countdownMs);
-  next.textContent = valid
-    ? t("sync.next", { time: formatCountdown(data.countdownMs - (performance.now() - state.syncReceivedAt)) })
-    : t("sync.nextNone");
+  text.textContent = data.fetchedAt
+    ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
+    : t("sync.onSearch");
+  dot.dataset.state = data.fetchedAt ? "live" : "none";
+  next.textContent = data.fetchedAt
+    ? t("sync.transparency", {
+        source: data.source || "Government of India OGD / AGMARKNET",
+        mode: data.cacheStatus === "temporary-cache" ? t("sync.temporaryCache") : t("sync.liveApi"),
+        freshness: data.freshnessStatus || "",
+      })
+    : t("sync.noFetchYet");
 }
 
 async function loadSync() {
   try {
-    state.sync = await fetchSyncStatus();
-    state.syncReceivedAt = performance.now();
+    const status = await fetchSyncStatus();
+    state.sync = {
+      ...status,
+      fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt,
+    };
   } catch (error) {
     console.error("[Mandi prices] Unable to load sync status:", error);
     state.sync = "error";
@@ -476,6 +516,10 @@ async function loadSync() {
 
 /* ============================ boot ============================ */
 function bind() {
+  $("priceUnit").addEventListener("change", (event) => {
+    state.priceUnit = event.currentTarget.value === "kg" ? "kg" : "quintal";
+    renderResults();
+  });
   $("stateSelect").addEventListener("change", (e) => chooseState(e.currentTarget.value));
   $("districtSelect").addEventListener("change", (e) => chooseDistrict(e.currentTarget.value));
   $("sortFilter").addEventListener("change", (e) => {
@@ -484,13 +528,24 @@ function bind() {
   });
   $("clearFilters").addEventListener("click", () => {
     $("cropSearch").value = "";
+    $("arrivalDate").value = "";
+    state.arrivalDate = "";
     $("sortFilter").value = "date_desc";
     state.sort = "date_desc";
     loadPrices();
   });
   $("loadMore").addEventListener("click", () => {
-    state.meta.offset += state.meta.limit;
+    state.meta.offset = state.meta.nextOffset;
     loadPrices({ append: true });
+  });
+  $("loadPrevious").addEventListener("click", () => {
+    state.pageOffsets.pop();
+    const previousOffset = state.pageOffsets[state.pageOffsets.length - 1] ?? 0;
+    loadPrices({ offset: previousOffset });
+  });
+  $("arrivalDate").addEventListener("change", (event) => {
+    state.arrivalDate = event.currentTarget.value;
+    loadPrices();
   });
   let timer;
   $("cropSearch").addEventListener("input", () => {
@@ -516,8 +571,6 @@ async function init() {
   renderFinder();
   renderResults();
   loadSync();
-  window.setInterval(renderSync, 30_000);
-  window.setInterval(loadSync, 5 * 60_000);
 
   try {
     state.states = (await fetchFilters()).states;
