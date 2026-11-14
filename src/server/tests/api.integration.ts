@@ -141,7 +141,8 @@ async function main() {
     assert(filteredRequest.searchParams.get("filters[Market]") === "Pune Market", "prices pass market filter upstream");
     assert(filteredRequest.searchParams.get("filters[Commodity]") === "Apple", "prices pass commodity filter upstream");
     assert(filteredRequest.searchParams.get("filters[Arrival_Date]") === "13/11/2026", "date filter is normalized upstream");
-    assert(filteredRequest.searchParams.get("sort[fields]") === "Modal_Price", "price sort is sent upstream");
+    assert(filteredRequest.searchParams.get("sort[Modal_Price]") === "desc", "price sort uses OGD sort[field]=direction syntax");
+    assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(filtered.meta.total === 1003, "comma-separated upstream total is parsed");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
