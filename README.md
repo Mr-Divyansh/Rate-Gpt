@@ -11,11 +11,14 @@ guaranteed real-time trading data.
 
 ## Public website pages
 
-The public website has three pages:
+The public website has six pages:
 
 - `index.html` — landing page with a preview of recent government mandi records.
 - `mandi-prices.html` — searchable state, district, market, crop, and arrival-date filters using `/api/v1`.
 - `about.html` — platform purpose, data-source context, and limitations.
+- `contact.html` — contact form with explicit consent and server-side delivery.
+- `privacy.html` — privacy disclosures.
+- `terms.html` — service terms and data-use limitations.
 
 ## Stack
 

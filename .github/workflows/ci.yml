@@ -43,6 +43,9 @@ jobs:
       - name: API integration tests
         run: npm run test:integration
 
+      - name: Public-site SEO metadata checks
+        run: npm run test:site
+
       - name: TypeScript check
         run: npm run lint
 
