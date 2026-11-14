@@ -140,7 +140,7 @@ async function main() {
     assert(filteredRequest.searchParams.get("filters[district]") === "Pune", "prices pass district filter upstream");
     assert(filteredRequest.searchParams.get("filters[market]") === "Pune Market", "prices pass market filter upstream");
     assert(filteredRequest.searchParams.get("filters[commodity]") === "Apple", "prices pass commodity filter upstream");
-    assert(filteredRequest.searchParams.get("filters[arrival_date]") === "13/11/2026", "date filter is normalized upstream");
+    assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
     assert(filteredRequest.searchParams.get("sort[Modal_Price]") === "desc", "price sort uses OGD sort[field]=direction syntax");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
@@ -167,7 +167,7 @@ async function main() {
     const comparisonRequest = upstreamRequests.at(-1)!;
     assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
     assert(comparisonRequest.searchParams.get("filters[commodity]") === "Apple", "live comparison forwards commodity filter");
-    assert(comparisonRequest.searchParams.get("filters[arrival_date]") === "13/11/2026", "live comparison forwards requested arrival date");
+    assert(comparisonRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "live comparison forwards requested arrival date");
     assert(comparison.meta.source === "Government of India OGD / AGMARKNET", "live comparison identifies government source");
 
     const historicalTrend = await fetch(
