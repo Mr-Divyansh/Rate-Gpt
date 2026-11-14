@@ -118,9 +118,39 @@ async function main() {
     console.log("\nRate-GPT live API integration tests");
 
     const health = await fetch(`${base}/api/v1/health`).then((r) => r.json());
-    assert(health.success && health.data.priceStorage === "disabled", "health reports disabled price storage");
-    assert(health.data.upstreamSource.apiKeyConfigured === true, "health reports key presence without revealing key");
+    assert(health.success && health.data.status === "ok", "health returns minimal service status");
+    assert(!("upstreamSource" in health.data) && !("apiKeyConfigured" in health.data), "health does not disclose upstream credential configuration");
     assert(!JSON.stringify(health).includes(apiKey), "health never returns government key");
+
+    const docs = await fetch(`${base}/api/v1/docs`);
+    assert(docs.status === 404, "OpenAPI documentation endpoint is not publicly exposed");
+
+    const missingConsent = await fetch(`${base}/api/v1/contact`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Test", email: "test@example.com", message: "Hello", consent: false }),
+    });
+    assert(missingConsent.status === 400, "contact submission requires explicit policy consent");
+
+    const previousFetch = globalThis.fetch;
+    const previousContactKey = process.env.WEB3FORMS_ACCESS_KEY;
+    const forwardedContact: { value?: Record<string, unknown> } = {};
+    process.env.WEB3FORMS_ACCESS_KEY = "integration-only-contact-key";
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      assert(String(input) === "https://api.web3forms.com/submit", "contact is forwarded server-to-server");
+      forwardedContact.value = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }) as typeof fetch;
+    const contactResponse = await previousFetch(`${base}/api/v1/contact`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Test User", email: "test@example.com", phone: "", message: "Test request", consent: true, botcheck: "" }),
+    });
+    const contactPayload = await contactResponse.json();
+    assert(contactResponse.status === 200 && contactPayload.success, "valid consented contact form is accepted");
+    assert(forwardedContact.value?.access_key === "integration-only-contact-key", "contact provider key is attached only on the server");
+    assert(!JSON.stringify(contactPayload).includes("integration-only-contact-key"), "contact response never exposes provider key");
+    globalThis.fetch = previousFetch;
+    if (previousContactKey === undefined) delete process.env.WEB3FORMS_ACCESS_KEY;
+    else process.env.WEB3FORMS_ACCESS_KEY = previousContactKey;
 
     const filters = await fetch(`${base}/api/v1/meta/filters?state=Maharashtra&district=Pune`)
       .then((r) => r.json());

@@ -577,6 +577,14 @@ function bind() {
       if (!$("cropSearch").disabled) $("cropSearch").focus();
     }
   });
+  // Refresh the selected market periodically while the page is visible.
+  // The upstream source publishes daily observations, so this is a re-fetch,
+  // not a promise that the government data itself changes every interval.
+  window.setInterval(() => {
+    if (document.visibilityState === "visible" && state.market && !state.loading) {
+      loadPrices();
+    }
+  }, 5 * 60 * 1000);
   onLangChange(() => {
     renderFinder();
     renderResults();

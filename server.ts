@@ -80,6 +80,14 @@ export function createApiApp() {
   app.use("/api/v1/prices", liveDataLimiter);
   app.use("/api/v1/meta/filters", liveDataLimiter);
   app.use("/api/v1/commodities/search", liveDataLimiter);
+  const contactLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: "RATE_LIMITED", message: "Too many contact attempts. Please try again later." } },
+  });
+  app.use("/api/v1/contact", contactLimiter);
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -104,7 +112,6 @@ export function createApiApp() {
   });
 
   app.use("/api/v1", apiRouter);
-  app.use("/api", apiRouter);
 
   app.use(
     (
