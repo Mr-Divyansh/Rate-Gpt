@@ -13,6 +13,9 @@
 - Cache-Control: no-store for admin/mutations; 30s public for GET prices.
 - Secrets server-side only (`DATA_GOV_API_KEY`, `ADMIN_SYNC_KEY`).
 
+- Contact submissions are accepted only through the versioned server endpoint, validated, rate-limited separately, and forwarded to Web3Forms using a server-side sensitive environment variable.
+- Public API documentation is not served; read-only price and filter endpoints remain public because the website browser must call them. The government API key and contact-provider key stay server-side.
+
 ## Known issues
 - Production database connectivity depends on a valid PostgreSQL URL configured
   in the deployment environment; a configured URL alone does not prove that the
