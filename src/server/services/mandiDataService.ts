@@ -357,7 +357,7 @@ export async function fetchLivePrices(
     const upstreamMessage = [payload.message, payload.error, payload.detail]
       .find((value) => typeof value === "string" && value.trim());
     const safeMessage = typeof upstreamMessage === "string"
-      ? upstreamMessage.replace(/(?:api[-_ ]?key|token)\s*[:=]\s*\S+/gi, "$1=[redacted]").slice(0, 240)
+      ? upstreamMessage.replace(/((?:api[-_ ]?key|token)\s*[:=]\s*)\S+/gi, "$1[redacted]").slice(0, 240)
       : "";
     const normalizedMessage = safeMessage.toLocaleLowerCase();
     if (/api.?key|unauthori[sz]ed|forbidden|credential/.test(normalizedMessage)) {
