@@ -344,10 +344,36 @@ export async function fetchLivePrices(
   const offset = options.offset ?? 0;
   const url = buildUrl(options, getApiKey());
   const payload = await requestGovernmentPage(url, fetcher);
-  if (!Array.isArray(payload.records)) {
-    throw new GovernmentApiError("Government API returned an invalid records page.", 502);
+  // data.gov.in normally returns { records: [...] }. Some upstream error
+  // responses still use HTTP 200 and contain an error/message object instead.
+  const rawRecords = Array.isArray(payload.records)
+    ? payload.records
+    : Array.isArray((payload.data as Record<string, unknown> | undefined)?.records)
+      ? ((payload.data as Record<string, unknown>).records as unknown[])
+      : Array.isArray(payload.data)
+        ? payload.data as unknown[]
+        : null;
+  if (!rawRecords) {
+    const upstreamMessage = [payload.message, payload.error, payload.detail]
+      .find((value) => typeof value === "string" && value.trim());
+    const safeMessage = typeof upstreamMessage === "string"
+      ? upstreamMessage.replace(/(?:api[-_ ]?key|token)\s*[:=]\s*\S+/gi, "$1=[redacted]").slice(0, 240)
+      : "";
+    const normalizedMessage = safeMessage.toLocaleLowerCase();
+    if (/api.?key|unauthori[sz]ed|forbidden|credential/.test(normalizedMessage)) {
+      throw new GovernmentApiError("Government data API rejected its configured key. Check DATA_GOV_API_KEY in the server environment.", 503);
+    }
+    if (/rate.?limit|too many requests|quota/.test(normalizedMessage)) {
+      throw new GovernmentApiError("Government data API rate limit or quota reached. Please retry later.", 503);
+    }
+    throw new GovernmentApiError(
+      safeMessage
+        ? `Government API did not return a records array: ${safeMessage}`
+        : "Government API response did not contain a records array. Check the upstream resource, API key, and response format.",
+      502,
+    );
   }
-  if (payload.records.length > limit) {
+  if (rawRecords.length > limit) {
     throw new GovernmentApiError("Government API exceeded the requested page size.", 502);
   }
 
@@ -367,14 +393,14 @@ export async function fetchLivePrices(
   if (payload.total !== undefined && total === null) {
     throw new GovernmentApiError("Government API returned an invalid result total.", 502);
   }
-  const rawCount = payload.records.length;
+  const rawCount = rawRecords.length;
   if (total !== null && offset + rawCount > total) {
     throw new GovernmentApiError("Government API returned inconsistent pagination totals.", 502);
   }
 
   const seen = new Set<string>();
   const records: MandiRecord[] = [];
-  for (const raw of payload.records) {
+  for (const raw of rawRecords) {
     const mapped = mapUpstreamRecord(raw);
     if (!mapped) continue;
     const key = mapped.sourceRecordId
