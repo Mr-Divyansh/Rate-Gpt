@@ -336,6 +336,11 @@ function indiaTodayIsoDate(now = new Date()): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+export function isFutureArrivalDate(rawDate: unknown, now = new Date()): boolean {
+  const normalized = normalizeArrivalDate(rawDate);
+  return normalized !== null && normalized > indiaTodayIsoDate(now);
+}
+
 export async function fetchLivePrices(
   options: LiveQueryOptions = {},
   fetcher: typeof fetch = fetch,
@@ -358,7 +363,7 @@ export async function fetchLivePrices(
   if (options.arrivalDate) {
     const requestedDate = normalizeArrivalDate(options.arrivalDate);
     if (!requestedDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
-    if (requestedDate > indiaTodayIsoDate()) {
+    if (isFutureArrivalDate(requestedDate)) {
       throw new GovernmentApiError("Future arrival dates are not available. Choose today or an earlier date.", 400);
     }
   }

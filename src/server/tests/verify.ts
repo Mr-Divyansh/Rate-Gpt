@@ -107,6 +107,7 @@ async function main() {
   } = await import("../db/database.js");
   const {
     normalizeArrivalDate,
+    isFutureArrivalDate,
     parsePrice,
     mapUpstreamRecord,
     parseReportedTotal,
@@ -120,6 +121,9 @@ async function main() {
   check(normalizeArrivalDate("05-11-2026") === "2026-11-05", "DD-MM-YYYY normalization");
   check(normalizeArrivalDate("2026-10-31") === "2026-10-31", "ISO date preservation");
   check(normalizeArrivalDate(null) === null, "missing date is rejected");
+  check(!isFutureArrivalDate("2026-11-14", new Date("2026-11-14T05:00:00.000Z")), "today in India is selectable");
+  check(isFutureArrivalDate("2026-11-15", new Date("2026-11-14T05:00:00.000Z")), "future arrival date is rejected using India calendar date");
+  check(!isFutureArrivalDate("2026-11-13", new Date("2026-11-14T05:00:00.000Z")), "past arrival date remains selectable");
   check(parsePrice("2,450.50") === 2450.5, "formatted numeric price parsing");
   check(parsePrice(null) === null && parsePrice("NA") === null, "missing prices remain null");
   check(parsePrice("-2") === null, "negative prices are rejected");
@@ -222,6 +226,21 @@ async function main() {
   check(livePage.meta.hasNext && livePage.meta.nextOffset === 2, "live page metadata points to next upstream offset");
   check(livePage.meta.cacheStatus === "live" && livePage.records.length === 1, "live response deduplicates records and reports live status");
   check(livePage.records[0].modal_price === null, "missing prices are not fabricated");
+  const exactDatePage = await fetchLivePrices({
+    state: "Maharashtra", district: "Pune", market: "Pune",
+    arrivalDate: "2026-11-14", limit: 2,
+  }, async () => mockPage([upstreamRecord], { total: "1", limit: 2 }));
+  check(exactDatePage.records.length === 0, "records from neighbouring dates are never shown for an exact date filter");
+  let futureRequestMade = false;
+  try {
+    await fetchLivePrices({ arrivalDate: "2099-01-01", limit: 2 }, async () => {
+      futureRequestMade = true;
+      return mockPage([]);
+    });
+    check(false, "future date request is rejected");
+  } catch (error) {
+    check(error instanceof GovernmentApiError && error.httpStatus === 400 && !futureRequestMade, "future date is rejected before upstream request");
+  }
   check(!JSON.stringify(livePage).includes("test-only-government-key"), "upstream key is absent from live response");
 
   let requestedOffset: string | null = null;
