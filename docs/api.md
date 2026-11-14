@@ -5,15 +5,17 @@ Base path: `/api/v1`. All successful responses use `{ success: true, data, meta?
 ## Endpoints
 
 - `GET /health` — minimal process availability check.
-- `GET /meta/filters?state=&district=&market=` — Indian state/UT names and source-observed districts, markets, and commodities. For a selected location, discovery reads at most ten live upstream pages (1,000 rows), so returned location values may still be partial and are not a nationwide catalogue.
+- `GET /meta/filters?state=&district=&market=` — state/UT selector names and source-observed districts, markets, and commodities. Dependent options page through up to 100 upstream pages (10,000 rows); `data.coverage` and `meta.coverage` state whether discovery finished or hit that safety bound. Partial options are not presented as complete coverage.
 - `GET /prices?state=&district=&market=&commodity=&date=&search=&limit=&offset=&sort=` — live normalized records. `limit` is 1–100; `offset` is 0–1,000,000. Missing prices are `null`, never zero. `date` is an exact arrival date and future dates are rejected.
 - `GET /commodities/search?q=&limit=` — source-derived commodity names from a live upstream response. A suggestion is not emitted merely because it exists in a local catalogue.
-- `GET /prices/compare?commodity=&date=` — a bounded live comparison page. `meta.comparisonMayBePartial` is true when the upstream source indicates more records.
+- `GET /prices/compare?commodity=&date=` — a bounded live observation page for a required commodity and arrival date. It does not calculate price differences; consumers should compare only matching varieties and source units. `meta.comparisonMayBePartial` indicates upstream records remain.
 - `GET /prices/trend` — returns HTTP 410 with `HISTORICAL_STORAGE_DISABLED`; Rate-GPT does not store price history.
 - `GET /sync-status` — describes the on-demand, no-storage data mode; it does not represent a database sync.
 - `POST /contact` — validates a consented contact request and forwards it server-to-server to Web3Forms when `WEB3FORMS_ACCESS_KEY` is configured.
 
-`/prices` metadata includes the upstream `total` where available, the next raw upstream offset, source attribution, and an ISO `fetchedAt` timestamp. API data uses `Cache-Control: no-store`.
+`/prices` metadata includes the upstream `total` where available, the next raw upstream offset, source attribution, and an ISO `fetchedAt` timestamp. `upstreamHasNext` reports upstream coverage; `hasNext` is false when the supported offset boundary prevents another request, and `truncated` identifies that case. API data uses `Cache-Control: no-store`.
+
+The Mandi Prices page exports all matching live records client-side, subject to a 5,000-record / 50-page safety bound. Filters are carried across every request; if the export cannot complete, no partial CSV is downloaded. Price records are not stored by the server.
 
 ## Failure behavior
 

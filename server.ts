@@ -48,7 +48,31 @@ export function createApiApp() {
     next();
   });
 
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: process.env.NODE_ENV === "production"
+          ? ["'self'"]
+          : ["'self'", "ws://localhost:*", "ws://127.0.0.1:*"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    frameguard: { action: "deny" },
+    hsts: { maxAge: 63_072_000, includeSubDomains: true, preload: true },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  }));
+  app.use((_req, res, next) => {
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    next();
+  });
 
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -126,8 +150,8 @@ export function createApiApp() {
       const requestId = (req as any).requestId;
       console.error("[Server Error]", {
         requestId,
-        message: err?.message || err,
-        stack: process.env.NODE_ENV === "production" ? undefined : err?.stack,
+        name: err?.name,
+        code: err?.code,
       });
       const status =
         Number.isInteger(err?.status) && err.status >= 400 && err.status < 500
@@ -195,9 +219,6 @@ if (isMainModule && !process.env.VERCEL) {
     console.log(`🌾 Rate GPT Server running on http://localhost:${PORT}`);
     console.log(
       `📡 API Endpoints available at http://localhost:${PORT}/api/v1`,
-    );
-    console.log(
-      `🏛️ OGD Endpoint: ${process.env.DATA_GOV_API_BASE_URL || "https://api.data.gov.in/resource"}`,
     );
     console.log(`=========================================`);
   });

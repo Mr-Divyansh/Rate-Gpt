@@ -116,6 +116,9 @@
 .mobile-list .state-message { padding: 36px 16px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--control); border-radius: var(--r-m); }
 
 .results-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-weight: 600; }
+.results-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pagination-notice, .export-status { color: var(--muted); font-size: .92rem; }
+.export-status:empty { display: none; }
 .error { padding: 16px 18px; background: #fbefed; border: 1.5px solid var(--error); border-radius: var(--r-m); color: #7a2d25; font-weight: 600; display: grid; gap: 12px; justify-items: start; }
 .next-sync { font-size: 0.875rem; color: var(--muted); }
 
@@ -213,6 +216,8 @@
   .page-prices .toolbar .btn { width: 100%; }
   .page-prices .price-card-top { align-items: flex-start; }
   .page-prices .price-card .modal-price strong { font-size: 1.25rem; }
+  .page-prices .results-actions { width: 100%; }
+  .page-prices .results-actions .btn { flex: 1 1 100%; }
   .page-prices .note { margin-top: 34px; padding: 19px; }
 }
 @media (max-width: 360px) {

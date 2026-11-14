@@ -35,7 +35,13 @@ export async function fetchFilters({ state = "", district = "" } = {}) {
     !data ||
     !isStringArray(data.states) ||
     !isStringArray(data.districts) ||
-    !isStringArray(data.markets)
+    !isStringArray(data.markets) ||
+    !data.coverage ||
+    !["catalogue", "complete", "partial"].includes(data.coverage.status) ||
+    !Number.isInteger(data.coverage.pagesScanned) ||
+    !Number.isInteger(data.coverage.recordsScanned) ||
+    (data.coverage.total !== null &&
+      (!Number.isInteger(data.coverage.total) || data.coverage.total < 0))
   ) {
     throw new Error("The market filters response has an invalid format.");
   }
@@ -57,7 +63,16 @@ export function isPriceRecord(record) {
     typeof record.commodity !== "string" ||
     !record.commodity.trim() ||
     typeof record.market !== "string" ||
-    !record.market.trim()
+    !record.market.trim() ||
+    typeof record.state !== "string" ||
+    !record.state.trim() ||
+    typeof record.district !== "string" ||
+    !record.district.trim() ||
+    typeof record.arrival_date !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(record.arrival_date) ||
+    typeof record.source_unit !== "string" ||
+    !record.source_unit.trim() ||
+    (record.variety !== null && typeof record.variety !== "string")
   ) {
     return false;
   }

@@ -1,5 +1,6 @@
 /* Shared presentation helpers: number/date formatting, crop names, the price-range bar, sparkline. */
 import { getLang, getLocale, t } from "./i18n.js";
+import { calculatePriceDelta } from "./price-comparison.js";
 
 const numberFormat = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 
@@ -141,21 +142,19 @@ export function createRange(record, axis, { labels = true } = {}) {
 /* ---- change vs previous arrival ---- */
 export function createDelta(current, previous) {
   const node = el("span", "delta");
-  const now = priceNumber(current);
-  const before = priceNumber(previous);
-  if (now === null || before === null) {
+  const comparison = calculatePriceDelta(current, previous);
+  if (!comparison) {
     node.classList.add("is-none");
     node.textContent = t("delta.none");
     return node;
   }
-  const diff = now - before;
+  const diff = comparison.difference;
   if (Math.abs(diff) < 0.005) {
     node.classList.add("is-same");
     node.textContent = t("delta.same");
     return node;
   }
-  const pct = before > 0 ? (Math.abs(diff) / before) * 100 : null;
-  const amount = `${formatPrice(Math.abs(diff))}${pct === null ? "" : ` (${pct.toFixed(1)}%)`}`;
+  const amount = `${formatPrice(Math.abs(diff))}${comparison.percentage === null ? "" : ` (${comparison.percentage.toFixed(1)}%)`}`;
   node.classList.add(diff > 0 ? "is-up" : "is-down");
   const mark = el("span", "delta-mark");
   mark.setAttribute("aria-hidden", "true");
