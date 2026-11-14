@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, fix/ogd-sort-and-ci]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tests, typecheck and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download source archive
+        env:
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error --location \
+            "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" \
+            | tar --extract --gzip --strip-components=1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit and service tests
+        run: npm test
+
+      - name: API integration tests
+        run: npm run test:integration
+
+      - name: TypeScript check
+        run: npm run lint
+
+      - name: Production frontend build
+        run: npm run build

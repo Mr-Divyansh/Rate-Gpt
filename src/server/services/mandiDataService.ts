@@ -290,8 +290,9 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   if (options.search) url.searchParams.set("q", normalizeCommoditySearch(options.search));
   const sort = upstreamSort(options.sort);
   if (sort) {
-    url.searchParams.set("sort[fields]", sort.field);
-    url.searchParams.set("sort[order]", sort.order);
+    // OGD uses one sort[field]=direction parameter. Sending sort[order]
+    // is interpreted as a field name and causes an Elasticsearch field_sort error.
+    url.searchParams.set(`sort[${sort.field}]`, sort.order);
   }
   return url;
 }
