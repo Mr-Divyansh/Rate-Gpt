@@ -520,16 +520,34 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function fetchLiveFilters(options: {
-  state?: string;
-  district?: string;
-  market?: string;
-} = {}): Promise<{
+type LiveFilterMetadata = {
   states: string[];
   districts: string[];
   markets: string[];
   commodities: string[];
-}> {
+};
+
+// Filter metadata is small and short-lived. Cache only dropdown options in
+// process memory; mandi price records are never cached or written to the DB.
+const FILTER_CACHE_TTL_MS = 60_000;
+const FILTER_CACHE_MAX_ENTRIES = 64;
+const FILTER_PAGE_LIMIT = 2;
+const liveFilterCache = new Map<string, { expiresAt: number; value: LiveFilterMetadata }>();
+const liveFilterInFlight = new Map<string, Promise<LiveFilterMetadata>>();
+
+function filterCacheKey(options: { state?: string; district?: string; market?: string }): string {
+  return JSON.stringify([
+    options.state?.trim() ?? "",
+    options.district?.trim() ?? "",
+    options.market?.trim() ?? "",
+  ]);
+}
+
+export async function fetchLiveFilters(options: {
+  state?: string;
+  district?: string;
+  market?: string;
+} = {}): Promise<LiveFilterMetadata> {
   if (!options.state && !options.district && !options.market) {
     return {
       states: STATES_AND_UTS,
@@ -538,36 +556,61 @@ export async function fetchLiveFilters(options: {
       commodities: [],
     };
   }
-  // A single 100-row page can contain only one or two districts/markets,
-  // making the location selectors appear empty or incomplete. Walk a bounded
-  // number of live pages for the selected state/district, without persisting
-  // any mandi price records.
-  const records: MandiRecord[] = [];
-  const seen = new Set<string>();
-  const FILTER_PAGE_LIMIT = 10;
-  for (let page = 0; page < FILTER_PAGE_LIMIT; page += 1) {
-    const offset = page * MAX_PAGE_SIZE;
-    const result = await fetchLivePrices({
-      ...options,
-      limit: MAX_PAGE_SIZE,
-      offset,
-    });
-    for (const record of result.records) {
-      const key = [record.state, record.district, record.market, record.commodity]
-        .join("|").toLocaleLowerCase();
-      if (!seen.has(key)) {
-        seen.add(key);
-        records.push(record);
+
+  const key = filterCacheKey(options);
+  const now = Date.now();
+  const cached = liveFilterCache.get(key);
+  if (cached && cached.expiresAt > now) return cached.value;
+  if (cached) liveFilterCache.delete(key);
+
+  const pending = liveFilterInFlight.get(key);
+  if (pending) return pending;
+
+  const request = (async (): Promise<LiveFilterMetadata> => {
+    const records: MandiRecord[] = [];
+    const seen = new Set<string>();
+
+    // Keep selector discovery inexpensive: two pages maximum per selection.
+    // The result is explicitly partial, while price search remains paginated.
+    for (let page = 0; page < FILTER_PAGE_LIMIT; page += 1) {
+      const result = await fetchLivePrices({
+        ...options,
+        limit: MAX_PAGE_SIZE,
+        offset: page * MAX_PAGE_SIZE,
+      });
+      for (const record of result.records) {
+        const recordKey = [record.state, record.district, record.market, record.commodity]
+          .join("|").toLocaleLowerCase();
+        if (!seen.has(recordKey)) {
+          seen.add(recordKey);
+          records.push(record);
+        }
       }
+      if (!result.meta.hasNext || result.records.length < MAX_PAGE_SIZE) break;
     }
-    if (!result.meta.hasNext || result.records.length < MAX_PAGE_SIZE) break;
+
+    const value: LiveFilterMetadata = {
+      states: uniqueSorted([...STATES_AND_UTS, ...records.map((record) => record.state)]),
+      districts: uniqueSorted(records.map((record) => record.district)),
+      markets: uniqueSorted(records.map((record) => record.market)),
+      commodities: uniqueSorted(records.map((record) => record.commodity)),
+    };
+
+    // LRU-like bounded insertion: never allow an unbounded process cache.
+    if (liveFilterCache.size >= FILTER_CACHE_MAX_ENTRIES) {
+      const oldestKey = liveFilterCache.keys().next().value;
+      if (oldestKey) liveFilterCache.delete(oldestKey);
+    }
+    liveFilterCache.set(key, { value, expiresAt: Date.now() + FILTER_CACHE_TTL_MS });
+    return value;
+  })();
+
+  liveFilterInFlight.set(key, request);
+  try {
+    return await request;
+  } finally {
+    liveFilterInFlight.delete(key);
   }
-  return {
-    states: uniqueSorted([...STATES_AND_UTS, ...records.map((record) => record.state)]),
-    districts: uniqueSorted(records.map((record) => record.district)),
-    markets: uniqueSorted(records.map((record) => record.market)),
-    commodities: uniqueSorted(records.map((record) => record.commodity)),
-  };
 }
 
 export async function searchLiveCommodities(
