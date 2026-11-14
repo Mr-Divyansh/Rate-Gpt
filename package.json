@@ -11,7 +11,8 @@
     "test": "tsx src/server/tests/verify.ts",
     "test:integration": "tsx src/server/tests/api.integration.ts",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:site": "tsx src/server/tests/site-metadata.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
