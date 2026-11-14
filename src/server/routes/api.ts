@@ -85,7 +85,7 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
       data,
       {
         source: "Government of India OGD / AGMARKNET",
-        scope: "Distinct values from a bounded live result page; market options may be partial.",
+        scope: "Distinct values discovered from up to ten live pages (maximum 1,000 upstream rows); options may still be partial and are not a nationwide catalogue.",
       },
       "Live filter metadata retrieved",
     );
