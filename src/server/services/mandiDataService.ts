@@ -828,7 +828,8 @@ export async function fetchLiveFilters(options: {
     });
     return {
       ...value,
-      cache: filterCacheInfo(false, storedAt),
+      // The metadata has been inserted into the in-process cache above.
+      cache: filterCacheInfo(true, storedAt),
     };
   })();
 
@@ -846,18 +847,45 @@ export async function searchLiveCommodities(
   fetcher: typeof fetch = fetch,
 ): Promise<string[]> {
   const normalizedQuery = normalizeCommoditySearch(query);
-  const { records } = await fetchLivePrices({
-    search: normalizedQuery,
-    limit: MAX_PAGE_SIZE,
-    offset: 0,
-    sort: "commodity_asc",
-  }, fetcher);
-  const matches = records
-    .map((record) => record.commodity)
-    .filter((commodity) => commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
+  const suggestionLimit = Math.min(Math.max(Math.trunc(limit) || 10, 1), 50);
+  const matches = new Set<string>();
+  let offset = 0;
+  let upstreamHasNext = true;
+
+  // Search results can repeat the same commodity across many markets. Continue
+  // through upstream pages until enough distinct source commodities are found
+  // or the source confirms that no more matching records remain.
+  while (upstreamHasNext && matches.size < suggestionLimit) {
+    const result = await fetchLivePrices({
+      search: normalizedQuery,
+      limit: MAX_PAGE_SIZE,
+      offset,
+      sort: "commodity_asc",
+    }, fetcher);
+
+    for (const record of result.records) {
+      if (record.commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase())) {
+        matches.add(record.commodity);
+      }
+    }
+
+    const nextOffset = result.meta.nextOffset;
+    if (nextOffset <= offset) {
+      throw new GovernmentApiError(
+        "Government API pagination stopped advancing during commodity search.",
+        502,
+      );
+    }
+    offset = nextOffset;
+    upstreamHasNext = result.meta.upstreamHasNext && !result.meta.truncated;
+    if (upstreamHasNext && matches.size < suggestionLimit) {
+      await delay(FILTER_DISCOVERY_PAGE_DELAY_MS);
+    }
+  }
+
   // Suggestions must be observed upstream commodities, never a hand-written
   // crop catalogue that could imply unsupported price coverage.
-  return uniqueSorted(matches).slice(0, Math.min(limit, 50));
+  return uniqueSorted([...matches]).slice(0, suggestionLimit);
 }
 
 function uniqueSorted(values: string[]): string[] {
