@@ -46,6 +46,9 @@ jobs:
       - name: API integration tests
         run: npm run test:integration
 
+      - name: API contract and published OpenAPI checks
+        run: npm run test:api-contract
+
       - name: AGMARKNET 2.0 service tests
         run: npm run test:agmarknet2
 

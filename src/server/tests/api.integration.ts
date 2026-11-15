@@ -324,8 +324,10 @@ async function main() {
       discoveryResponse.status === 200 &&
         discovery.success &&
         discovery.data.openapi.endsWith("/openapi.json") &&
-        discovery.data.priceStorage === "disabled",
-      "API root provides machine-readable discovery for AI clients",
+        discovery.data.priceStorage === "disabled" &&
+        discovery.data.endpoints?.contact === "/api/v1/contact" &&
+        discovery.data.endpoints?.trend === "/api/v1/prices/trend",
+      "API root provides machine-readable discovery for all public endpoints, including contact and disabled historical trends",
     );
 
     const filters = await fetch(`${base}/api/v1/meta/filters?state=Maharashtra&district=Pune`)

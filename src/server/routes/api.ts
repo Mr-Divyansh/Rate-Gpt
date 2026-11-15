@@ -26,7 +26,7 @@ router.get("/", (_req: Request, res: Response) => {
   return sendSuccess(res, {
     name: "Rate-GPT Mandi Prices API",
     version: "1.0.0",
-    description: "On-demand government-reported Indian mandi price observations. Price records are not stored by Rate-GPT.",
+    description: "On-demand government-reported Indian mandi price observations and a consent-based contact form. Price records are not stored by Rate-GPT.",
     documentation: "https://rate-gpt.vercel.app/docs/api.md",
     openapi: "https://rate-gpt.vercel.app/openapi.json",
     llms: "https://rate-gpt.vercel.app/llms.txt",
@@ -36,7 +36,9 @@ router.get("/", (_req: Request, res: Response) => {
       compare: "/api/v1/prices/compare",
       commoditySearch: "/api/v1/commodities/search",
       syncStatus: "/api/v1/sync-status",
-      health: "/api/v1/health"
+      health: "/api/v1/health",
+      trend: "/api/v1/prices/trend",
+      contact: "/api/v1/contact"
     },
     responseFormat: "{ success, data, meta, message }",
     priceDataMode: "live-on-demand",
