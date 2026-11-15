@@ -16,13 +16,14 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, baseCss, pricesCss, homeCss, globalNav] = await Promise.all([
+  const [home, prices, baseCss, pricesCss, homeCss, globalNav, mandiScript] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("style/base.css", "utf8"),
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
+    readFile("script/mandi-prices.js", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -65,6 +66,10 @@ async function main() {
     "backdrop dismissal restores keyboard focus to the menu trigger");
   check(/e\.shiftKey[\s\S]*?last\.focus\(\)[\s\S]*?first\.focus\(\)/.test(globalNav),
     "mobile drawer keeps keyboard focus within navigation while open");
+
+  const priceTableColumns = (prices.match(/<th\s+scope="col"/g) || []).length;
+  check(priceTableColumns === 5 && /td\.colSpan = 5;/.test(mandiScript),
+    "empty, loading and error table messages span the exact five visible price columns");
 
   console.log(`\nResponsive layout checks: ${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
