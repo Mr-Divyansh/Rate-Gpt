@@ -18,18 +18,6 @@ const sourceRecords = [
     Modal_Price: "2,100",
   },
   {
-    id: "delhi-apple-1",
-    State: "NCT of Delhi",
-    District: "New Delhi",
-    Market: "Azadpur APMC",
-    Commodity: "Apple",
-    Variety: "Red",
-    Arrival_Date: "13/11/2026",
-    Min_Price: "1,700",
-    Max_Price: "2,300",
-    Modal_Price: "2,000",
-  },
-  {
     id: "apple-1",
     State: "Maharashtra",
     District: "Pune",
@@ -109,6 +97,18 @@ const sourceRecords = [
     Min_Price: "7,300",
     Max_Price: "7,300",
     Modal_Price: "7,300",
+  },
+  {
+    id: "delhi-apple-1",
+    State: "NCT of Delhi",
+    District: "New Delhi",
+    Market: "Azadpur APMC",
+    Commodity: "Apple",
+    Variety: "Red",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "1,700",
+    Max_Price: "2,300",
+    Modal_Price: "2,000",
   },
 ];
 
