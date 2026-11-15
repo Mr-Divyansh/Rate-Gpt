@@ -283,7 +283,7 @@ function updateControls() {
     state.allIndia ? "finder.browsingIndia" : "finder.browseIndia",
   );
   $("exportCsv").disabled = !(state.market || state.allIndia) || (state.loading && !state.exporting);
-  $(\"refreshPrices\").disabled = !state.market && !state.allIndia;
+  $("refreshPrices").disabled = !state.market && !state.allIndia;
   $("exportCsv").textContent = t(state.exporting ? "results.exportCancel" : "results.export");
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
@@ -751,13 +751,10 @@ function bind() {
   });
   $("exportCsv").addEventListener("click", exportCsv);
   $("refreshPrices").addEventListener("click", () => {
-    state.loading = true;
-    state.error = "";
-    renderResults();
+    // loadPrices owns the loading state and aborts any older request.
+    // Do not toggle state.loading around the async call.
     renderSync();
-    loadPrices();
-    state.loading = false;
-    renderResults();
+    void loadPrices();
   });
   $("loadMore").addEventListener("click", () => {
     state.meta.offset = state.meta.nextOffset;
