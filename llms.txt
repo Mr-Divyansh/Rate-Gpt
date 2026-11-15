@@ -1,0 +1,31 @@
+# Rate-GPT
+
+Rate-GPT helps farmers explore government-reported mandi prices in India and compare observations by crop and market.
+
+## Machine-readable API
+- OpenAPI specification: https://rate-gpt.vercel.app/openapi.json
+- API discovery: https://rate-gpt.vercel.app/api/v1/
+- API reference: https://rate-gpt.vercel.app/docs/api.md
+- Mandi prices page: https://rate-gpt.vercel.app/mandi-prices.html
+
+## API usage
+- Base URL: https://rate-gpt.vercel.app/api/v1
+- GET /meta/filters?state=Himachal%20Pradesh
+- GET /prices?state=Himachal%20Pradesh&limit=50&offset=0
+- GET /prices/compare?commodity=Apple&date=2026-11-13
+- GET /commodities/search?q=Potato
+- GET /sync-status
+
+## Data and interpretation
+- Data source: Government of India OGD / AGMARKNET.
+- Price records are fetched on demand; Rate-GPT does not persist price observations.
+- Published arrival-date observations are not guaranteed real-time trading quotes.
+- Always read each record's source_unit. If the source does not provide a unit, it is explicitly marked as not provided.
+- Missing prices are null, not zero.
+- Use pagination metadata and inspect coverage/truncation fields before claiming completeness.
+- Compare only like-for-like commodity, variety, grade and source unit. Account for transport, quality and other costs separately.
+- Do not infer prices or mandi availability from the administrative directory alone.
+- Historical trend endpoint returns HTTP 410 because historical price storage is disabled.
+
+## Response format
+Successful API responses use { success: true, data, meta?, message }. Errors use { success: false, error: { code, message } }.
