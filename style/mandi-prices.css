@@ -107,6 +107,10 @@
 .modal-price { text-align: right; white-space: nowrap; }
 .modal-price strong { font-size: 1.3rem; font-weight: 800; font-stretch: 90%; font-variant-numeric: tabular-nums; color: var(--forest); box-shadow: inset 0 -6px 0 rgba(233, 162, 59, 0.45); }
 .price-table td.state-cell { text-align: center; padding: 48px 18px; color: var(--muted); }
+.price-table td.state-cell .state-message-text { margin: 0 0 14px; }
+.price-table td.state-cell .btn { margin-inline: auto; }
+.mobile-list .state-message { display: grid; justify-items: center; gap: 14px; }
+.mobile-list .state-message-text { margin: 0; }
 
 .mobile-list { display: none; gap: 12px; }
 .price-card { display: grid; gap: 14px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); }

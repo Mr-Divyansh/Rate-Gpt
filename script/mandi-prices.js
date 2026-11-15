@@ -381,17 +381,37 @@ function cardFor(record, ctx, showLocation) {
   return card;
 }
 
-function messageRows(message) {
+function messageRows(message, { actionLabel = "", onAction = null } = {}) {
   const tr = document.createElement("tr");
   const td = document.createElement("td");
-  td.colSpan = 5;
+  td.colSpan = 6;
   td.className = "state-cell";
-  td.textContent = message;
+  td.setAttribute("role", "status");
+  const rowMessage = document.createElement("p");
+  rowMessage.className = "state-message-text";
+  rowMessage.textContent = message;
+  td.append(rowMessage);
   tr.append(td);
-  const p = document.createElement("p");
-  p.className = "state-message";
-  p.textContent = message;
-  return { row: tr, card: p };
+
+  const card = document.createElement("div");
+  card.className = "state-message";
+  card.setAttribute("role", "status");
+  const cardMessage = document.createElement("p");
+  cardMessage.className = "state-message-text";
+  cardMessage.textContent = message;
+  card.append(cardMessage);
+
+  if (actionLabel && typeof onAction === "function") {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn";
+    button.textContent = actionLabel;
+    button.addEventListener("click", onAction);
+    td.append(button);
+    card.append(button.cloneNode(true));
+    card.lastElementChild.addEventListener("click", onAction);
+  }
+  return { row: tr, card };
 }
 
 function skeletonRows() {
@@ -449,12 +469,28 @@ function renderResults() {
     body.replaceChildren(m.row);
     list.replaceChildren(m.card);
     $("resultCount").textContent = "";
-  } else if (state.records.length === 0 && !state.error) {
-    const m = messageRows(t("results.none"));
+  } else if (state.records.length === 0 && state.error) {
+    const message = t("results.unavailable");
+    const m = messageRows(message);
+    body.replaceChildren(m.row);
+    list.replaceChildren(m.card);
+    $("resultCount").textContent = "";
+    announcement = message;
+  } else if (state.records.length === 0) {
+    const hasNarrowFilters = Boolean($("cropSearch").value.trim() || state.arrivalDate);
+    const message = hasNarrowFilters
+      ? t("results.noMatches")
+      : t("results.none");
+    const action = hasNarrowFilters
+      ? { actionLabel: t("results.clearSearchFilters"), onAction: clearSearchAndDateFilters }
+      : !state.allIndia
+        ? { actionLabel: t("results.browseIndia"), onAction: toggleIndiaBrowse }
+        : {};
+    const m = messageRows(message, action);
     body.replaceChildren(m.row);
     list.replaceChildren(m.card);
     $("resultCount").textContent = tCount("results.count", 0);
-    announcement = t("results.none");
+    announcement = message;
   } else {
     const divisor = state.priceUnit === "kg" ? 100 : 1;
     const displayRecords = state.records.map((record) => ({
@@ -496,6 +532,13 @@ function renderResults() {
 }
 
 
+
+function clearSearchAndDateFilters() {
+  $("cropSearch").value = "";
+  $("arrivalDate").value = "";
+  state.arrivalDate = "";
+  loadPrices();
+}
 
 function renderError() {
   const box = $("priceError");
