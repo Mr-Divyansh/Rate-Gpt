@@ -61,9 +61,11 @@ jobs:
         run: npm run test:responsive
 
       - name: Install pinned Playwright test runtime
+        if: github.event_name == 'pull_request'
         run: npm install --no-save --no-package-lock playwright@1.56.1
 
       - name: Install Chromium browser
+        if: github.event_name == 'pull_request'
         run: npx playwright install --with-deps chromium
 
       - name: Select Vercel preview for pull-request browser checks
@@ -91,6 +93,7 @@ jobs:
           exit 1
 
       - name: Production browser interaction checks
+        if: github.event_name == 'pull_request'
         run: node scripts/production-browser-smoke.mjs
 
       - name: Production release-gate regression checks
