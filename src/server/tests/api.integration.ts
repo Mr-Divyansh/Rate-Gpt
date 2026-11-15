@@ -263,6 +263,7 @@ async function main() {
       .then((r) => r.json());
     assert(filters.success && filters.data.districts.includes("Pune"), "live filters return selected-state districts");
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
+    const initialFilterRequest = upstreamRequests.at(-1)!;
 
     const expectedStatesAndUnionTerritories = [
       "Andaman and Nicobar Islands",
@@ -340,9 +341,8 @@ async function main() {
       );
     }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
-    const filterRequest = upstreamRequests.at(-1)!;
-    assert(filterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
-    assert(filterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
+    assert(initialFilterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
+    assert(initialFilterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
 
     const filteredResponse = await fetch(
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
