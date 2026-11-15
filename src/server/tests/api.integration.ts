@@ -318,6 +318,16 @@ async function main() {
     if (previousContactKey === undefined) delete process.env.WEB3FORMS_ACCESS_KEY;
     else process.env.WEB3FORMS_ACCESS_KEY = previousContactKey;
 
+    const discoveryResponse = await fetch(`${base}/api/v1/`);
+    const discovery = await discoveryResponse.json();
+    assert(
+      discoveryResponse.status === 200 &&
+        discovery.success &&
+        discovery.data.openapi.endsWith("/openapi.json") &&
+        discovery.data.priceStorage === "disabled",
+      "API root provides machine-readable discovery for AI clients",
+    );
+
     const filters = await fetch(`${base}/api/v1/meta/filters?state=Maharashtra&district=Pune`)
       .then((r) => r.json());
     assert(filters.success && filters.data.districts.includes("Pune"), "live filters return selected-state districts");
