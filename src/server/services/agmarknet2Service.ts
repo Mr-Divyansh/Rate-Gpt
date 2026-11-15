@@ -3,6 +3,7 @@ import {
   isFutureArrivalDate,
   normalizeArrivalDate,
   parsePrice,
+  normalizeCommoditySearch,
   type LiveQueryOptions,
   type MandiRecord,
 } from "./mandiDataService.js";
@@ -463,7 +464,7 @@ export async function fetchAgmarknet2Prices(
     if (options.district && normalizeName(record.district) !== normalizeName(options.district)) continue;
     if (options.market && normalizeName(record.market) !== normalizeName(options.market)) continue;
     if (options.commodity && normalizeName(record.commodity) !== normalizeName(options.commodity)) continue;
-    if (options.search && !normalizeName(record.commodity).includes(normalizeName(options.search))) continue;
+    if (options.search && !normalizeName(record.commodity).includes(normalizeName(normalizeCommoditySearch(options.search)))) continue;
     unique.set(record.id, record);
   }
   const records = [...unique.values()];
@@ -510,7 +511,7 @@ export async function searchAgmarknet2Commodities(
   fetcher: typeof fetch = fetch,
 ): Promise<string[]> {
   const catalog = await getCatalog(fetcher);
-  const normalized = normalizeName(query);
+  const normalized = normalizeName(normalizeCommoditySearch(query));
   const boundedLimit = Math.min(Math.max(Math.trunc(limit) || 10, 1), 50);
   return [...new Set(catalog.cmdt_data
     .map((row) => row.cmdt_name.trim())
