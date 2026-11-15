@@ -86,9 +86,16 @@ function findStateRows(catalog: AgmarknetCatalog, selectedState: string): Agmark
 // Normalize canonical UI state names to the spelling used by the live OGD
 // price resource. The combined Dadra and Nagar Haveli and Daman and Diu UT
 // intentionally has no single OGD state value.
+const OGD_PRICE_STATE_NAMES: Record<string, string> = {
+  "andaman and nicobar islands": "Andaman and Nicobar",
+  "chhattisgarh": "Chattisgarh",
+  "delhi": "NCT of Delhi",
+  "kerala": "Keralam",
+  "puducherry": "Pondicherry",
+};
+
 export function normalizeAgmarknetStateName(value: string): string {
-  const aliases = STATE_NAME_ALIASES[normalizeName(value)];
-  return aliases?.length === 1 ? aliases[0] : value;
+  return OGD_PRICE_STATE_NAMES[normalizeName(value)] ?? value;
 }
 
 function indiaTodayIsoDate(now = new Date()): string {
