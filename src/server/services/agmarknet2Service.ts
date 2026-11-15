@@ -63,6 +63,26 @@ function normalizeName(value: string): string {
   return value.trim().toLocaleLowerCase("en-IN");
 }
 
+// The public UI uses current Indian state/UT names, while the AGMARKNET
+// administrative master still contains several legacy/source spellings.
+const STATE_NAME_ALIASES: Record<string, string[]> = {
+  "andaman and nicobar islands": ["andaman and nicobar"],
+  "chhattisgarh": ["chattisgarh"],
+  "dadra and nagar haveli and daman and diu": [
+    "dadra and nagar haveli",
+    "daman and diu",
+  ],
+  "delhi": ["nct of delhi"],
+  "kerala": ["keralam"],
+  "puducherry": ["pondicherry"],
+};
+
+function findStateRows(catalog: AgmarknetCatalog, selectedState: string): AgmarknetState[] {
+  const normalized = normalizeName(selectedState);
+  const acceptedNames = new Set([normalized, ...(STATE_NAME_ALIASES[normalized] ?? [])]);
+  return catalog.state_data.filter((row) => acceptedNames.has(normalizeName(row.state_name)));
+}
+
 function indiaTodayIsoDate(now = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
@@ -184,10 +204,10 @@ export async function fetchAgmarknet2Filters(
   fetcher: typeof fetch = fetch,
 ): Promise<FilterOptions> {
   const catalog = await getCatalog(fetcher);
-  const stateRow = options.state
-    ? catalog.state_data.find((row) => normalizeName(row.state_name) === normalizeName(options.state!))
-    : undefined;
-  if (options.state && !stateRow) {
+  const stateRows = options.state
+    ? findStateRows(catalog, options.state)
+    : [];
+  if (options.state && !stateRows.length) {
     return {
       source: SOURCE_NAME,
       states: catalog.state_data.map((row) => row.state_name).sort(),
@@ -211,19 +231,22 @@ export async function fetchAgmarknet2Filters(
     };
   }
 
-  const districts = stateRow
-    ? catalog.district_data.filter((row) => row.state_id === stateRow.state_id)
+  const stateIds = new Set(stateRows.map((row) => row.state_id));
+  const districts = stateRows.length
+    ? catalog.district_data.filter((row) => stateIds.has(row.state_id))
     : [];
-  const districtRow = options.district
-    ? districts.find((row) => normalizeName(row.district_name) === normalizeName(options.district!))
-    : undefined;
-  const markets = stateRow
+  const districtRows = options.district
+    ? districts.filter((row) => normalizeName(row.district_name) === normalizeName(options.district!))
+    : [];
+  const districtIds = new Set(districtRows.map((row) => row.id));
+  const markets = stateRows.length
     ? catalog.market_data.filter((row) =>
-        row.state_id === stateRow.state_id &&
-        (!options.district || row.district_id === districtRow?.id) &&
+        stateIds.has(row.state_id) &&
+        (!options.district || districtIds.has(row.district_id)) &&
         (!options.market || normalizeName(row.mkt_name) === normalizeName(options.market)),
       )
     : [];
+
   const districtNames = districts.map((row) => row.district_name).sort();
   const marketNames = markets.map((row) => row.mkt_name).sort();
   const storedAt = catalogCache!.storedAt;
@@ -235,13 +258,13 @@ export async function fetchAgmarknet2Filters(
     markets: marketNames,
     commodities: catalog.cmdt_data.map((row) => row.cmdt_name).sort(),
     coverage: {
-      status: stateRow ? "complete" : "catalogue",
+      status: stateRows.length ? "complete" : "catalogue",
       pagesScanned: 1,
-      recordsScanned: stateRow ? markets.length : 0,
-      total: stateRow ? markets.length : null,
+      recordsScanned: stateRows.length ? markets.length : 0,
+      total: stateRows.length ? markets.length : null,
       maxOffset: MAX_OFFSET,
-      message: stateRow
-        ? "Complete AGMARKNET 2.0 administrative mandi directory for this state. Price availability depends on each market's daily report."
+      message: stateRows.length
+        ? "Complete AGMARKNET 2.0 administrative mandi directory for the selected state/UT. Price availability depends on each market's daily report."
         : "State and union-territory names are an administrative selector; mandi availability is determined by the AGMARKNET 2.0 directory and daily reports.",
     },
     cache: {
