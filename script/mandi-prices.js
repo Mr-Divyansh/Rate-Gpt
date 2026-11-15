@@ -697,7 +697,7 @@ function renderSync() {
   }
   text.textContent = data.fetchedAt
     ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
-    : t("sync.lastFetched", { time: fetched, upstream: upstream });
+    : t("sync.noFetchYet");
   dot.dataset.state = data.fetchedAt ? "live" : "none";
   const transparency = data.fetchedAt
     ? t("sync.transparency", {
