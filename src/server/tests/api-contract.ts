@@ -59,6 +59,10 @@ async function main(): Promise<void> {
   );
 
   check(/router\.post\("\/contact"/.test(routeSource), "documented contact endpoint exists in the server router");
+  check(
+    routeSource.includes("commitSha: process.env.VERCEL_GIT_COMMIT_SHA"),
+    "API discovery reports the Vercel deployment commit SHA for exact release verification",
+  );
   check(/POST \/contact/.test(apiDocs), "human-readable API guide documents contact submission");
   check(
     !/Read-only API for/.test(spec?.info?.description ?? ""),

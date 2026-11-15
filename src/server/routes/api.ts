@@ -26,6 +26,7 @@ router.get("/", (_req: Request, res: Response) => {
   return sendSuccess(res, {
     name: "Rate-GPT Mandi Prices API",
     version: "1.0.0",
+    commitSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
     description: "On-demand government-reported Indian mandi price observations and a consent-based contact form. Price records are not stored by Rate-GPT.",
     documentation: "https://rate-gpt.vercel.app/docs/api.md",
     openapi: "https://rate-gpt.vercel.app/openapi.json",

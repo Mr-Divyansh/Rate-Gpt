@@ -24,7 +24,7 @@ Validation failures return 400. Upstream rejection or invalid upstream content r
 
 ## AI and agent integration
 
-AI assistants should use the REST API rather than scrape rendered HTML. The machine-readable OpenAPI contract is published at `/openapi.json`; concise agent instructions are at `/llms.txt`; `GET /api/v1/` returns a discovery document with canonical links and endpoint names. All endpoints are read-only except the separately documented contact form. No authentication is required for public read endpoints. API responses are JSON and use the standard success/error envelope.
+AI assistants should use the REST API rather than scrape rendered HTML. The machine-readable OpenAPI contract is published at `/openapi.json`; concise agent instructions are at `/llms.txt`; `GET /api/v1/` returns a discovery document with canonical links, endpoint names and `data.commitSha` (the Vercel Git commit SHA serving that request, or `null` outside a Git-backed Vercel deployment). Release checks must compare this value with the exact source SHA they expect before running production smoke tests. All endpoints are read-only except the separately documented contact form. No authentication is required for public read endpoints. API responses are JSON and use the standard success/error envelope.
 
 Example:
 ```http

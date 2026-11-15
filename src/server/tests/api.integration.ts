@@ -228,6 +228,7 @@ async function main() {
   process.env.AGMARKNET_API_BASE_URL =
     `http://127.0.0.1:${upstreamAddress.port}/v1`;
   process.env.NODE_ENV = "test";
+  process.env.VERCEL_GIT_COMMIT_SHA = "integration-test-commit";
   const app = createApiApp();
   const apiServer = http.createServer(app);
   const apiAddress = await listen(apiServer);
@@ -325,6 +326,7 @@ async function main() {
         discovery.success &&
         discovery.data.openapi.endsWith("/openapi.json") &&
         discovery.data.priceStorage === "disabled" &&
+        discovery.data.commitSha === "integration-test-commit" &&
         discovery.data.endpoints?.contact === "/api/v1/contact" &&
         discovery.data.endpoints?.trend === "/api/v1/prices/trend",
       "API root provides machine-readable discovery for all public endpoints, including contact and disabled historical trends",
