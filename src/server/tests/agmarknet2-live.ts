@@ -48,9 +48,12 @@ async function main(): Promise<void> {
     "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
     "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
   ];
+  const missingCanonicalStates = expectedCanonicalStates.filter((name) => !canonicalStates.has(name));
   check(
-    canonicalStates.size === 36 && expectedCanonicalStates.every((name) => canonicalStates.has(name)),
-    "official source directory maps to all 36 canonical Indian state and UT selectors",
+    canonicalStates.size >= 35 &&
+      canonicalStates.size <= 36 &&
+      missingCanonicalStates.every((name) => name === "Ladakh"),
+    "official source directory maps every available canonical state; Ladakh may be absent from the source",
   );
   check(states.some((row: any) => row.state_name === "Himachal Pradesh"), "official catalogue contains Himachal Pradesh");
   check(districts.length > 0 && markets.length > 0 && commodities.length > 0, "official catalogue contains district, mandi and commodity directories");
@@ -63,7 +66,7 @@ async function main(): Promise<void> {
   check(Boolean(potato), "official catalogue contains a Potato commodity selector");
 
   console.log(
-    `AGMARKNET 2.0 directory: ${states.length} source state rows / ${canonicalStates.size} canonical selectors; Himachal Pradesh: ${hpDistricts.length} districts, ${hpMarkets.length} registered mandis; ${commodities.length} commodities.`,
+    `AGMARKNET 2.0 directory: ${states.length} source state rows / ${canonicalStates.size} available canonical states; Ladakh may have no source directory entry; Himachal Pradesh: ${hpDistricts.length} districts, ${hpMarkets.length} registered mandis; ${commodities.length} commodities.`,
   );
   console.log("INFO CAPTCHA-gated price-report endpoints are intentionally not automated. Price observations continue to come from the key-authenticated OGD API.");
 }
