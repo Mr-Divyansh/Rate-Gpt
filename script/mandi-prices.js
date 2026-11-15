@@ -108,7 +108,7 @@ function renderMandis() {
     return;
   }
   if (state.filtersLoading) {
-    help.textContent = t("finder.loadingLocations");
+    help.textContent = "Loading district and mandi options…";
     return;
   }
   if (!s || !district) {
