@@ -16,7 +16,7 @@ import {
 } from "../services/mandiDataService.js";
 import {
   fetchAgmarknet2Filters,
-  fetchAgmarknet2Prices,
+  fetchAgmarknet2PricesForSearch,
   searchAgmarknet2Commodities,
 } from "../services/agmarknet2Service.js";
 
@@ -162,8 +162,8 @@ router.get("/prices", async (req: Request, res: Response) => {
   try {
     const { date, ...filters } = parsed.data;
     const liveOptions = { ...filters, arrivalDate: date };
-    const result = liveOptions.state
-      ? await fetchAgmarknet2Prices(liveOptions).catch(() =>
+    const result = liveOptions.state && (liveOptions.commodity || liveOptions.search)
+      ? await fetchAgmarknet2PricesForSearch(liveOptions).catch(() =>
           // The data.gov.in current-daily resource remains a live fallback; no
           // price records are persisted when either upstream is unavailable.
           fetchLivePrices(liveOptions),
