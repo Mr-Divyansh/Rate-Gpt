@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
+
       - name: Unit and service tests
         run: npm test
 
