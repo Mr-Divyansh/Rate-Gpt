@@ -54,7 +54,8 @@ jobs:
             sleep 10
           done
           echo "ready=false" >> "$GITHUB_OUTPUT"
-          echo "::warning::Production is still serving an older release or the new deployment is rate-limited. Smoke tests were skipped rather than incorrectly testing old code against new-release expectations."
+          echo "::error::Production is still serving an older release or the new deployment is rate-limited. The release is not verified; public smoke tests cannot run against stale code."
+          exit 1
       - name: Run public production checks
         if: steps.release.outputs.ready == 'true'
         run: npm run test:production
