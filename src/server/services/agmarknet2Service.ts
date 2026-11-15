@@ -34,6 +34,7 @@ type AgmarknetCatalog = {
 };
 
 type FilterOptions = {
+  source: string;
   states: string[];
   districts: string[];
   markets: string[];
@@ -198,6 +199,7 @@ export async function fetchAgmarknet2Filters(
     : undefined;
   if (options.state && !stateRow) {
     return {
+      source: SOURCE_NAME,
       states: catalog.state_data.map((row) => row.state_name).sort(),
       districts: [],
       markets: [],
@@ -237,6 +239,7 @@ export async function fetchAgmarknet2Filters(
   const storedAt = catalogCache!.storedAt;
 
   return {
+    source: SOURCE_NAME,
     states: catalog.state_data.map((row) => row.state_name).sort(),
     districts: districtNames,
     markets: marketNames,
