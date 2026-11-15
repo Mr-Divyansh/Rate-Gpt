@@ -51,6 +51,52 @@ async function main(): Promise<void> {
     "state and UT selector exposes all 36 administrative entries",
   );
 
+  // State-scoped checks validate that location discovery and price records
+  // describe the same live upstream scope without hard-coding a daily row count.
+  const hpFilters = await json("/api/v1/meta/filters?state=Himachal%20Pradesh");
+  check(
+    hpFilters.response.status === 200 &&
+      hpFilters.body?.success === true &&
+      hpFilters.body?.data?.coverage?.status === "complete",
+    "Himachal Pradesh live location discovery completes all upstream-reported pages",
+  );
+  check(
+    Array.isArray(hpFilters.body?.data?.districts) &&
+      Array.isArray(hpFilters.body?.data?.markets) &&
+      Array.isArray(hpFilters.body?.data?.commodities) &&
+      hpFilters.body.data.coverage.recordsScanned === hpFilters.body.data.coverage.total,
+    "Himachal Pradesh filter options are derived from the complete reported source scope",
+  );
+
+  const hpPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&limit=100");
+  check(
+    hpPrices.response.status === 200 &&
+      hpPrices.body?.success === true &&
+      Array.isArray(hpPrices.body?.data),
+    "Himachal Pradesh live price endpoint returns a records array",
+  );
+  if (Array.isArray(hpPrices.body?.data)) {
+    const hpDistricts = new Set(hpFilters.body?.data?.districts ?? []);
+    const hpMarkets = new Set(hpFilters.body?.data?.markets ?? []);
+    const hpCommodities = new Set(hpFilters.body?.data?.commodities ?? []);
+    check(
+      hpPrices.body.data.every((record: any) =>
+        record.state === "Himachal Pradesh" &&
+        hpDistricts.has(record.district) &&
+        hpMarkets.has(record.market) &&
+        hpCommodities.has(record.commodity)
+      ),
+      "Himachal Pradesh price records agree with the discovered district, market and crop options",
+    );
+    check(
+      hpPrices.body?.meta?.cacheStatus === "live" &&
+        Number.isInteger(hpPrices.body?.meta?.total) &&
+        hpPrices.body.meta.total >= hpPrices.body.data.length &&
+        hpPrices.body?.meta?.hasNext === (hpPrices.body.meta.nextOffset < hpPrices.body.meta.total),
+      "Himachal Pradesh live pagination metadata is internally consistent",
+    );
+  }
+
   const prices = await json("/api/v1/prices?limit=5");
   check(prices.response.status === 200 && prices.body?.success === true, "live government prices endpoint returns HTTP 200");
   check(Array.isArray(prices.body?.data), "live prices response contains a records array");
