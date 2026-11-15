@@ -368,6 +368,8 @@ async function main() {
     assert(status.data.mode === "on-demand" && !status.data.bulkSyncEnabled, "sync status confirms bulk sync is disabled");
     assert(status.data.schedulerEnabled === false, "sync status confirms no scheduler");
     assert(status.data.priceStorage === "disabled", "sync status confirms price storage is disabled");
+    assert(status.data.lastFetchedAt === null && status.data.upstreamUpdatedAt === null, "sync status does not invent fetch or upstream update timestamps");
+    assert(typeof status.data.timestamp === "string" && Number.isFinite(Date.parse(status.data.timestamp)), "sync status exposes a valid response timestamp");
 
     const invalid = await fetch(`${base}/api/v1/prices?offset=-1`);
     assert(invalid.status === 400, "invalid pagination is rejected");
