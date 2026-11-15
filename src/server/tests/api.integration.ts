@@ -162,6 +162,62 @@ const upstream = http.createServer((req, res) => {
     return;
   }
 
+  if (url.pathname.endsWith("/prices-and-arrivals/date-wise/specific-commodity")) {
+    agmarknetRequests.push({ url, method: req.method || "GET", body: {} });
+    const stateId = Number(url.searchParams.get("stateId"));
+    const commodityId = Number(url.searchParams.get("commodityId"));
+    const stateName = [...stateIds.entries()].find(([, id]) => id === stateId)?.[0] || "";
+    const commodityName = [...commodityDirectory.values()].find((row) => row.cmdt_id === commodityId)?.cmdt_name || "";
+    const month = Number(url.searchParams.get("month"));
+    const year = Number(url.searchParams.get("year"));
+    const markets = [...marketDirectory.values()]
+      .filter((market) => market.state_id === stateId)
+      .flatMap((market) => {
+        const district = [...districtDirectory.values()].find((row) => row.id === market.district_id)?.district_name || "";
+        const rows = (sourceRecords as any[]).filter((record) => {
+          const date = normalizeArrivalDate(String(record.Arrival_Date)) || "";
+          return record.State === stateName &&
+            record.District === district &&
+            record.Market === market.mkt_name &&
+            record.Commodity === commodityName &&
+            Number(date.slice(0, 4)) === year &&
+            Number(date.slice(5, 7)) === month;
+        });
+        if (!rows.length) return [];
+        const dates = new Map<string, any[]>();
+        for (const record of rows) {
+          const date = normalizeArrivalDate(String(record.Arrival_Date))!;
+          const [yyyy, mm, dd] = date.split("-");
+          const displayDate = `${dd}/${mm}/${yyyy}`;
+          const list = dates.get(displayDate) ?? [];
+          list.push({
+            variety: record.Variety || "Unspecified",
+            minimumPrice: record.Min_Price,
+            maximumPrice: record.Max_Price,
+            modalPrice: record.Modal_Price,
+          });
+          dates.set(displayDate, list);
+        }
+        return [{
+          marketName: market.mkt_name,
+          dates: [...dates.entries()].map(([arrivalDate, data]) => ({ arrivalDate, data })),
+        }];
+      });
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      success: true,
+      columns: [
+        { key: "arrivalDate", title: "Arrival Date" },
+        { key: "variety", title: "Variety" },
+        { key: "minimumPrice", title: "Minimum Price (Rs./Quintal)" },
+        { key: "maximumPrice", title: "Maximum Price (Rs./Quintal)" },
+        { key: "modalPrice", title: "Modal Price (Rs./Quintal)" },
+      ],
+      markets,
+    }));
+    return;
+  }
+
   if (url.pathname.endsWith("/prices-and-arrivals/market-report/daily")) {
     let rawBody = "";
     req.on("data", (chunk) => { rawBody += chunk; });
@@ -417,21 +473,18 @@ async function main() {
     );
     const filtered = await filteredResponse.json();
     const filteredRequest = agmarknetRequests.findLast((request) =>
-      request.body?.date === "2026-11-13" &&
-      (request.body?.stateIds as number[] | undefined)?.includes(stateIds.get("Maharashtra")!) &&
-      (request.body?.marketIds as number[] | undefined)?.includes(
-        [...marketDirectory.values()].find((market) => market.mkt_name === "Pune Market")!.id,
-      ),
+      request.url.pathname.endsWith("/date-wise/specific-commodity") &&
+      request.url.searchParams.get("year") === "2026" &&
+      request.url.searchParams.get("month") === "11" &&
+      request.url.searchParams.get("stateId") === String(stateIds.get("Maharashtra")) &&
+      request.url.searchParams.get("commodityId") === String(commodityDirectory.get("Apple")?.cmdt_id),
     );
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(
-      filteredRequest?.method === "POST" &&
-        filteredRequest.body?.date === "2026-11-13" &&
-        (filteredRequest.body?.stateIds as number[]).includes(stateIds.get("Maharashtra")!) &&
-        (filteredRequest.body?.marketIds as number[]).includes(
-          [...marketDirectory.values()].find((market) => market.mkt_name === "Pune Market")!.id,
-        ),
-      "prices request the exact state, mandi and arrival date from AGMARKNET 2.0",
+      filteredRequest?.method === "GET" &&
+        filteredRequest.url.searchParams.get("stateId") === String(stateIds.get("Maharashtra")) &&
+        filteredRequest.url.searchParams.get("commodityId") === String(commodityDirectory.get("Apple")?.cmdt_id),
+      "prices request the exact state and commodity from the public AGMARKNET monthly report",
     );
     assert(filtered.meta.total === 1 && filtered.data.length === 1, "duplicate daily source rows are removed before local pagination");
     assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination reports the complete local result set");
@@ -472,14 +525,16 @@ async function main() {
         state: "Andhra Pradesh",
         district: "Alluri Sitharama Raju",
         market: item.market,
+        commodity: item.commodity,
         limit: "100",
         offset: "0",
       });
       const marketResponse = await fetch(`${base}/api/v1/prices?${query}`);
       const marketPayload = await marketResponse.json();
-      const sourceMarketId = [...marketDirectory.values()].find((market) => market.mkt_name === item.market)!.id;
       const sourceRequest = agmarknetRequests.findLast((request) =>
-        (request.body?.marketIds as number[] | undefined)?.includes(sourceMarketId),
+        request.url.pathname.endsWith("/date-wise/specific-commodity") &&
+        request.url.searchParams.get("stateId") === String(stateIds.get("Andhra Pradesh")) &&
+        request.url.searchParams.get("commodityId") === String(commodityDirectory.get(item.commodity)?.cmdt_id),
       );
       assert(
         marketResponse.status === 200 &&
@@ -491,10 +546,10 @@ async function main() {
         `${item.market} regression preserves the sole matching source observation`,
       );
       assert(
-        sourceRequest?.method === "POST" &&
-          (sourceRequest.body?.stateIds as number[] | undefined)?.includes(stateIds.get("Andhra Pradesh")!) &&
-          (sourceRequest.body?.marketIds as number[] | undefined)?.includes(sourceMarketId),
-        `${item.market} regression sends exact state and market IDs to AGMARKNET 2.0`,
+        sourceRequest?.method === "GET" &&
+          sourceRequest.url.searchParams.get("stateId") === String(stateIds.get("Andhra Pradesh")) &&
+          sourceRequest.url.searchParams.get("commodityId") === String(commodityDirectory.get(item.commodity)?.cmdt_id),
+        `${item.market} regression uses the official state and commodity report and filters the mandi`,
       );
     }
 
