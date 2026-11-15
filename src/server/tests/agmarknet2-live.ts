@@ -27,6 +27,31 @@ async function main(): Promise<void> {
   const districts = Array.isArray(payload.data.district_data) ? payload.data.district_data : [];
   const markets = Array.isArray(payload.data.market_data) ? payload.data.market_data : [];
   const commodities = Array.isArray(payload.data.cmdt_data) ? payload.data.cmdt_data : [];
+  const canonicalStateName = (value: string): string => {
+    switch (value.trim().toLocaleLowerCase("en-IN")) {
+      case "andaman and nicobar": return "Andaman and Nicobar Islands";
+      case "chattisgarh": return "Chhattisgarh";
+      case "dadra and nagar haveli":
+      case "daman and diu": return "Dadra and Nagar Haveli and Daman and Diu";
+      case "nct of delhi": return "Delhi";
+      case "keralam": return "Kerala";
+      case "pondicherry": return "Puducherry";
+      default: return value.trim();
+    }
+  };
+  const canonicalStates = new Set(states.map((row: any) => canonicalStateName(row.state_name)));
+  const expectedCanonicalStates = [
+    "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+    "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+    "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+    "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+    "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+    "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  ];
+  check(
+    canonicalStates.size === 36 && expectedCanonicalStates.every((name) => canonicalStates.has(name)),
+    "official source directory maps to all 36 canonical Indian state and UT selectors",
+  );
   check(states.some((row: any) => row.state_name === "Himachal Pradesh"), "official catalogue contains Himachal Pradesh");
   check(districts.length > 0 && markets.length > 0 && commodities.length > 0, "official catalogue contains district, mandi and commodity directories");
 
@@ -38,7 +63,7 @@ async function main(): Promise<void> {
   check(Boolean(potato), "official catalogue contains a Potato commodity selector");
 
   console.log(
-    `AGMARKNET 2.0 directory: ${states.length} states/UTs; Himachal Pradesh: ${hpDistricts.length} districts, ${hpMarkets.length} registered mandis; ${commodities.length} commodities.`,
+    `AGMARKNET 2.0 directory: ${states.length} source state rows / ${canonicalStates.size} canonical selectors; Himachal Pradesh: ${hpDistricts.length} districts, ${hpMarkets.length} registered mandis; ${commodities.length} commodities.`,
   );
   console.log("INFO CAPTCHA-gated price-report endpoints are intentionally not automated. Price observations continue to come from the key-authenticated OGD API.");
 }
