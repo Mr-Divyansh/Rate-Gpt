@@ -1,6 +1,7 @@
 import {
   GovernmentApiError,
   normalizeCommoditySearch,
+  STATES_AND_UTS,
 } from "./mandiDataService.js";
 const DEFAULT_BASE_URL = "https://api.agmarknet.gov.in/v1";
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -178,6 +179,21 @@ function readArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? value as T[] : [];
 }
 
+function uniqueBy<T>(rows: T[], keyOf: (row: T) => string): T[] {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const key = keyOf(row);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "en-IN", { sensitivity: "base" }));
+}
+
 async function getCatalog(fetcher: typeof fetch = fetch): Promise<AgmarknetCatalog> {
   if (catalogCache && catalogCache.expiresAt > Date.now()) return catalogCache.value;
   const payload = await requestJson("/daily-price-arrival/filters", {}, fetcher);
@@ -197,10 +213,22 @@ async function getCatalog(fetcher: typeof fetch = fetch): Promise<AgmarknetCatal
   }
 
   const value: AgmarknetCatalog = {
-    state_data: states.filter((row) => Number.isInteger(row.state_id) && row.state_id > 0 && row.state_id < 100_000 && typeof row.state_name === "string"),
-    district_data: districts.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && typeof row.district_name === "string"),
-    market_data: markets.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && Number.isInteger(row.district_id) && typeof row.mkt_name === "string"),
-    cmdt_data: commodities.filter((row) => Number.isInteger(row.cmdt_id) && row.cmdt_id > 0 && row.cmdt_id < 100_000 && typeof row.cmdt_name === "string"),
+    state_data: uniqueBy(
+      states.filter((row) => Number.isInteger(row.state_id) && row.state_id > 0 && row.state_id < 100_000 && typeof row.state_name === "string"),
+      (row) => String(row.state_id),
+    ),
+    district_data: uniqueBy(
+      districts.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && typeof row.district_name === "string"),
+      (row) => String(row.id),
+    ),
+    market_data: uniqueBy(
+      markets.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && Number.isInteger(row.district_id) && typeof row.mkt_name === "string"),
+      (row) => String(row.id),
+    ),
+    cmdt_data: uniqueBy(
+      commodities.filter((row) => Number.isInteger(row.cmdt_id) && row.cmdt_id > 0 && row.cmdt_id < 100_000 && typeof row.cmdt_name === "string"),
+      (row) => String(row.cmdt_id),
+    ),
   };
   if (!value.state_data.length || !value.market_data.length || !value.cmdt_data.length) {
     throw new GovernmentApiError("AGMARKNET 2.0 returned no usable catalogue entries.", 502);
@@ -225,10 +253,10 @@ export async function fetchAgmarknet2Filters(
   if (options.state && !stateRows.length) {
     return {
       source: SOURCE_NAME,
-      states: catalog.state_data.map((row) => row.state_name).sort(),
+      states: [...STATES_AND_UTS],
       districts: [],
       markets: [],
-      commodities: catalog.cmdt_data.map((row) => row.cmdt_name).sort(),
+      commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
       coverage: {
         status: "complete",
         pagesScanned: 1,
@@ -262,16 +290,16 @@ export async function fetchAgmarknet2Filters(
       )
     : [];
 
-  const districtNames = districts.map((row) => row.district_name).sort();
-  const marketNames = markets.map((row) => row.mkt_name).sort();
+  const districtNames = uniqueSorted(districts.map((row) => row.district_name));
+  const marketNames = uniqueSorted(markets.map((row) => row.mkt_name));
   const storedAt = catalogCache!.storedAt;
 
   return {
     source: SOURCE_NAME,
-    states: catalog.state_data.map((row) => row.state_name).sort(),
+    states: [...STATES_AND_UTS],
     districts: districtNames,
     markets: marketNames,
-    commodities: catalog.cmdt_data.map((row) => row.cmdt_name).sort(),
+    commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
     coverage: {
       status: stateRows.length ? "complete" : "catalogue",
       pagesScanned: 1,
