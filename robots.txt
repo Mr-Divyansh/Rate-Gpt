@@ -2,3 +2,8 @@ User-agent: *
 Allow: /
 
 Sitemap: https://rate-gpt.vercel.app/sitemap.xml
+
+# Machine-readable public API documentation
+Allow: /openapi.json
+Allow: /llms.txt
+Allow: /api/v1/
