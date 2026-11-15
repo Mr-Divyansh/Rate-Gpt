@@ -2,6 +2,7 @@ import {
   fetchAgmarknet2Filters,
   resetAgmarknetCatalogCache,
   searchAgmarknet2Commodities,
+  normalizeAgmarknetStateName,
 } from "../services/agmarknet2Service.js";
 
 let passed = 0;
@@ -24,17 +25,38 @@ const filtersPayload = {
     state_data: [
       { state_id: 5, state_name: "Himachal Pradesh" },
       { state_id: 6, state_name: "Punjab" },
+      { state_id: 7, state_name: "Andaman and Nicobar" },
+      { state_id: 8, state_name: "Chattisgarh" },
+      { state_id: 9, state_name: "NCT of Delhi" },
+      { state_id: 10, state_name: "Keralam" },
+      { state_id: 11, state_name: "Pondicherry" },
+      { state_id: 12, state_name: "Dadra and Nagar Haveli" },
+      { state_id: 13, state_name: "Daman and Diu" },
       { state_id: 100006, state_name: "All States/UTs" },
     ],
     district_data: [
       { id: 51, state_id: 5, district_name: "Kullu" },
       { id: 52, state_id: 5, district_name: "Mandi" },
       { id: 61, state_id: 6, district_name: "Ludhiana" },
+      { id: 71, state_id: 7, district_name: "South Andaman" },
+      { id: 81, state_id: 8, district_name: "Raipur" },
+      { id: 91, state_id: 9, district_name: "New Delhi" },
+      { id: 101, state_id: 10, district_name: "Ernakulam" },
+      { id: 111, state_id: 11, district_name: "Puducherry" },
+      { id: 121, state_id: 12, district_name: "Dadra and Nagar Haveli" },
+      { id: 131, state_id: 13, district_name: "Diu" },
     ],
     market_data: [
       { id: 501, state_id: 5, district_id: 51, mkt_name: "SMY Bhuntar" },
       { id: 502, state_id: 5, district_id: 52, mkt_name: "SMY Takoli" },
       { id: 601, state_id: 6, district_id: 61, mkt_name: "Ludhiana APMC" },
+      { id: 701, state_id: 7, district_id: 71, mkt_name: "Port Blair APMC" },
+      { id: 801, state_id: 8, district_id: 81, mkt_name: "Raipur APMC" },
+      { id: 901, state_id: 9, district_id: 91, mkt_name: "New Delhi APMC" },
+      { id: 1001, state_id: 10, district_id: 101, mkt_name: "Ernakulam APMC" },
+      { id: 1101, state_id: 11, district_id: 111, mkt_name: "Puducherry APMC" },
+      { id: 1201, state_id: 12, district_id: 121, mkt_name: "Silvassa APMC" },
+      { id: 1301, state_id: 13, district_id: 131, mkt_name: "Diu APMC" },
       { id: 100009, state_id: 100006, district_id: 100007, mkt_name: "All Markets" },
     ],
     cmdt_data: [
@@ -73,6 +95,40 @@ async function main(): Promise<void> {
 
   const kullu = await fetchAgmarknet2Filters({ state: "Himachal Pradesh", district: "Kullu" }, mock.fetcher);
   check(kullu.markets.length === 1 && kullu.markets[0] === "SMY Bhuntar", "district filter returns only mandis in that district");
+  const delhi = await fetchAgmarknet2Filters({ state: "Delhi" }, mock.fetcher);
+  check(delhi.districts.includes("New Delhi") && delhi.markets.includes("New Delhi APMC"), "Delhi selector maps to the official NCT of Delhi directory name");
+
+  const kerala = await fetchAgmarknet2Filters({ state: "Kerala" }, mock.fetcher);
+  check(kerala.districts.includes("Ernakulam") && kerala.markets.includes("Ernakulam APMC"), "Kerala selector maps to the official Keralam directory name");
+
+  const chhattisgarh = await fetchAgmarknet2Filters({ state: "Chhattisgarh" }, mock.fetcher);
+  check(chhattisgarh.markets.includes("Raipur APMC"), "Chhattisgarh selector maps to the source spelling Chattisgarh");
+
+  const andaman = await fetchAgmarknet2Filters({ state: "Andaman and Nicobar Islands" }, mock.fetcher);
+  check(andaman.markets.includes("Port Blair APMC"), "Andaman and Nicobar Islands selector maps to the source directory name");
+
+  const puducherry = await fetchAgmarknet2Filters({ state: "Puducherry" }, mock.fetcher);
+  check(puducherry.markets.includes("Puducherry APMC"), "Puducherry selector maps to the source name Pondicherry");
+
+  const combinedUt = await fetchAgmarknet2Filters({
+    state: "Dadra and Nagar Haveli and Daman and Diu",
+  }, mock.fetcher);
+  check(
+    combinedUt.markets.includes("Silvassa APMC") && combinedUt.markets.includes("Diu APMC"),
+    "combined Dadra and Nagar Haveli and Daman and Diu selector merges both source directories",
+  );
+
+  check(normalizeAgmarknetStateName("Delhi") === "NCT of Delhi", "Delhi canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Kerala") === "Keralam", "Kerala canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Chhattisgarh") === "Chattisgarh", "Chhattisgarh canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Himachal Pradesh") === "Himachal Pradesh", "unchanged state names pass through without modification");
+
+  const ladakh = await fetchAgmarknet2Filters({ state: "Ladakh" }, mock.fetcher);
+  check(
+    ladakh.coverage.status === "complete" && ladakh.markets.length === 0,
+    "a state absent from the official directory returns an honest empty result",
+  );
+
   check(mock.calls === 1, "administrative catalogue is cached and fetched once");
 
   const search = await searchAgmarknet2Commodities("pot", 10, mock.fetcher);
