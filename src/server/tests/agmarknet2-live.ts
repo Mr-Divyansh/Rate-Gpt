@@ -40,8 +40,6 @@ async function main(): Promise<void> {
     }
   };
   const canonicalStates = new Set(states.filter((row: any) => row.state_name !== "All States/UTs").map((row: any) => canonicalStateName(row.state_name)));
-  console.log("AGMARKNET 2.0 source state names:", JSON.stringify(states.map((row: any) => row.state_name)));
-  console.log("AGMARKNET 2.0 canonical state names:", JSON.stringify([...canonicalStates].sort()));
   const expectedCanonicalStates = [
     "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
     "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
