@@ -67,8 +67,8 @@ async function main() {
   check(/e\.shiftKey[\s\S]*?last\.focus\(\)[\s\S]*?first\.focus\(\)/.test(globalNav),
     "mobile drawer keeps keyboard focus within navigation while open");
 
-  const priceTableColumns = (prices.match(/<th\\s+scope="col"/g) || []).length;
-  check(priceTableColumns === 5 && /td\\.colSpan = 5;/.test(mandiScript),
+  const priceTableColumns = (prices.match(/<th\s+scope="col"/g) || []).length;
+  check(priceTableColumns === 5 && /td\.colSpan = 5;/.test(mandiScript),
     "empty, loading and error table messages span the exact five visible price columns");
 
   console.log(`\nResponsive layout checks: ${passed} passed, ${failed} failed`);
