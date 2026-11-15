@@ -18,6 +18,18 @@ const sourceRecords = [
     Modal_Price: "2,100",
   },
   {
+    id: "delhi-apple-1",
+    State: "NCT of Delhi",
+    District: "New Delhi",
+    Market: "Azadpur APMC",
+    Commodity: "Apple",
+    Variety: "Red",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "1,700",
+    Max_Price: "2,300",
+    Modal_Price: "2,000",
+  },
+  {
     id: "apple-1",
     State: "Maharashtra",
     District: "Pune",
@@ -403,6 +415,19 @@ async function main() {
     assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
+
+    const delhiResponse = await fetch(`${base}/api/v1/prices?state=Delhi&limit=5`);
+    const delhiPayload = await delhiResponse.json();
+    const delhiRequest = upstreamRequests.at(-1)!;
+    assert(
+      delhiResponse.status === 200 &&
+        delhiPayload.data.some((record: any) => record.state === "NCT of Delhi"),
+      "canonical Delhi selection returns OGD records published under NCT of Delhi",
+    );
+    assert(
+      delhiRequest.searchParams.get("filters[state.keyword]") === "NCT of Delhi",
+      "canonical Delhi filter is normalized to the exact OGD state spelling",
+    );
 
     const firstPage = await fetch(`${base}/api/v1/prices?limit=2&offset=0`).then((r) => r.json());
     const secondPage = await fetch(`${base}/api/v1/prices?limit=2&offset=2`).then((r) => r.json());
