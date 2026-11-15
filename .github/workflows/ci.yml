@@ -58,6 +58,9 @@ jobs:
       - name: Responsive layout regression checks
         run: npm run test:responsive
 
+      - name: Production release-gate regression checks
+        run: npm run test:release-gate
+
       - name: TypeScript check
         run: npm run lint
 
