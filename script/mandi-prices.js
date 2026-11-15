@@ -714,12 +714,16 @@ function renderSync() {
 
 async function loadSync() {
   try {
+    // fetchSyncStatus() unwraps the API envelope and returns its `data` object.
+    // Keep this response shape consistent; reading status.data here throws.
     const status = await fetchSyncStatus();
-    state.lastFetchedAt = status.data.lastFetchedAt;
-    state.upstreamUpdatedAt = status.data.upstreamUpdatedAt;
+    state.lastFetchedAt = status.lastFetchedAt ?? null;
+    state.upstreamUpdatedAt = status.upstreamUpdatedAt ?? null;
     state.sync = {
       ...status,
-      fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt,
+      // A successful price request may have completed while this status
+      // request was in flight. Never overwrite its newer fetch timestamp.
+      fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt || null,
     };
   } catch (error) {
     console.error("[Mandi prices] Unable to load sync status:", error);
