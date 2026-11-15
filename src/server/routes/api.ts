@@ -85,19 +85,19 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    let data;
-    try {
-      data = await fetchAgmarknet2Filters(parsed.data);
-    } catch {
+    const data = await fetchAgmarknet2Filters(parsed.data).catch(() =>
       // Keep the OGD resource as a live fallback if the newer AGMARKNET 2.0
       // directory is temporarily unavailable.
-      data = await fetchLiveFilters(parsed.data);
-    }
+      fetchLiveFilters(parsed.data),
+    );
+    const source = "source" in data && typeof data.source === "string"
+      ? data.source
+      : "Government of India OGD / AGMARKNET";
     return sendSuccess(
       res,
       data,
       {
-        source: data.source ?? "Government of India OGD / AGMARKNET",
+        source,
         scope: data.coverage.message,
         coverage: data.coverage,
         filterCacheStatus: data.cache.status,
@@ -162,18 +162,13 @@ router.get("/prices", async (req: Request, res: Response) => {
   try {
     const { date, ...filters } = parsed.data;
     const liveOptions = { ...filters, arrivalDate: date };
-    let result;
-    if (liveOptions.state) {
-      try {
-        result = await fetchAgmarknet2Prices(liveOptions);
-      } catch {
-        // The data.gov.in current-daily resource remains a live fallback; no
-        // price records are persisted when either upstream is unavailable.
-        result = await fetchLivePrices(liveOptions);
-      }
-    } else {
-      result = await fetchLivePrices(liveOptions);
-    }
+    const result = liveOptions.state
+      ? await fetchAgmarknet2Prices(liveOptions).catch(() =>
+          // The data.gov.in current-daily resource remains a live fallback; no
+          // price records are persisted when either upstream is unavailable.
+          fetchLivePrices(liveOptions),
+        )
+      : await fetchLivePrices(liveOptions);
     return sendSuccess(
       res,
       result.records,
