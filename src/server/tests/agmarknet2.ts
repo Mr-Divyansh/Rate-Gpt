@@ -118,8 +118,24 @@ function mockFetcher(options: { failDate?: string; dates?: string[] } = {}) {
   return { fetcher, calls };
 }
 
+function indiaToday(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function shiftDate(date: string, days: number): string {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
 async function main(): Promise<void> {
   process.env.AGMARKNET_API_BASE_URL = "https://agmarknet.test/v1";
+  const today = indiaToday();
+  const yesterday = shiftDate(today, -1);
+  const reportDates = Array.from({ length: 4 }, (_, index) => shiftDate(today, -index));
   resetAgmarknetCatalogCache();
 
   const catalogMock = mockFetcher();
@@ -164,24 +180,24 @@ async function main(): Promise<void> {
   const exact = await fetchAgmarknet2Prices({
     state: "Himachal Pradesh",
     district: "Kullu",
-    arrivalDate: "2026-11-13",
+    arrivalDate: yesterday,
     limit: 10,
   }, exactMock.fetcher);
   check(
     exact.records.length === 1 &&
-      exact.records[0]?.arrival_date === "2026-11-13" &&
+      exact.records[0]?.arrival_date === yesterday &&
       exactMock.calls.filter((call) => call.method === "POST").length === 1,
     "an explicit arrival date fetches only that exact government report date",
   );
 
   resetAgmarknetCatalogCache();
-  const partialMock = mockFetcher({ failDate: "2026-11-14" });
+  const partialMock = mockFetcher({ failDate: reportDates[1] });
   const partial = await fetchAgmarknet2Prices({
     state: "Himachal Pradesh",
     district: "Kullu",
     limit: 100,
   }, partialMock.fetcher);
-  check(partial.meta.partial && partial.meta.failedDates.includes("2026-11-14"), "partial daily report outages are surfaced rather than hidden");
+  check(partial.meta.partial && partial.meta.failedDates.includes(reportDates[1]!), "partial daily report outages are surfaced rather than hidden");
 
   console.log(`\nAGMARKNET 2.0 tests: ${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
