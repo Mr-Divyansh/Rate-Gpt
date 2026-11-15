@@ -209,13 +209,14 @@ async function main(): Promise<void> {
   const failureMock = mockFetcher({ failMonth: currentMonth });
   let upstreamFailureSurfaced = false;
   try {
-    await fetchAgmarknet2Prices({
+    const partial = await fetchAgmarknet2Prices({
       state: "Himachal Pradesh", commodity: "Potato", limit: 10,
     }, failureMock.fetcher);
+    upstreamFailureSurfaced = partial.meta.partial && partial.meta.failedMonths.includes(currentMonth);
   } catch {
     upstreamFailureSurfaced = true;
   }
-  check(upstreamFailureSurfaced, "failed public monthly reports surface an upstream error instead of fabricated records");
+  check(upstreamFailureSurfaced, "failed public monthly reports surface an error or explicit partial status instead of fabricated records");
 
   console.log(`\nAGMARKNET 2.0 tests: ${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
