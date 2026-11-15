@@ -207,7 +207,16 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
   .header-inner { grid-template-columns:1fr auto; align-items:center; padding-block:8px; }
   .header-actions { grid-column:2; grid-row:1; }
   .menu-toggle { display:block; }
-  .site-nav { position:fixed; z-index:80; top:0; right:0; bottom:0; width:min(84vw,360px); margin:0; padding:92px 22px 28px; display:flex; flex-direction:column; align-items:stretch; gap:8px; background:#fff; box-shadow:-18px 0 48px rgba(16,48,32,.16); transform:translateX(105%); visibility:hidden; transition:transform .25s ease,visibility .25s ease; }
+  .site-nav {
+    position:fixed; z-index:80; top:0; right:0; bottom:0; left:auto;
+    grid-column:auto; grid-row:auto; order:initial;
+    width:min(84vw,360px); max-width:100%; margin:0;
+    padding:92px 22px 28px; display:flex; flex-direction:column;
+    align-items:stretch; justify-content:flex-start; gap:8px;
+    background:#fff; box-shadow:-18px 0 48px rgba(16,48,32,.16);
+    transform:translateX(105%); visibility:hidden;
+    transition:transform .25s ease,visibility .25s ease;
+  }
   .site-nav.is-open { transform:translateX(0); visibility:visible; }
   .site-nav a { min-height:52px; justify-content:flex-start; padding-inline:16px; font-size:1.05rem; }
   .site-nav a[aria-current="page"]::after { left:16px; right:auto; bottom:7px; width:28px; }

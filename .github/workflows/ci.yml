@@ -55,6 +55,9 @@ jobs:
       - name: Public-site SEO metadata checks
         run: npm run test:site
 
+      - name: Responsive layout regression checks
+        run: npm run test:responsive
+
       - name: TypeScript check
         run: npm run lint
 
