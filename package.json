@@ -15,7 +15,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:site": "tsx src/server/tests/site-metadata.ts",
-    "test:production": "tsx src/server/tests/production-smoke.ts"
+    "test:production": "tsx src/server/tests/production-smoke.ts",
+    "test:responsive": "tsx src/server/tests/responsive-layout.ts"
   },
   "dependencies": {
     "compression": "^1.8.2",
