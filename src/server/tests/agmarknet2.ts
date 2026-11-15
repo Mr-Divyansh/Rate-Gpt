@@ -2,6 +2,7 @@ import {
   fetchAgmarknet2Filters,
   resetAgmarknetCatalogCache,
   searchAgmarknet2Commodities,
+  normalizeAgmarknetStateName,
 } from "../services/agmarknet2Service.js";
 
 let passed = 0;
@@ -116,6 +117,11 @@ async function main(): Promise<void> {
     combinedUt.markets.includes("Silvassa APMC") && combinedUt.markets.includes("Diu APMC"),
     "combined Dadra and Nagar Haveli and Daman and Diu selector merges both source directories",
   );
+
+  check(normalizeAgmarknetStateName("Delhi") === "NCT of Delhi", "Delhi canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Kerala") === "Keralam", "Kerala canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Chhattisgarh") === "Chattisgarh", "Chhattisgarh canonical name normalizes to the OGD source spelling");
+  check(normalizeAgmarknetStateName("Himachal Pradesh") === "Himachal Pradesh", "unchanged state names pass through without modification");
 
   const ladakh = await fetchAgmarknet2Filters({ state: "Ladakh" }, mock.fetcher);
   check(
