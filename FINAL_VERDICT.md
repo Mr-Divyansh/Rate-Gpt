@@ -8,11 +8,12 @@
 
 ## 1. Current repository state
 
-- Latest `main` commit: `a50fac5cf03b8c84db643126099055a194948a49`
-- PR #49 (mobile navigation keyboard-focus restoration) is merged.
-- PR #49 CI check: passed.
-- Merged-main CI run `43729810208`: passed, including dependency audit, unit/service tests, API integration, AGMARKNET catalogue tests, site metadata, responsive regression checks, TypeScript and production build.
-- No open pull requests or GitHub issues were present at the last repository audit.
+- Latest `main` commit: `835739a3376a714143fe59b4d9016d01bfd81c7e`
+- PR #49 (mobile navigation keyboard-focus restoration) is merged; its CI check passed.
+- PR #50 (accurate release-readiness documentation) is merged; its CI run `43730075809` passed.
+- PR #51 (five-column mandi empty-state alignment) is merged; its CI run `43730150356` passed, including the new responsive regression assertion.
+- The full CI pipeline passed on the code changes: dependency audit, unit/service tests, API integration, AGMARKNET catalogue tests, site metadata, responsive regression checks, TypeScript and production build.
+- No open pull requests or GitHub issues were present immediately after PR #51 merged.
 
 ## 2. Production deployment status
 
@@ -25,13 +26,13 @@ Latest Vercel deployment explicitly targeting production at the last audit:
 - Branch: `main`
 - Deployed commit: `70fe7bc560b6a5b3e8a2f3444f01cf84fca989bb`
 
-Latest repository `main` is `a50fac5cf03b8c84db643126099055a194948a49`, so the production deployment does not yet contain the latest merged work.
+Latest repository `main` is `835739a3376a714143fe59b4d9016d01bfd81c7e`, so the production deployment does not yet contain the latest merged work.
 
 A separate `READY` Vercel deployment for `fix/mobile-navigation-focus-restoration` is a preview deployment. It is not evidence that the production domain has been updated.
 
 Vercel reported the free deployment quota limit and a 24-hour retry cooldown. Do not bypass the limit or repeatedly retry. The scheduled deployment verification is set for **16 November 2026, 8:45 PM IST**. The deployment must be checked again then.
 
-A GitHub production smoke workflow for the current merge was still running at the time of this status snapshot. Its result must be recorded after it completes; do not assume it passed.
+The GitHub production smoke workflow for commit `a50fac5` completed with overall workflow status `success`, but its `Run public production checks` step was **skipped** because the release markers did not reach production before the wait window expired. Therefore, this is not a successful production smoke test and does not verify the production API or frontend.
 
 ## 3. Live government data — what is and is not verified
 
@@ -67,7 +68,7 @@ See [live-data coverage and source limitations](docs/live-data-coverage.md).
 
 | Gate | Current state | Completion evidence |
 |---|---|---|
-| Main-branch CI | Passed | GitHub Actions run for commit `a50fac5` |
+| Main-branch CI | Passed | CI runs for PR #49 and PR #51; PR #50 documentation CI also passed |
 | Dependency audit | Passed at `--audit-level=high` | CI audit step; does not exclude low/moderate advisories |
 | Production deployment | Pending latest main | Vercel production deployment READY with SHA `a50fac5...` |
 | Production domain alias | Pending | `rate-gpt.vercel.app` resolves to that deployment |
