@@ -1,0 +1,263 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Rate-GPT Mandi Prices API",
+    "version": "1.0.0",
+    "description": "Read-only API for on-demand government-reported Indian mandi price observations. Price records are fetched live from Government of India OGD / AGMARKNET and are not persisted by Rate-GPT. Published arrival observations are not guaranteed real-time trading quotes."
+  },
+  "servers": [
+    {
+      "url": "https://rate-gpt.vercel.app/api/v1"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Discover API capabilities",
+        "responses": {
+          "200": {
+            "description": "API discovery response"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Check API availability",
+        "responses": {
+          "200": {
+            "description": "Service health"
+          }
+        }
+      }
+    },
+    "/meta/filters": {
+      "get": {
+        "summary": "Get state, district, mandi and crop selectors",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "district",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Official administrative directory and observed filter metadata"
+          }
+        }
+      }
+    },
+    "/prices": {
+      "get": {
+        "summary": "Fetch live government-reported mandi prices",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "district",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000,
+              "default": 0
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "modal_price_asc",
+                "modal_price_desc",
+                "market_asc",
+                "market_desc",
+                "date_desc",
+                "date_asc",
+                "commodity_asc",
+                "commodity_desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Normalized live price records with pagination and source metadata"
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "502": {
+            "description": "Upstream source error"
+          },
+          "503": {
+            "description": "Upstream unavailable or rate limited"
+          }
+        }
+      }
+    },
+    "/prices/compare": {
+      "get": {
+        "summary": "Fetch observations for a crop and arrival date across markets",
+        "parameters": [
+          {
+            "name": "commodity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live comparable market observations"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          }
+        }
+      }
+    },
+    "/commodities/search": {
+      "get": {
+        "summary": "Search source-derived crop names",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Government-source-derived commodity names"
+          }
+        }
+      }
+    },
+    "/sync-status": {
+      "get": {
+        "summary": "Describe live-only data mode",
+        "responses": {
+          "200": {
+            "description": "Data mode and freshness explanation"
+          }
+        }
+      }
+    },
+    "/prices/trend": {
+      "get": {
+        "summary": "Historical trends (not available)",
+        "responses": {
+          "410": {
+            "description": "Historical storage is disabled"
+          }
+        }
+      }
+    }
+  }
+}

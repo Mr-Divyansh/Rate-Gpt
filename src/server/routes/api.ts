@@ -21,6 +21,30 @@ import {
 
 const router = Router();
 
+// Machine-readable API discovery for AI agents and developer tools.
+router.get("/", (_req: Request, res: Response) => {
+  return sendSuccess(res, {
+    name: "Rate-GPT Mandi Prices API",
+    version: "1.0.0",
+    description: "On-demand government-reported Indian mandi price observations. Price records are not stored by Rate-GPT.",
+    documentation: "https://rate-gpt.vercel.app/docs/api.md",
+    openapi: "https://rate-gpt.vercel.app/openapi.json",
+    llms: "https://rate-gpt.vercel.app/llms.txt",
+    endpoints: {
+      filters: "/api/v1/meta/filters",
+      prices: "/api/v1/prices",
+      compare: "/api/v1/prices/compare",
+      commoditySearch: "/api/v1/commodities/search",
+      syncStatus: "/api/v1/sync-status",
+      health: "/api/v1/health"
+    },
+    responseFormat: "{ success, data, meta, message }",
+    priceDataMode: "live-on-demand",
+    priceStorage: "disabled",
+    source: "Government of India OGD / AGMARKNET"
+  }, undefined, "API discovery document");
+});
+
 function sendSuccess<T>(
   res: Response,
   data: T,
