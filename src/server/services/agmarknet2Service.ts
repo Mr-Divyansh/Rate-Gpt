@@ -63,6 +63,26 @@ function normalizeName(value: string): string {
   return value.trim().toLocaleLowerCase("en-IN");
 }
 
+function canonicalStateName(sourceName: string): string {
+  switch (normalizeName(sourceName)) {
+    case "andaman and nicobar":
+      return "Andaman and Nicobar Islands";
+    case "chattisgarh":
+      return "Chhattisgarh";
+    case "dadra and nagar haveli":
+    case "daman and diu":
+      return "Dadra and Nagar Haveli and Daman and Diu";
+    case "nct of delhi":
+      return "Delhi";
+    case "keralam":
+      return "Kerala";
+    case "pondicherry":
+      return "Puducherry";
+    default:
+      return sourceName.trim();
+  }
+}
+
 // The public UI uses current Indian state/UT names, while the AGMARKNET
 // administrative master still contains several legacy/source spellings.
 const STATE_NAME_ALIASES: Record<string, string[]> = {
@@ -247,7 +267,7 @@ export async function fetchAgmarknet2Filters(
   if (options.state && !stateRows.length) {
     return {
       source: SOURCE_NAME,
-      states: uniqueSorted(catalog.state_data.map((row) => row.state_name)),
+      states: uniqueSorted(catalog.state_data.map((row) => canonicalStateName(row.state_name))),
       districts: [],
       markets: [],
       commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
