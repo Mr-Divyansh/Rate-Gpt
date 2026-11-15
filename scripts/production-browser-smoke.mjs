@@ -38,12 +38,26 @@ try {
     });
     page.setDefaultTimeout(45_000);
 
+    const initialFiltersResponsePromise = page.waitForResponse((candidate) => {
+      const url = new URL(candidate.url());
+      return url.pathname === "/api/v1/meta/filters" && !url.searchParams.has("state");
+    }, { timeout: 45_000 });
+
     const response = await page.goto(baseUrl + "/mandi-prices.html", {
       waitUntil: "domcontentloaded",
       timeout: 45_000,
     });
     assert.equal(response?.status(), 200, viewport.name + ": mandi page must return HTTP 200");
     pass(viewport.name + ": mandi page opens");
+
+    const initialFiltersResponse = await initialFiltersResponsePromise;
+    assert.equal(initialFiltersResponse.status(), 200, viewport.name + ": government directory request must succeed");
+    const initialFiltersBody = await initialFiltersResponse.json();
+    assert.ok(
+      Array.isArray(initialFiltersBody.data?.states) &&
+        initialFiltersBody.data.states.includes("Himachal Pradesh"),
+      viewport.name + ": government directory must include Himachal Pradesh",
+    );
 
     await page.waitForFunction(() => {
       const state = document.querySelector("#stateSelect");
@@ -53,27 +67,29 @@ try {
     }, null, { timeout: 45_000 });
     pass(viewport.name + ": government state options load");
 
+    const stateFiltersResponsePromise = page.waitForResponse((candidate) => {
+      const url = new URL(candidate.url());
+      return url.pathname === "/api/v1/meta/filters" &&
+        url.searchParams.get("state") === "Himachal Pradesh";
+    }, { timeout: 45_000 });
     await page.selectOption("#stateSelect", "Himachal Pradesh");
-    await page.waitForTimeout(1_000);
-    let districtState = await page.evaluate(() => {
+    const stateFiltersResponse = await stateFiltersResponsePromise;
+    assert.equal(stateFiltersResponse.status(), 200, viewport.name + ": state directory request must succeed");
+    const stateFiltersBody = await stateFiltersResponse.json();
+    assert.ok(
+      Array.isArray(stateFiltersBody.data?.districts) && stateFiltersBody.data.districts.length > 0,
+      viewport.name + ": state directory response must contain districts",
+    );
+
+    await page.waitForFunction(() => {
+      const district = document.querySelector("#districtSelect");
+      return district && !district.disabled && district.options.length > 1;
+    }, null, { timeout: 45_000 });
+
+    const districtState = await page.evaluate(() => {
       const district = document.querySelector("#districtSelect");
       return { disabled: district?.disabled ?? true, optionCount: district?.options.length ?? 0 };
     });
-
-    // Some browser engines can select an option without the app's delegated change listener
-    // being ready after the initial asynchronous catalogue load. Dispatch once if needed.
-    if (districtState.optionCount <= 1) {
-      await page.locator("#stateSelect").dispatchEvent("change");
-      await page.waitForFunction(() => {
-        const district = document.querySelector("#districtSelect");
-        return district && district.options.length > 1;
-      }, null, { timeout: 30_000 }).catch(() => undefined);
-      districtState = await page.evaluate(() => {
-        const district = document.querySelector("#districtSelect");
-        return { disabled: district?.disabled ?? true, optionCount: district?.options.length ?? 0 };
-      });
-    }
-
     assert.ok(
       districtState.optionCount > 1 && !districtState.disabled,
       viewport.name + ": state selection must load district options; diagnostics=" +
