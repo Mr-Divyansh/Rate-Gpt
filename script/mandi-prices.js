@@ -209,6 +209,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
   state.market = "";
   state.finderError = "";
   state.filterCoverage = null;
+  state.filtersLoading = Boolean(name);
   clearResults();
   renderFinder();
   if (!name) return;
@@ -220,6 +221,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
     state.filtersLoading = false;
   } catch (error) {
     if (token !== navToken) return;
+    state.filtersLoading = false;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
     renderFinder();
     return;
