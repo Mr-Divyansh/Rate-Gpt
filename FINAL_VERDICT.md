@@ -4,77 +4,80 @@
 **Repository:** https://github.com/Mr-Divyansh/Rate-Gpt  
 **Production URL:** https://rate-gpt.vercel.app/
 
-> This document is the current release status. It intentionally does not declare the product complete until the latest `main` commit is deployed to the production domain and the production smoke suite passes.
+> This document is the current release status. It does not declare the product complete until the latest `main` commit is deployed to the production domain and the production smoke suite passes.
 
 ## 1. Current repository state
 
-- Latest `main` commit: `835739a3376a714143fe59b4d9016d01bfd81c7e`
-- PR #49 (mobile navigation keyboard-focus restoration) is merged; its CI check passed.
-- PR #50 (accurate release-readiness documentation) is merged; its CI run `43730075809` passed.
-- PR #51 (five-column mandi empty-state alignment) is merged; its CI run `43730150356` passed, including the new responsive regression assertion.
-- The full CI pipeline passed on the code changes: dependency audit, unit/service tests, API integration, AGMARKNET catalogue tests, site metadata, responsive regression checks, TypeScript and production build.
-- No open pull requests or GitHub issues were present immediately after PR #51 merged.
+- Latest verified `main` commit: `98a53ec4c866e1e3c89a87c8ee94f48e69093dfb`.
+- PR #49: mobile navigation keyboard-focus restoration — merged.
+- PR #50: accurate release-readiness documentation — merged.
+- PR #51: five-column mandi empty-state alignment — merged.
+- PR #52: release status refresh — merged.
+- PR #53: production smoke release gate — merged.
+- PR #53 makes the production smoke workflow fail explicitly when production still serves an older release or the deployment is rate-limited. It no longer treats a skipped public smoke suite as a successful release verification.
+- CI for PR #53 passed: dependency audit, unit/service tests, API integration tests, AGMARKNET catalogue checks, site metadata, responsive regression checks, release-gate regression checks, TypeScript and production build.
+- The release-gate regression test checks the stale-release failure path and required release markers.
+- No open pull requests or GitHub issues were present at the last repository audit.
 
 ## 2. Production deployment status
 
-**Production is behind the latest source commit.**
+**Production is not yet verified against the latest main commit.**
 
-Latest Vercel deployment explicitly targeting production at the last audit:
+Last known Vercel production deployment from the deployment audit:
 
 - Deployment: `dpl_7E6PVs7AFT3o6Q7skYkCPg2XgHDx`
 - State: `READY`
 - Branch: `main`
 - Deployed commit: `70fe7bc560b6a5b3e8a2f3444f01cf84fca989bb`
 
-Latest repository `main` is `835739a3376a714143fe59b4d9016d01bfd81c7e`, so the production deployment does not yet contain the latest merged work.
+Latest `main` is `98a53ec4c866e1e3c89a87c8ee94f48e69093dfb`; therefore, the last known production deployment is behind the repository.
 
-A separate `READY` Vercel deployment for `fix/mobile-navigation-focus-restoration` is a preview deployment. It is not evidence that the production domain has been updated.
+A separate `READY` Vercel deployment for a feature branch is a preview deployment, not evidence that the production domain has been updated.
 
-Vercel reported the free deployment quota limit and a 24-hour retry cooldown. Do not bypass the limit or repeatedly retry. The scheduled deployment verification is set for **16 November 2026, 8:45 PM IST**. The deployment must be checked again then.
+Vercel reported the free deployment quota limit and a 24-hour retry cooldown on 15 November 2026. The recorded retry time is **16 November 2026, 8:42 PM IST or later**. A scheduled verification is set for **16 November 2026, 8:45 PM IST**. Do not bypass the limit, create duplicate deployments, or repeatedly retry before the cooldown expires.
 
-The GitHub production smoke workflow for commit `a50fac5` completed with overall workflow status `success`, but its `Run public production checks` step was **skipped** because the release markers did not reach production before the wait window expired. Therefore, this is not a successful production smoke test and does not verify the production API or frontend.
+The earlier production smoke workflow completed while its public smoke step was skipped because release markers had not reached production. That run did not verify the production API or frontend. PR #53 now makes this condition fail the workflow instead of showing a misleading green result.
 
-## 3. Live government data — what is and is not verified
+## 3. Live government data — verified implementation and external limits
 
 ### Implemented
 
-- Price observations are fetched on demand from the Government of India's OGD resource:
-  `9ef84268-d588-465a-a308-a864a43d0070`.
+- Price observations are fetched on demand from the Government of India's OGD resource: `9ef84268-d588-465a-a308-a864a43d0070`.
 - Price records are not persisted in a database by the application.
-- The production Vercel environment has a `DATA_GOV_API_KEY` secret configured. The secret value was not read or exposed during this audit.
 - The public AGMARKNET 2.0 filters endpoint supplies the administrative state, district, market and commodity directory.
 - The directory cache applies only to selector metadata. It does not cache price observations.
-- The UI and API preserve the source unit. If the upstream observation has no unit, the application must show that the unit was not provided rather than assume a unit.
-- Missing prices must remain missing; the application must not synthesize or invent observations.
+- The UI and API preserve the source unit. If the upstream observation has no unit, the application reports that the unit was not provided rather than assuming a unit.
+- Missing prices remain missing; the application must not synthesize or invent observations.
+- Price responses distinguish the successful API fetch timestamp from the government-reported arrival date and upstream update timestamp when supplied.
 
 ### External source limitations
 
 - The AGMARKNET 2.0 price-report endpoint returned `TOKEN_OR_CAPTCHA_REQUIRED` during prior testing. Rate-GPT must not bypass or automate that CAPTCHA/token gate.
 - The OGD feed's actual returned rows do not prove complete daily coverage of every registered mandi.
 - “Live” means a fresh request for the latest government-published observation available from the upstream source. It does not mean an instantaneous auction/trading quote.
-- Broader coverage requires another official, documented, unattended government price-data source. Do not label all-India or state coverage complete without measured source evidence.
+- Broader coverage requires another official, documented, unattended government price-data source. Do not label all-India or state price coverage complete without measured source evidence.
 
 See [live-data coverage and source limitations](docs/live-data-coverage.md).
 
 ## 4. Product quality and UI
 
-- The codebase has a responsive desktop/mobile layout, mobile price cards, filters, paging, CSV export, Hindi/English labels and reduced-motion styling.
+- The codebase has responsive desktop/mobile layouts, mobile price cards, filters, paging, CSV export, Hindi/English labels and reduced-motion styling.
 - The approved design baseline is Forest Green + Warm Ivory + Harvest Gold, with readable surfaces and restrained accents.
-- PR #49 restores keyboard focus to the mobile menu trigger after Escape/backdrop dismissal and adds source-level regression assertions.
-- Responsive source-level checks pass in CI.
+- Mobile navigation restores keyboard focus to its trigger after Escape/backdrop dismissal.
+- Responsive and accessibility-related source-level regression assertions pass in CI.
 - Real browser/device visual testing has not yet been demonstrated by the available CI suite. Do not claim physical-device validation from CSS/source checks alone.
 
 ## 5. Release gates still required
 
 | Gate | Current state | Completion evidence |
 |---|---|---|
-| Main-branch CI | Passed | CI runs for PR #49 and PR #51; PR #50 documentation CI also passed |
+| Main-branch CI | Passed on latest PR #53 changes | All PR #53 CI steps passed |
 | Dependency audit | Passed at `--audit-level=high` | CI audit step; does not exclude low/moderate advisories |
-| Production deployment | Pending latest main | Vercel production deployment READY with SHA `a50fac5...` |
-| Production domain alias | Pending | `rate-gpt.vercel.app` resolves to that deployment |
+| Latest production deployment | Pending | Vercel production deployment READY with SHA `98a53ec...` |
+| Production domain alias | Pending verification | `rate-gpt.vercel.app` resolves to that exact deployment |
 | Production API smoke | Pending latest release | Production smoke suite passes against the custom domain |
 | Live price verification | Pending latest release | Real API response, valid source metadata and timestamps; no fabricated rows |
-| Browser visual QA | Not yet evidenced | Test key pages at mobile, tablet and desktop viewports in a real browser |
+| Browser visual QA | Not yet evidenced | Key pages tested at mobile, tablet and desktop viewports in a real browser |
 | Physical-device QA | Not yet evidenced | Manual check on actual mobile devices |
 | Hackathon/admin submission | Separate external task | Requires authorized access to the relevant submission portal |
 
@@ -90,4 +93,4 @@ Rate-GPT can be called production-ready for this release only when all of the fo
 6. Key user flows work across desktop/mobile browser viewports, with remaining physical-device limitations clearly reported.
 7. Documentation matches the actual deployed code and data-source capabilities.
 
-**Current verdict: engineering checks pass on main, but the latest main commit is not yet verified in production. Release completion remains pending deployment and production verification.**
+**Current verdict: latest main-branch engineering CI passes, but the latest main commit is not yet verified in production. Release completion remains pending deployment, production API/data checks and browser QA.**
