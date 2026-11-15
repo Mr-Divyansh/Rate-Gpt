@@ -208,6 +208,11 @@ function uniqueBy<T>(rows: T[], keyOf: (row: T) => string): T[] {
   });
 }
 
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "en-IN", { sensitivity: "base" }));
+}
+
 async function getCatalog(fetcher: typeof fetch = fetch): Promise<AgmarknetCatalog> {
   if (catalogCache && catalogCache.expiresAt > Date.now()) return catalogCache.value;
   const payload = await requestJson("/daily-price-arrival/filters", {}, fetcher);
