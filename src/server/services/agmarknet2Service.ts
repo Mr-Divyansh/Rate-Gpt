@@ -318,7 +318,7 @@ export async function fetchAgmarknet2Filters(
     states: uniqueSorted(catalog.state_data.map((row) => canonicalStateName(row.state_name))),
     districts: districtNames,
     markets: marketNames,
-    commodities: catalog.cmdt_data.map((row) => row.cmdt_name).sort(),
+    commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
     coverage: {
       status: stateRows.length ? "complete" : "catalogue",
       pagesScanned: 1,
