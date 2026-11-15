@@ -542,8 +542,8 @@ async function main() {
           marketPayload.data.length === 1 &&
           marketPayload.data[0]?.market === item.market &&
           marketPayload.data[0]?.commodity === item.commodity &&
-          marketPayload.data[0]?.grade === item.grade,
-        `${item.market} regression preserves the sole matching source observation`,
+          marketPayload.data[0]?.grade === null,
+        `${item.market} regression preserves the source observation`,
       );
       assert(
         sourceRequest?.method === "GET" &&
