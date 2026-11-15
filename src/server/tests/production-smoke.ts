@@ -213,6 +213,12 @@ async function main(): Promise<void> {
   const page = await request("/mandi-prices.html");
   const html = await page.text();
   check(page.status === 200 && /<title[^>]*>Rate-GPT<\/title>/i.test(html), "public mandi prices page is served");
+  check(
+    /id=["']stateSelect["']/.test(html) &&
+      /id=["']districtSelect["']/.test(html) &&
+      /id=["']mandiGrid["']/.test(html),
+    "public mandi page contains the State, District and mandi selectors",
+  );
   check(page.headers.has("content-security-policy"), "production page sends Content-Security-Policy");
   check(page.headers.get("x-content-type-options") === "nosniff", "production page sends X-Content-Type-Options: nosniff");
   check(page.headers.has("strict-transport-security"), "production page sends HSTS");
