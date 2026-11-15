@@ -1,4 +1,5 @@
 import { t, tCount, onLangChange } from "./i18n.js";
+// auto-refresh test
 import { hydrateIcons, icon } from "./icons.js";
 import {
   fetchFilters, fetchPrices, fetchSyncStatus,
@@ -50,6 +51,8 @@ const state = {
   exporting: false,
   exportStatus: null,
   sync: null,
+  lastFetchedAt: null,
+  upstreamUpdatedAt: null,
 };
 let navToken = 0; // guards async state → district → mandi chains against fast re-selection
 
@@ -280,6 +283,7 @@ function updateControls() {
     state.allIndia ? "finder.browsingIndia" : "finder.browseIndia",
   );
   $("exportCsv").disabled = !(state.market || state.allIndia) || (state.loading && !state.exporting);
+  $(\"refreshPrices\").disabled = !state.market && !state.allIndia;
   $("exportCsv").textContent = t(state.exporting ? "results.exportCancel" : "results.export");
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
@@ -693,7 +697,7 @@ function renderSync() {
   }
   text.textContent = data.fetchedAt
     ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
-    : t("sync.onSearch");
+    : t("sync.lastFetched", { time: fetched, upstream: upstream });
   dot.dataset.state = data.fetchedAt ? "live" : "none";
   const transparency = data.fetchedAt
     ? t("sync.transparency", {
@@ -711,6 +715,8 @@ function renderSync() {
 async function loadSync() {
   try {
     const status = await fetchSyncStatus();
+    state.lastFetchedAt = status.data.lastFetchedAt;
+    state.upstreamUpdatedAt = status.data.upstreamUpdatedAt;
     state.sync = {
       ...status,
       fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt,
@@ -744,6 +750,15 @@ function bind() {
     loadPrices();
   });
   $("exportCsv").addEventListener("click", exportCsv);
+  $("refreshPrices").addEventListener("click", () => {
+    state.loading = true;
+    state.error = "";
+    renderResults();
+    renderSync();
+    loadPrices();
+    state.loading = false;
+    renderResults();
+  });
   $("loadMore").addEventListener("click", () => {
     state.meta.offset = state.meta.nextOffset;
     loadPrices({ append: true });
@@ -779,16 +794,40 @@ function bind() {
   // Refresh the selected market periodically while the page is visible.
   // The upstream source publishes daily observations, so this is a re-fetch,
   // not a promise that the government data itself changes every interval.
-  window.setInterval(() => {
+  let refreshInterval = null;
+
+function startAutoRefresh() {
+  if (refreshInterval) clearInterval(refreshInterval);
+
+  refreshInterval = setInterval(() => {
     if (
       document.visibilityState === "visible" &&
-      state.market &&
       !state.loading &&
       !state.exporting
     ) {
       loadPrices();
     }
   }, 5 * 60 * 1000);
+}
+
+function stopAutoRefresh() {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
+}
+
+// Refresh when returning to visible tab (pause while hidden, then refresh)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    startAutoRefresh();
+    loadPrices(); // Fetch fresh data when user returns to tab
+  } else {
+    stopAutoRefresh();
+  }
+});
+
+startAutoRefresh();
   onLangChange(() => {
     renderFinder();
     updateControls();

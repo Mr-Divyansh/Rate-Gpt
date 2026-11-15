@@ -165,14 +165,17 @@ export function normalizeArrivalDate(
 ): string | null {
   if (typeof rawDate !== "string" || !rawDate.trim()) return null;
   const trimmed = rawDate.trim();
-  const dmyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+
+  const dmyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:[T\s].*)?$/);
   if (dmyMatch) {
     return validIsoDate(Number(dmyMatch[3]), Number(dmyMatch[2]), Number(dmyMatch[1]));
   }
-  const ymdMatch = trimmed.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
+
+  const ymdMatch = trimmed.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?:[T\s].*)?$/);
   if (ymdMatch) {
     return validIsoDate(Number(ymdMatch[1]), Number(ymdMatch[2]), Number(ymdMatch[3]));
   }
+
   const parsed = new Date(trimmed);
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
 }
@@ -244,8 +247,14 @@ export function mapUpstreamRecord(raw: unknown): RawMandiInput | null {
     minPrice: parsePrice(field("min_price", "Min_Price")),
     maxPrice: parsePrice(field("max_price", "Max_Price")),
     modalPrice: parsePrice(field("modal_price", "Modal_Price")),
-    sourceUnit: "Rs/Quintal",
+    sourceUnit: normalizeSourceUnit(field("unit", "Unit") ?? record.source_unit),
   };
+}
+
+function normalizeSourceUnit(value: unknown): string {
+  if (typeof value !== "string") return "Rs/Quintal";
+  const trimmed = value.trim();
+  return trimmed || "Rs/Quintal";
 }
 
 export function parsePageInteger(value: unknown): number | null {
@@ -575,6 +584,7 @@ async function requestGovernmentPage(
     try {
       response = await fetcher(url, {
         method: "GET",
+        cache: "no-store",
         headers: {
           Accept: "application/json",
           "User-Agent": "RateGPT-Mandi-Client/1.0",
@@ -647,6 +657,13 @@ function retryAfterMilliseconds(value: string | null): number | null {
   return Math.min(Math.max(0, date - Date.now()), RETRY_MAX_DELAY_MS);
 }
 
+export interface FilterCacheInfo {
+  status: "not-cached" | "temporary-cache";
+  ttlMs: number;
+  storedAt: string | null;
+  appliesTo: string;
+}
+
 type LiveFilterMetadata = {
   states: string[];
   districts: string[];
@@ -660,13 +677,28 @@ type LiveFilterMetadata = {
     maxOffset: number;
     message: string;
   };
+  cache: FilterCacheInfo;
 };
 
+type StoredFilterMetadata = Omit<LiveFilterMetadata, "cache">;
+
 // Filter metadata is small and short-lived. Cache only dropdown options in
-// process memory; mandi price records are never cached or written to the DB.
+// process memory for FILTER_CACHE_TTL_MS. Mandi price records are never
+// cached or written to a database.
 const FILTER_CACHE_TTL_MS = 60_000;
+const FILTER_CACHE_SCOPE =
+  "Location dropdown options only. Mandi price records are fetched live and are not cached.";
 const FILTER_CACHE_MAX_ENTRIES = 64;
-const liveFilterCache = new Map<string, { expiresAt: number; value: LiveFilterMetadata }>();
+const liveFilterCache = new Map<string, { expiresAt: number; storedAt: string; value: StoredFilterMetadata }>();
+
+function filterCacheInfo(cached: boolean, storedAt: string | null, ttlMs = FILTER_CACHE_TTL_MS): FilterCacheInfo {
+  return {
+    status: cached ? "temporary-cache" : "not-cached",
+    ttlMs,
+    storedAt,
+    appliesTo: FILTER_CACHE_SCOPE,
+  };
+}
 const liveFilterInFlight = new Map<string, Promise<LiveFilterMetadata>>();
 
 function filterCacheKey(options: { state?: string; district?: string; market?: string }): string {
@@ -696,13 +728,19 @@ export async function fetchLiveFilters(options: {
         maxOffset: MAX_OFFSET,
         message: "State and union-territory names are an administrative selector; availability is determined by live source records.",
       },
+      cache: filterCacheInfo(false, null, 0),
     };
   }
 
   const key = filterCacheKey(options);
   const now = Date.now();
   const cached = liveFilterCache.get(key);
-  if (cached && cached.expiresAt > now) return cached.value;
+  if (cached && cached.expiresAt > now) {
+    return {
+      ...cached.value,
+      cache: filterCacheInfo(true, cached.storedAt),
+    };
+  }
   if (cached) liveFilterCache.delete(key);
 
   const pending = liveFilterInFlight.get(key);
@@ -760,7 +798,8 @@ export async function fetchLiveFilters(options: {
     }
 
     const complete = !upstreamHasNext;
-    const value: LiveFilterMetadata = {
+    const storedAt = new Date().toISOString();
+    const value: StoredFilterMetadata = {
       states: uniqueSorted(STATES_AND_UTS),
       districts: uniqueSorted([...districts]),
       markets: uniqueSorted([...markets]),
@@ -782,8 +821,15 @@ export async function fetchLiveFilters(options: {
       const oldestKey = liveFilterCache.keys().next().value;
       if (oldestKey) liveFilterCache.delete(oldestKey);
     }
-    liveFilterCache.set(key, { value, expiresAt: Date.now() + FILTER_CACHE_TTL_MS });
-    return value;
+    liveFilterCache.set(key, {
+      value,
+      storedAt,
+      expiresAt: Date.now() + FILTER_CACHE_TTL_MS,
+    });
+    return {
+      ...value,
+      cache: filterCacheInfo(false, storedAt),
+    };
   })();
 
   liveFilterInFlight.set(key, request);

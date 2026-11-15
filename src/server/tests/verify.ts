@@ -69,6 +69,7 @@ async function main(): Promise<void> {
 
   check(normalizeArrivalDate("13/11/2026") === "2026-11-13", "DD/MM/YYYY dates are normalized");
   check(normalizeArrivalDate("2026-11-13") === "2026-11-13", "ISO dates are preserved");
+  check(normalizeArrivalDate("2026-11-13T23:30:00+05:30") === "2026-11-13", "timezone-offset ISO timestamps keep the local calendar day");
   check(normalizeArrivalDate("31/02/2026") === null, "impossible dates are rejected");
   check(parsePrice("1,234.50") === 1234.5, "formatted numeric prices are parsed");
   check(parsePrice("") === null && parsePrice("-1") === null, "missing and negative prices are not fabricated");

@@ -14,6 +14,7 @@ import {
   normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
+import { summarizeModalComparison } from "../../../script/price-comparison.js";
 
 const router = Router();
 
@@ -88,6 +89,10 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
         source: "Government of India OGD / AGMARKNET",
         scope: data.coverage.message,
         coverage: data.coverage,
+        filterCacheStatus: data.cache.status,
+        filterCacheTtlMs: data.cache.ttlMs,
+        filterCacheStoredAt: data.cache.storedAt,
+        filterCacheAppliesTo: data.cache.appliesTo,
       },
       "Live filter metadata retrieved",
     );
@@ -228,8 +233,9 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
           normalizeArrivalDate(parsed.data.date) ??
           parsed.data.date,
         comparisonMayBePartial: records.meta.upstreamHasNext,
+        comparison: summarizeModalComparison(records.records),
         comparisonRule:
-          "Compare only records with matching variety and source unit; this endpoint returns observations and does not calculate price differences.",
+          "Compare only records with the same commodity and source unit; matching variety is required before treating prices as like-for-like. This endpoint returns observations and does not recommend travelling to a mandi.",
         scope: "One live government API page for the requested commodity and arrival date; use pagination for more records.",
       },
       "Latest government-reported market observations retrieved",
@@ -353,7 +359,7 @@ router.get("/sync-status", (_req: Request, res: Response) => {
     source: "Government of India OGD / AGMARKNET",
     freshnessStatus:
       "Data is fetched from the government source when requested; published arrival data is not guaranteed real-time.",
-    lastFetchedAt: null,
+    lastFetchedAt: now,
     timestamp: new Date().toISOString(),
   });
 });
