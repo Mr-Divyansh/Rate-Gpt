@@ -100,10 +100,116 @@ const sourceRecords = [
   },
 ];
 
+const expectedStatesAndUnionTerritories = [
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+  "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+];
+
+const stateIds = new Map(expectedStatesAndUnionTerritories.map((name, index) => [name, index + 1]));
+const districtDirectory = new Map<string, { id: number; state_id: number; district_name: string }>();
+const marketDirectory = new Map<string, { id: number; state_id: number; district_id: number; mkt_name: string }>();
+const commodityDirectory = new Map<string, { cmdt_id: number; cmdt_name: string; cmdt_group_id: number }>();
+let nextDistrictId = 100;
+let nextMarketId = 1_000;
+let nextCommodityId = 1;
+for (const record of sourceRecords as any[]) {
+  const state_id = stateIds.get(record.State);
+  if (!state_id) continue;
+  const districtKey = `${record.State}| ${record.District}`;
+  if (!districtDirectory.has(districtKey)) {
+    districtDirectory.set(districtKey, {
+      id: nextDistrictId++, state_id, district_name: record.District,
+    });
+  }
+  const district = districtDirectory.get(districtKey)!;
+  const marketKey = `${districtKey}| ${record.Market}`;
+  if (!marketDirectory.has(marketKey)) {
+    marketDirectory.set(marketKey, {
+      id: nextMarketId++, state_id, district_id: district.id, mkt_name: record.Market,
+    });
+  }
+  if (!commodityDirectory.has(record.Commodity)) {
+    commodityDirectory.set(record.Commodity, {
+      cmdt_id: nextCommodityId++, cmdt_name: record.Commodity, cmdt_group_id: 4,
+    });
+  }
+}
+
+const agmarknetRequests: Array<{ url: URL; method: string; body?: Record<string, unknown> }> = [];
 const upstreamRequests: URL[] = [];
 const upstream = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
   upstreamRequests.push(url);
+
+  if (url.pathname.endsWith("/daily-price-arrival/filters")) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      status: true,
+      message: "Filters fetched successfully",
+      data: {
+        state_data: expectedStatesAndUnionTerritories.map((state_name) => ({
+          state_id: stateIds.get(state_name), state_name,
+        })),
+        district_data: [...districtDirectory.values()],
+        market_data: [...marketDirectory.values()],
+        cmdt_data: [...commodityDirectory.values()],
+      },
+    }));
+    return;
+  }
+
+  if (url.pathname.endsWith("/prices-and-arrivals/market-report/daily")) {
+    let rawBody = "";
+    req.on("data", (chunk) => { rawBody += chunk; });
+    req.on("end", () => {
+      const body = JSON.parse(rawBody || "{}") as Record<string, unknown>;
+      agmarknetRequests.push({ url, method: req.method || "POST", body });
+      const date = String(body.date || "");
+      const requestedMarketIds = new Set(
+        Array.isArray(body.marketIds) ? body.marketIds.map(Number) : [],
+      );
+      const requestedStateIds = new Set(
+        Array.isArray(body.stateIds) ? body.stateIds.map(Number) : [],
+      );
+      const states = expectedStatesAndUnionTerritories.flatMap((stateName) => {
+        const stateId = stateIds.get(stateName)!;
+        if (!requestedStateIds.has(stateId)) return [];
+        const markets = [...marketDirectory.values()]
+          .filter((market) => market.state_id === stateId && requestedMarketIds.has(market.id))
+          .map((market) => {
+            const district = [...districtDirectory.values()].find((row) => row.id === market.district_id)?.district_name || "";
+            const rows = (sourceRecords as any[]).filter((record) =>
+              record.State === stateName &&
+              record.District === district &&
+              record.Market === market.mkt_name &&
+              normalizeArrivalDate(String(record.Arrival_Date)) === date,
+            );
+            const commodities = [...new Set(rows.map((row) => row.Commodity))].map((commodityName) => ({
+              commodityId: commodityDirectory.get(String(commodityName))?.cmdt_id,
+              commodityName,
+              data: rows.filter((row) => row.Commodity === commodityName).map((row) => ({
+                variety: row.Variety || "Unspecified",
+                grade: row.Grade || "Unspecified",
+                minimumPrice: row.Min_Price,
+                maximumPrice: row.Max_Price,
+                modalPrice: row.Modal_Price,
+                unitOfPrice: "Rs./Quintal",
+              })),
+            }));
+            return { marketId: market.id, marketName: market.mkt_name, commodities };
+          });
+        return [{ stateId, stateName, markets }];
+      });
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, states }));
+    });
+    return;
+  }
+
   const filters = [
     ["filters[state.keyword]", "State"],
     ["filters[district.keyword]", "District"],
@@ -111,7 +217,7 @@ const upstream = http.createServer((req, res) => {
     ["filters[commodity.keyword]", "Commodity"],
     ["filters[arrival_date]", "Arrival_Date"],
   ] as const;
-  let records = sourceRecords.filter((record) =>
+  let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
       const filter = url.searchParams.get(parameter);
       const sourceValue = field === "Arrival_Date"
@@ -168,6 +274,8 @@ async function main() {
   process.env.DATA_GOV_API_KEY = apiKey;
   process.env.DATA_GOV_API_BASE_URL =
     `http://127.0.0.1:${upstreamAddress.port}/resource`;
+  process.env.AGMARKNET_API_BASE_URL =
+    `http://127.0.0.1:${upstreamAddress.port}/v1`;
   process.env.NODE_ENV = "test";
   const app = createApiApp();
   const apiServer = http.createServer(app);
@@ -265,44 +373,7 @@ async function main() {
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
     const initialFilterRequest = upstreamRequests.at(-1)!;
 
-    const expectedStatesAndUnionTerritories = [
-      "Andaman and Nicobar Islands",
-      "Andhra Pradesh",
-      "Arunachal Pradesh",
-      "Assam",
-      "Bihar",
-      "Chandigarh",
-      "Chhattisgarh",
-      "Dadra and Nagar Haveli and Daman and Diu",
-      "Delhi",
-      "Goa",
-      "Gujarat",
-      "Haryana",
-      "Himachal Pradesh",
-      "Jammu and Kashmir",
-      "Jharkhand",
-      "Karnataka",
-      "Kerala",
-      "Ladakh",
-      "Lakshadweep",
-      "Madhya Pradesh",
-      "Maharashtra",
-      "Manipur",
-      "Meghalaya",
-      "Mizoram",
-      "Nagaland",
-      "Odisha",
-      "Puducherry",
-      "Punjab",
-      "Rajasthan",
-      "Sikkim",
-      "Tamil Nadu",
-      "Telangana",
-      "Tripura",
-      "Uttar Pradesh",
-      "Uttarakhand",
-      "West Bengal",
-    ];
+    const expectedStatesAndUnionTerritories = stateNamesForIntegration;
     assert(
       filters.data.states.length === 36 &&
         expectedStatesAndUnionTerritories.every((state) => filters.data.states.includes(state)),
