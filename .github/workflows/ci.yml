@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -64,6 +65,30 @@ jobs:
 
       - name: Install Chromium browser
         run: npx playwright install --with-deps chromium
+
+      - name: Select Vercel preview for pull-request browser checks
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          preview_url=""
+          for attempt in $(seq 1 18); do
+            comments="$(curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
+            preview_url="$(printf '%s' "${comments}" | jq -r '[.[] | .body | try (capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url) catch empty] | last // empty')"
+            if [ -n "${preview_url}" ]; then
+              echo "RATE_GPT_BASE_URL=${preview_url}" >> "${GITHUB_ENV}"
+              echo "Browser checks will target the PR's READY Vercel preview."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Vercel preview URL was not published in the PR comments." >&2
+          exit 1
 
       - name: Production browser interaction checks
         run: node scripts/production-browser-smoke.mjs
