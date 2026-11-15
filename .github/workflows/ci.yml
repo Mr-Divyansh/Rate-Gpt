@@ -82,7 +82,7 @@ jobs:
               -H "Authorization: Bearer ${GH_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
               "https://api.github.com/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
-            preview_url="$(printf '%s' "${comments}" | jq -r '[.[] | .body | try (capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url) catch empty] | last // empty')"
+            preview_url="$(printf '%s' "${comments}" | jq -r '[.[] | select(.user.login == "vercel[bot]") | .body] | last // "" | if contains("Ready") then (try (capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url) catch "") else "" end')"
             if [ -n "${preview_url}" ]; then
               echo "RATE_GPT_BASE_URL=${preview_url}" >> "${GITHUB_ENV}"
               echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
