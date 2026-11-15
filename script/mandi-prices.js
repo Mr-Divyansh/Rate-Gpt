@@ -330,7 +330,7 @@ function cropBlock(record, showLocation = false) {
     typeof record.variety === "string" ? record.variety.trim() : "",
     typeof record.grade === "string" ? record.grade.trim() : "",
     typeof record.source_unit === "string" && record.source_unit.trim()
-      ? (state.priceUnit === "kg" && /rs\\.?\\s*\\/\\s*quintal/i.test(record.source_unit) ? "₹ / kg" : record.source_unit)
+      ? (state.priceUnit === "kg" && /rs\.?\s*\/\s*quintal/i.test(record.source_unit) ? "₹ / kg" : record.source_unit)
       : t("results.unitUnavailable"),
   ]
     .filter(Boolean)
@@ -497,7 +497,7 @@ function renderResults() {
   } else {
     const displayRecords = state.records.map((record) => {
       const isQuintal = typeof record.source_unit === "string" &&
-        /rs\\.?\\s*\\/\\s*quintal/i.test(record.source_unit);
+        /rs\.?\s*\/\s*quintal/i.test(record.source_unit);
       const divisor = state.priceUnit === "kg" && isQuintal ? 100 : 1;
       return {
         ...record,
