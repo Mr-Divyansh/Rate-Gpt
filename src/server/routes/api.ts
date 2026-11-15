@@ -14,6 +14,11 @@ import {
   normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
+import {
+  fetchAgmarknet2Filters,
+  fetchAgmarknet2Prices,
+  searchAgmarknet2Commodities,
+} from "../services/agmarknet2Service.js";
 
 const router = Router();
 
@@ -80,12 +85,19 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    const data = await fetchLiveFilters(parsed.data);
+    let data;
+    try {
+      data = await fetchAgmarknet2Filters(parsed.data);
+    } catch {
+      // Keep the OGD resource as a live fallback if the newer AGMARKNET 2.0
+      // directory is temporarily unavailable.
+      data = await fetchLiveFilters(parsed.data);
+    }
     return sendSuccess(
       res,
       data,
       {
-        source: "Government of India OGD / AGMARKNET",
+        source: data.source ?? "Government of India OGD / AGMARKNET",
         scope: data.coverage.message,
         coverage: data.coverage,
         filterCacheStatus: data.cache.status,
@@ -149,11 +161,25 @@ router.get("/prices", async (req: Request, res: Response) => {
 
   try {
     const { date, ...filters } = parsed.data;
-    const { records, meta } = await fetchLivePrices({
-      ...filters,
-      arrivalDate: date,
-    });
-    return sendSuccess(res, records, meta, "Latest government-reported prices fetched successfully");
+    const liveOptions = { ...filters, arrivalDate: date };
+    let result;
+    if (liveOptions.state) {
+      try {
+        result = await fetchAgmarknet2Prices(liveOptions);
+      } catch {
+        // The data.gov.in current-daily resource remains a live fallback; no
+        // price records are persisted when either upstream is unavailable.
+        result = await fetchLivePrices(liveOptions);
+      }
+    } else {
+      result = await fetchLivePrices(liveOptions);
+    }
+    return sendSuccess(
+      res,
+      result.records,
+      result.meta,
+      "Latest government-reported prices fetched successfully",
+    );
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {
       return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
@@ -270,7 +296,12 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
   }
 
   try {
-    const results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    let results: string[];
+    try {
+      results = await searchAgmarknet2Commodities(parsed.data.q, parsed.data.limit);
+    } catch {
+      results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    }
     return sendSuccess(
       res,
       results,
