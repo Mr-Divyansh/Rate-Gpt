@@ -46,6 +46,9 @@ jobs:
       - name: AGMARKNET 2.0 service tests
         run: npm run test:agmarknet2
 
+      - name: Verify public AGMARKNET 2.0 upstream
+        run: npm run test:agmarknet2:live
+
       - name: Public-site SEO metadata checks
         run: npm run test:site
 
