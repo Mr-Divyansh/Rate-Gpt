@@ -31,6 +31,7 @@ const state = {
   states: [], districts: [], markets: [],
   location: { state: "", district: "" },
   market: "",
+  allIndia: false,
   arrivalDate: "",
   records: [],
   meta: {
@@ -82,6 +83,10 @@ function chip(label, { pressed = false, sub = "", onClick }) {
 function renderMandis() {
   const grid = $("mandiGrid");
   const help = $("mandiHelp");
+  $("indiaBrowse").textContent = t(
+    state.allIndia ? "finder.browsingIndia" : "finder.browseIndia",
+  );
+  $("indiaBrowse").setAttribute("aria-pressed", String(state.allIndia));
   grid.replaceChildren();
   const { state: s, district } = state.location;
   if (state.finderError) {
@@ -146,6 +151,7 @@ function renderFinder() {
 
 async function chooseState(name, { district = "", market = "" } = {}) {
   const token = ++navToken;
+  state.allIndia = false;
   state.location = { state: name, district: "" };
   state.districts = [];
   state.markets = [];
@@ -174,6 +180,7 @@ async function chooseState(name, { district = "", market = "" } = {}) {
 
 async function chooseDistrict(name, { market = "" } = {}) {
   const token = ++navToken;
+  state.allIndia = false;
   state.location.district = name;
   state.markets = [];
   state.market = "";
@@ -204,6 +211,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
 }
 
 function selectMandi(market) {
+  state.allIndia = false;
   state.market = market;
   const entry = { ...state.location, market };
   saveLocation(entry);
@@ -212,6 +220,29 @@ function selectMandi(market) {
   renderMandis();
   renderRecent();
   loadPrices();
+}
+
+function toggleIndiaBrowse() {
+  if (state.loading || state.exporting) return;
+  state.allIndia = !state.allIndia;
+  state.market = "";
+  state.location = { state: "", district: "" };
+  state.districts = [];
+  state.markets = [];
+  state.finderError = "";
+  if (state.allIndia) {
+    $("cropSearch").value = "";
+    $("arrivalDate").value = "";
+    state.arrivalDate = "";
+    $("sortFilter").value = "date_desc";
+    state.sort = "date_desc";
+  }
+  clearResults();
+  renderFinder();
+  if (state.allIndia) {
+    history.replaceState(null, "", `${location.pathname}?scope=india`);
+    loadPrices();
+  }
 }
 
 /* ============================ results ============================ */
@@ -236,14 +267,19 @@ function clearResults() {
 
 function updateControls() {
   const locked = state.loading || state.exporting;
-  const on = Boolean(state.market) && !locked;
+  const on = Boolean(state.market || state.allIndia) && !locked;
   $("stateSelect").disabled = state.exporting || state.states.length === 0;
   $("districtSelect").disabled = state.exporting || !state.location.state || state.districts.length === 0;
-  $("cropSearch").disabled = !state.market || state.exporting;
-  $("arrivalDate").disabled = !state.market || state.exporting;
+  $("cropSearch").disabled = !(state.market || state.allIndia) || state.exporting;
+  $("arrivalDate").disabled = !(state.market || state.allIndia) || state.exporting;
   $("sortFilter").disabled = !on;
   $("clearFilters").disabled = !on;
-  $("exportCsv").disabled = !state.market || (state.loading && !state.exporting);
+  $("indiaBrowse").disabled = locked;
+  $("indiaBrowse").setAttribute("aria-pressed", String(state.allIndia));
+  $("indiaBrowse").textContent = t(
+    state.allIndia ? "finder.browsingIndia" : "finder.browseIndia",
+  );
+  $("exportCsv").disabled = !(state.market || state.allIndia) || (state.loading && !state.exporting);
   $("exportCsv").textContent = t(state.exporting ? "results.exportCancel" : "results.export");
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
@@ -269,13 +305,21 @@ function buildContext(records) {
   };
 }
 
-function cropBlock(record) {
+function cropBlock(record, showLocation = false) {
   const names = cropNames(record.commodity);
   const wrap = document.createElement("div");
   wrap.className = "crop-name";
   const strong = document.createElement("strong");
   strong.textContent = names.primary;
   wrap.append(strong);
+  if (showLocation) {
+    const locationLabel = document.createElement("small");
+    locationLabel.className = "record-location";
+    locationLabel.textContent = [record.market, record.district, record.state]
+      .filter(Boolean)
+      .join(" · ");
+    wrap.append(locationLabel);
+  }
   const second = [
     names.secondary,
     typeof record.variety === "string" ? record.variety.trim() : "",
@@ -300,10 +344,10 @@ function modalBlock(record, tag = "div") {
   return wrap;
 }
 
-function tableRow(record, ctx) {
+function tableRow(record, ctx, showLocation) {
   const tr = document.createElement("tr");
   const crop = document.createElement("td");
-  crop.append(cropBlock(record));
+  crop.append(cropBlock(record, showLocation));
   const date = document.createElement("td");
   date.className = "date-cell";
   date.textContent = formatDate(record.arrival_date);
@@ -317,12 +361,12 @@ function tableRow(record, ctx) {
   return tr;
 }
 
-function cardFor(record, ctx) {
+function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
   const top = document.createElement("div");
   top.className = "price-card-top";
-  top.append(cropBlock(record), modalBlock(record));
+  top.append(cropBlock(record, showLocation), modalBlock(record));
   const meta = document.createElement("div");
   meta.className = "price-card-meta";
   const date = document.createElement("span");
@@ -374,9 +418,14 @@ function skeletonRows() {
 function renderResults() {
   const body = $("priceTableBody");
   const list = $("mobilePriceList");
-  $("pricesHeading").textContent = state.market
-    ? t("results.titleSet", { market: state.market })
-    : t("results.titleNone");
+  $("pricesHeading").textContent = state.allIndia
+    ? t("results.titleAllIndia")
+    : state.market
+      ? t("results.titleSet", { market: state.market })
+      : t("results.titleNone");
+  document.querySelector(".price-table caption").textContent = t(
+    state.allIndia ? "results.captionAllIndia" : "results.caption",
+  );
 
   const busy = state.loading && state.records.length === 0;
   const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
@@ -390,7 +439,7 @@ function renderResults() {
     list.replaceChildren(...cards);
     announcement = t("results.loading");
     $("resultCount").textContent = t("results.loading");
-  } else if (!state.market) {
+  } else if (!state.market && !state.allIndia) {
     const m = messageRows(t("results.pickMandi"));
     body.replaceChildren(m.row);
     list.replaceChildren(m.card);
@@ -410,10 +459,12 @@ function renderResults() {
       modal_price: record.modal_price === null ? null : record.modal_price / divisor,
     }));
     const ctx = buildContext(displayRecords);
-    body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx)));
-    list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx)));
+    body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx, state.allIndia)));
+    list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx, state.allIndia)));
     $("resultCount").textContent = tCount("results.count", state.records.length);
-    announcement = `${state.market}: ${$("resultCount").textContent}`;
+    announcement = state.allIndia
+      ? t("results.allIndiaAnnouncement", { n: state.records.length.toLocaleString("en-IN") })
+      : `${state.market}: ${$("resultCount").textContent}`;
   }
 
   $("showingText").textContent = state.records.length > 0
@@ -458,13 +509,13 @@ function renderError() {
 
 function priceQueryParams() {
   const params = {
-    state: state.location.state,
-    district: state.location.district,
-    market: state.market,
     limit: "100",
     offset: "0",
     sort: state.sort,
   };
+  if (state.location.state) params.state = state.location.state;
+  if (state.location.district) params.district = state.location.district;
+  if (state.market) params.market = state.market;
   const search = $("cropSearch").value.trim();
   if (search) params.search = search;
   if (state.arrivalDate) params.date = state.arrivalDate;
@@ -476,7 +527,7 @@ async function exportCsv() {
     state.exportController?.abort();
     return;
   }
-  if (!state.market || state.loading) return;
+  if ((!state.market && !state.allIndia) || state.loading) return;
 
   const controller = new AbortController();
   state.exportController = controller;
@@ -513,7 +564,10 @@ async function exportCsv() {
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = createCsvFilename(state.market, indiaTodayIsoDate());
+    link.download = createCsvFilename(
+      state.allIndia ? "India" : state.market,
+      indiaTodayIsoDate(),
+    );
     document.body.append(link);
     link.click();
     link.remove();
@@ -543,7 +597,7 @@ async function exportCsv() {
 }
 
 async function loadPrices({ append = false, offset = 0, preserveHistory = false } = {}) {
-  if (!state.market) return;
+  if (!state.market && !state.allIndia) return;
   state.controller?.abort();
   const controller = new AbortController();
   state.controller = controller;
@@ -560,13 +614,13 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
   renderResults();
 
   const params = {
-    state: state.location.state,
-    district: state.location.district,
-    market: state.market,
     limit: String(PAGE_SIZE),
     offset: String(state.meta.offset),
     sort: state.sort,
   };
+  if (state.location.state) params.state = state.location.state;
+  if (state.location.district) params.district = state.location.district;
+  if (state.market) params.market = state.market;
   if (state.arrivalDate) params.date = state.arrivalDate;
   const search = $("cropSearch").value.trim();
   if (search) params.search = search;
@@ -676,6 +730,7 @@ function bind() {
   });
   $("stateSelect").addEventListener("change", (e) => chooseState(e.currentTarget.value));
   $("districtSelect").addEventListener("change", (e) => chooseDistrict(e.currentTarget.value));
+  $("indiaBrowse").addEventListener("click", toggleIndiaBrowse);
   $("sortFilter").addEventListener("change", (e) => {
     state.sort = e.currentTarget.value;
     loadPrices();
@@ -762,6 +817,10 @@ async function init() {
   renderFinder();
 
   const params = new URLSearchParams(location.search);
+  if (params.get("scope") === "india") {
+    toggleIndiaBrowse();
+    return;
+  }
   const initial = params.get("state")
     ? { state: params.get("state"), district: params.get("district") || "", market: params.get("market") || "" }
     : loadLocation();

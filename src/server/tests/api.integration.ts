@@ -295,6 +295,14 @@ async function main() {
 
     const firstPage = await fetch(`${base}/api/v1/prices?limit=2&offset=0`).then((r) => r.json());
     const secondPage = await fetch(`${base}/api/v1/prices?limit=2&offset=2`).then((r) => r.json());
+    const nationalRequest = upstreamRequests.at(-2);
+    assert(
+      Boolean(nationalRequest &&
+        !nationalRequest.searchParams.has("filters[state.keyword]") &&
+        !nationalRequest.searchParams.has("filters[district.keyword]") &&
+        !nationalRequest.searchParams.has("filters[market.keyword]")),
+      "unfiltered national pages do not apply location filters",
+    );
     assert(firstPage.meta.nextOffset === 2 && firstPage.meta.hasNext, "first live page advertises next upstream offset");
     assert(upstreamRequests.at(-1)?.searchParams.get("offset") === "2", "next-page request advances upstream offset");
     assert(secondPage.meta.offset === 2, "second-page response reflects upstream offset");
