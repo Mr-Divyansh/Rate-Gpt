@@ -342,6 +342,8 @@ function indiaTodayIsoDate(now = new Date()): string {
 
 function sortRecords(records: MandiRecord[], sort?: string): void {
   records.sort((left, right) => {
+    if (sort === "date_asc") return left.arrival_date.localeCompare(right.arrival_date);
+    if (sort === "date_desc" || !sort) return right.arrival_date.localeCompare(left.arrival_date);
     if (sort === "modal_price_asc" || sort === "modal_price_desc") {
       const a = left.modal_price;
       const b = right.modal_price;
