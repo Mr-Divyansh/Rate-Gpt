@@ -1,5 +1,6 @@
 const BASE_URL = (process.env.RATE_GPT_BASE_URL || "https://rate-gpt.vercel.app").replace(/\/+$/, "");
 const TIMEOUT_MS = 15_000;
+const expectedCommitSha = process.env.RATE_GPT_EXPECTED_COMMIT_SHA;
 let passed = 0;
 let failed = 0;
 
@@ -47,8 +48,9 @@ async function main(): Promise<void> {
     discovery.response.status === 200 &&
       discovery.body?.success === true &&
       discovery.body?.data?.openapi === "https://rate-gpt.vercel.app/openapi.json" &&
-      discovery.body?.data?.priceStorage === "disabled",
-    "AI-readable API discovery endpoint advertises OpenAPI and live-only data mode",
+      discovery.body?.data?.priceStorage === "disabled" &&
+      (!expectedCommitSha || discovery.body?.data?.commitSha === expectedCommitSha),
+    "AI-readable API discovery endpoint advertises OpenAPI, live-only mode and the expected deployed commit",
   );
 
   const openapi = await request("/openapi.json");
