@@ -87,7 +87,7 @@ async function main(): Promise<void> {
 
   const modalColumn = report.columns.find((column: any) => column.key === "modalPrice");
   check(
-    Boolean(modalColumn && /modal price/i.test(modalColumn.title) && /rs\\.\\/?/i.test(modalColumn.title)),
+    Boolean(modalColumn && /modal price/i.test(modalColumn.title) && modalColumn.title.includes("Rs.")),
     "government report identifies the price unit in its column title",
   );
 
