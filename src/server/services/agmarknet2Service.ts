@@ -1,6 +1,7 @@
 import {
   GovernmentApiError,
   normalizeCommoditySearch,
+  STATES_AND_UTS,
 } from "./mandiDataService.js";
 const DEFAULT_BASE_URL = "https://api.agmarknet.gov.in/v1";
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -61,26 +62,6 @@ export function resetAgmarknetCatalogCache(): void {
 
 function normalizeName(value: string): string {
   return value.trim().toLocaleLowerCase("en-IN");
-}
-
-function canonicalStateName(sourceName: string): string {
-  switch (normalizeName(sourceName)) {
-    case "andaman and nicobar":
-      return "Andaman and Nicobar Islands";
-    case "chattisgarh":
-      return "Chhattisgarh";
-    case "dadra and nagar haveli":
-    case "daman and diu":
-      return "Dadra and Nagar Haveli and Daman and Diu";
-    case "nct of delhi":
-      return "Delhi";
-    case "keralam":
-      return "Kerala";
-    case "pondicherry":
-      return "Puducherry";
-    default:
-      return sourceName.trim();
-  }
 }
 
 // The public UI uses current Indian state/UT names, while the AGMARKNET
@@ -272,7 +253,7 @@ export async function fetchAgmarknet2Filters(
   if (options.state && !stateRows.length) {
     return {
       source: SOURCE_NAME,
-      states: uniqueSorted(catalog.state_data.map((row) => canonicalStateName(row.state_name))),
+      states: [...STATES_AND_UTS],
       districts: [],
       markets: [],
       commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
@@ -315,7 +296,7 @@ export async function fetchAgmarknet2Filters(
 
   return {
     source: SOURCE_NAME,
-    states: uniqueSorted(catalog.state_data.map((row) => canonicalStateName(row.state_name))),
+    states: [...STATES_AND_UTS],
     districts: districtNames,
     markets: marketNames,
     commodities: uniqueSorted(catalog.cmdt_data.map((row) => row.cmdt_name)),
