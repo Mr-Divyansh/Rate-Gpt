@@ -100,10 +100,67 @@ const sourceRecords = [
   },
 ];
 
+const expectedStatesAndUnionTerritories = [
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+  "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+];
+
+const stateIds = new Map(expectedStatesAndUnionTerritories.map((name, index) => [name, index + 1]));
+const districtDirectory = new Map<string, { id: number; state_id: number; district_name: string }>();
+const marketDirectory = new Map<string, { id: number; state_id: number; district_id: number; mkt_name: string }>();
+const commodityDirectory = new Map<string, { cmdt_id: number; cmdt_name: string; cmdt_group_id: number }>();
+let nextDistrictId = 100;
+let nextMarketId = 1_000;
+let nextCommodityId = 1;
+for (const record of sourceRecords as any[]) {
+  const state_id = stateIds.get(record.State);
+  if (!state_id) continue;
+  const districtKey = `${record.State}| ${record.District}`;
+  if (!districtDirectory.has(districtKey)) {
+    districtDirectory.set(districtKey, {
+      id: nextDistrictId++, state_id, district_name: record.District,
+    });
+  }
+  const district = districtDirectory.get(districtKey)!;
+  const marketKey = `${districtKey}| ${record.Market}`;
+  if (!marketDirectory.has(marketKey)) {
+    marketDirectory.set(marketKey, {
+      id: nextMarketId++, state_id, district_id: district.id, mkt_name: record.Market,
+    });
+  }
+  if (!commodityDirectory.has(record.Commodity)) {
+    commodityDirectory.set(record.Commodity, {
+      cmdt_id: nextCommodityId++, cmdt_name: record.Commodity, cmdt_group_id: 4,
+    });
+  }
+}
+
 const upstreamRequests: URL[] = [];
 const upstream = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
   upstreamRequests.push(url);
+
+  if (url.pathname.endsWith("/daily-price-arrival/filters")) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      status: true,
+      message: "Filters fetched successfully",
+      data: {
+        state_data: expectedStatesAndUnionTerritories.map((state_name) => ({
+          state_id: stateIds.get(state_name), state_name,
+        })),
+        district_data: [...districtDirectory.values()],
+        market_data: [...marketDirectory.values()],
+        cmdt_data: [...commodityDirectory.values()],
+      },
+    }));
+    return;
+  }
+
   const filters = [
     ["filters[state.keyword]", "State"],
     ["filters[district.keyword]", "District"],
@@ -111,7 +168,7 @@ const upstream = http.createServer((req, res) => {
     ["filters[commodity.keyword]", "Commodity"],
     ["filters[arrival_date]", "Arrival_Date"],
   ] as const;
-  let records = sourceRecords.filter((record) =>
+  let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
       const filter = url.searchParams.get(parameter);
       const sourceValue = field === "Arrival_Date"
@@ -168,6 +225,8 @@ async function main() {
   process.env.DATA_GOV_API_KEY = apiKey;
   process.env.DATA_GOV_API_BASE_URL =
     `http://127.0.0.1:${upstreamAddress.port}/resource`;
+  process.env.AGMARKNET_API_BASE_URL =
+    `http://127.0.0.1:${upstreamAddress.port}/v1`;
   process.env.NODE_ENV = "test";
   const app = createApiApp();
   const apiServer = http.createServer(app);
@@ -265,60 +324,21 @@ async function main() {
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
     const initialFilterRequest = upstreamRequests.at(-1)!;
 
-    const expectedStatesAndUnionTerritories = [
-      "Andaman and Nicobar Islands",
-      "Andhra Pradesh",
-      "Arunachal Pradesh",
-      "Assam",
-      "Bihar",
-      "Chandigarh",
-      "Chhattisgarh",
-      "Dadra and Nagar Haveli and Daman and Diu",
-      "Delhi",
-      "Goa",
-      "Gujarat",
-      "Haryana",
-      "Himachal Pradesh",
-      "Jammu and Kashmir",
-      "Jharkhand",
-      "Karnataka",
-      "Kerala",
-      "Ladakh",
-      "Lakshadweep",
-      "Madhya Pradesh",
-      "Maharashtra",
-      "Manipur",
-      "Meghalaya",
-      "Mizoram",
-      "Nagaland",
-      "Odisha",
-      "Puducherry",
-      "Punjab",
-      "Rajasthan",
-      "Sikkim",
-      "Tamil Nadu",
-      "Telangana",
-      "Tripura",
-      "Uttar Pradesh",
-      "Uttarakhand",
-      "West Bengal",
-    ];
     assert(
       filters.data.states.length === 36 &&
         expectedStatesAndUnionTerritories.every((state) => filters.data.states.includes(state)),
       "state selector contains all 28 States and 8 Union Territories",
     );
 
-    // Exercise every official selector value against the upstream exact-match
-    // filter. The fixture deliberately contains records for only four states;
-    // other states must return an empty, complete result rather than records
-    // borrowed from another state or fabricated fallback data.
+    // Exercise every official selector value against the AGMARKNET 2.0 master
+    // directory. The fixture deliberately has market rows for only four states;
+    // other states must return empty location lists rather than borrowed or
+    // fabricated market data.
     for (const stateName of expectedStatesAndUnionTerritories) {
       const stateResponse = await fetch(
         `${base}/api/v1/meta/filters?state=${encodeURIComponent(stateName)}`,
       );
       const statePayload = await stateResponse.json();
-      const upstreamRequest = upstreamRequests.at(-1)!;
       const expectedDistricts = [...new Set(
         sourceRecords
           .filter((record) => record.State === stateName)
@@ -331,24 +351,24 @@ async function main() {
         `state selector request succeeds for ${stateName}`,
       );
       assert(
-        upstreamRequest.searchParams.get("filters[state.keyword]") === stateName,
-        `upstream receives exact state filter for ${stateName}`,
-      );
-      assert(
         JSON.stringify(statePayload.data.districts) === JSON.stringify(expectedDistricts) &&
           statePayload.data.coverage.status === "complete",
         `district discovery is state-scoped and complete for ${stateName}`,
       );
     }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
-    assert(initialFilterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
-    assert(initialFilterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
+    assert(
+      initialFilterRequest.pathname.endsWith("/daily-price-arrival/filters") &&
+        filters.meta.source === "Government of India AGMARKNET 2.0",
+      "state and mandi options come from the complete AGMARKNET 2.0 directory",
+    );
 
     const filteredResponse = await fetch(
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
     );
     const filtered = await filteredResponse.json();
     const filteredRequest = upstreamRequests.at(-1)!;
+    assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "prices pass state filter upstream");
     assert(filteredRequest.searchParams.get("filters[district.keyword]") === "Pune", "prices pass district exact-match filter upstream");
@@ -358,7 +378,7 @@ async function main() {
     assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
-    assert(filtered.meta.total === 2, "upstream result totals are parsed");
+    assert(filtered.meta.total === 2 && filtered.data.length === 1, "upstream totals are retained while duplicate daily records are removed");
     assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(
@@ -366,6 +386,7 @@ async function main() {
         filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
       "upstream dataset update time is returned separately from the successful fetch time",
     );
+    assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
 
@@ -395,6 +416,7 @@ async function main() {
         state: "Andhra Pradesh",
         district: "Alluri Sitharama Raju",
         market: item.market,
+        commodity: item.commodity,
         limit: "100",
         offset: "0",
       });
@@ -408,13 +430,14 @@ async function main() {
           marketPayload.data[0]?.market === item.market &&
           marketPayload.data[0]?.commodity === item.commodity &&
           marketPayload.data[0]?.grade === item.grade,
-        `${item.market} regression preserves the sole matching source observation`,
+        `${item.market} regression preserves the source observation`,
       );
       assert(
         sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
           sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
-          sourceRequest.searchParams.get("filters[market.keyword]") === item.market,
-        `${item.market} regression sends exact state, district, and market filters upstream`,
+          sourceRequest.searchParams.get("filters[market.keyword]") === item.market &&
+          sourceRequest.searchParams.get("filters[commodity.keyword]") === item.commodity,
+        `${item.market} regression sends exact state, district, market and commodity filters upstream`,
       );
     }
 

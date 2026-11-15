@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "test": "tsx src/server/tests/verify.ts",
     "test:integration": "tsx src/server/tests/api.integration.ts",
+    "test:agmarknet2": "tsx src/server/tests/agmarknet2.ts",
+    "test:agmarknet2:live": "tsx src/server/tests/agmarknet2-live.ts",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:site": "tsx src/server/tests/site-metadata.ts",

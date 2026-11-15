@@ -14,6 +14,10 @@ import {
   normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
+import {
+  fetchAgmarknet2Filters,
+  searchAgmarknet2Commodities,
+} from "../services/agmarknet2Service.js";
 
 const router = Router();
 
@@ -80,12 +84,19 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    const data = await fetchLiveFilters(parsed.data);
+    const data = await fetchAgmarknet2Filters(parsed.data).catch(() =>
+      // Keep the OGD resource as a live fallback if the newer AGMARKNET 2.0
+      // directory is temporarily unavailable.
+      fetchLiveFilters(parsed.data),
+    );
+    const source = "source" in data && typeof data.source === "string"
+      ? data.source
+      : "Government of India OGD / AGMARKNET";
     return sendSuccess(
       res,
       data,
       {
-        source: "Government of India OGD / AGMARKNET",
+        source,
         scope: data.coverage.message,
         coverage: data.coverage,
         filterCacheStatus: data.cache.status,
@@ -149,11 +160,17 @@ router.get("/prices", async (req: Request, res: Response) => {
 
   try {
     const { date, ...filters } = parsed.data;
-    const { records, meta } = await fetchLivePrices({
-      ...filters,
-      arrivalDate: date,
-    });
-    return sendSuccess(res, records, meta, "Latest government-reported prices fetched successfully");
+    const liveOptions = { ...filters, arrivalDate: date };
+    // Price records come only from the key-authenticated OGD resource.
+    // The public AGMARKNET 2.0 monthly report is CAPTCHA-gated and is not
+    // automated. The AGMARKNET 2.0 directory is used for selector metadata.
+    const result = await fetchLivePrices(liveOptions);
+    return sendSuccess(
+      res,
+      result.records,
+      result.meta,
+      "Latest government-reported prices fetched successfully",
+    );
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {
       return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
@@ -270,13 +287,18 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
   }
 
   try {
-    const results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    let results: string[];
+    try {
+      results = await searchAgmarknet2Commodities(parsed.data.q, parsed.data.limit);
+    } catch {
+      results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    }
     return sendSuccess(
       res,
       results,
       {
         count: results.length,
-        source: "Government of India OGD / AGMARKNET",
+        source: "Government of India AGMARKNET 2.0",
         sourceDerived: true,
       },
       "Government-reported commodity search completed",

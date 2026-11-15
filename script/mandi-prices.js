@@ -115,7 +115,9 @@ function renderMandis() {
         records: state.filterCoverage.recordsScanned.toLocaleString("en-IN"),
         maxOffset: state.filterCoverage.maxOffset.toLocaleString("en-IN"),
       })}`
-    : "";
+    : state.filterCoverage?.status === "complete"
+      ? ` · ${t("finder.directoryNote")}`
+      : "";
   help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}${coverageNote}`;
   for (const market of state.markets) {
     grid.append(
@@ -329,6 +331,11 @@ function cropBlock(record, showLocation = false) {
     names.secondary,
     typeof record.variety === "string" ? record.variety.trim() : "",
     typeof record.grade === "string" ? record.grade.trim() : "",
+    typeof record.display_unit === "string" && record.display_unit.trim()
+      ? record.display_unit
+      : typeof record.source_unit === "string" && record.source_unit.trim()
+        ? record.source_unit
+      : t("results.unitUnavailable"),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -453,9 +460,15 @@ function renderResults() {
   );
 
   const busy = state.loading && state.records.length === 0;
-  const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
   const unitControl = $("priceUnit");
-  if (unitControl) unitControl.value = state.priceUnit;
+  const hasKnownQuintalUnit = state.records.some((record) =>
+    typeof record.source_unit === "string" && /rs\.?\s*\/\s*quintal/i.test(record.source_unit),
+  );
+  if (!hasKnownQuintalUnit && state.priceUnit === "kg") state.priceUnit = "quintal";
+  if (unitControl) {
+    unitControl.disabled = !hasKnownQuintalUnit;
+    unitControl.value = state.priceUnit;
+  }
   let announcement = "";
 
   if (busy) {
@@ -492,13 +505,18 @@ function renderResults() {
     $("resultCount").textContent = tCount("results.count", 0);
     announcement = message;
   } else {
-    const divisor = state.priceUnit === "kg" ? 100 : 1;
-    const displayRecords = state.records.map((record) => ({
-      ...record,
-      min_price: record.min_price === null ? null : record.min_price / divisor,
-      max_price: record.max_price === null ? null : record.max_price / divisor,
-      modal_price: record.modal_price === null ? null : record.modal_price / divisor,
-    }));
+    const displayRecords = state.records.map((record) => {
+      const isQuintal = typeof record.source_unit === "string" &&
+        /rs\.?\s*\/\s*quintal/i.test(record.source_unit);
+      const divisor = state.priceUnit === "kg" && isQuintal ? 100 : 1;
+      return {
+        ...record,
+        display_unit: state.priceUnit === "kg" && isQuintal ? "₹ / kg" : record.source_unit,
+        min_price: record.min_price === null ? null : record.min_price / divisor,
+        max_price: record.max_price === null ? null : record.max_price / divisor,
+        modal_price: record.modal_price === null ? null : record.modal_price / divisor,
+      };
+    });
     const ctx = buildContext(displayRecords);
     body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx, state.allIndia)));
     list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx, state.allIndia)));

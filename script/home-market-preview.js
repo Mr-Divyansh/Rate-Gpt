@@ -47,7 +47,13 @@ function boardRow(record, axis) {
   const strong = document.createElement("strong");
   strong.textContent = names.primary;
   crop.append(strong);
-  const second = [names.secondary, record.variety, record.market, record.district].filter(Boolean).join(" · ");
+  const second = [
+    names.secondary,
+    record.variety,
+    record.market,
+    record.district,
+    record.source_unit || t("results.unitUnavailable"),
+  ].filter(Boolean).join(" · ");
   if (second) {
     const small = document.createElement("small");
     small.textContent = second;

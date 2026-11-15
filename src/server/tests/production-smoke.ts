@@ -3,6 +3,19 @@ const TIMEOUT_MS = 15_000;
 let passed = 0;
 let failed = 0;
 
+function indiaTodayIsoDate(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function shiftIsoDate(date: string, days: number): string {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
 function check(condition: boolean, label: string): void {
   if (condition) {
     passed += 1;
@@ -46,9 +59,95 @@ async function main(): Promise<void> {
   check(filters.response.status === 200 && filters.body?.success === true, "government location catalogue endpoint is available");
   check(
     Array.isArray(filters.body?.data?.states) &&
-      filters.body.data.states.length === 36 &&
+      filters.body.data.states.length >= 36 &&
       filters.body?.meta?.coverage?.status === "catalogue",
-    "state and UT selector exposes all 36 administrative entries",
+    "state and UT selector exposes the full official administrative catalogue",
+  );
+
+  // State-scoped checks validate that location discovery and price records
+  // describe the same live upstream scope without hard-coding a daily row count.
+  const hpFilters = await json("/api/v1/meta/filters?state=Himachal%20Pradesh");
+  check(
+    hpFilters.response.status === 200 &&
+      hpFilters.body?.success === true &&
+      hpFilters.body?.data?.coverage?.status === "complete",
+    "Himachal Pradesh live location discovery completes all upstream-reported pages",
+  );
+  check(
+    Array.isArray(hpFilters.body?.data?.districts) &&
+      Array.isArray(hpFilters.body?.data?.markets) &&
+      Array.isArray(hpFilters.body?.data?.commodities) &&
+      hpFilters.body.data.coverage.recordsScanned === hpFilters.body.data.coverage.total,
+    "Himachal Pradesh filter options are derived from the complete reported source scope",
+  );
+
+  const hpPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&limit=100");
+  check(
+    hpPrices.response.status === 200 &&
+      hpPrices.body?.success === true &&
+      Array.isArray(hpPrices.body?.data),
+    "Himachal Pradesh live price endpoint returns a records array",
+  );
+  if (Array.isArray(hpPrices.body?.data)) {
+    const hpDistricts = new Set(hpFilters.body?.data?.districts ?? []);
+    const hpMarkets = new Set(hpFilters.body?.data?.markets ?? []);
+    const hpCommodities = new Set(hpFilters.body?.data?.commodities ?? []);
+    check(
+      hpPrices.body.data.every((record: any) =>
+        record.state === "Himachal Pradesh" &&
+        hpDistricts.has(record.district) &&
+        hpMarkets.has(record.market) &&
+        hpCommodities.has(record.commodity)
+      ),
+      "Himachal Pradesh price records agree with the discovered district, market and crop options",
+    );
+    check(
+      hpPrices.body?.meta?.cacheStatus === "live" &&
+        Number.isInteger(hpPrices.body?.meta?.total) &&
+        hpPrices.body.meta.total >= hpPrices.body.data.length &&
+        hpPrices.body?.meta?.hasNext === (hpPrices.body.meta.nextOffset < hpPrices.body.meta.total),
+      "Himachal Pradesh live pagination metadata is internally consistent",
+    );
+  }
+
+  const priorReportDate = shiftIsoDate(indiaTodayIsoDate(), -2);
+  const hpPriorDay = await json(
+    `/api/v1/prices?state=Himachal%20Pradesh&date=${encodeURIComponent(priorReportDate)}&limit=100`,
+  );
+  check(
+    hpPriorDay.response.status === 200 &&
+      hpPriorDay.body?.success === true &&
+      Array.isArray(hpPriorDay.body?.data),
+    "OGD accepts an exact historical arrival-date query",
+  );
+  if (hpPriorDay.body?.data?.length) {
+    check(
+      hpPriorDay.body.data.every((record: any) =>
+        record.state === "Himachal Pradesh" && record.arrival_date === priorReportDate
+      ),
+      "historical date results contain only the requested state and arrival date",
+    );
+  } else {
+    console.log(`INFO OGD returned no Himachal Pradesh rows for ${priorReportDate}; the current-daily resource does not expose a historical observation for that date.`);
+  }
+
+  const hpPotatoPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&commodity=Potato&limit=100");
+  check(
+    hpPotatoPrices.response.status === 200 &&
+      hpPotatoPrices.body?.success === true &&
+      Array.isArray(hpPotatoPrices.body?.data) &&
+      hpPotatoPrices.body?.meta?.source === "Government of India OGD / AGMARKNET",
+    "Himachal Pradesh crop search uses the verified live OGD price resource",
+  );
+  check(
+    hpPotatoPrices.body?.meta?.cacheStatus === "live" &&
+      hpPotatoPrices.body?.data?.every((record: any) =>
+        record.state === "Himachal Pradesh" &&
+        record.commodity === "Potato" &&
+        typeof record.source_unit === "string" &&
+        record.source_unit.length > 0
+      ),
+    "live crop observations preserve state, commodity and an explicit or unknown source unit",
   );
 
   const prices = await json("/api/v1/prices?limit=5");

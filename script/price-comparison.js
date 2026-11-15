@@ -2,7 +2,7 @@ export function summarizeModalComparison(records) {
   const groups = new Map();
   for (const record of Array.isArray(records) ? records : []) {
     if (!record || typeof record.commodity !== "string" || !record.commodity.trim()) continue;
-    if (typeof record.source_unit !== "string" || !record.source_unit.trim()) continue;
+    if (typeof record.source_unit !== "string" || !record.source_unit.trim() || /not provided|unknown/i.test(record.source_unit)) continue;
     if (typeof record.market !== "string" || !record.market.trim()) continue;
     const commodity = record.commodity.trim();
     if (!groups.has(commodity)) groups.set(commodity, []);
@@ -91,6 +91,7 @@ export function buildPreviousObservationIndex(records) {
       record.source_unit,
     ];
     if (keyParts.some((value) => typeof value !== "string" || !value.trim())) continue;
+    if (/not provided|unknown/i.test(record.source_unit)) continue;
     if (!isIsoDate(record.arrival_date)) continue;
     const key = keyParts.map((value) => value.trim().toLocaleLowerCase()).join("|");
     if (!groups.has(key)) groups.set(key, new Map());
