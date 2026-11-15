@@ -310,7 +310,7 @@ export async function fetchAgmarknet2Filters(
 
   return {
     source: SOURCE_NAME,
-    states: catalog.state_data.map((row) => row.state_name).sort(),
+    states: uniqueSorted(catalog.state_data.map((row) => canonicalStateName(row.state_name))),
     districts: districtNames,
     markets: marketNames,
     commodities: catalog.cmdt_data.map((row) => row.cmdt_name).sort(),
