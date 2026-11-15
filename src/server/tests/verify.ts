@@ -266,6 +266,24 @@ async function main(): Promise<void> {
   check(searchedUrl?.searchParams.get("q") === "Grapes", "Hindi commodity search is translated before the upstream request");
   check(commodities.length === 1 && commodities[0] === "Grapes", "commodity suggestions are limited to upstream records");
 
+  let commoditySearchPages = 0;
+  const paginatedCommodities = await searchLiveCommodities("a", 10, async (input) => {
+    commoditySearchPages += 1;
+    const offset = Number(new URL(String(input)).searchParams.get("offset"));
+    const rows = offset === 0
+      ? Array.from({ length: 100 }, (_, index) => ({
+          ...upstreamRecord, id: `apple-${index}`, Commodity: "Apple",
+        }))
+      : [{ ...upstreamRecord, id: "mango-last-page", Commodity: "Mango" }];
+    return responseFor(rows, input, "101");
+  });
+  check(
+    commoditySearchPages === 2 &&
+      paginatedCommodities.includes("Apple") &&
+      paginatedCommodities.includes("Mango"),
+    "commodity suggestions paginate past repeated first-page matches",
+  );
+
   const discoveryRecords = Array.from({ length: 1_205 }, (_, index) => ({
     ...upstreamRecord,
     id: `discovery-${index}`,
@@ -293,6 +311,23 @@ async function main(): Promise<void> {
       discovered.coverage.total === 1_206 &&
       discovered.coverage.maxOffset === 1_000_000,
     "filter discovery reports complete coverage and its supported offset boundary",
+  );
+  check(
+    discovered.cache.status === "temporary-cache" &&
+      discovered.cache.storedAt !== null &&
+      discovered.cache.ttlMs === 60_000,
+    "newly discovered filter metadata reports its active temporary cache",
+  );
+  let cachedDiscoveryRequests = 0;
+  const cachedDiscovery = await fetchLiveFilters({ state: "Discovery State" }, async (input) => {
+    cachedDiscoveryRequests += 1;
+    return responseFor([], input, "0");
+  });
+  check(
+    cachedDiscoveryRequests === 0 &&
+      cachedDiscovery.cache.status === "temporary-cache" &&
+      cachedDiscovery.cache.storedAt === discovered.cache.storedAt,
+    "cached filter metadata is reused and reports its stored timestamp",
   );
 
   const largeDiscoveryTotal = 10_001;
