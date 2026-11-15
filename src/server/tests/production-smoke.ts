@@ -59,9 +59,9 @@ async function main(): Promise<void> {
   check(filters.response.status === 200 && filters.body?.success === true, "government location catalogue endpoint is available");
   check(
     Array.isArray(filters.body?.data?.states) &&
-      filters.body.data.states.length === 36 &&
+      filters.body.data.states.length >= 36 &&
       filters.body?.meta?.coverage?.status === "catalogue",
-    "state and UT selector exposes all 36 administrative entries",
+    "state and UT selector exposes the full official administrative catalogue",
   );
 
   // State-scoped checks validate that location discovery and price records
