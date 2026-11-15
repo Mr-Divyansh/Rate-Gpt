@@ -379,10 +379,10 @@ async function main() {
       "state selector contains all 28 States and 8 Union Territories",
     );
 
-    // Exercise every official selector value against the upstream exact-match
-    // filter. The fixture deliberately contains records for only four states;
-    // other states must return an empty, complete result rather than records
-    // borrowed from another state or fabricated fallback data.
+    // Exercise every official selector value against the AGMARKNET 2.0 master
+    // directory. The fixture deliberately has market rows for only four states;
+    // other states must return empty location lists rather than borrowed or
+    // fabricated market data.
     for (const stateName of expectedStatesAndUnionTerritories) {
       const stateResponse = await fetch(
         `${base}/api/v1/meta/filters?state=${encodeURIComponent(stateName)}`,
