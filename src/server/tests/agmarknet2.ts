@@ -107,6 +107,10 @@ async function main(): Promise<void> {
   const hp = await fetchAgmarknet2Filters({ state: "Himachal Pradesh" }, mock.fetcher);
   check(hp.districts.join(",") === "Kullu,Mandi", "state filter returns every registered district");
   check(hp.markets.length === 2 && hp.markets.includes("SMY Bhuntar"), "state filter returns every registered mandi");
+  check(
+    hp.coverage.recordsScanned === 2 && hp.coverage.total === 2,
+    "state directory coverage totals count unique registered mandis",
+  );
   check(hp.commodities.includes("Potato") && !hp.commodities.includes("All Commodities"), "commodity catalogue excludes the all-commodities sentinel");
   check(
     new Set(hp.districts).size === hp.districts.length &&
