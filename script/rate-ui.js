@@ -96,7 +96,10 @@ export function createRange(record, axis, { labels = true } = {}) {
   wrap.setAttribute("role", "img");
   wrap.setAttribute(
     "aria-label",
-    t("range.aria", { min: formatPrice(min), modal: formatPrice(modal), max: formatPrice(max) }),
+    t("range.aria", {
+      min: formatPrice(min), modal: formatPrice(modal), max: formatPrice(max),
+      unit: record.display_unit || record.source_unit || t("results.unitUnavailable"),
+    }),
   );
 
   const track = el("span", "range-track");
