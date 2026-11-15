@@ -68,7 +68,7 @@ const HINDI_CROP_NAMES: Record<string, string> = {
   मशरूम: "mushroom",
 };
 
-const STATES_AND_UTS = [
+export const STATES_AND_UTS = [
   "Andaman and Nicobar Islands",
   "Andhra Pradesh",
   "Arunachal Pradesh",
