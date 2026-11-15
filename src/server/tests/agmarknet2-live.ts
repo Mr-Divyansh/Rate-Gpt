@@ -50,39 +50,65 @@ async function main(): Promise<void> {
   const hpMarkets = markets.filter((row: any) => row.state_id === hp.state_id && Number.isInteger(row.id));
   check(hpMarkets.length > 0, "Himachal Pradesh has registered mandis in the official directory");
 
-  const date = shiftDate(indiaToday(), -2);
-  const reportResponse = await fetch(`${BASE_URL}/prices-and-arrivals/market-report/daily`, {
-    method: "POST",
-    headers: { ...HEADERS, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      date,
-      marketIds: hpMarkets.map((row: any) => row.id),
-      stateIds: [hp.state_id],
-      includeExcel: false,
-    }),
-    cache: "no-store",
-    signal: AbortSignal.timeout(20_000),
-  });
-  check(reportResponse.ok, "official daily mandi report endpoint returns HTTP success");
-  const report = await reportResponse.json() as any;
-  check(Array.isArray(report?.states), "daily report contains the expected state collection");
+  const today = indiaToday();
+  const [year, month] = today.split("-");
+  const potato = commodities.find((row: any) => row.cmdt_name === "Potato");
+  check(Boolean(potato), "official catalogue contains Potato commodity ID");
 
-  const stateReport = report.states.find((row: any) =>
-    row.stateId === hp.state_id || row.stateName === "Himachal Pradesh"
+  const params = new URLSearchParams({
+    year: String(year),
+    month: String(Number(month)),
+    stateId: String(hp.state_id),
+    commodityId: String(potato?.cmdt_id),
+    includeExcel: "false",
+  });
+  const reportResponse = await fetch(
+    `${BASE_URL}/prices-and-arrivals/date-wise/specific-commodity?${params.toString()}`,
+    {
+      headers: HEADERS,
+      cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
+    },
   );
-  const reportedMarkets = Array.isArray(stateReport?.markets) ? stateReport.markets : [];
-  const priceRows = reportedMarkets.flatMap((market: any) =>
-    (Array.isArray(market.commodities) ? market.commodities : []).flatMap((commodity: any) =>
-      Array.isArray(commodity.data) ? commodity.data : []
+  const reportText = await reportResponse.text();
+  if (!reportResponse.ok) {
+    throw new Error(
+      `AGMARKNET public monthly commodity report returned HTTP ${reportResponse.status}: ${reportText.replace(/\\s+/g, " ").slice(0, 400)}`,
+    );
+  }
+  let report: any;
+  try {
+    report = JSON.parse(reportText);
+  } catch {
+    throw new Error("AGMARKNET monthly commodity report returned non-JSON content.");
+  }
+  check(report?.success === true, "public monthly commodity report returns success");
+  check(Array.isArray(report?.columns) && Array.isArray(report?.markets), "monthly report includes price columns and mandi records");
+
+  const modalColumn = report.columns.find((column: any) => column.key === "modalPrice");
+  check(
+    Boolean(modalColumn && /modal price/i.test(modalColumn.title) && /rs\\.\\/?/i.test(modalColumn.title)),
+    "government report identifies the price unit in its column title",
+  );
+
+  const priceRows = report.markets.flatMap((market: any) =>
+    (Array.isArray(market.dates) ? market.dates : []).flatMap((day: any) =>
+      (Array.isArray(day.data) ? day.data : []).map((row: any) => ({
+        market: market.marketName,
+        date: day.arrivalDate,
+        ...row,
+      }))
     )
   );
-  console.log(`AGMARKNET report date: ${date}; registered HP mandis: ${hpMarkets.length}; reporting mandis: ${reportedMarkets.length}; price rows: ${priceRows.length}`);
+  console.log(
+    `AGMARKNET report month: ${year}-${month}; registered HP mandis: ${hpMarkets.length}; reporting crop markets: ${report.markets.length}; price rows: ${priceRows.length}`,
+  );
   if (priceRows.length > 0) {
     const sample = priceRows.find((row: any) => row.modalPrice !== null && row.modalPrice !== undefined);
-    check(Boolean(sample), "daily report includes at least one modal price observation");
-    check(typeof sample?.unitOfPrice === "string" && sample.unitOfPrice.trim().length > 0, "daily report provides the source price unit");
+    check(Boolean(sample), "monthly report includes a modal price observation");
+    check(typeof sample?.market === "string" && typeof sample?.date === "string", "price observations include mandi and arrival date");
   } else {
-    console.log("INFO No price rows were reported for Himachal Pradesh on the sampled date; directory and report API access were verified.");
+    console.log("INFO No Potato price rows were published for Himachal Pradesh in the sampled month; public endpoint and response schema were verified.");
   }
 }
 
