@@ -4,93 +4,79 @@
 **Repository:** https://github.com/Mr-Divyansh/Rate-Gpt  
 **Production URL:** https://rate-gpt.vercel.app/
 
-> This document is the current release status. It does not declare the product complete until the latest `main` commit is deployed to the production domain and the production smoke suite passes.
+> This document distinguishes successful deployment and endpoint checks from full product completion. Rate-GPT is not declared universally complete while upstream source limitations and browser/device QA remain.
 
-## 1. Current repository state
+## 1. Repository and CI
 
-- Latest verified `main` commit: `98a53ec4c866e1e3c89a87c8ee94f48e69093dfb`.
-- PR #49: mobile navigation keyboard-focus restoration — merged.
-- PR #50: accurate release-readiness documentation — merged.
-- PR #51: five-column mandi empty-state alignment — merged.
-- PR #52: release status refresh — merged.
-- PR #53: production smoke release gate — merged.
-- PR #53 makes the production smoke workflow fail explicitly when production still serves an older release or the deployment is rate-limited. It no longer treats a skipped public smoke suite as a successful release verification.
-- CI for PR #53 passed: dependency audit, unit/service tests, API integration tests, AGMARKNET catalogue checks, site metadata, responsive regression checks, release-gate regression checks, TypeScript and production build.
-- The release-gate regression test checks the stale-release failure path and required release markers.
-- No open pull requests or GitHub issues were present at the last repository audit.
+- Latest verified `main` commit: `e18014a394d100af26284e3ca43b351c86ae19a7`.
+- PR #57 (exact production commit identity in release checks) is merged.
+- GitHub Actions run `43737678374` passed all 15 job steps: dependency audit, unit/service tests, API integration, API contract/OpenAPI, AGMARKNET service/catalogue, SEO metadata, responsive source regression, release-gate regression, TypeScript and production build.
+- No open GitHub issues were present at the latest issue search.
+- Production deployment is Vercel deployment `dpl_J7waXEhwFhfNFjr5NbcS6DXyhd` (READY), built from the same `main` SHA above. Its production aliases include `rate-gpt.vercel.app`.
 
-## 2. Production deployment status
+## 2. Production verification performed
 
-**Production is not yet verified against the latest main commit.**
+Direct requests were made against the production custom domain after deployment:
 
-Last known Vercel production deployment from the deployment audit:
+| Check | Observed result |
+|---|---|
+| `GET /api/v1/` | HTTP 200; discovery reports `commitSha=e18014a394d100af26284e3ca43b351c86ae19a7` and `priceStorage=disabled` |
+| `GET /api/v1/health` | HTTP 200; status `ok` |
+| `GET /api/v1/meta/filters` | HTTP 200; official administrative catalogue and crop directory returned |
+| `GET /api/v1/meta/filters?state=Himachal Pradesh` | HTTP 200; AGMARKNET 2.0 directory reports 13 districts and 47 markets, 47/47 directory records scanned |
+| `GET /api/v1/prices?limit=5` | HTTP 200; five real OGD observations returned; reported total 2,593; source unit explicitly says not provided |
+| `GET /api/v1/prices?state=Himachal Pradesh&limit=100` | HTTP 200; 42 live observations returned for 15 Nov 2026 |
+| `GET /api/v1/prices?state=Himachal Pradesh&commodity=Potato&limit=100` | HTTP 200; two observations returned (SMY Bhuntar and SMY Takoli) |
+| `GET /api/v1/sync-status` | HTTP 200; on-demand mode, scheduler disabled, bulk sync disabled, price storage disabled |
+| `GET /openapi.json` and `GET /llms.txt` | HTTP 200; published API contract and AI usage guide available |
+| `GET /mandi-prices.html` | HTTP 200; page HTML and required selector/table elements present |
 
-- Deployment: `dpl_7E6PVs7AFT3o6Q7skYkCPg2XgHDx`
-- State: `READY`
-- Branch: `main`
-- Deployed commit: `70fe7bc560b6a5b3e8a2f3444f01cf84fca989bb`
+The API discovery SHA matches the Vercel deployment's source SHA. This verifies that the production alias is serving the intended release, rather than an older deployment.
 
-Latest `main` is `98a53ec4c866e1e3c89a87c8ee94f48e69093dfb`; therefore, the last known production deployment is behind the repository.
+These are direct endpoint checks, not a claim that the complete GitHub production-smoke workflow or real-browser interaction suite has run. The full production smoke workflow has not yet been confirmed as completed for this release.
 
-A separate `READY` Vercel deployment for a feature branch is a preview deployment, not evidence that the production domain has been updated.
-
-Vercel reported the free deployment quota limit and a 24-hour retry cooldown on 15 November 2026. The recorded retry time is **16 November 2026, 8:42 PM IST or later**. A scheduled verification is set for **16 November 2026, 8:45 PM IST**. Do not bypass the limit, create duplicate deployments, or repeatedly retry before the cooldown expires.
-
-The earlier production smoke workflow completed while its public smoke step was skipped because release markers had not reached production. That run did not verify the production API or frontend. PR #53 now makes this condition fail the workflow instead of showing a misleading green result.
-
-## 3. Live government data — verified implementation and external limits
+## 3. Government data source and honest limitations
 
 ### Implemented
 
-- Price observations are fetched on demand from the Government of India's OGD resource: `9ef84268-d588-465a-a308-a864a43d0070`.
-- Price records are not persisted in a database by the application.
-- The public AGMARKNET 2.0 filters endpoint supplies the administrative state, district, market and commodity directory.
-- The directory cache applies only to selector metadata. It does not cache price observations.
-- The UI and API preserve the source unit. If the upstream observation has no unit, the application reports that the unit was not provided rather than assuming a unit.
-- Missing prices remain missing; the application must not synthesize or invent observations.
-- Price responses distinguish the successful API fetch timestamp from the government-reported arrival date and upstream update timestamp when supplied.
+- Price observations are fetched on demand from Government of India OGD resource `9ef84268-d588-465a-a308-a864a43d0070`.
+- The public AGMARKNET 2.0 filters endpoint supplies administrative state, district, market and commodity directory data.
+- Price records are not persisted by Rate-GPT. Temporary in-process caching applies to filter/directory metadata only.
+- Missing prices remain missing; no synthetic observations are added.
+- Source units are preserved. Where OGD does not provide a unit, the response says `Not provided by source`.
+- Responses distinguish API fetch time from government arrival date and upstream update time where supplied.
+- “Live” means a fresh request for the latest government-published observations available from the source, not an instantaneous auction/trading quote.
 
-### External source limitations
+### External limitations
 
-- The AGMARKNET 2.0 price-report endpoint returned `TOKEN_OR_CAPTCHA_REQUIRED` during prior testing. Rate-GPT must not bypass or automate that CAPTCHA/token gate.
-- The OGD feed's actual returned rows do not prove complete daily coverage of every registered mandi.
-- “Live” means a fresh request for the latest government-published observation available from the upstream source. It does not mean an instantaneous auction/trading quote.
-- Broader coverage requires another official, documented, unattended government price-data source. Do not label all-India or state price coverage complete without measured source evidence.
+- The AGMARKNET 2.0 price-report endpoint previously returned `TOKEN_OR_CAPTCHA_REQUIRED`. Rate-GPT must not bypass or automate this access gate.
+- An administrative directory entry does not prove that a market has a price observation on a given day.
+- The observed 42 Himachal Pradesh rows and two Potato rows are the source's returned observations at the time checked; they are not proof that every registered mandi reported prices.
+- OGD observations checked did not include a source unit. Do not label them ₹/quintal or ₹/kg without a verified unit.
+- `/api/v1/sync-status` explicitly reports `schedulerEnabled: false` and `bulkSyncEnabled: false`. Price fetching is on-demand, not an automatic background sync.
+- Broader unattended coverage requires another official, documented government price source that is accessible without CAPTCHA/token bypass.
 
 See [live-data coverage and source limitations](docs/live-data-coverage.md).
 
-## 4. Product quality and UI
+## 4. Product quality and remaining QA
 
-- The codebase has responsive desktop/mobile layouts, mobile price cards, filters, paging, CSV export, Hindi/English labels and reduced-motion styling.
-- The approved design baseline is Forest Green + Warm Ivory + Harvest Gold, with readable surfaces and restrained accents.
-- Mobile navigation restores keyboard focus to its trigger after Escape/backdrop dismissal.
-- Responsive and accessibility-related source-level regression assertions pass in CI.
-- Real browser/device visual testing has not yet been demonstrated by the available CI suite. Do not claim physical-device validation from CSS/source checks alone.
+- Responsive layouts, mobile price cards, filters, paging, CSV export, Hindi/English labels and reduced-motion styling are implemented.
+- GitHub CI responsive regression checks pass, but source-level checks are not equivalent to real browser/device testing.
+- The production mandi page HTML and key controls were fetched successfully. Full user-interaction testing in a real browser at mobile, tablet and desktop sizes has not yet been demonstrated.
+- Physical-device QA has not been performed in this verification.
+- Contact-form delivery requires the production `WEB3FORMS_ACCESS_KEY`; a successful live contact submission has not been tested in this audit.
+- Historical trends are intentionally unavailable (HTTP 410) because price history is not stored.
+- Hackathon/admin portal submission is a separate external task and requires authorized portal access.
 
-## 5. Release gates still required
+## 5. Definition of done
 
-| Gate | Current state | Completion evidence |
-|---|---|---|
-| Main-branch CI | Passed on latest PR #53 changes | All PR #53 CI steps passed |
-| Dependency audit | Passed at `--audit-level=high` | CI audit step; does not exclude low/moderate advisories |
-| Latest production deployment | Pending | Vercel production deployment READY with SHA `98a53ec...` |
-| Production domain alias | Pending verification | `rate-gpt.vercel.app` resolves to that exact deployment |
-| Production API smoke | Pending latest release | Production smoke suite passes against the custom domain |
-| Live price verification | Pending latest release | Real API response, valid source metadata and timestamps; no fabricated rows |
-| Browser visual QA | Not yet evidenced | Key pages tested at mobile, tablet and desktop viewports in a real browser |
-| Physical-device QA | Not yet evidenced | Manual check on actual mobile devices |
-| Hackathon/admin submission | Separate external task | Requires authorized access to the relevant submission portal |
+1. Latest `main` commit is deployed as a Vercel production deployment.
+2. Production custom domain resolves to that deployment and API discovery reports the exact deployed commit SHA.
+3. Production API smoke suite completes successfully against the custom domain.
+4. Live price observations return valid source provenance, timestamps, pagination and explicit unknown units where needed.
+5. No fabricated prices, unsupported coverage claims, persistent price records or CAPTCHA bypasses are introduced.
+6. Key user flows pass real browser tests at mobile, tablet and desktop viewports.
+7. Contact delivery is verified with the configured provider, or clearly marked unavailable if configuration is absent.
+8. Documentation matches deployed code and actual government-source capabilities.
 
-## 6. Definition of done
-
-Rate-GPT can be called production-ready for this release only when all of the following are true:
-
-1. Latest `main` commit is deployed as a Vercel **production** deployment.
-2. The production custom domain is aliased to that exact deployment.
-3. Production smoke tests pass against `https://rate-gpt.vercel.app/`.
-4. The live price endpoint returns real upstream observations where available, correct provenance, timestamps, pagination and explicit unknown units.
-5. No fake prices, fabricated coverage claims, persistent price records or CAPTCHA bypasses are introduced.
-6. Key user flows work across desktop/mobile browser viewports, with remaining physical-device limitations clearly reported.
-7. Documentation matches the actual deployed code and data-source capabilities.
-
-**Current verdict: latest main-branch engineering CI passes, but the latest main commit is not yet verified in production. Release completion remains pending deployment, production API/data checks and browser QA.**
+**Current verdict:** Latest main CI passed; the exact latest commit is deployed to production; direct production API/data checks listed above passed. Full production-smoke workflow completion, real-browser interaction QA, physical-device QA and live contact-delivery verification remain unproven. Government-source limitations also prevent a guarantee of price data for every mandi every day. Therefore the project is not honestly classifiable as 100% complete yet.
