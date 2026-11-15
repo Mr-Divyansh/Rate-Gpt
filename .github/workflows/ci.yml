@@ -43,6 +43,9 @@ jobs:
       - name: API integration tests
         run: npm run test:integration
 
+      - name: AGMARKNET 2.0 service tests
+        run: npm run test:agmarknet2
+
       - name: Public-site SEO metadata checks
         run: npm run test:site
 
