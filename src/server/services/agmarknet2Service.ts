@@ -323,7 +323,7 @@ export async function fetchAgmarknet2Filters(
       status: stateRows.length ? "complete" : "catalogue",
       pagesScanned: 1,
       recordsScanned: stateRows.length ? marketNames.length : 0,
-      total: stateRows.length ? markets.length : null,
+      total: stateRows.length ? marketNames.length : null,
       maxOffset: MAX_OFFSET,
       message: stateRows.length
         ? "Complete AGMARKNET 2.0 administrative mandi directory for the selected state/UT. Price availability depends on each market's daily report."
