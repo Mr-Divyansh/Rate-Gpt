@@ -1,3 +1,83 @@
+export function summarizeModalComparison(records) {
+  const groups = new Map();
+  for (const record of Array.isArray(records) ? records : []) {
+    if (!record || typeof record.commodity !== "string" || !record.commodity.trim()) continue;
+    if (typeof record.source_unit !== "string" || !record.source_unit.trim()) continue;
+    if (typeof record.market !== "string" || !record.market.trim()) continue;
+    const commodity = record.commodity.trim();
+    if (!groups.has(commodity)) groups.set(commodity, []);
+    groups.get(commodity).push(record);
+  }
+
+  return [...groups.entries()].map(([commodity, group]) => {
+    const units = [...new Set(group.map((record) => record.source_unit.trim()))];
+    const missingModal = group.filter((record) => !Number.isFinite(Number(record.modal_price)) || record.modal_price === null || record.modal_price === "").length;
+    if (units.length !== 1) {
+      return {
+        commodity,
+        comparable: false,
+        reason: "incompatible-units",
+        sourceUnit: null,
+        units,
+        highest: [],
+        missingModal,
+        recordCount: group.length,
+        mixedVariety: false,
+        caveat: "Prices in different units are not compared.",
+      };
+    }
+
+    const priced = group.filter((record) => {
+      const price = Number(record.modal_price);
+      return record.modal_price !== null && record.modal_price !== "" && Number.isFinite(price);
+    });
+    if (priced.length === 0) {
+      return {
+        commodity,
+        comparable: false,
+        reason: "missing-modal",
+        sourceUnit: units[0],
+        units,
+        highest: [],
+        missingModal,
+        recordCount: group.length,
+        mixedVariety: false,
+        caveat: "No loaded record has a modal price, so no mandi is ranked.",
+      };
+    }
+
+    const highestPrice = Math.max(...priced.map((record) => Number(record.modal_price)));
+    const highest = priced
+      .filter((record) => Number(record.modal_price) === highestPrice)
+      .map((record) => ({
+        market: record.market,
+        district: record.district ?? "",
+        state: record.state ?? "",
+        arrival_date: record.arrival_date ?? "",
+        variety: record.variety ?? null,
+        grade: record.grade ?? null,
+        min_price: record.min_price ?? null,
+        max_price: record.max_price ?? null,
+        modal_price: Number(record.modal_price),
+        source_unit: units[0],
+      }));
+    const varietyKey = (record) => `${record.variety ?? ""}|${record.grade ?? ""}`.trim().toLocaleLowerCase();
+    const mixedVariety = new Set(priced.map(varietyKey)).size > 1;
+    return {
+      commodity,
+      comparable: true,
+      reason: highest.length > 1 ? "tie" : "highest-modal",
+      sourceUnit: units[0],
+      units,
+      highest,
+      missingModal,
+      recordCount: group.length,
+      mixedVariety,
+      caveat: "Highest reported modal price among the loaded records. Transport, quality, and actual sale conditions are not included.",
+    };
+  });
+}
+
 export function buildPreviousObservationIndex(records) {
   const groups = new Map();
   for (const record of records) {

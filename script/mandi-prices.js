@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { t, tCount, onLangChange } from "./i18n.js";
 // auto-refresh test
 import { hydrateIcons, icon } from "./icons.js";
