@@ -20,6 +20,9 @@
     "test:release-gate": "tsx src/server/tests/release-gate.ts",
     "test:api-contract": "tsx src/server/tests/api-contract.ts"
   },
+  "npmConfig": {
+    "allow-scripts": true
+  },
   "dependencies": {
     "compression": "^1.8.2",
     "dotenv": "^17.2.3",
@@ -40,5 +43,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
