@@ -411,7 +411,7 @@ function cardFor(record, ctx, showLocation) {
 function messageRows(message, { actionLabel = "", onAction = null } = {}) {
   const tr = document.createElement("tr");
   const td = document.createElement("td");
-  td.colSpan = 6;
+  td.colSpan = 5;
   td.className = "state-cell";
   td.setAttribute("role", "status");
   const rowMessage = document.createElement("p");
