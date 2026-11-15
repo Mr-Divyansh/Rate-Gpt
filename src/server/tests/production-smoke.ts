@@ -102,8 +102,8 @@ async function main(): Promise<void> {
     hpPotatoPrices.response.status === 200 &&
       hpPotatoPrices.body?.success === true &&
       Array.isArray(hpPotatoPrices.body?.data) &&
-      hpPotatoPrices.body?.meta?.source === "Government of India AGMARKNET 2.0",
-    "Himachal Pradesh crop search uses the public AGMARKNET monthly commodity report",
+      hpPotatoPrices.body?.meta?.source === "Government of India OGD / AGMARKNET",
+    "Himachal Pradesh crop search uses the verified live OGD price resource",
   );
   check(
     hpPotatoPrices.body?.meta?.cacheStatus === "live" &&
@@ -113,7 +113,7 @@ async function main(): Promise<void> {
         typeof record.source_unit === "string" &&
         record.source_unit.length > 0
       ),
-    "monthly crop observations preserve state, commodity and source-reported units",
+    "live crop observations preserve state, commodity and an explicit or unknown source unit",
   );
 
   const prices = await json("/api/v1/prices?limit=5");
