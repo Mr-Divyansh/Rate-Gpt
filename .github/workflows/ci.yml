@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-\${{ github.workflow }}-\${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -21,12 +21,10 @@ jobs:
     steps:
       - name: Download source archive
         env:
-          SOURCE_REPOSITORY: \${{ github.repository }}
-          SOURCE_SHA: \${{ github.sha }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
-          curl --fail --silent --show-error --location \\
-            "https://codeload.github.com/\${SOURCE_REPOSITORY}/tar.gz/\${SOURCE_SHA}" \\
-            | tar --extract --gzip --strip-components=1
+          curl --fail --silent --show-error --location "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" | tar --extract --gzip --strip-components=1
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node.js 24 runtime)
