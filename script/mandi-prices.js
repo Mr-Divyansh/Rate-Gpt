@@ -115,7 +115,9 @@ function renderMandis() {
         records: state.filterCoverage.recordsScanned.toLocaleString("en-IN"),
         maxOffset: state.filterCoverage.maxOffset.toLocaleString("en-IN"),
       })}`
-    : "";
+    : state.filterCoverage?.status === "complete"
+      ? ` · ${t("finder.directoryNote")}`
+      : "";
   help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}${coverageNote}`;
   for (const market of state.markets) {
     grid.append(
