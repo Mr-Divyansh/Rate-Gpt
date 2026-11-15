@@ -384,9 +384,14 @@ async function main() {
     }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
     assert(
-      initialFilterRequest.pathname.endsWith("/daily-price-arrival/filters") &&
-        filters.meta.source === "Government of India AGMARKNET 2.0",
-      "state and mandi options come from the complete AGMARKNET 2.0 directory",
+      initialFilterRequest.pathname.endsWith("/daily-price-arrival/filters"),
+      "state and mandi options request the official AGMARKNET 2.0 directory endpoint",
+      `actual path: ${initialFilterRequest.pathname}`,
+    );
+    assert(
+      filters.meta.source === "Government of India AGMARKNET 2.0",
+      "filter metadata identifies the official AGMARKNET 2.0 directory source",
+      `actual source: ${JSON.stringify(filters.meta.source)}`,
     );
 
     const filteredResponse = await fetch(
