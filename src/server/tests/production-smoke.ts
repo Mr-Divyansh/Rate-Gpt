@@ -97,6 +97,25 @@ async function main(): Promise<void> {
     );
   }
 
+  const hpPotatoPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&commodity=Potato&limit=100");
+  check(
+    hpPotatoPrices.response.status === 200 &&
+      hpPotatoPrices.body?.success === true &&
+      Array.isArray(hpPotatoPrices.body?.data) &&
+      hpPotatoPrices.body?.meta?.source === "Government of India AGMARKNET 2.0",
+    "Himachal Pradesh crop search uses the public AGMARKNET monthly commodity report",
+  );
+  check(
+    hpPotatoPrices.body?.meta?.cacheStatus === "live" &&
+      hpPotatoPrices.body?.data?.every((record: any) =>
+        record.state === "Himachal Pradesh" &&
+        record.commodity === "Potato" &&
+        typeof record.source_unit === "string" &&
+        record.source_unit.length > 0
+      ),
+    "monthly crop observations preserve state, commodity and source-reported units",
+  );
+
   const prices = await json("/api/v1/prices?limit=5");
   check(prices.response.status === 200 && prices.body?.success === true, "live government prices endpoint returns HTTP 200");
   check(Array.isArray(prices.body?.data), "live prices response contains a records array");
