@@ -59,10 +59,11 @@ function renderHeader(header) {
   const backdrop = document.createElement("button"); backdrop.className = "nav-backdrop";
   backdrop.type = "button"; backdrop.tabIndex = -1; backdrop.setAttribute("aria-label", getLang()==="hi" ? "मेनू बंद करें" : "Close menu");
   document.body.append(backdrop);
-  const close = () => {
+  const close = ({ restoreFocus = false } = {}) => {
     nav.classList.remove("is-open"); backdrop.classList.remove("is-visible"); header.classList.remove("menu-open");
     toggle.setAttribute("aria-expanded","false");
     toggle.setAttribute("aria-label", getLang()==="hi" ? "मेनू खोलें" : "Open menu");
+    if (restoreFocus) toggle.focus();
   };
   const open = () => {
     nav.classList.add("is-open"); backdrop.classList.add("is-visible"); header.classList.add("menu-open");
@@ -71,12 +72,11 @@ function renderHeader(header) {
     nav.querySelector("a")?.focus();
   };
   toggle.addEventListener("click", () => toggle.getAttribute("aria-expanded")==="true" ? close() : open());
-  backdrop.addEventListener("click", close);
+  backdrop.addEventListener("click", () => close({ restoreFocus: true }));
   nav.addEventListener("click", e => { if (e.target.closest("a")) close(); });
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && nav.classList.contains("is-open")) {
-      close();
-      toggle.focus();
+      close({ restoreFocus: true });
       return;
     }
     if (e.key !== "Tab" || !nav.classList.contains("is-open")) return;
