@@ -29,8 +29,18 @@ function indiaTodayIsoDate() {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+const INDIA_STATES_AND_UTS = [
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+  "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+];
+
 const state = {
-  states: [], districts: [], markets: [],
+  states: [...INDIA_STATES_AND_UTS], districts: [], markets: [],
+  filtersLoading: false,
   location: { state: "", district: "" },
   market: "",
   allIndia: false,
@@ -95,6 +105,10 @@ function renderMandis() {
   const { state: s, district } = state.location;
   if (state.finderError) {
     help.textContent = state.finderError;
+    return;
+  }
+  if (state.filtersLoading) {
+    help.textContent = t("finder.loadingLocations");
     return;
   }
   if (!s || !district) {
@@ -164,6 +178,7 @@ async function chooseState(name, { district = "", market = "" } = {}) {
   state.market = "";
   state.finderError = "";
   state.filterCoverage = null;
+  state.filtersLoading = Boolean(name);
   clearResults();
   renderFinder();
   if (!name) return;
@@ -172,8 +187,10 @@ async function chooseState(name, { district = "", market = "" } = {}) {
     if (token !== navToken) return;
     state.districts = data.districts;
     state.filterCoverage = data.coverage ?? null;
+    state.filtersLoading = false;
   } catch (error) {
     if (token !== navToken) return;
+    state.filtersLoading = false;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
     renderFinder();
     return;
@@ -200,6 +217,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
     if (token !== navToken) return;
     state.markets = data.markets;
     state.filterCoverage = data.coverage ?? null;
+    state.filtersLoading = false;
   } catch (error) {
     if (token !== navToken) return;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
@@ -908,13 +926,12 @@ async function init() {
 
   try {
     const data = await fetchFilters();
-    state.states = data.states;
+    if (Array.isArray(data.states) && data.states.length) state.states = data.states;
     state.filterCoverage = data.coverage ?? null;
   } catch (error) {
     console.error("[Mandi prices] Unable to load mandi filters:", error);
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
     renderFinder();
-    return;
   }
   renderFinder();
 
