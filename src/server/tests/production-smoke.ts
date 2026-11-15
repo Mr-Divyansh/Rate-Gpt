@@ -42,6 +42,33 @@ async function json(path: string): Promise<{ response: Response; body: any }> {
 async function main(): Promise<void> {
   console.log(`Rate-GPT production smoke checks: ${BASE_URL}`);
 
+  const discovery = await json("/api/v1/");
+  check(
+    discovery.response.status === 200 &&
+      discovery.body?.success === true &&
+      discovery.body?.data?.openapi === "https://rate-gpt.vercel.app/openapi.json" &&
+      discovery.body?.data?.priceStorage === "disabled",
+    "AI-readable API discovery endpoint advertises OpenAPI and live-only data mode",
+  );
+
+  const openapi = await request("/openapi.json");
+  const openapiBody = await openapi.json().catch(() => null);
+  check(
+    openapi.status === 200 &&
+      openapiBody?.openapi === "3.1.0" &&
+      Boolean(openapiBody?.paths?.["/prices"]?.get),
+    "public OpenAPI specification is valid JSON and documents live prices",
+  );
+
+  const llms = await request("/llms.txt");
+  const llmsText = await llms.text();
+  check(
+    llms.status === 200 &&
+      llmsText.includes("OpenAPI specification") &&
+      llmsText.includes("price observations"),
+    "AI usage guide is publicly accessible",
+  );
+
   const health = await json("/api/v1/health");
   check(health.response.status === 200, "health endpoint returns HTTP 200");
   check(health.body?.success === true && health.body?.data?.status === "ok", "health response has the documented success envelope");
