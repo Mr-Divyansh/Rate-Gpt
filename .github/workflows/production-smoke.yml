@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "30 3 * * *"
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -14,6 +18,7 @@ concurrency:
 
 jobs:
   smoke:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Verify deployed Rate-GPT
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -26,12 +31,25 @@ jobs:
       - name: Download source archive
         env:
           SOURCE_REPOSITORY: ${{ github.repository }}
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
         run: |
           curl --fail --silent --show-error --location \
             "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" \
             | tar --extract --gzip --strip-components=1
       - name: Install dependencies
         run: npm ci
+      - name: Wait for the production deployment
+        env:
+          BASE_URL: https://rate-gpt.vercel.app
+        run: |
+          for attempt in $(seq 1 18); do
+            if curl --fail --silent --show-error "$BASE_URL/api/v1/health" >/dev/null; then
+              sleep 20
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Production health endpoint did not become ready."
+          exit 1
       - name: Run public production checks
         run: npm run test:production
