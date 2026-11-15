@@ -3,6 +3,19 @@ const TIMEOUT_MS = 15_000;
 let passed = 0;
 let failed = 0;
 
+function indiaTodayIsoDate(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function shiftIsoDate(date: string, days: number): string {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
 function check(condition: boolean, label: string): void {
   if (condition) {
     passed += 1;
@@ -95,6 +108,27 @@ async function main(): Promise<void> {
         hpPrices.body?.meta?.hasNext === (hpPrices.body.meta.nextOffset < hpPrices.body.meta.total),
       "Himachal Pradesh live pagination metadata is internally consistent",
     );
+  }
+
+  const priorReportDate = shiftIsoDate(indiaTodayIsoDate(), -2);
+  const hpPriorDay = await json(
+    `/api/v1/prices?state=Himachal%20Pradesh&date=${encodeURIComponent(priorReportDate)}&limit=100`,
+  );
+  check(
+    hpPriorDay.response.status === 200 &&
+      hpPriorDay.body?.success === true &&
+      Array.isArray(hpPriorDay.body?.data),
+    "OGD accepts an exact historical arrival-date query",
+  );
+  if (hpPriorDay.body?.data?.length) {
+    check(
+      hpPriorDay.body.data.every((record: any) =>
+        record.state === "Himachal Pradesh" && record.arrival_date === priorReportDate
+      ),
+      "historical date results contain only the requested state and arrival date",
+    );
+  } else {
+    console.log(`INFO OGD returned no Himachal Pradesh rows for ${priorReportDate}; the current-daily resource does not expose a historical observation for that date.`);
   }
 
   const hpPotatoPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&commodity=Potato&limit=100");
