@@ -3,7 +3,7 @@
   "info": {
     "title": "Rate-GPT Mandi Prices API",
     "version": "1.0.0",
-    "description": "Read-only API for on-demand government-reported Indian mandi price observations. Price records are fetched live from Government of India OGD / AGMARKNET and are not persisted by Rate-GPT. Published arrival observations are not guaranteed real-time trading quotes."
+    "description": "Public API for on-demand government-reported Indian mandi price observations. Price records are fetched live from Government of India OGD / AGMARKNET and are not persisted by Rate-GPT. Published arrival observations are not guaranteed real-time trading quotes. The contact endpoint accepts consented messages and forwards them server-to-server."
   },
   "servers": [
     {
@@ -255,6 +255,86 @@
         "responses": {
           "410": {
             "description": "Historical storage is disabled"
+          }
+        }
+      }
+    },
+    "/contact": {
+      "post": {
+        "summary": "Submit a consented contact request",
+        "description": "Forwards a validated message to the configured contact-delivery provider. A valid email address or phone number is required. The optional botcheck field is a honeypot and should be left empty.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name",
+                  "message",
+                  "consent"
+                ],
+                "anyOf": [
+                  {
+                    "required": [
+                      "email"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "phone"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "description": "Optional when a phone number is supplied."
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 24,
+                    "description": "Optional when an email address is supplied."
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 5000
+                  },
+                  "consent": {
+                    "type": "boolean",
+                    "const": true,
+                    "description": "Must be true to confirm consent to be contacted."
+                  },
+                  "botcheck": {
+                    "type": "string",
+                    "description": "Optional honeypot field. Leave empty."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact request accepted for delivery"
+          },
+          "400": {
+            "description": "Validation failed or required consent/contact detail is missing"
+          },
+          "502": {
+            "description": "Contact delivery provider rejected the message or could not be reached"
+          },
+          "503": {
+            "description": "Contact delivery is not configured or temporarily unavailable"
           }
         }
       }
