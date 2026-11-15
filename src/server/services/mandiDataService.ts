@@ -252,9 +252,9 @@ export function mapUpstreamRecord(raw: unknown): RawMandiInput | null {
 }
 
 function normalizeSourceUnit(value: unknown): string {
-  if (typeof value !== "string") return "Rs/Quintal";
+  if (typeof value !== "string") return "Not provided by source";
   const trimmed = value.trim();
-  return trimmed || "Rs/Quintal";
+  return trimmed || "Not provided by source";
 }
 
 export function parsePageInteger(value: unknown): number | null {
