@@ -34,6 +34,12 @@ async function main(): Promise<void> {
     "release readiness requires health, API discovery, OpenAPI and AI guide markers",
   );
   check(
+    waitStep.includes("SOURCE_SHA:") &&
+      waitStep.includes(".data.commitSha == $sha") &&
+      waitStep.includes("jq -e"),
+    "release readiness verifies the exact workflow commit SHA reported by production, not generic feature markers",
+  );
+  check(
     /if: steps\.release\.outputs\.ready == 'true'/.test(smokeStep) &&
       /npm run test:production/.test(smokeStep),
     "public production smoke suite runs only after the current release is confirmed",
