@@ -91,6 +91,17 @@ async function main(): Promise<void> {
   const root = await fetchAgmarknet2Filters({}, mock.fetcher);
   check(root.states.includes("Himachal Pradesh") && !root.states.includes("All States/UTs"), "state catalogue excludes the all-states sentinel");
   check(new Set(root.states).size === root.states.length, "state catalogue deduplicates repeated source rows");
+  check(
+    root.states.includes("Andaman and Nicobar Islands") &&
+      root.states.includes("Chhattisgarh") &&
+      root.states.includes("Delhi") &&
+      root.states.includes("Kerala") &&
+      root.states.includes("Puducherry") &&
+      root.states.includes("Dadra and Nagar Haveli and Daman and Diu") &&
+      !root.states.includes("Dadra and Nagar Haveli") &&
+      !root.states.includes("Daman and Diu"),
+    "legacy AGMARKNET state and split-UT names map to canonical selector labels",
+  );
   check(root.coverage.status === "catalogue" && root.cache.status === "temporary-cache", "root filter metadata identifies a cached administrative catalogue");
 
   const hp = await fetchAgmarknet2Filters({ state: "Himachal Pradesh" }, mock.fetcher);
