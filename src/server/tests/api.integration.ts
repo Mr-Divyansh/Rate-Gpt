@@ -373,7 +373,6 @@ async function main() {
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
     const initialFilterRequest = upstreamRequests.at(-1)!;
 
-    const expectedStatesAndUnionTerritories = stateNamesForIntegration;
     assert(
       filters.data.states.length === 36 &&
         expectedStatesAndUnionTerritories.every((state) => filters.data.states.includes(state)),
@@ -389,7 +388,6 @@ async function main() {
         `${base}/api/v1/meta/filters?state=${encodeURIComponent(stateName)}`,
       );
       const statePayload = await stateResponse.json();
-      const upstreamRequest = upstreamRequests.at(-1)!;
       const expectedDistricts = [...new Set(
         sourceRecords
           .filter((record) => record.State === stateName)
@@ -402,41 +400,49 @@ async function main() {
         `state selector request succeeds for ${stateName}`,
       );
       assert(
-        upstreamRequest.searchParams.get("filters[state.keyword]") === stateName,
-        `upstream receives exact state filter for ${stateName}`,
-      );
-      assert(
         JSON.stringify(statePayload.data.districts) === JSON.stringify(expectedDistricts) &&
           statePayload.data.coverage.status === "complete",
         `district discovery is state-scoped and complete for ${stateName}`,
       );
     }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
-    assert(initialFilterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
-    assert(initialFilterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
+    assert(
+      initialFilterRequest.pathname.endsWith("/daily-price-arrival/filters") &&
+        filters.meta.source === "Government of India AGMARKNET 2.0",
+      "state and mandi options come from the complete AGMARKNET 2.0 directory",
+    );
 
     const filteredResponse = await fetch(
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
     );
     const filtered = await filteredResponse.json();
-    const filteredRequest = upstreamRequests.at(-1)!;
-    assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
-    assert(filteredRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "prices pass state filter upstream");
-    assert(filteredRequest.searchParams.get("filters[district.keyword]") === "Pune", "prices pass district exact-match filter upstream");
-    assert(filteredRequest.searchParams.get("filters[market.keyword]") === "Pune Market", "prices pass market exact-match filter upstream");
-    assert(filteredRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "prices pass commodity exact-match filter upstream");
-    assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
-    assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
-    assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
-    assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
-    assert(filtered.meta.total === 2, "upstream result totals are parsed");
-    assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
-    assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
-    assert(
-      filtered.meta.upstreamUpdatedAt === "2026-11-13T20:00:47.000Z" &&
-        filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
-      "upstream dataset update time is returned separately from the successful fetch time",
+    const filteredRequest = agmarknetRequests.findLast((request) =>
+      request.body?.date === "2026-11-13" &&
+      (request.body?.stateIds as number[] | undefined)?.includes(stateIds.get("Maharashtra")!) &&
+      (request.body?.marketIds as number[] | undefined)?.includes(
+        [...marketDirectory.values()].find((market) => market.mkt_name === "Pune Market")!.id,
+      ),
     );
+    assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
+    assert(
+      filteredRequest?.method === "POST" &&
+        filteredRequest.body?.date === "2026-11-13" &&
+        (filteredRequest.body?.stateIds as number[]).includes(stateIds.get("Maharashtra")!) &&
+        (filteredRequest.body?.marketIds as number[]).includes(
+          [...marketDirectory.values()].find((market) => market.mkt_name === "Pune Market")!.id,
+        ),
+      "prices request the exact state, mandi and arrival date from AGMARKNET 2.0",
+    );
+    assert(filtered.meta.total === 1 && filtered.data.length === 1, "duplicate daily source rows are removed before local pagination");
+    assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination reports the complete local result set");
+    assert(
+      filtered.meta.cacheStatus === "live" &&
+        filtered.meta.source === "Government of India AGMARKNET 2.0" &&
+        filtered.meta.fetchedAt,
+      "live source and fetch timestamp are returned",
+    );
+    assert(filtered.meta.upstreamUpdatedAt === null, "no upstream update timestamp is invented when the source does not provide one");
+    assert(filtered.data[0]?.source_unit === "Rs./Quintal", "the price unit is preserved from the AGMARKNET report");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
 
@@ -471,7 +477,10 @@ async function main() {
       });
       const marketResponse = await fetch(`${base}/api/v1/prices?${query}`);
       const marketPayload = await marketResponse.json();
-      const sourceRequest = upstreamRequests.at(-1)!;
+      const sourceMarketId = [...marketDirectory.values()].find((market) => market.mkt_name === item.market)!.id;
+      const sourceRequest = agmarknetRequests.findLast((request) =>
+        (request.body?.marketIds as number[] | undefined)?.includes(sourceMarketId),
+      );
       assert(
         marketResponse.status === 200 &&
           marketPayload.meta.total === 1 &&
@@ -482,10 +491,10 @@ async function main() {
         `${item.market} regression preserves the sole matching source observation`,
       );
       assert(
-        sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
-          sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
-          sourceRequest.searchParams.get("filters[market.keyword]") === item.market,
-        `${item.market} regression sends exact state, district, and market filters upstream`,
+        sourceRequest?.method === "POST" &&
+          (sourceRequest.body?.stateIds as number[] | undefined)?.includes(stateIds.get("Andhra Pradesh")!) &&
+          (sourceRequest.body?.marketIds as number[] | undefined)?.includes(sourceMarketId),
+        `${item.market} regression sends exact state and market IDs to AGMARKNET 2.0`,
       );
     }
 
