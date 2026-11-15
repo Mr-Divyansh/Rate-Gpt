@@ -86,6 +86,11 @@ async function main(): Promise<void> {
   const mapped = mapUpstreamRecord({ ...upstreamRecord, Min_Price: null, Max_Price: "", Modal_Price: null });
   check(mapped?.arrivalDate === "2026-11-13", "OGD arrival dates are mapped exactly");
   check(mapped?.minPrice === null && mapped?.maxPrice === null && mapped?.modalPrice === null, "missing source prices remain null");
+  check(mapped?.sourceUnit === "Not provided by source", "missing upstream unit is not fabricated as Rs/Quintal");
+  check(
+    mapUpstreamRecord({ ...upstreamRecord, Unit: "Rs/Number" })?.sourceUnit === "Rs/Number",
+    "an explicit upstream price unit is preserved",
+  );
   check(mapUpstreamRecord({ Commodity: "Apple" }) === null, "incomplete source records are rejected");
 
   let filtersUrl: URL | undefined;
