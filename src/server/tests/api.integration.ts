@@ -139,7 +139,6 @@ for (const record of sourceRecords as any[]) {
   }
 }
 
-const agmarknetRequests: Array<{ url: URL; method: string; body?: Record<string, unknown> }> = [];
 const upstreamRequests: URL[] = [];
 const upstream = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
@@ -159,110 +158,6 @@ const upstream = http.createServer((req, res) => {
         cmdt_data: [...commodityDirectory.values()],
       },
     }));
-    return;
-  }
-
-  if (url.pathname.endsWith("/prices-and-arrivals/date-wise/specific-commodity")) {
-    agmarknetRequests.push({ url, method: req.method || "GET", body: {} });
-    const stateId = Number(url.searchParams.get("stateId"));
-    const commodityId = Number(url.searchParams.get("commodityId"));
-    const stateName = [...stateIds.entries()].find(([, id]) => id === stateId)?.[0] || "";
-    const commodityName = [...commodityDirectory.values()].find((row) => row.cmdt_id === commodityId)?.cmdt_name || "";
-    const month = Number(url.searchParams.get("month"));
-    const year = Number(url.searchParams.get("year"));
-    const markets = [...marketDirectory.values()]
-      .filter((market) => market.state_id === stateId)
-      .flatMap((market) => {
-        const district = [...districtDirectory.values()].find((row) => row.id === market.district_id)?.district_name || "";
-        const rows = (sourceRecords as any[]).filter((record) => {
-          const date = normalizeArrivalDate(String(record.Arrival_Date)) || "";
-          return record.State === stateName &&
-            record.District === district &&
-            record.Market === market.mkt_name &&
-            record.Commodity === commodityName &&
-            Number(date.slice(0, 4)) === year &&
-            Number(date.slice(5, 7)) === month;
-        });
-        if (!rows.length) return [];
-        const dates = new Map<string, any[]>();
-        for (const record of rows) {
-          const date = normalizeArrivalDate(String(record.Arrival_Date))!;
-          const [yyyy, mm, dd] = date.split("-");
-          const displayDate = `${dd}/${mm}/${yyyy}`;
-          const list = dates.get(displayDate) ?? [];
-          list.push({
-            variety: record.Variety || "Unspecified",
-            minimumPrice: record.Min_Price,
-            maximumPrice: record.Max_Price,
-            modalPrice: record.Modal_Price,
-          });
-          dates.set(displayDate, list);
-        }
-        return [{
-          marketName: market.mkt_name,
-          dates: [...dates.entries()].map(([arrivalDate, data]) => ({ arrivalDate, data })),
-        }];
-      });
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({
-      success: true,
-      columns: [
-        { key: "arrivalDate", title: "Arrival Date" },
-        { key: "variety", title: "Variety" },
-        { key: "minimumPrice", title: "Minimum Price (Rs./Quintal)" },
-        { key: "maximumPrice", title: "Maximum Price (Rs./Quintal)" },
-        { key: "modalPrice", title: "Modal Price (Rs./Quintal)" },
-      ],
-      markets,
-    }));
-    return;
-  }
-
-  if (url.pathname.endsWith("/prices-and-arrivals/market-report/daily")) {
-    let rawBody = "";
-    req.on("data", (chunk) => { rawBody += chunk; });
-    req.on("end", () => {
-      const body = JSON.parse(rawBody || "{}") as Record<string, unknown>;
-      agmarknetRequests.push({ url, method: req.method || "POST", body });
-      const date = String(body.date || "");
-      const requestedMarketIds = new Set(
-        Array.isArray(body.marketIds) ? body.marketIds.map(Number) : [],
-      );
-      const requestedStateIds = new Set(
-        Array.isArray(body.stateIds) ? body.stateIds.map(Number) : [],
-      );
-      const states = expectedStatesAndUnionTerritories.flatMap((stateName) => {
-        const stateId = stateIds.get(stateName)!;
-        if (!requestedStateIds.has(stateId)) return [];
-        const markets = [...marketDirectory.values()]
-          .filter((market) => market.state_id === stateId && requestedMarketIds.has(market.id))
-          .map((market) => {
-            const district = [...districtDirectory.values()].find((row) => row.id === market.district_id)?.district_name || "";
-            const rows = (sourceRecords as any[]).filter((record) =>
-              record.State === stateName &&
-              record.District === district &&
-              record.Market === market.mkt_name &&
-              normalizeArrivalDate(String(record.Arrival_Date)) === date,
-            );
-            const commodities = [...new Set(rows.map((row) => row.Commodity))].map((commodityName) => ({
-              commodityId: commodityDirectory.get(String(commodityName))?.cmdt_id,
-              commodityName,
-              data: rows.filter((row) => row.Commodity === commodityName).map((row) => ({
-                variety: row.Variety || "Unspecified",
-                grade: row.Grade || "Unspecified",
-                minimumPrice: row.Min_Price,
-                maximumPrice: row.Max_Price,
-                modalPrice: row.Modal_Price,
-                unitOfPrice: "Rs./Quintal",
-              })),
-            }));
-            return { marketId: market.id, marketName: market.mkt_name, commodities };
-          });
-        return [{ stateId, stateName, markets }];
-      });
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ success: true, states }));
-    });
     return;
   }
 
