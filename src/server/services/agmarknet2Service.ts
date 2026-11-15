@@ -301,7 +301,7 @@ function sourceUnitFromColumns(columns: MonthlyCommodityReport["columns"]): stri
   const modalColumn = columns?.find((column) => column.key === "modalPrice");
   const priceColumn = modalColumn ?? columns?.find((column) => /price/i.test(column.key ?? ""));
   const title = priceColumn?.title ?? "";
-  const unit = title.match(/\\(([^)]+)\\)/)?.[1]?.trim();
+  const unit = title.match(/\(([^)]+)\)/)?.[1]?.trim();
   return unit || "Not provided by source";
 }
 
