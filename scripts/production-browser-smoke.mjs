@@ -45,12 +45,31 @@ try {
     assert.equal(response?.status(), 200, viewport.name + ": mandi page must return HTTP 200");
     pass(viewport.name + ": mandi page opens");
 
-    await page.waitForFunction(() => {
-      const state = document.querySelector("#stateSelect");
-      return state &&
-        !state.disabled &&
-        Array.from(state.options).some((option) => option.value === "Himachal Pradesh");
-    }, null, { timeout: 45_000 });
+    try {
+      await page.waitForFunction(() => {
+        const state = document.querySelector("#stateSelect");
+        return state &&
+          !state.disabled &&
+          Array.from(state.options).some((option) => option.value === "Himachal Pradesh");
+      }, null, { timeout: 45_000 });
+    } catch (error) {
+      throw new Error(
+        viewport.name + ": state selector did not initialize; diagnostics=" +
+          JSON.stringify({
+            pageErrors,
+            consoleErrors,
+            failedRequests,
+            filterResponses,
+            stateSelect: await page.locator("#stateSelect").evaluate((element) => ({
+              disabled: element.disabled,
+              options: Array.from(element.options).map((option) => ({
+                value: option.value,
+                text: option.textContent,
+              })),
+            })),
+          }) + "; cause=" + error.message,
+      );
+    }
     pass(viewport.name + ": government state options load");
 
     const stateFiltersResponsePromise = page.waitForResponse((candidate) => {

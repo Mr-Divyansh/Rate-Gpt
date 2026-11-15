@@ -561,8 +561,7 @@ function renderResults() {
   $("loadPrevious").hidden = state.pageOffsets.length < 2;
   $("loadPrevious").disabled = state.loading || state.exporting;
   $("priceMessage").textContent = announcement;
-  const unitNote = document.querySelector(".unit-field label");
-  if (unitNote) unitNote.textContent = `Price unit (${unitLabel})`;
+  // Keep the control label static; unit availability is represented by the selector state.
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
     : "";
