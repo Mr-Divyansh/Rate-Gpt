@@ -39,7 +39,7 @@ async function main(): Promise<void> {
       default: return value.trim();
     }
   };
-  const canonicalStates = new Set(states.map((row: any) => canonicalStateName(row.state_name)));
+  const canonicalStates = new Set(states.filter((row: any) => row.state_name !== "All States/UTs").map((row: any) => canonicalStateName(row.state_name)));
   console.log("AGMARKNET 2.0 source state names:", JSON.stringify(states.map((row: any) => row.state_name)));
   console.log("AGMARKNET 2.0 canonical state names:", JSON.stringify([...canonicalStates].sort()));
   const expectedCanonicalStates = [
