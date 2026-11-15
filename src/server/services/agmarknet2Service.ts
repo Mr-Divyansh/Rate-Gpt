@@ -11,7 +11,6 @@ import {
 const DEFAULT_BASE_URL = "https://api.agmarknet.gov.in/v1";
 const REQUEST_TIMEOUT_MS = 12_000;
 const CATALOG_TTL_MS = 15 * 60 * 1_000;
-const REPORT_LOOKBACK_DAYS = 4;
 const MAX_PAGE_SIZE = 100;
 const MAX_OFFSET = 1_000_000;
 const SOURCE_NAME = "Government of India AGMARKNET 2.0";
@@ -84,11 +83,6 @@ function indiaTodayIsoDate(now = new Date()): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-function shiftIsoDate(date: string, days: number): string {
-  const [year, month, day] = date.split("-").map(Number);
-  const shifted = new Date(Date.UTC(year, month - 1, day + days));
-  return shifted.toISOString().slice(0, 10);
-}
 
 function apiBaseUrl(): string {
   const raw = process.env.AGMARKNET_API_BASE_URL || DEFAULT_BASE_URL;
@@ -272,54 +266,172 @@ function recordNumber(value: unknown): number | null {
   return parsePrice(value);
 }
 
-function reportRows(
-  payload: Record<string, unknown>,
-  reportDate: string,
-  catalog: AgmarknetCatalog,
-): MandiRecord[] {
-  const states = readArray<Record<string, unknown>>(payload.states);
-  const districtByMarketId = new Map(catalog.market_data.map((market) => [
-    market.id,
-    catalog.district_data.find((district) => district.id === market.district_id)?.district_name ?? "",
-  ]));
+type MonthlyCommodityReport = {
+  success?: boolean;
+  message?: string;
+  columns?: Array<{ key?: string; title?: string }>;
+  markets?: Array<{
+    marketName?: string;
+    dates?: Array<{
+      arrivalDate?: string;
+      data?: Array<Record<string, unknown>>;
+    }>;
+  }>;
+  data?: MonthlyCommodityReport;
+};
 
-  const records: MandiRecord[] = [];
-  for (const state of states) {
-    const stateName = typeof state.stateName === "string" ? state.stateName.trim() : "";
-    for (const market of readArray<Record<string, unknown>>(state.markets)) {
-      const marketId = Number(market.marketId);
+type CommodityLoadResult = {
+  records: MandiRecord[];
+  partial: boolean;
+  failedMonths: string[];
+  unmatchedMarkets: string[];
+};
+
+function reportFromPayload(payload: Record<string, unknown>): MonthlyCommodityReport {
+  if (Array.isArray(payload.markets) || Array.isArray(payload.columns)) {
+    return payload as MonthlyCommodityReport;
+  }
+  if (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data)) {
+    return payload.data as MonthlyCommodityReport;
+  }
+  return payload as MonthlyCommodityReport;
+}
+
+function sourceUnitFromColumns(columns: MonthlyCommodityReport["columns"]): string {
+  const modalColumn = columns?.find((column) => column.key === "modalPrice");
+  const priceColumn = modalColumn ?? columns?.find((column) => /price/i.test(column.key ?? ""));
+  const title = priceColumn?.title ?? "";
+  const unit = title.match(/\\(([^)]+)\\)/)?.[1]?.trim();
+  return unit || "Not provided by source";
+}
+
+function canonicalMarketName(value: string): string {
+  return normalizeName(value).replace(/[^a-z0-9]/g, "").replace(/apmc$/, "");
+}
+
+function monthParts(isoDate: string): { year: number; month: number; key: string } {
+  const [year, month] = isoDate.split("-").map(Number);
+  return { year, month, key: `${year}-${String(month).padStart(2, "0")}` };
+}
+
+function previousMonth(year: number, month: number): { year: number; month: number; key: string } {
+  const date = new Date(Date.UTC(year, month - 2, 1));
+  const nextYear = date.getUTCFullYear();
+  const nextMonth = date.getUTCMonth() + 1;
+  return { year: nextYear, month: nextMonth, key: `${nextYear}-${String(nextMonth).padStart(2, "0")}` };
+}
+
+function latestObservationRecords(records: MandiRecord[]): MandiRecord[] {
+  const latest = new Map<string, MandiRecord>();
+  for (const record of records) {
+    const key = [
+      record.state, record.district, record.market, record.commodity,
+      record.variety ?? "", record.source_unit,
+    ].join("|").toLocaleLowerCase();
+    const existing = latest.get(key);
+    if (!existing || record.arrival_date > existing.arrival_date) latest.set(key, record);
+  }
+  return [...latest.values()];
+}
+
+async function loadCommodityRecords(
+  options: LiveQueryOptions,
+  fetcher: typeof fetch,
+): Promise<CommodityLoadResult> {
+  if (!options.state) {
+    throw new GovernmentApiError("A state is required for the AGMARKNET commodity report.", 400);
+  }
+  if (!options.commodity) {
+    throw new GovernmentApiError("Select a government-listed commodity to load its market report.", 400);
+  }
+  const requestedDate = options.arrivalDate ? normalizeArrivalDate(options.arrivalDate) : null;
+  if (options.arrivalDate && !requestedDate) {
+    throw new GovernmentApiError("Arrival date is invalid.", 400);
+  }
+  if (requestedDate && isFutureArrivalDate(requestedDate)) {
+    throw new GovernmentApiError("Future arrival dates are not available. Choose today or an earlier date.", 400);
+  }
+
+  const catalog = await getCatalog(fetcher);
+  const stateRow = catalog.state_data.find((row) => normalizeName(row.state_name) === normalizeName(options.state!));
+  if (!stateRow) throw new GovernmentApiError("The selected state is not available in AGMARKNET 2.0.", 404);
+  const commodityRow = catalog.cmdt_data.find((row) => normalizeName(row.cmdt_name) === normalizeName(options.commodity!));
+  if (!commodityRow) throw new GovernmentApiError("The selected commodity is not available in the AGMARKNET 2.0 catalogue.", 404);
+
+  const districtById = new Map(catalog.district_data.map((row) => [row.id, row.district_name]));
+  const registeredMarkets = catalog.market_data.filter((row) =>
+    row.state_id === stateRow.state_id &&
+    (!options.district || normalizeName(districtById.get(row.district_id) ?? "") === normalizeName(options.district)) &&
+    (!options.market || normalizeName(row.mkt_name) === normalizeName(options.market)),
+  );
+  if (!registeredMarkets.length) {
+    return { records: [], partial: false, failedMonths: [], unmatchedMarkets: [] };
+  }
+
+  const anchor = requestedDate ?? indiaTodayIsoDate();
+  const currentMonth = monthParts(anchor);
+  const months = [currentMonth];
+  if (!requestedDate && Number(anchor.slice(8, 10)) <= 10) {
+    months.push(previousMonth(currentMonth.year, currentMonth.month));
+  }
+
+  const districtForMarket = (marketName: string): string | null => {
+    const candidates = registeredMarkets.filter(
+      (row) => canonicalMarketName(row.mkt_name) === canonicalMarketName(marketName),
+    );
+    return candidates.length === 1 ? districtById.get(candidates[0]!.district_id) ?? null : null;
+  };
+
+  const settled = await Promise.allSettled(months.map(async (month) => {
+    const params = new URLSearchParams({
+      year: String(month.year),
+      month: String(month.month),
+      stateId: String(stateRow.state_id),
+      commodityId: String(commodityRow.cmdt_id),
+      includeExcel: "false",
+    });
+    const payload = await requestJson(
+      `/prices-and-arrivals/date-wise/specific-commodity?${params.toString()}`,
+      {},
+      fetcher,
+    );
+    const report = reportFromPayload(payload);
+    if (report.success !== true || !Array.isArray(report.markets)) {
+      throw new GovernmentApiError("AGMARKNET 2.0 returned an invalid monthly commodity report.", 502);
+    }
+
+    const sourceUnit = sourceUnitFromColumns(report.columns);
+    const records: MandiRecord[] = [];
+    const unmatchedMarkets: string[] = [];
+    for (const market of report.markets) {
       const marketName = typeof market.marketName === "string" ? market.marketName.trim() : "";
-      const district = districtByMarketId.get(marketId) ?? "";
-      if (!stateName || !marketName || !district) continue;
-
-      for (const commodity of readArray<Record<string, unknown>>(market.commodities)) {
-        const commodityName = typeof commodity.commodityName === "string"
-          ? commodity.commodityName.trim()
-          : "";
-        if (!commodityName) continue;
-
-        for (const row of readArray<Record<string, unknown>>(commodity.data)) {
-          const arrivalDate = normalizeArrivalDate(row.arrivalDate) ?? reportDate;
-          const minPrice = recordNumber(row.minimumPrice);
-          const maxPrice = recordNumber(row.maximumPrice);
-          const modalPrice = recordNumber(row.modalPrice);
+      if (!marketName) continue;
+      const district = districtForMarket(marketName);
+      if (!district) {
+        unmatchedMarkets.push(marketName);
+        continue;
+      }
+      for (const day of market.dates ?? []) {
+        const arrivalDate = normalizeArrivalDate(day.arrivalDate) ?? "";
+        if (!arrivalDate || (requestedDate && arrivalDate !== requestedDate)) continue;
+        for (const row of day.data ?? []) {
+          const minPrice = parsePrice(row.minimumPrice);
+          const maxPrice = parsePrice(row.maximumPrice);
+          const modalPrice = parsePrice(row.modalPrice);
           if (minPrice === null && maxPrice === null && modalPrice === null) continue;
-          const sourceUnit = typeof row.unitOfPrice === "string" && row.unitOfPrice.trim()
-            ? row.unitOfPrice.trim()
-            : "Not provided by source";
           const variety = typeof row.variety === "string" && row.variety.trim() ? row.variety.trim() : null;
-          const grade = typeof row.grade === "string" && row.grade.trim() ? row.grade.trim() : null;
           const id = [
-            stateName, district, marketName, commodityName, variety ?? "", grade ?? "", arrivalDate, sourceUnit,
+            stateRow.state_name, district, marketName, commodityRow.cmdt_name,
+            variety ?? "", arrivalDate, sourceUnit,
           ].join("|").toLocaleLowerCase();
           records.push({
             id,
-            state: stateName,
+            state: stateRow.state_name,
             district,
             market: marketName,
-            commodity: commodityName,
+            commodity: commodityRow.cmdt_name,
             variety,
-            grade,
+            grade: null,
             arrival_date: arrivalDate,
             min_price: minPrice,
             max_price: maxPrice,
@@ -329,8 +441,33 @@ function reportRows(
         }
       }
     }
+    return { records, unmatchedMarkets };
+  }));
+
+  const successful = settled.flatMap((result) => result.status === "fulfilled" ? [result.value] : []);
+  const failedMonths = settled.flatMap((result, index) => result.status === "rejected" ? [months[index]!.key] : []);
+  if (!successful.length) {
+    const first = settled.find((result) => result.status === "rejected");
+    throw first && first.status === "rejected"
+      ? first.reason
+      : new GovernmentApiError("AGMARKNET 2.0 monthly commodity reports are unavailable.", 502);
   }
-  return records;
+
+  const allRecords = successful.flatMap((result) => result.records);
+  const filtered = allRecords.filter((record) =>
+    (!options.district || normalizeName(record.district) === normalizeName(options.district)) &&
+    (!options.market || normalizeName(record.market) === normalizeName(options.market)) &&
+    (!options.search || normalizeName(record.commodity).includes(normalizeName(normalizeCommoditySearch(options.search)))),
+  );
+  const records = requestedDate
+    ? [...new Map(filtered.map((record) => [record.id, record])).values()]
+    : latestObservationRecords(filtered);
+  return {
+    records,
+    partial: failedMonths.length > 0 || successful.some((result) => result.unmatchedMarkets.length > 0),
+    failedMonths,
+    unmatchedMarkets: [...new Set(successful.flatMap((result) => result.unmatchedMarkets))],
+  };
 }
 
 function sortRecords(records: MandiRecord[], sort?: string): void {
@@ -353,118 +490,11 @@ function sortRecords(records: MandiRecord[], sort?: string): void {
   });
 }
 
-export async function fetchAgmarknet2Prices(
+function pageCommodityRecords(
+  records: MandiRecord[],
   options: LiveQueryOptions,
-  fetcher: typeof fetch = fetch,
-): Promise<{
-  records: MandiRecord[];
-  meta: {
-    limit: number;
-    offset: number;
-    nextOffset: number;
-    total: number;
-    hasNext: boolean;
-    upstreamHasNext: boolean;
-    truncated: false;
-    source: string;
-    fetchedAt: string;
-    upstreamUpdatedAt: null;
-    cacheStatus: "live";
-    freshnessStatus: string;
-    partial: boolean;
-    failedDates: string[];
-  };
-}> {
-  if (!options.state) {
-    throw new GovernmentApiError("A state is required for the AGMARKNET 2.0 market report.", 400);
-  }
-  if (options.arrivalDate) {
-    const requested = normalizeArrivalDate(options.arrivalDate);
-    if (!requested) throw new GovernmentApiError("Arrival date is invalid.", 400);
-    if (isFutureArrivalDate(requested)) {
-      throw new GovernmentApiError("Future arrival dates are not available. Choose today or an earlier date.", 400);
-    }
-  }
-
-  const catalog = await getCatalog(fetcher);
-  const stateRow = catalog.state_data.find((row) => normalizeName(row.state_name) === normalizeName(options.state!));
-  if (!stateRow) {
-    throw new GovernmentApiError("The selected state is not available in AGMARKNET 2.0.", 404);
-  }
-  const districtRow = options.district
-    ? catalog.district_data.find((row) =>
-        row.state_id === stateRow.state_id &&
-        normalizeName(row.district_name) === normalizeName(options.district!),
-      )
-    : undefined;
-  const marketRows = catalog.market_data.filter((row) =>
-    row.state_id === stateRow.state_id &&
-    (!options.district || row.district_id === districtRow?.id) &&
-    (!options.market || normalizeName(row.mkt_name) === normalizeName(options.market)),
-  );
-  if (!marketRows.length) {
-    const limit = options.limit ?? 50;
-    const offset = options.offset ?? 0;
-    return {
-      records: [],
-      meta: {
-        limit, offset, nextOffset: offset, total: 0,
-        hasNext: false, upstreamHasNext: false, truncated: false,
-        source: SOURCE_NAME, fetchedAt: new Date().toISOString(),
-        upstreamUpdatedAt: null, cacheStatus: "live",
-        freshnessStatus: FRESHNESS_STATUS, partial: false, failedDates: [],
-      },
-    };
-  }
-
-  const today = indiaTodayIsoDate();
-  const dates = options.arrivalDate
-    ? [normalizeArrivalDate(options.arrivalDate)!]
-    : Array.from({ length: REPORT_LOOKBACK_DAYS }, (_, index) => shiftIsoDate(today, -index));
-  const marketIds = marketRows.map((row) => row.id);
-  const settled = await Promise.allSettled(dates.map(async (date) => {
-    const payload = await requestJson(
-      "/prices-and-arrivals/market-report/daily",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date,
-          marketIds,
-          stateIds: [stateRow.state_id],
-          includeExcel: false,
-        }),
-      },
-      fetcher,
-    );
-    const payloadStates = readArray(payload.states);
-    if (!payloadStates.length && payload.success === false) {
-      throw new GovernmentApiError("AGMARKNET 2.0 returned an unsuccessful daily report.", 502);
-    }
-    return reportRows(payload, date, catalog);
-  }));
-
-  const successful = settled.flatMap((result) => result.status === "fulfilled" ? result.value : []);
-  const failedDates = settled.flatMap((result, index) => result.status === "rejected" ? [dates[index]!] : []);
-  if (settled.every((result) => result.status === "rejected")) {
-    const first = settled.find((result) => result.status === "rejected");
-    throw first && first.status === "rejected"
-      ? first.reason
-      : new GovernmentApiError("AGMARKNET 2.0 daily reports are unavailable.", 502);
-  }
-
-  const unique = new Map<string, MandiRecord>();
-  for (const record of successful) {
-    if (normalizeName(record.state) !== normalizeName(options.state)) continue;
-    if (options.district && normalizeName(record.district) !== normalizeName(options.district)) continue;
-    if (options.market && normalizeName(record.market) !== normalizeName(options.market)) continue;
-    if (options.commodity && normalizeName(record.commodity) !== normalizeName(options.commodity)) continue;
-    if (options.search && !normalizeName(record.commodity).includes(normalizeName(normalizeCommoditySearch(options.search)))) continue;
-    unique.set(record.id, record);
-  }
-  const records = [...unique.values()];
-  sortRecords(records, options.sort);
-
+  details: CommodityLoadResult,
+) {
   const limit = options.limit ?? 50;
   const offset = options.offset ?? 0;
   if (!Number.isInteger(limit) || limit < 1 || limit > MAX_PAGE_SIZE) {
@@ -473,31 +503,76 @@ export async function fetchAgmarknet2Prices(
   if (!Number.isInteger(offset) || offset < 0 || offset > MAX_OFFSET) {
     throw new GovernmentApiError("Page offset is outside the supported range.", 400);
   }
+  sortRecords(records, options.sort);
   const page = records.slice(offset, offset + limit);
   const nextOffset = offset + page.length;
   const hasNext = nextOffset < records.length;
-
   return {
     records: page,
     meta: {
-      limit,
-      offset,
-      nextOffset,
-      total: records.length,
-      hasNext,
-      upstreamHasNext: hasNext,
-      truncated: false,
-      source: SOURCE_NAME,
-      fetchedAt: new Date().toISOString(),
-      upstreamUpdatedAt: null,
-      cacheStatus: "live",
-      freshnessStatus: failedDates.length
-        ? `Government-published daily market data; some requested dates could not be fetched (${failedDates.join(", ")}).`
-        : FRESHNESS_STATUS,
-      partial: failedDates.length > 0,
-      failedDates,
+      limit, offset, nextOffset, total: records.length, hasNext,
+      upstreamHasNext: hasNext, truncated: false as const,
+      source: SOURCE_NAME, fetchedAt: new Date().toISOString(),
+      upstreamUpdatedAt: null, cacheStatus: "live" as const,
+      freshnessStatus: details.partial
+        ? "Some government report months or market-name matches were unavailable; only verified observations are shown."
+        : "Latest available government-reported observation for this commodity in the selected calendar month.",
+      partial: details.partial,
+      failedMonths: details.failedMonths,
+      unmatchedMarkets: details.unmatchedMarkets,
     },
   };
+}
+
+export async function fetchAgmarknet2Prices(
+  options: LiveQueryOptions,
+  fetcher: typeof fetch = fetch,
+) {
+  const details = await loadCommodityRecords(options, fetcher);
+  return pageCommodityRecords(details.records, options, details);
+}
+
+export async function fetchAgmarknet2PricesForSearch(
+  options: LiveQueryOptions,
+  fetcher: typeof fetch = fetch,
+) {
+  const candidates = options.commodity
+    ? [options.commodity]
+    : await searchAgmarknet2Commodities(options.search ?? "", 5, fetcher);
+  if (!candidates.length) {
+    return pageCommodityRecords([], options, {
+      records: [], partial: false, failedMonths: [], unmatchedMarkets: [],
+    });
+  }
+
+  const combined = new Map<string, MandiRecord>();
+  const failedMonths = new Set<string>();
+  const unmatchedMarkets = new Set<string>();
+  let partial = false;
+  let succeeded = 0;
+  let firstError: unknown;
+
+  for (const commodity of candidates) {
+    try {
+      const details = await loadCommodityRecords({ ...options, commodity }, fetcher);
+      succeeded += 1;
+      partial ||= details.partial;
+      details.failedMonths.forEach((month) => failedMonths.add(month));
+      details.unmatchedMarkets.forEach((market) => unmatchedMarkets.add(market));
+      details.records.forEach((record) => combined.set(record.id, record));
+    } catch (error) {
+      firstError ??= error;
+      partial = true;
+    }
+  }
+  if (succeeded === 0 && firstError) throw firstError;
+  const records = [...combined.values()];
+  return pageCommodityRecords(records, options, {
+    records,
+    partial,
+    failedMonths: [...failedMonths],
+    unmatchedMarkets: [...unmatchedMarkets],
+  });
 }
 
 export async function searchAgmarknet2Commodities(
