@@ -16,7 +16,6 @@ import {
 } from "../services/mandiDataService.js";
 import {
   fetchAgmarknet2Filters,
-  fetchAgmarknet2PricesForSearch,
   searchAgmarknet2Commodities,
 } from "../services/agmarknet2Service.js";
 
@@ -162,13 +161,10 @@ router.get("/prices", async (req: Request, res: Response) => {
   try {
     const { date, ...filters } = parsed.data;
     const liveOptions = { ...filters, arrivalDate: date };
-    const result = liveOptions.state && (liveOptions.commodity || liveOptions.search)
-      ? await fetchAgmarknet2PricesForSearch(liveOptions).catch(() =>
-          // The data.gov.in current-daily resource remains a live fallback; no
-          // price records are persisted when either upstream is unavailable.
-          fetchLivePrices(liveOptions),
-        )
-      : await fetchLivePrices(liveOptions);
+    // Price records come only from the key-authenticated OGD resource.
+    // The public AGMARKNET 2.0 monthly report is CAPTCHA-gated and is not
+    // automated. The AGMARKNET 2.0 directory is used for selector metadata.
+    const result = await fetchLivePrices(liveOptions);
     return sendSuccess(
       res,
       result.records,
