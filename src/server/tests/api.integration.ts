@@ -472,30 +472,26 @@ async function main() {
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
     );
     const filtered = await filteredResponse.json();
-    const filteredRequest = agmarknetRequests.findLast((request) =>
-      request.url.pathname.endsWith("/date-wise/specific-commodity") &&
-      request.url.searchParams.get("year") === "2026" &&
-      request.url.searchParams.get("month") === "11" &&
-      request.url.searchParams.get("stateId") === String(stateIds.get("Maharashtra")) &&
-      request.url.searchParams.get("commodityId") === String(commodityDirectory.get("Apple")?.cmdt_id),
-    );
+    const filteredRequest = upstreamRequests.at(-1)!;
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
+    assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
+    assert(filteredRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "prices pass state filter upstream");
+    assert(filteredRequest.searchParams.get("filters[district.keyword]") === "Pune", "prices pass district exact-match filter upstream");
+    assert(filteredRequest.searchParams.get("filters[market.keyword]") === "Pune Market", "prices pass market exact-match filter upstream");
+    assert(filteredRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "prices pass commodity exact-match filter upstream");
+    assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
+    assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
+    assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
+    assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
+    assert(filtered.meta.total === 2 && filtered.data.length === 1, "upstream totals are retained while duplicate daily records are removed");
+    assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
+    assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(
-      filteredRequest?.method === "GET" &&
-        filteredRequest.url.searchParams.get("stateId") === String(stateIds.get("Maharashtra")) &&
-        filteredRequest.url.searchParams.get("commodityId") === String(commodityDirectory.get("Apple")?.cmdt_id),
-      "prices request the exact state and commodity from the public AGMARKNET monthly report",
+      filtered.meta.upstreamUpdatedAt === "2026-11-13T20:00:47.000Z" &&
+        filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
+      "upstream dataset update time is returned separately from the successful fetch time",
     );
-    assert(filtered.meta.total === 1 && filtered.data.length === 1, "duplicate daily source rows are removed before local pagination");
-    assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination reports the complete local result set");
-    assert(
-      filtered.meta.cacheStatus === "live" &&
-        filtered.meta.source === "Government of India AGMARKNET 2.0" &&
-        filtered.meta.fetchedAt,
-      "live source and fetch timestamp are returned",
-    );
-    assert(filtered.meta.upstreamUpdatedAt === null, "no upstream update timestamp is invented when the source does not provide one");
-    assert(filtered.data[0]?.source_unit === "Rs./Quintal", "the price unit is preserved from the AGMARKNET report");
+    assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
     assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
 
@@ -531,25 +527,22 @@ async function main() {
       });
       const marketResponse = await fetch(`${base}/api/v1/prices?${query}`);
       const marketPayload = await marketResponse.json();
-      const sourceRequest = agmarknetRequests.findLast((request) =>
-        request.url.pathname.endsWith("/date-wise/specific-commodity") &&
-        request.url.searchParams.get("stateId") === String(stateIds.get("Andhra Pradesh")) &&
-        request.url.searchParams.get("commodityId") === String(commodityDirectory.get(item.commodity)?.cmdt_id),
-      );
+      const sourceRequest = upstreamRequests.at(-1)!;
       assert(
         marketResponse.status === 200 &&
           marketPayload.meta.total === 1 &&
           marketPayload.data.length === 1 &&
           marketPayload.data[0]?.market === item.market &&
           marketPayload.data[0]?.commodity === item.commodity &&
-          marketPayload.data[0]?.grade === null,
+          marketPayload.data[0]?.grade === item.grade,
         `${item.market} regression preserves the source observation`,
       );
       assert(
-        sourceRequest?.method === "GET" &&
-          sourceRequest.url.searchParams.get("stateId") === String(stateIds.get("Andhra Pradesh")) &&
-          sourceRequest.url.searchParams.get("commodityId") === String(commodityDirectory.get(item.commodity)?.cmdt_id),
-        `${item.market} regression uses the official state and commodity report and filters the mandi`,
+        sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
+          sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
+          sourceRequest.searchParams.get("filters[market.keyword]") === item.market &&
+          sourceRequest.searchParams.get("filters[commodity.keyword]") === item.commodity,
+        `${item.market} regression sends exact state, district, market and commodity filters upstream`,
       );
     }
 
