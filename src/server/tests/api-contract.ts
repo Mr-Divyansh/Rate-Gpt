@@ -59,7 +59,7 @@ async function main(): Promise<void> {
   );
 
   check(/router\.post\("\/contact"/.test(routeSource), "documented contact endpoint exists in the server router");
-  check(/POST `\/contact`/.test(apiDocs), "human-readable API guide documents contact submission");
+  check(/POST \\/contact/.test(apiDocs), "human-readable API guide documents contact submission");
   check(
     !/Read-only API for/.test(spec?.info?.description ?? ""),
     "API description does not incorrectly describe the contact-enabled API as read-only",
