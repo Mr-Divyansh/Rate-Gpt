@@ -10,22 +10,22 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-\${{ github.workflow }}-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
     name: Tests, typecheck and production build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Download source archive
         env:
-          SOURCE_REPOSITORY: ${{ github.repository }}
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REPOSITORY: \${{ github.repository }}
+          SOURCE_SHA: \${{ github.sha }}
         run: |
-          curl --fail --silent --show-error --location \
-            "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" \
+          curl --fail --silent --show-error --location \\
+            "https://codeload.github.com/\${SOURCE_REPOSITORY}/tar.gz/\${SOURCE_SHA}" \\
             | tar --extract --gzip --strip-components=1
 
       - name: Set up Node.js
@@ -60,6 +60,15 @@ jobs:
 
       - name: Responsive layout regression checks
         run: npm run test:responsive
+
+      - name: Install pinned Playwright test runtime
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+
+      - name: Install Chromium browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Production browser interaction checks
+        run: node scripts/production-browser-smoke.mjs
 
       - name: Production release-gate regression checks
         run: npm run test:release-gate
