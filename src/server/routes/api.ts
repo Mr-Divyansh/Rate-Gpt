@@ -302,7 +302,7 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
       results,
       {
         count: results.length,
-        source: "Government of India OGD / AGMARKNET",
+        source: "Government of India AGMARKNET 2.0",
         sourceDerived: true,
       },
       "Government-reported commodity search completed",
