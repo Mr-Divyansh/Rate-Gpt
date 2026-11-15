@@ -22,6 +22,7 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
+          cache: npm
       - name: Download source archive
         env:
           SOURCE_REPOSITORY: ${{ github.repository }}
@@ -30,5 +31,7 @@ jobs:
           curl --fail --silent --show-error --location \
             "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" \
             | tar --extract --gzip --strip-components=1
+      - name: Install dependencies
+        run: npm ci
       - name: Run public production checks
-        run: node src/server/tests/production-smoke.ts
+        run: npm run test:production
