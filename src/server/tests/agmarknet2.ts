@@ -24,6 +24,7 @@ const filtersPayload = {
   data: {
     state_data: [
       { state_id: 5, state_name: "Himachal Pradesh" },
+      { state_id: 5, state_name: "Himachal Pradesh" },
       { state_id: 6, state_name: "Punjab" },
       { state_id: 7, state_name: "Andaman and Nicobar" },
       { state_id: 8, state_name: "Chattisgarh" },
@@ -35,6 +36,7 @@ const filtersPayload = {
       { state_id: 100006, state_name: "All States/UTs" },
     ],
     district_data: [
+      { id: 51, state_id: 5, district_name: "Kullu" },
       { id: 51, state_id: 5, district_name: "Kullu" },
       { id: 52, state_id: 5, district_name: "Mandi" },
       { id: 61, state_id: 6, district_name: "Ludhiana" },
@@ -48,6 +50,7 @@ const filtersPayload = {
     ],
     market_data: [
       { id: 501, state_id: 5, district_id: 51, mkt_name: "SMY Bhuntar" },
+      { id: 501, state_id: 5, district_id: 51, mkt_name: "SMY Bhuntar" },
       { id: 502, state_id: 5, district_id: 52, mkt_name: "SMY Takoli" },
       { id: 601, state_id: 6, district_id: 61, mkt_name: "Ludhiana APMC" },
       { id: 701, state_id: 7, district_id: 71, mkt_name: "Port Blair APMC" },
@@ -60,6 +63,7 @@ const filtersPayload = {
       { id: 100009, state_id: 100006, district_id: 100007, mkt_name: "All Markets" },
     ],
     cmdt_data: [
+      { cmdt_id: 24, cmdt_name: "Potato", cmdt_group_id: 4 },
       { cmdt_id: 24, cmdt_name: "Potato", cmdt_group_id: 4 },
       { cmdt_id: 65, cmdt_name: "Tomato", cmdt_group_id: 4 },
       { cmdt_id: 100001, cmdt_name: "All Commodities", cmdt_group_id: 100000 },
@@ -86,12 +90,19 @@ async function main(): Promise<void> {
   const mock = mockFetcher();
   const root = await fetchAgmarknet2Filters({}, mock.fetcher);
   check(root.states.includes("Himachal Pradesh") && !root.states.includes("All States/UTs"), "state catalogue excludes the all-states sentinel");
+  check(new Set(root.states).size === root.states.length, "state catalogue deduplicates repeated source rows");
   check(root.coverage.status === "catalogue" && root.cache.status === "temporary-cache", "root filter metadata identifies a cached administrative catalogue");
 
   const hp = await fetchAgmarknet2Filters({ state: "Himachal Pradesh" }, mock.fetcher);
   check(hp.districts.join(",") === "Kullu,Mandi", "state filter returns every registered district");
   check(hp.markets.length === 2 && hp.markets.includes("SMY Bhuntar"), "state filter returns every registered mandi");
   check(hp.commodities.includes("Potato") && !hp.commodities.includes("All Commodities"), "commodity catalogue excludes the all-commodities sentinel");
+  check(
+    new Set(hp.districts).size === hp.districts.length &&
+      new Set(hp.markets).size === hp.markets.length &&
+      new Set(hp.commodities).size === hp.commodities.length,
+    "district, mandi and commodity selectors contain no duplicate names",
+  );
 
   const kullu = await fetchAgmarknet2Filters({ state: "Himachal Pradesh", district: "Kullu" }, mock.fetcher);
   check(kullu.markets.length === 1 && kullu.markets[0] === "SMY Bhuntar", "district filter returns only mandis in that district");
