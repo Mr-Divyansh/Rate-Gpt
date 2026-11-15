@@ -263,10 +263,86 @@ async function main() {
       .then((r) => r.json());
     assert(filters.success && filters.data.districts.includes("Pune"), "live filters return selected-state districts");
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
+    const initialFilterRequest = upstreamRequests.at(-1)!;
+
+    const expectedStatesAndUnionTerritories = [
+      "Andaman and Nicobar Islands",
+      "Andhra Pradesh",
+      "Arunachal Pradesh",
+      "Assam",
+      "Bihar",
+      "Chandigarh",
+      "Chhattisgarh",
+      "Dadra and Nagar Haveli and Daman and Diu",
+      "Delhi",
+      "Goa",
+      "Gujarat",
+      "Haryana",
+      "Himachal Pradesh",
+      "Jammu and Kashmir",
+      "Jharkhand",
+      "Karnataka",
+      "Kerala",
+      "Ladakh",
+      "Lakshadweep",
+      "Madhya Pradesh",
+      "Maharashtra",
+      "Manipur",
+      "Meghalaya",
+      "Mizoram",
+      "Nagaland",
+      "Odisha",
+      "Puducherry",
+      "Punjab",
+      "Rajasthan",
+      "Sikkim",
+      "Tamil Nadu",
+      "Telangana",
+      "Tripura",
+      "Uttar Pradesh",
+      "Uttarakhand",
+      "West Bengal",
+    ];
+    assert(
+      filters.data.states.length === 36 &&
+        expectedStatesAndUnionTerritories.every((state) => filters.data.states.includes(state)),
+      "state selector contains all 28 States and 8 Union Territories",
+    );
+
+    // Exercise every official selector value against the upstream exact-match
+    // filter. The fixture deliberately contains records for only four states;
+    // other states must return an empty, complete result rather than records
+    // borrowed from another state or fabricated fallback data.
+    for (const stateName of expectedStatesAndUnionTerritories) {
+      const stateResponse = await fetch(
+        `${base}/api/v1/meta/filters?state=${encodeURIComponent(stateName)}`,
+      );
+      const statePayload = await stateResponse.json();
+      const upstreamRequest = upstreamRequests.at(-1)!;
+      const expectedDistricts = [...new Set(
+        sourceRecords
+          .filter((record) => record.State === stateName)
+          .map((record) => record.District),
+      )].sort((left, right) => left.localeCompare(right));
+      assert(
+        stateResponse.status === 200 &&
+          statePayload.success &&
+          statePayload.data.states.includes(stateName),
+        `state selector request succeeds for ${stateName}`,
+      );
+      assert(
+        upstreamRequest.searchParams.get("filters[state.keyword]") === stateName,
+        `upstream receives exact state filter for ${stateName}`,
+      );
+      assert(
+        JSON.stringify(statePayload.data.districts) === JSON.stringify(expectedDistricts) &&
+          statePayload.data.coverage.status === "complete",
+        `district discovery is state-scoped and complete for ${stateName}`,
+      );
+    }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
-    const filterRequest = upstreamRequests.at(-1)!;
-    assert(filterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
-    assert(filterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
+    assert(initialFilterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
+    assert(initialFilterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
 
     const filteredResponse = await fetch(
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
