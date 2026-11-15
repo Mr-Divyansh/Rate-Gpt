@@ -460,9 +460,15 @@ function renderResults() {
   );
 
   const busy = state.loading && state.records.length === 0;
-  const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
   const unitControl = $("priceUnit");
-  if (unitControl) unitControl.value = state.priceUnit;
+  const hasKnownQuintalUnit = state.records.some((record) =>
+    typeof record.source_unit === "string" && /rs\.?\s*\/\s*quintal/i.test(record.source_unit),
+  );
+  if (!hasKnownQuintalUnit && state.priceUnit === "kg") state.priceUnit = "quintal";
+  if (unitControl) {
+    unitControl.disabled = !hasKnownQuintalUnit;
+    unitControl.value = state.priceUnit;
+  }
   let announcement = "";
 
   if (busy) {
