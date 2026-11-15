@@ -359,10 +359,10 @@ async function loadCommodityRecords(
   if (!commodityRow) throw new GovernmentApiError("The selected commodity is not available in the AGMARKNET 2.0 catalogue.", 404);
 
   const districtById = new Map(catalog.district_data.map((row) => [row.id, row.district_name]));
-  const registeredMarkets = catalog.market_data.filter((row) =>
-    row.state_id === stateRow.state_id &&
+  const allStateMarkets = catalog.market_data.filter((row) => row.state_id === stateRow.state_id);
+  const registeredMarkets = allStateMarkets.filter((row) =>
     (!options.district || normalizeName(districtById.get(row.district_id) ?? "") === normalizeName(options.district)) &&
-    (!options.market || normalizeName(row.mkt_name) === normalizeName(options.market)),
+    (!options.market || canonicalMarketName(row.mkt_name) === canonicalMarketName(options.market)),
   );
   if (!registeredMarkets.length) {
     return { records: [], partial: false, failedMonths: [], unmatchedMarkets: [] };
@@ -376,7 +376,7 @@ async function loadCommodityRecords(
   }
 
   const districtForMarket = (marketName: string): string | null => {
-    const candidates = registeredMarkets.filter(
+    const candidates = allStateMarkets.filter(
       (row) => canonicalMarketName(row.mkt_name) === canonicalMarketName(marketName),
     );
     return candidates.length === 1 ? districtById.get(candidates[0]!.district_id) ?? null : null;
@@ -411,6 +411,8 @@ async function loadCommodityRecords(
         unmatchedMarkets.push(marketName);
         continue;
       }
+      if (options.district && normalizeName(district) !== normalizeName(options.district)) continue;
+      if (options.market && canonicalMarketName(marketName) !== canonicalMarketName(options.market)) continue;
       for (const day of market.dates ?? []) {
         const arrivalDate = normalizeArrivalDate(day.arrivalDate) ?? "";
         if (!arrivalDate || (requestedDate && arrivalDate !== requestedDate)) continue;
