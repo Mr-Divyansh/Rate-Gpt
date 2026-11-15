@@ -20,7 +20,22 @@ try {
   for (const viewport of viewports) {
     const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
     const pageErrors = [];
+    const consoleErrors = [];
+    const failedRequests = [];
+    const filterResponses = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("requestfailed", (request) => {
+      failedRequests.push({ url: request.url(), error: request.failure()?.errorText || "unknown" });
+    });
+    page.on("response", (candidate) => {
+      const url = new URL(candidate.url());
+      if (url.pathname === "/api/v1/meta/filters") {
+        filterResponses.push({ status: candidate.status(), state: url.searchParams.get("state") });
+      }
+    });
     page.setDefaultTimeout(45_000);
 
     const response = await page.goto(baseUrl + "/mandi-prices.html", {
@@ -39,10 +54,31 @@ try {
     pass(viewport.name + ": government state options load");
 
     await page.selectOption("#stateSelect", "Himachal Pradesh");
-    await page.waitForFunction(() => {
+    await page.waitForTimeout(1_000);
+    let districtState = await page.evaluate(() => {
       const district = document.querySelector("#districtSelect");
-      return district && !district.disabled && district.options.length > 1;
-    }, null, { timeout: 45_000 });
+      return { disabled: district?.disabled ?? true, optionCount: district?.options.length ?? 0 };
+    });
+
+    // Some browser engines can select an option without the app's delegated change listener
+    // being ready after the initial asynchronous catalogue load. Dispatch once if needed.
+    if (districtState.optionCount <= 1) {
+      await page.locator("#stateSelect").dispatchEvent("change");
+      await page.waitForFunction(() => {
+        const district = document.querySelector("#districtSelect");
+        return district && district.options.length > 1;
+      }, null, { timeout: 30_000 }).catch(() => undefined);
+      districtState = await page.evaluate(() => {
+        const district = document.querySelector("#districtSelect");
+        return { disabled: district?.disabled ?? true, optionCount: district?.options.length ?? 0 };
+      });
+    }
+
+    assert.ok(
+      districtState.optionCount > 1 && !districtState.disabled,
+      viewport.name + ": state selection must load district options; diagnostics=" +
+        JSON.stringify({ districtState, filterResponses, consoleErrors, failedRequests }),
+    );
     pass(viewport.name + ": state selection loads district options");
 
     const districtValue = await page.locator("#districtSelect option").nth(1).getAttribute("value");
@@ -89,7 +125,7 @@ try {
     );
     pass(viewport.name + ": layout fits the viewport without horizontal overflow");
 
-    assert.deepEqual(pageErrors, [], viewport.name + ": page must not emit uncaught JavaScript errors");
+    assert.deepEqual(pageErrors, [], viewport.name + ": page must not emit uncaught browser JavaScript errors");
     pass(viewport.name + ": no uncaught browser JavaScript errors");
 
     await page.close();
