@@ -22,6 +22,7 @@ async function main() {
     readFile("style/base.css", "utf8"),
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
+    readFile("script/global-nav.js", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
