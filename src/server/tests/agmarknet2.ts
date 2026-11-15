@@ -90,6 +90,10 @@ async function main(): Promise<void> {
   const mock = mockFetcher();
   const root = await fetchAgmarknet2Filters({}, mock.fetcher);
   check(root.states.includes("Himachal Pradesh") && !root.states.includes("All States/UTs"), "state catalogue excludes the all-states sentinel");
+  check(
+    root.states.length === 36 && root.states.includes("Ladakh"),
+    "all 36 canonical state and UT selectors remain available when a state has no directory rows",
+  );
   check(new Set(root.states).size === root.states.length, "state catalogue deduplicates repeated source rows");
   check(
     root.states.includes("Andaman and Nicobar Islands") &&
