@@ -253,10 +253,6 @@ export async function fetchAgmarknet2Filters(
   };
 }
 
-function recordNumber(value: unknown): number | null {
-  return parsePrice(value);
-}
-
 export async function searchAgmarknet2Commodities(
   query: string,
   limit = 10,
