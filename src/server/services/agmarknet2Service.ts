@@ -392,7 +392,6 @@ export async function fetchAgmarknet2Prices(
   if (!stateRow) {
     throw new GovernmentApiError("The selected state is not available in AGMARKNET 2.0.", 404);
   }
-  const districtById = new Map(catalog.district_data.map((row) => [row.id, row.district_name]));
   const districtRow = options.district
     ? catalog.district_data.find((row) =>
         row.state_id === stateRow.state_id &&
