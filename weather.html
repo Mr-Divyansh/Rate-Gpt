@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/webp" href="/Images/Logo.webp">
+  <link rel="apple-touch-icon" href="/Images/Logo.webp">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F7F7F0">
+  <meta name="description" content="Get current weather conditions by location">
+  <title>Weather | Rate-GPT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/base.css">
+  <link rel="stylesheet" href="style/weather.css">
+    <link rel="canonical" href="https://rate-gpt.vercel.app/weather.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Rate-GPT">
+    <meta property="og:title" content="Weather | Rate-GPT">
+    <meta property="og:description" content="Get current weather conditions by location">
+    <meta property="og:url" content="https://rate-gpt.vercel.app/weather.html">
+    <meta property="og:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Weather | Rate-GPT">
+    <meta name="twitter:description" content="Get current weather conditions by location">
+    <meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+  </head>
+<body>
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  
+  <header class="site-header"></header>
+  
+  <main id="main-content" tabindex="-1">
+    <section class="weather-wrap">
+      <div class="weather-card">
+        <div class="weather-header">
+          <h2 data-i18n="weather.title">Weather by Location</h2>
+          <p data-i18n="weather.subtitle">Check current conditions</p>
+        </div>
+        <div class="weather-input-wrapper">
+          <input type="text" id="locationInput" placeholder="Enter city name" data-i18n="weather.placeholder">
+          <button class="btn btn-primary" id="getWeatherBtn" data-i18n="weather.fetch">Get Weather</button>
+        </div>
+        <div class="weather-result" id="weatherResult" hidden>
+          <div class="weather-city" id="weatherCity"></div>
+          <div class="weather-temperature" id="weatherTemperature"></div>
+          <div class="weather-condition" id="weatherCondition"></div>
+          <div class="weather-details" id="weatherDetails"></div>
+        </div>
+        <div class="weather-error" id="weatherError" hidden></div>
+      </div>
+    </section>
+  </main>
+  
+  <footer class="site-footer"></footer>
+
+  <script type="module" src="/script/global-nav.js"></script>
+  <script type="module" src="/script/weather.js"></script>
+</body>
+</html>
