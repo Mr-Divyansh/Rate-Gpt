@@ -112,11 +112,16 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    const data = await fetchAgmarknet2Filters(parsed.data).catch(() =>
+    const data = await fetchAgmarknet2Filters(parsed.data).catch((error: unknown) => {
       // Keep the OGD resource as a live fallback if the newer AGMARKNET 2.0
-      // directory is temporarily unavailable.
-      fetchLiveFilters(parsed.data),
-    );
+      // directory is temporarily unavailable, but leave a safe diagnostic so
+      // silent source fallback can be investigated from server logs.
+      console.warn("[AGMARKNET 2.0] Directory unavailable; using OGD filter fallback", {
+        name: error instanceof Error ? error.name : "UnknownError",
+        message: error instanceof Error ? error.message : "Unknown directory error",
+      });
+      return fetchLiveFilters(parsed.data);
+    });
     const source = "source" in data && typeof data.source === "string"
       ? data.source
       : "Government of India OGD / AGMARKNET";
