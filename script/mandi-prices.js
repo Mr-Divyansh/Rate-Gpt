@@ -329,6 +329,9 @@ function cropBlock(record, showLocation = false) {
     names.secondary,
     typeof record.variety === "string" ? record.variety.trim() : "",
     typeof record.grade === "string" ? record.grade.trim() : "",
+    typeof record.source_unit === "string" && record.source_unit.trim()
+      ? (state.priceUnit === "kg" && /rs\\.?\\s*\\/\\s*quintal/i.test(record.source_unit) ? "₹ / kg" : record.source_unit)
+      : t("results.unitUnavailable"),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -492,13 +495,17 @@ function renderResults() {
     $("resultCount").textContent = tCount("results.count", 0);
     announcement = message;
   } else {
-    const divisor = state.priceUnit === "kg" ? 100 : 1;
-    const displayRecords = state.records.map((record) => ({
-      ...record,
-      min_price: record.min_price === null ? null : record.min_price / divisor,
-      max_price: record.max_price === null ? null : record.max_price / divisor,
-      modal_price: record.modal_price === null ? null : record.modal_price / divisor,
-    }));
+    const displayRecords = state.records.map((record) => {
+      const isQuintal = typeof record.source_unit === "string" &&
+        /rs\\.?\\s*\\/\\s*quintal/i.test(record.source_unit);
+      const divisor = state.priceUnit === "kg" && isQuintal ? 100 : 1;
+      return {
+        ...record,
+        min_price: record.min_price === null ? null : record.min_price / divisor,
+        max_price: record.max_price === null ? null : record.max_price / divisor,
+        modal_price: record.modal_price === null ? null : record.modal_price / divisor,
+      };
+    });
     const ctx = buildContext(displayRecords);
     body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx, state.allIndia)));
     list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx, state.allIndia)));
