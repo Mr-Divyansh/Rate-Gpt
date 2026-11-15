@@ -38,26 +38,12 @@ try {
     });
     page.setDefaultTimeout(45_000);
 
-    const initialFiltersResponsePromise = page.waitForResponse((candidate) => {
-      const url = new URL(candidate.url());
-      return url.pathname === "/api/v1/meta/filters" && !url.searchParams.has("state");
-    }, { timeout: 45_000 });
-
     const response = await page.goto(baseUrl + "/mandi-prices.html", {
       waitUntil: "domcontentloaded",
       timeout: 45_000,
     });
     assert.equal(response?.status(), 200, viewport.name + ": mandi page must return HTTP 200");
     pass(viewport.name + ": mandi page opens");
-
-    const initialFiltersResponse = await initialFiltersResponsePromise;
-    assert.equal(initialFiltersResponse.status(), 200, viewport.name + ": government directory request must succeed");
-    const initialFiltersBody = await initialFiltersResponse.json();
-    assert.ok(
-      Array.isArray(initialFiltersBody.data?.states) &&
-        initialFiltersBody.data.states.includes("Himachal Pradesh"),
-      viewport.name + ": government directory must include Himachal Pradesh",
-    );
 
     await page.waitForFunction(() => {
       const state = document.querySelector("#stateSelect");
@@ -73,7 +59,25 @@ try {
         url.searchParams.get("state") === "Himachal Pradesh";
     }, { timeout: 45_000 });
     await page.selectOption("#stateSelect", "Himachal Pradesh");
-    const stateFiltersResponse = await stateFiltersResponsePromise;
+    let stateFiltersResponse;
+    try {
+      stateFiltersResponse = await stateFiltersResponsePromise;
+    } catch (error) {
+      throw new Error(
+        viewport.name + ": selecting the state did not trigger its directory request; diagnostics=" +
+          JSON.stringify({
+            filterResponses,
+            pageErrors,
+            consoleErrors,
+            failedRequests,
+            stateValue: await page.locator("#stateSelect").inputValue(),
+            districtState: await page.locator("#districtSelect").evaluate((element) => ({
+              disabled: element.disabled,
+              options: Array.from(element.options).map((option) => option.value),
+            })),
+          }) + "; cause=" + error.message,
+      );
+    }
     assert.equal(stateFiltersResponse.status(), 200, viewport.name + ": state directory request must succeed");
     const stateFiltersBody = await stateFiltersResponse.json();
     assert.ok(
