@@ -16,7 +16,8 @@
     "lint": "tsc --noEmit",
     "test:site": "tsx src/server/tests/site-metadata.ts",
     "test:production": "tsx src/server/tests/production-smoke.ts",
-    "test:responsive": "tsx src/server/tests/responsive-layout.ts"
+    "test:responsive": "tsx src/server/tests/responsive-layout.ts",
+    "test:release-gate": "tsx src/server/tests/release-gate.ts"
   },
   "dependencies": {
     "compression": "^1.8.2",
