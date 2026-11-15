@@ -94,7 +94,11 @@ function apiBaseUrl(): string {
   const raw = process.env.AGMARKNET_API_BASE_URL || DEFAULT_BASE_URL;
   try {
     const url = new URL(raw);
-    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) {
+    const localTestEndpoint =
+      process.env.NODE_ENV === "test" &&
+      url.protocol === "http:" &&
+      (url.hostname === "127.0.0.1" || url.hostname === "localhost");
+    if ((!localTestEndpoint && url.protocol !== "https:") || url.username || url.password || url.search || url.hash) {
       throw new Error("invalid");
     }
     return url.toString().replace(/\/+$/, "");
