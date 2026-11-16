@@ -168,12 +168,10 @@ import { t } from "./i18n.js";
         { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
       );
     } finally {
-      // Keep controls disabled only while a geolocation request is pending.
-      // fetchWeather manages its own loading state after coordinates arrive.
-      if (status.textContent === t("weather.requestingLocation")) {
-        locationButton.disabled = false;
-        searchButton.disabled = false;
-      }
+      // Geolocation callbacks are asynchronous; fetchWeather applies its own
+      // loading state when coordinates arrive.
+      locationButton.disabled = false;
+      searchButton.disabled = false;
     }
   }
 
