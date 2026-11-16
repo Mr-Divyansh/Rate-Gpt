@@ -87,6 +87,11 @@ async function main(): Promise<void> {
   const filters = await json("/api/v1/meta/filters");
   check(filters.response.status === 200 && filters.body?.success === true, "government location catalogue endpoint is available");
   check(
+    filters.response.headers.get("cache-control")?.includes("s-maxage=900") === true &&
+      filters.response.headers.get("cache-control")?.includes("max-age=0") === true,
+    "location metadata uses the configured shared edge TTL while browsers revalidate",
+  );
+  check(
     Array.isArray(filters.body?.data?.states) &&
       filters.body.data.states.length >= 36 &&
       filters.body?.meta?.coverage?.status === "catalogue",
@@ -116,6 +121,11 @@ async function main(): Promise<void> {
       hpPrices.body?.success === true &&
       Array.isArray(hpPrices.body?.data),
     "Himachal Pradesh live price endpoint returns a records array",
+  );
+  check(
+    hpPrices.response.headers.get("cache-control")?.includes("s-maxage=60") === true &&
+      hpPrices.response.headers.get("cache-control")?.includes("max-age=0") === true,
+    "live prices use a short shared edge TTL without browser-side freshness caching",
   );
   if (Array.isArray(hpPrices.body?.data)) {
     const hpDistricts = new Set(hpFilters.body?.data?.districts ?? []);
