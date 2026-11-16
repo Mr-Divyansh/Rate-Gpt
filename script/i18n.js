@@ -69,9 +69,6 @@ const STRINGS = {
     "footer.note": "Records are for information and may not match a current offer.",
     "footer.rights": "© {year} Rate-GPT",
 
-    "weather.title": "Weather by location",
-    "weather.subtitle": "Check current weather conditions",
-    "weather.placeholder": "Enter a city or district name",
     "weather.title": "Weather near you",
     "weather.subtitle": "Get current conditions for your location or search any city.",
     "weather.placeholder": "Search city, district or PIN code",
@@ -301,9 +298,6 @@ const STRINGS = {
     "footer.note": "ये रिकॉर्ड सिर्फ़ जानकारी के लिए हैं और मौजूदा प्रस्ताव से अलग हो सकते हैं।",
     "footer.rights": "© {year} Rate-GPT",
 
-    "weather.title": "स्थान के अनुसार मौसम",
-    "weather.subtitle": "मौजूदा मौसम की जानकारी देखें",
-    "weather.placeholder": "शहर या ज़िले का नाम लिखें",
     "weather.title": "आपके आस-पास का मौसम",
     "weather.subtitle": "अपनी लोकेशन का मौसम देखें या किसी भी शहर को खोजें।",
     "weather.placeholder": "शहर, ज़िला या पिन कोड खोजें",
