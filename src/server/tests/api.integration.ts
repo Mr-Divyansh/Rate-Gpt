@@ -279,7 +279,7 @@ async function main() {
     assert(securityHeaders.frame === "DENY", "API responses deny framing");
     assert(securityHeaders.noSniff === "nosniff", "API responses set nosniff");
     assert(securityHeaders.referrer === "strict-origin-when-cross-origin", "API responses use a strict referrer policy");
-    assert(securityHeaders.permissions.includes("camera=()") && securityHeaders.permissions.includes("geolocation=()"), "API responses disable unused powerful browser features");
+    assert(securityHeaders.permissions.includes("camera=()") && securityHeaders.permissions.includes("microphone=()") && securityHeaders.permissions.includes("geolocation=(self)"), "API responses disable camera and microphone while allowing same-origin weather geolocation");
     assert(healthResponse.headers.get("access-control-allow-origin") === null, "API does not enable cross-origin access");
 
     const docs = await fetch(`${base}/api/v1/docs`);
