@@ -3,9 +3,9 @@ const RESOURCE_ID =
 const DEFAULT_BASE_URL = "https://api.data.gov.in/resource";
 const MAX_PAGE_SIZE = 100;
 const MAX_OFFSET = 1_000_000;
-const REQUEST_TIMEOUT_MS = 8_000;
-const MAX_ATTEMPTS = 3;
-const RETRY_BASE_DELAY_MS = 200;
+const REQUEST_TIMEOUT_MS = 6_000;
+const MAX_ATTEMPTS = 2;
+const RETRY_BASE_DELAY_MS = 100;
 const RETRY_MAX_DELAY_MS = 2_000;
 const FILTER_DISCOVERY_PAGE_DELAY_MS = 100;
 
