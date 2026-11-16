@@ -7,15 +7,25 @@ Browser → /api/v1 → Express validation and rate limits → OGD / AGMARKNET
 Browser ← normalized current page ← timeout, retry, validation, and deduplication
 ```
 
-`src/server/services/mandiDataService.ts` is the only government-data client. It reads `DATA_GOV_API_KEY` on the server, requests the configured AGMARKNET resource over HTTPS in production, validates pagination, normalizes source field names and dates, preserves missing prices as `null`, and retries only transient upstream failures.
+`src/server/services/mandiDataService.ts` is the government-data client. It reads `DATA_GOV_API_KEY` on the server, requests the configured AGMARKNET resource over HTTPS in production, validates pagination, normalizes source field names and dates, preserves missing prices as `null`, and retries only transient upstream failures.
 
-`src/server/routes/api.ts` validates public parameters with Zod and returns a consistent JSON envelope. `server.ts` applies request-size limits, Helmet, rate limiting, request IDs, compression, and `Cache-Control: no-store` to API responses. `api/index.ts` adapts the Express app to Vercel serverless functions.
+`src/server/routes/api.ts` validates public parameters with Zod and returns a consistent JSON envelope. `server.ts` applies request-size limits, Helmet, rate limiting, request IDs, compression, and a default `Cache-Control: no-store` policy to API responses. Public read-only GET routes explicitly override that default with bounded Vercel edge caching. `api/index.ts` adapts the Express app to Vercel serverless functions.
 
-## Storage policy
+## Storage and caching policy
 
-Rate-GPT has no database or price storage layer. It does not use SQLite, PostgreSQL, Neon, Redis, files, scheduled imports, or a stale-price fallback. Each price response comes directly from the official upstream service for that request.
+Rate-GPT has no database or persistent price-storage layer. It does not use SQLite, PostgreSQL, Neon, Redis, files, scheduled price imports, or a stale-price fallback. Price records are requested from the official upstream service on demand and are never written to a Rate-GPT database.
 
-The service keeps a short, bounded process-memory cache for filter metadata only: at most 64 entries for 60 seconds. It never contains mandi price records and does not serve a price response.
+To reduce repeated public catalogue and price requests, Vercel edge caching is configured per read-only endpoint:
+
+| Endpoint | Shared edge TTL | Browser policy |
+|---|---:|---|
+| `/api/v1/prices` | 60 seconds | `max-age=0` |
+| `/api/v1/prices/compare` | 60 seconds | `max-age=0` |
+| `/api/v1/meta/filters` | 15 minutes | Revalidate according to response headers |
+| `/api/v1/commodities/search` | 5 minutes | `max-age=0` |
+| Contact, health, sync status, and other default API responses | No shared cache | `no-store` |
+
+The service also keeps a bounded process-memory cache for filter metadata only. The AGMARKNET directory cache is 15 minutes; the OGD metadata fallback cache is bounded separately. Neither cache contains price records. A short edge-cached price response is temporary CDN delivery caching, not persistent price storage or historical trend storage.
 
 ## Pagination and ordering
 
