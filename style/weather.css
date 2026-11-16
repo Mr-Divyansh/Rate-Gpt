@@ -11,7 +11,9 @@
 .weather-location-copy strong { color:var(--ink); font-size:1.05rem; }
 .weather-location-copy small,.weather-privacy,.weather-updated,.weather-source { color:var(--muted); font-size:.9rem; }
 .weather-location-icon { display:grid; place-items:center; width:48px; height:48px; flex:none; border-radius:14px; background:var(--soft); color:var(--forest); font-size:1.8rem; }
-.weather-location-action .btn { min-height:48px; white-space:nowrap; }
+.weather-location-buttons { display:grid; gap:8px; min-width:min(100%,230px); }
+.weather-location-action .btn { min-height:48px; white-space:normal; }
+.weather-location-action .btn-secondary { border:1px solid var(--control); background:var(--surface); color:var(--forest); }
 .weather-or { display:flex; align-items:center; gap:14px; margin:22px 0 16px; color:var(--muted); font-size:.75rem; font-weight:800; letter-spacing:.1em; }
 .weather-or::before,.weather-or::after { content:""; height:1px; flex:1; background:var(--line); }
 .weather-input-wrapper { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; }
@@ -37,6 +39,7 @@
  .weather-intro { text-align:left; margin-bottom:18px; }
  .weather-search-card,.weather-result { border-radius:16px; }
  .weather-location-action { align-items:stretch; flex-direction:column; }
+ .weather-location-buttons { width:100%; }
  .weather-location-action .btn { width:100%; }
  .weather-input-wrapper { grid-template-columns:1fr; }
  .weather-input-wrapper .btn { width:100%; }
