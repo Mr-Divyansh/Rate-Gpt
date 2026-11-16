@@ -70,6 +70,9 @@ export async function requestJson(path, options = {}) {
     );
   }
   const payload = await response.json();
+  if (payload?.meta && response.headers.get("x-vercel-cache") === "HIT") {
+    payload.meta.cacheStatus = "temporary-cache";
+  }
   if (!response.ok || payload?.success !== true) {
     throw new Error(
       payload?.error?.message || `The request failed (HTTP ${response.status}).`,

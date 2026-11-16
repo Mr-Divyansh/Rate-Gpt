@@ -57,10 +57,10 @@ export function createApiApp() {
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-        imgSrc: ["'self'", "data:"],
+        imgSrc: ["'self'", "data:", "https://cdn.weatherapi.com"],
         connectSrc: process.env.NODE_ENV === "production"
-          ? ["'self'"]
-          : ["'self'", "ws://localhost:*", "ws://127.0.0.1:*"],
+          ? ["'self'", "https://api.weatherapi.com"]
+          : ["'self'", "https://api.weatherapi.com", "ws://localhost:*", "ws://127.0.0.1:*"],
         formAction: ["'self'"],
         frameAncestors: ["'none'"],
       },
@@ -70,7 +70,7 @@ export function createApiApp() {
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   }));
   app.use((_req, res, next) => {
-    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
     next();
   });
 
@@ -132,7 +132,8 @@ export function createApiApp() {
     next();
   });
 
-  // Government price data is fetched on demand; never serve stale intermediary copies.
+  // Keep browser responses uncached; allow a very short Vercel edge cache for identical government price queries.
+  // AGMARKNET observations are daily-published data, so a 15-second edge TTL reduces repeat latency without persistent storage.
   app.use("/api", (req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
     next();
