@@ -42,9 +42,9 @@
         <div class="weather-location-action">
           <div class="weather-location-copy">
             <span class="weather-location-icon" aria-hidden="true">⌖</span>
-            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small></span>
+            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
           </div>
-          <button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Use my location</span></button>
+          <div class="weather-location-buttons"><button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Use my location</span></button><button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button></div>
         </div>
         <div class="weather-or"><span data-i18n="weather.orSearch">OR SEARCH A PLACE</span></div>
         <form class="weather-input-wrapper" id="weatherSearchForm">
