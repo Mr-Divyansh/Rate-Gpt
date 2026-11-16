@@ -122,6 +122,9 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
       });
       return fetchLiveFilters(parsed.data);
     });
+    // This endpoint contains only the public administrative directory (not prices or user data).
+    // Let Vercel edge cache it so cold starts do not repeatedly wait on AGMARKNET.
+    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=3600");
     const source = "source" in data && typeof data.source === "string"
       ? data.source
       : "Government of India OGD / AGMARKNET";
