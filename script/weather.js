@@ -138,6 +138,7 @@ import { t } from "./i18n.js";
     }
 
     locationButton.disabled = true;
+    approximateLocationButton.disabled = true;
     searchButton.disabled = true;
     setStatus(t("weather.requestingLocation"));
 
