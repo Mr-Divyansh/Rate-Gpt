@@ -113,7 +113,7 @@ import { t } from "./i18n.js";
     }
   }
 
-  async function useMyLocation() {
+  function useMyLocation() {
     clearMessages();
     if (!window.isSecureContext) {
       showError(t("weather.insecureContext"));
@@ -128,43 +128,71 @@ import { t } from "./i18n.js";
     searchButton.disabled = true;
     setStatus(t("weather.requestingLocation"));
 
+    let permissionState = "unknown";
+    const getPolicyState = () => {
+      const policy = document.permissionsPolicy || document.featurePolicy;
+      if (!policy?.allowsFeature) return "not-exposed";
+      try {
+        return policy.allowsFeature("geolocation") ? "allowed" : "blocked";
+      } catch {
+        return "check-failed";
+      }
+    };
+    const finishButtons = () => {
+      locationButton.disabled = false;
+      searchButton.disabled = false;
+    };
+    const diagnostic = (error) => {
+      const reason = error.code === 1 ? "PERMISSION_DENIED"
+        : error.code === 2 ? "POSITION_UNAVAILABLE"
+          : error.code === 3 ? "TIMEOUT" : "UNKNOWN";
+      return [
+        `GPS diagnostic: ${reason} (code ${error.code ?? "n/a"})`,
+        `permission=${permissionState}`,
+        `secureContext=${window.isSecureContext}`,
+        `geolocationPolicy=${getPolicyState()}`,
+        `browserMessage=${error.message || "not provided"}`
+      ].join(" · ");
+    };
+
     const handlePosition = ({ coords }) => {
+      finishButtons();
       setStatus(t("weather.locatingWeather"));
       fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
     };
     const handleError = (error) => {
-      locationButton.disabled = false;
-      searchButton.disabled = false;
-      if (error.code === error.PERMISSION_DENIED) {
-        showError(t("weather.locationDenied"));
-      } else if (error.code === error.TIMEOUT) {
-        showError(t("weather.locationTimeout"));
-      } else {
-        showError(t("weather.locationUnavailable"));
-      }
+      finishButtons();
+      const detail = diagnostic(error);
+      console.warn("[Weather] Device geolocation failed:", detail);
+      const message = error.code === 1 ? t("weather.locationDenied")
+        : error.code === 3 ? t("weather.locationTimeout")
+          : t("weather.locationUnavailable");
+      showError(`${message} ${detail}`);
     };
 
-    // Permission state is advisory only. getCurrentPosition is still called
-    // for "prompt" so the browser can display its native consent prompt.
-    try {
-      if (navigator.permissions?.query) {
-        const permission = await navigator.permissions.query({ name: "geolocation" });
-        if (permission.state === "denied") {
-          handleError({ code: 1, PERMISSION_DENIED: 1 });
-          return;
-        }
-      }
-    } catch (error) {
-      console.info("[Weather] Permissions API unavailable; requesting browser geolocation directly.");
+    // Read permission state for diagnostics, but never await it before
+    // getCurrentPosition: the geolocation request starts directly in the
+    // user's click handler so the browser can show its native permission UI.
+    if (navigator.permissions?.query) {
+      navigator.permissions.query({ name: "geolocation" })
+        .then((permission) => { permissionState = permission.state; })
+        .catch(() => { permissionState = "query-unavailable"; });
+    } else {
+      permissionState = "permissions-api-unavailable";
     }
 
-    // Reuse a recent browser fix when available. Do not silently substitute
-    // IP-derived city data: it can point to a different state or ISP gateway.
-    navigator.geolocation.getCurrentPosition(
-      handlePosition,
-      handleError,
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        handlePosition,
+        handleError,
+        { enableHighAccuracy: false, timeout: 45000, maximumAge: 600000 }
+      );
+    } catch (error) {
+      finishButtons();
+      const detail = `GPS diagnostic: synchronous-error · permission=${permissionState} · secureContext=${window.isSecureContext} · geolocationPolicy=${getPolicyState()} · browserMessage=${error?.message || "not provided"}`;
+      console.error("[Weather] Geolocation could not start:", detail);
+      showError(`${t("weather.locationUnavailable")} ${detail}`);
+    }
   }
 
   form.addEventListener("submit", (event) => {
