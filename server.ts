@@ -132,8 +132,9 @@ export function createApiApp() {
     next();
   });
 
-  // Keep browser responses uncached; allow a very short Vercel edge cache for identical government price queries.
-  // AGMARKNET observations are daily-published data, so a 15-second edge TTL reduces repeat latency without persistent storage.
+  // Default API responses to no-store. Individual public read-only routes may
+  // explicitly override this with short Vercel edge-cache headers; user/contact
+  // and other non-cacheable endpoints remain no-store.
   app.use("/api", (req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
     next();
