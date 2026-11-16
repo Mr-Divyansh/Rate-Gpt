@@ -102,6 +102,7 @@ const STRINGS = {
     "weather.locationDenied": "Location is blocked for this site. In your browser site settings, set Location to Allow, then reload this page and tap Use my location again.",
     "weather.locationTimeout": "Could not get your location in time. Please try again or search for a place.",
     "weather.locationUnavailable": "Your location is unavailable right now. Please search for a place instead.",
+    "weather.ipFallback": "Device location is unavailable; checking approximate network location…",
     "prices.doc": "Mandi Prices | Rate-GPT",
     "prices.title": "Latest government-reported mandi prices",
     "prices.lede": "Choose a mandi to see the prices recorded there. Search by crop name in English or Hindi.",
