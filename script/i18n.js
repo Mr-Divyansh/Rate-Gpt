@@ -332,6 +332,7 @@ const STRINGS = {
     "weather.locationDenied": "इस साइट की लोकेशन अनुमति ब्लॉक है। ब्राउज़र की Site settings में Location को Allow करें, पेज reload करें और फिर Use my location दबाएँ।",
     "weather.locationTimeout": "समय पर लोकेशन नहीं मिल सकी। फिर कोशिश करें या जगह खोजें।",
     "weather.locationUnavailable": "अभी आपकी लोकेशन उपलब्ध नहीं है। कृपया जगह खोजें।",
+    "weather.ipFallback": "डिवाइस लोकेशन नहीं मिली; अनुमानित नेटवर्क लोकेशन से मौसम खोज रहे हैं…",
     "prices.doc": "मंडी भाव | Rate-GPT",
     "prices.title": "सरकारी मंडी भाव की नवीनतम रिपोर्ट",
     "prices.lede": "कोई मंडी चुनें और वहाँ दर्ज भाव देखें। फसल का नाम हिंदी या अंग्रेज़ी में खोजें।",
