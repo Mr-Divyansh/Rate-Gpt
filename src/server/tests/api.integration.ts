@@ -262,6 +262,10 @@ async function main() {
     assert(health.success && health.data.status === "ok", "health returns minimal service status");
     assert(!("upstreamSource" in health.data) && !("apiKeyConfigured" in health.data), "health does not disclose upstream credential configuration");
     assert(!JSON.stringify(health).includes(apiKey), "health never returns government key");
+    assert(
+      healthResponse.headers.get("permissions-policy")?.includes("geolocation=(self)"),
+      "same-origin weather page is allowed to request browser geolocation",
+    );
     const securityHeaders = {
       csp: healthResponse.headers.get("content-security-policy") || "",
       hsts: healthResponse.headers.get("strict-transport-security") || "",
