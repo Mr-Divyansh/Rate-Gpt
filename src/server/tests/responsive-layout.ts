@@ -16,14 +16,17 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, baseCss, pricesCss, homeCss, globalNav, mandiScript] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
+    readFile("weather.html", "utf8"),
     readFile("style/base.css", "utf8"),
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
+    readFile("style/weather.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
+    readFile("script/weather.js", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -32,6 +35,25 @@ async function main() {
     check(/<a class="skip-link" href="#main-content"/.test(html),
       `${file}: keyboard skip navigation`);
   }
+
+  check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(weather),
+    "weather.html: responsive viewport metadata");
+  check(/<a class="skip-link" href="#main-content"/.test(weather),
+    "weather.html: keyboard skip navigation");
+  check(/id="useMyLocationBtn"/.test(weather) && /id="useApproxLocationBtn"/.test(weather),
+    "weather page exposes separate device and approximate location actions");
+  check(/id="weatherStatus" role="status"/.test(weather) && /id="weatherError" role="alert"/.test(weather),
+    "weather page announces loading and error states accessibly");
+  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-location-action\s*\{[^}]*flex-direction:column/s.test(weatherCss),
+    "weather location actions stack on narrow screens");
+  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-input-wrapper\s*\{\s*grid-template-columns:1fr;/s.test(weatherCss),
+    "weather search input and action use a single-column mobile layout");
+  check(/\.weather-details\s*\{\s*display:grid;\s*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/s.test(weatherCss) &&
+    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-details\s*\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/s.test(weatherCss),
+    "weather detail cards adapt from four desktop columns to two mobile columns");
+  check(/locationButton\.addEventListener\("click", useMyLocation\)/.test(weatherScript) &&
+    /approximateLocationButton\.addEventListener\("click", \(\) =>\s*\{\s*fetchWeather\("auto:ip", "approximate"\)/s.test(weatherScript),
+    "weather location lookups are opt-in and never triggered automatically");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),

@@ -263,7 +263,7 @@ async function main() {
     assert(!("upstreamSource" in health.data) && !("apiKeyConfigured" in health.data), "health does not disclose upstream credential configuration");
     assert(!JSON.stringify(health).includes(apiKey), "health never returns government key");
     assert(
-      healthResponse.headers.get("permissions-policy")?.includes("geolocation=(self)"),
+      (healthResponse.headers.get("permissions-policy") || "").includes("geolocation=(self)"),
       "same-origin weather page is allowed to request browser geolocation",
     );
     const securityHeaders = {
@@ -423,7 +423,7 @@ async function main() {
     );
     assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
-    assert(filteredResponse.headers.get("cache-control")?.includes("s-maxage=60"), "daily government price observations use a short 60-second shared cache");
+    assert((filteredResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "daily government price observations use a short 60-second shared cache");
 
     const delhiResponse = await fetch(`${base}/api/v1/prices?state=Delhi&limit=5`);
     const delhiPayload = await delhiResponse.json();
@@ -493,13 +493,13 @@ async function main() {
     const search = await searchResponse.json();
     assert(search.success && search.data.length === 1 && search.data[0] === "Grapes", "Hindi commodity search returns an upstream commodity only");
     assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
-    assert(searchResponse.headers.get("cache-control")?.includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
+    assert((searchResponse.headers.get("cache-control") || "").includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
 
     const comparisonResponse = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
     );
     const comparison = await comparisonResponse.json();
-    assert(comparisonResponse.headers.get("cache-control")?.includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
+    assert((comparisonResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
     const comparisonRequest = upstreamRequests.at(-1)!;
     assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
     assert(comparisonRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "live comparison forwards commodity exact-match filter");

@@ -68,6 +68,27 @@ jobs:
         if: github.event_name == 'pull_request'
         run: npx playwright install --with-deps chromium
 
+      - name: Start local app for weather browser checks
+        if: github.event_name == 'pull_request'
+        run: |
+          PORT=4173 npm run dev > /tmp/rate-gpt-dev.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/weather.html >/dev/null; then
+              echo "Local app is ready for browser tests."
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/rate-gpt-dev.log
+          echo "::error::Local app did not start for weather browser checks."
+          exit 1
+
+      - name: Weather browser interaction checks
+        if: github.event_name == 'pull_request'
+        env:
+          RATE_GPT_BASE_URL: http://127.0.0.1:4173
+        run: node scripts/weather-browser-smoke.mjs
+
       - name: Select Vercel preview for pull-request browser checks
         id: preview
         if: github.event_name == 'pull_request'
@@ -84,12 +105,15 @@ jobs:
               "https://api.github.com/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
             preview_url="$(printf '%s' "${comments}" | jq -r '[.[] | select(.user.login == "vercel[bot]") | .body] | last // "" | if contains("Ready") then (try (capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url) catch "") else "" end')"
             if [ -n "${preview_url}" ]; then
-              echo "RATE_GPT_BASE_URL=${preview_url}" >> "${GITHUB_ENV}"
-              echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
-              echo "Browser checks will target the PR's READY Vercel preview."
-              exit 0
+              if curl --fail --silent --show-error "${preview_url}/mandi-prices.html" | grep -q 'id="stateSelect"'; then
+                echo "RATE_GPT_BASE_URL=${preview_url}" >> "${GITHUB_ENV}"
+                echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
+                echo "Browser checks will target the PR's READY Vercel preview."
+                exit 0
+              fi
+              echo "::warning::Vercel preview is READY but does not expose the app HTML to unauthenticated CI (possibly Deployment Protection); preview-only browser checks are skipped."
+              break
             fi
-            sleep 5
           done
           echo "preview_url=" >> "${GITHUB_OUTPUT}"
           echo "::warning::Vercel preview is unavailable (for example, deployment quota cooldown); preview-only browser checks are skipped. Production smoke checks remain gated on the exact deployed commit."
