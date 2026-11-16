@@ -8,6 +8,7 @@ import { t } from "./i18n.js";
   const input = document.getElementById("locationInput");
   const searchButton = document.getElementById("getWeatherBtn");
   const locationButton = document.getElementById("useMyLocationBtn");
+  const approximateLocationButton = document.getElementById("useApproxLocationBtn");
   const result = document.getElementById("weatherResult");
   const errorBox = document.getElementById("weatherError");
   const status = document.getElementById("weatherStatus");
@@ -18,7 +19,7 @@ import { t } from "./i18n.js";
   const updated = document.getElementById("weatherUpdated");
   const weatherIcon = document.getElementById("weatherIcon");
 
-  if (!form || !input || !searchButton || !locationButton || !result || !errorBox || !status) return;
+  if (!form || !input || !searchButton || !locationButton || !approximateLocationButton || !result || !errorBox || !status) return;
 
   let requestController = null;
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
@@ -53,6 +54,7 @@ import { t } from "./i18n.js";
     const timeout = window.setTimeout(() => controller.abort(), 12000);
     searchButton.disabled = true;
     locationButton.disabled = true;
+    approximateLocationButton.disabled = true;
     searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
@@ -95,7 +97,8 @@ import { t } from "./i18n.js";
       updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
       result.hidden = false;
       errorBox.hidden = true;
-      setStatus(source === "location" ? t("weather.locationSuccess") : "");
+      setStatus(source === "location" ? t("weather.locationSuccess")
+        : source === "approximate" ? t("weather.approxLocationSuccess") : "");
     } catch (error) {
       // Ignore completion from a superseded request; it must not overwrite
       // the status or results of the newer request.
@@ -117,6 +120,7 @@ import { t } from "./i18n.js";
         requestController = null;
         searchButton.disabled = false;
         locationButton.disabled = false;
+        approximateLocationButton.disabled = false;
         searchButton.textContent = t("weather.fetch");
       }
     }
@@ -134,6 +138,7 @@ import { t } from "./i18n.js";
     }
 
     locationButton.disabled = true;
+    approximateLocationButton.disabled = true;
     searchButton.disabled = true;
     setStatus(t("weather.requestingLocation"));
 
@@ -149,6 +154,7 @@ import { t } from "./i18n.js";
     };
     const finishButtons = () => {
       locationButton.disabled = false;
+      approximateLocationButton.disabled = false;
       searchButton.disabled = false;
     };
     const diagnostic = (error) => {
@@ -209,4 +215,9 @@ import { t } from "./i18n.js";
     fetchWeather(input.value.trim());
   });
   locationButton.addEventListener("click", useMyLocation);
+  // WeatherAPI auto:ip is deliberately opt-in and only used after this button
+  // is clicked. It is an approximate city-level estimate, not device GPS.
+  approximateLocationButton.addEventListener("click", () => {
+    fetchWeather("auto:ip", "approximate");
+  });
 })();
