@@ -263,6 +263,61 @@ async function main(): Promise<void> {
     );
   }
 
+  // Fetch resolves as soon as headers arrive. The same deadline must also
+  // cover a response body that stalls while JSON is being read.
+  const originalSetTimeout = globalThis.setTimeout;
+  const originalClearTimeout = globalThis.clearTimeout;
+  let bodyTimeoutAttempts = 0;
+  let bodyTimeoutGuard: ReturnType<typeof setTimeout> | undefined;
+  globalThis.setTimeout = ((...args: any[]) => {
+    const [handler, timeoutMs, ...rest] = args;
+    if (timeoutMs === 6_000) {
+      bodyTimeoutAttempts += 1;
+      return originalSetTimeout(handler, 0, ...rest);
+    }
+    return originalSetTimeout(handler, timeoutMs, ...rest);
+  }) as typeof globalThis.setTimeout;
+  try {
+    const stalledBodyRequest = fetchLivePrices({ limit: 1 }, async (_input, init) => {
+      const signal = init?.signal as AbortSignal;
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ "Content-Type": "application/json" }),
+        body: null,
+        json: () => new Promise((_resolve, reject) => {
+          if (signal.aborted) {
+            reject(new DOMException("The operation was aborted.", "AbortError"));
+            return;
+          }
+          signal.addEventListener("abort", () => {
+            reject(new DOMException("The operation was aborted.", "AbortError"));
+          }, { once: true });
+        }),
+      } as Response;
+    });
+    const guard = new Promise<never>((_resolve, reject) => {
+      bodyTimeoutGuard = originalSetTimeout(
+        () => reject(new Error("Response body timeout was not enforced.")),
+        1_500,
+      );
+    });
+    try {
+      await Promise.race([stalledBodyRequest, guard]);
+      check(false, "upstream request deadline covers stalled response-body parsing");
+    } catch (error) {
+      check(
+        error instanceof GovernmentApiError &&
+          error.httpStatus === 504 &&
+          bodyTimeoutAttempts === 3,
+        "upstream request deadline covers stalled response-body parsing and bounded retries",
+      );
+    }
+  } finally {
+    if (bodyTimeoutGuard) originalClearTimeout(bodyTimeoutGuard);
+    globalThis.setTimeout = originalSetTimeout;
+  }
+
   let searchedUrl: URL | undefined;
   const commodities = await searchLiveCommodities("अंगूर", 10, async (input) => {
     searchedUrl = new URL(String(input));

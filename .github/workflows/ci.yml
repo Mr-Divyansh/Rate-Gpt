@@ -60,16 +60,18 @@ jobs:
       - name: Responsive layout regression checks
         run: npm run test:responsive
 
+      # Keep the deterministic Weather browser suite on every PR and main push.
+      # It is local/mocked and does not depend on Vercel preview availability.
       - name: Install pinned Playwright test runtime
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
         run: npm install --no-save --no-package-lock playwright@1.56.1
 
       - name: Install Chromium browser
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
         run: npx playwright install --with-deps chromium
 
       - name: Start local app for weather browser checks
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
         run: |
           PORT=4173 npm run dev > /tmp/rate-gpt-dev.log 2>&1 &
           for attempt in $(seq 1 30); do
@@ -84,7 +86,7 @@ jobs:
           exit 1
 
       - name: Weather browser interaction checks
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
           RATE_GPT_BASE_URL: http://127.0.0.1:4173
         run: node scripts/weather-browser-smoke.mjs

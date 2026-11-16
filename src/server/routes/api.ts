@@ -124,7 +124,7 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
     });
     // This endpoint contains only the public administrative directory (not prices or user data).
     // Let Vercel edge cache it so cold starts do not repeatedly wait on AGMARKNET.
-    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=3600");
+    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=3600, max-age=0");
     const source = "source" in data && typeof data.source === "string"
       ? data.source
       : "Government of India OGD / AGMARKNET";
@@ -206,7 +206,7 @@ router.get("/prices", async (req: Request, res: Response) => {
     // automated. The AGMARKNET 2.0 directory is used for selector metadata.
     const result = await fetchLivePrices(liveOptions);
     // Short edge TTL only: source prices are daily observations, and identical
-    // queries can safely share a 15-second response. No database/persistent cache.
+    // queries can safely share a 60-second edge-cached response. No database/persistent cache.
     res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
     res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
     return sendSuccess(
