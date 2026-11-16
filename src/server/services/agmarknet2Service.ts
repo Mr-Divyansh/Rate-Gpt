@@ -52,12 +52,15 @@ let catalogCache: {
   storedAt: string;
   expiresAt: number;
 } | null = null;
+// Collapse concurrent cold-cache requests into one upstream catalogue fetch.
+let catalogInFlight: Promise<AgmarknetCatalog> | null = null;
 
 const CACHE_SCOPE =
   "AGMARKNET state, district, mandi and commodity directory only. Price records are fetched live and are not cached.";
 
 export function resetAgmarknetCatalogCache(): void {
   catalogCache = null;
+  catalogInFlight = null;
 }
 
 function normalizeName(value: string): string {
@@ -196,50 +199,61 @@ function uniqueSorted(values: string[]): string[] {
 
 async function getCatalog(fetcher: typeof fetch = fetch): Promise<AgmarknetCatalog> {
   if (catalogCache && catalogCache.expiresAt > Date.now()) return catalogCache.value;
-  const payload = await requestJson("/daily-price-arrival/filters", {}, fetcher);
-  const data = payload.data && typeof payload.data === "object"
-    ? payload.data as Record<string, unknown>
-    : null;
-  if ((payload.status !== true && payload.success !== true) || !data) {
-    throw new GovernmentApiError("AGMARKNET 2.0 location catalogue is unavailable.", 502);
-  }
+  if (catalogInFlight) return catalogInFlight;
 
-  const states = readArray<AgmarknetState>(data.state_data);
-  const districts = readArray<AgmarknetDistrict>(data.district_data);
-  const markets = readArray<AgmarknetMarket>(data.market_data);
-  const commodities = readArray<AgmarknetCommodity>(data.cmdt_data);
-  if (!states.length || !districts.length || !markets.length || !commodities.length) {
-    throw new GovernmentApiError("AGMARKNET 2.0 returned an incomplete location catalogue.", 502);
-  }
+  const request = (async (): Promise<AgmarknetCatalog> => {
+    const payload = await requestJson("/daily-price-arrival/filters", {}, fetcher);
+    const data = payload.data && typeof payload.data === "object"
+      ? payload.data as Record<string, unknown>
+      : null;
+    if ((payload.status !== true && payload.success !== true) || !data) {
+      throw new GovernmentApiError("AGMARKNET 2.0 location catalogue is unavailable.", 502);
+    }
 
-  const value: AgmarknetCatalog = {
-    state_data: uniqueBy(
-      states.filter((row) => Number.isInteger(row.state_id) && row.state_id > 0 && row.state_id < 100_000 && typeof row.state_name === "string"),
-      (row) => String(row.state_id),
-    ),
-    district_data: uniqueBy(
-      districts.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && typeof row.district_name === "string"),
-      (row) => String(row.id),
-    ),
-    market_data: uniqueBy(
-      markets.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && Number.isInteger(row.district_id) && typeof row.mkt_name === "string"),
-      (row) => String(row.id),
-    ),
-    cmdt_data: uniqueBy(
-      commodities.filter((row) => Number.isInteger(row.cmdt_id) && row.cmdt_id > 0 && row.cmdt_id < 100_000 && typeof row.cmdt_name === "string"),
-      (row) => String(row.cmdt_id),
-    ),
-  };
-  if (!value.state_data.length || !value.market_data.length || !value.cmdt_data.length) {
-    throw new GovernmentApiError("AGMARKNET 2.0 returned no usable catalogue entries.", 502);
-  }
+    const states = readArray<AgmarknetState>(data.state_data);
+    const districts = readArray<AgmarknetDistrict>(data.district_data);
+    const markets = readArray<AgmarknetMarket>(data.market_data);
+    const commodities = readArray<AgmarknetCommodity>(data.cmdt_data);
+    if (!states.length || !districts.length || !markets.length || !commodities.length) {
+      throw new GovernmentApiError("AGMARKNET 2.0 returned an incomplete location catalogue.", 502);
+    }
 
-  catalogCache = {
-    value,
-    storedAt: new Date().toISOString(),
-    expiresAt: Date.now() + CATALOG_TTL_MS,
-  };
-  return value;
+    const value: AgmarknetCatalog = {
+      state_data: uniqueBy(
+        states.filter((row) => Number.isInteger(row.state_id) && row.state_id > 0 && row.state_id < 100_000 && typeof row.state_name === "string"),
+        (row) => String(row.state_id),
+      ),
+      district_data: uniqueBy(
+        districts.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && typeof row.district_name === "string"),
+        (row) => String(row.id),
+      ),
+      market_data: uniqueBy(
+        markets.filter((row) => Number.isInteger(row.id) && Number.isInteger(row.state_id) && Number.isInteger(row.district_id) && typeof row.mkt_name === "string"),
+        (row) => String(row.id),
+      ),
+      cmdt_data: uniqueBy(
+        commodities.filter((row) => Number.isInteger(row.cmdt_id) && row.cmdt_id > 0 && row.cmdt_id < 100_000 && typeof row.cmdt_name === "string"),
+        (row) => String(row.cmdt_id),
+      ),
+    };
+    if (!value.state_data.length || !value.market_data.length || !value.cmdt_data.length) {
+      throw new GovernmentApiError("AGMARKNET 2.0 returned no usable catalogue entries.", 502);
+    }
+
+    catalogCache = {
+      value,
+      storedAt: new Date().toISOString(),
+      expiresAt: Date.now() + CATALOG_TTL_MS,
+    };
+    return value;
+  })();
+
+  catalogInFlight = request;
+  try {
+    return await request;
+  } finally {
+    if (catalogInFlight === request) catalogInFlight = null;
+  }
 }
 
 export async function fetchAgmarknet2Filters(
