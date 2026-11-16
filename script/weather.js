@@ -55,7 +55,6 @@ import { t } from "./i18n.js";
     searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
-    else if (source === "ip") setStatus(t("weather.ipFallback"));
 
     try {
       const url = new URL("https://api.weatherapi.com/v1/current.json");
@@ -150,11 +149,11 @@ import { t } from "./i18n.js";
             showError(t("weather.locationDenied"));
             return;
           }
-          // Fall back to approximate IP location if device positioning is slow/unavailable.
-          setStatus(t("weather.ipFallback"));
-          fetchWeather("auto:ip", "ip");
+          showError(error.code === error.TIMEOUT
+            ? t("weather.locationTimeout")
+            : t("weather.locationUnavailable"));
         },
-        { enableHighAccuracy: false, timeout: 35000, maximumAge: 300000 }
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 120000 }
       );
     } catch (error) {
       console.error("[Weather] Location permission check failed:", error);
@@ -167,8 +166,9 @@ import { t } from "./i18n.js";
             showError(t("weather.locationDenied"));
             return;
           }
-          setStatus(t("weather.ipFallback"));
-          fetchWeather("auto:ip", "ip");
+          showError(geoError.code === geoError.TIMEOUT
+            ? t("weather.locationTimeout")
+            : t("weather.locationUnavailable"));
         },
         { enableHighAccuracy: false, timeout: 35000, maximumAge: 300000 }
       );
