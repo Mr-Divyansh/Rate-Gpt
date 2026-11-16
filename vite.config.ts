@@ -18,6 +18,7 @@ export default defineConfig(() => {
           mandiPrices: path.resolve(rootDir, "mandi-prices.html"),
           about: path.resolve(rootDir, "about.html"),
           contact: path.resolve(rootDir, "contact.html"),
+          weather: path.resolve(rootDir, "weather.html"),
           terms: path.resolve(rootDir, "terms.html"),
           privacy: path.resolve(rootDir, "privacy.html"),
         },
