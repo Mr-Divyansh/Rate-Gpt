@@ -8,10 +8,12 @@ import { t } from "./i18n.js";
   const input = document.getElementById("locationInput");
   const searchButton = document.getElementById("getWeatherBtn");
   const locationButton = document.getElementById("useMyLocationBtn");
+  const stopTrackingButton = document.getElementById("stopLocationTrackingBtn");
   const approximateLocationButton = document.getElementById("useApproxLocationBtn");
   const result = document.getElementById("weatherResult");
   const errorBox = document.getElementById("weatherError");
   const status = document.getElementById("weatherStatus");
+  const locationMeta = document.getElementById("weatherLocationMeta");
   const city = document.getElementById("weatherCity");
   const temperature = document.getElementById("weatherTemperature");
   const condition = document.getElementById("weatherCondition");
@@ -19,9 +21,22 @@ import { t } from "./i18n.js";
   const updated = document.getElementById("weatherUpdated");
   const weatherIcon = document.getElementById("weatherIcon");
 
-  if (!form || !input || !searchButton || !locationButton || !approximateLocationButton || !result || !errorBox || !status) return;
+  if (!form || !input || !searchButton || !locationButton || !stopTrackingButton ||
+      !approximateLocationButton || !result || !errorBox || !status || !locationMeta) return;
+
+  const MOVEMENT_THRESHOLD_METRES = 500;
+  const MIN_WEATHER_REFRESH_INTERVAL_MS = 15000;
+  const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 };
 
   let requestController = null;
+  let watchId = null;
+  let tracking = false;
+  let permissionState = "unknown";
+  let latestPosition = null;
+  let lastWeatherPosition = null;
+  let lastWeatherRefreshAt = 0;
+  let pendingRefreshTimer = null;
+
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
   const showError = (message) => {
     errorBox.textContent = message;
@@ -43,17 +58,64 @@ import { t } from "./i18n.js";
     return item;
   }
 
+  function setTrackingUi(active) {
+    tracking = active;
+    locationButton.disabled = active;
+    locationButton.hidden = active;
+    stopTrackingButton.hidden = !active;
+    stopTrackingButton.disabled = false;
+    locationMeta.hidden = !active && !locationMeta.textContent;
+  }
+
+  function stopTracking({ announce = true } = {}) {
+    if (watchId !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+    watchId = null;
+    if (pendingRefreshTimer !== null) window.clearTimeout(pendingRefreshTimer);
+    pendingRefreshTimer = null;
+    latestPosition = null;
+    setTrackingUi(false);
+    if (announce && trackingWasActive) setStatus(t("weather.trackingStopped"));
+    trackingWasActive = false;
+  }
+
+  let trackingWasActive = false;
+
+  function distanceMetres(a, b) {
+    const radians = (degrees) => degrees * Math.PI / 180;
+    const lat1 = radians(a.latitude);
+    const lat2 = radians(b.latitude);
+    const deltaLat = lat2 - lat1;
+    const deltaLon = radians(b.longitude - a.longitude);
+    const value = Math.sin(deltaLat / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
+    return 6371000 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+  }
+
+  function updateLocationMeta(position) {
+    const accuracy = Number.isFinite(position.coords.accuracy)
+      ? Math.max(1, Math.round(position.coords.accuracy))
+      : null;
+    const time = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      .format(new Date(position.timestamp || Date.now()));
+    locationMeta.textContent = t("weather.trackingAccuracy", {
+      meters: accuracy === null ? "—" : accuracy,
+      time
+    });
+    locationMeta.hidden = false;
+  }
+
   async function fetchWeather(query, source = "search") {
     if (!query || !API_KEY) {
       showError(!API_KEY ? t("weather.notConfigured") : t("weather.enterPlace"));
-      return;
+      return false;
     }
     requestController?.abort();
     const controller = new AbortController();
     requestController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 12000);
     searchButton.disabled = true;
-    locationButton.disabled = true;
     approximateLocationButton.disabled = true;
     searchButton.textContent = t("weather.loading");
     clearMessages();
@@ -97,12 +159,11 @@ import { t } from "./i18n.js";
       updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
       result.hidden = false;
       errorBox.hidden = true;
-      setStatus(source === "location" ? t("weather.locationSuccess")
+      setStatus(source === "location" ? t("weather.trackingActive")
         : source === "approximate" ? t("weather.approxLocationSuccess") : "");
+      return true;
     } catch (error) {
-      // Ignore completion from a superseded request; it must not overwrite
-      // the status or results of the newer request.
-      if (requestController !== controller) return;
+      if (requestController !== controller) return false;
       if (error?.name === "AbortError") {
         showError(t("weather.timeout"));
       } else {
@@ -112,21 +173,100 @@ import { t } from "./i18n.js";
           ? t("weather.serviceUnavailable")
           : t("weather.fetchFailed"));
       }
+      return false;
     } finally {
       window.clearTimeout(timeout);
-      // An older aborted request must not re-enable controls while a newer
-      // request is still running.
       if (requestController === controller) {
         requestController = null;
         searchButton.disabled = false;
-        locationButton.disabled = false;
         approximateLocationButton.disabled = false;
         searchButton.textContent = t("weather.fetch");
       }
     }
   }
 
-  function useMyLocation() {
+  function maybeRefreshWeather(position) {
+    latestPosition = position;
+    if (!lastWeatherPosition) {
+      lastWeatherPosition = position.coords;
+      lastWeatherRefreshAt = Date.now();
+      fetchWeather(`${position.coords.latitude},${position.coords.longitude}`, "location");
+      return;
+    }
+
+    const moved = distanceMetres(lastWeatherPosition, position.coords);
+    if (moved < MOVEMENT_THRESHOLD_METRES || pendingRefreshTimer !== null) return;
+
+    const elapsed = Date.now() - lastWeatherRefreshAt;
+    const refresh = () => {
+      pendingRefreshTimer = null;
+      if (!tracking || !latestPosition) return;
+      if (distanceMetres(lastWeatherPosition, latestPosition.coords) < MOVEMENT_THRESHOLD_METRES) return;
+      const next = latestPosition;
+      lastWeatherPosition = next.coords;
+      lastWeatherRefreshAt = Date.now();
+      fetchWeather(`${next.coords.latitude},${next.coords.longitude}`, "location");
+    };
+
+    if (elapsed >= MIN_WEATHER_REFRESH_INTERVAL_MS) {
+      refresh();
+    } else {
+      pendingRefreshTimer = window.setTimeout(refresh, MIN_WEATHER_REFRESH_INTERVAL_MS - elapsed);
+    }
+  }
+
+  function getPolicyState() {
+    const policy = document.permissionsPolicy || document.featurePolicy;
+    if (!policy?.allowsFeature) return "not-exposed";
+    try {
+      return policy.allowsFeature("geolocation") ? "allowed" : "blocked";
+    } catch {
+      return "check-failed";
+    }
+  }
+
+  function locationDiagnostic(error) {
+    const reason = error.code === 1 ? "PERMISSION_DENIED"
+      : error.code === 2 ? "POSITION_UNAVAILABLE"
+        : error.code === 3 ? "TIMEOUT" : "UNKNOWN";
+    return [
+      `GPS diagnostic: ${reason} (code ${error.code ?? "n/a"})`,
+      `permission=${permissionState}`,
+      `secureContext=${window.isSecureContext}`,
+      `geolocationPolicy=${getPolicyState()}`,
+      `browserMessage=${error.message || "not provided"}`
+    ].join(" · ");
+  }
+
+  function handlePosition(position) {
+    if (!tracking) return;
+    updateLocationMeta(position);
+    if (lastWeatherPosition) {
+      const moved = distanceMetres(lastWeatherPosition, position.coords);
+      if (moved < MOVEMENT_THRESHOLD_METRES) {
+        setStatus(t("weather.trackingActive"));
+        return;
+      }
+    }
+    maybeRefreshWeather(position);
+  }
+
+  function handleLocationError(error) {
+    if (!tracking) return;
+    const detail = locationDiagnostic(error);
+    console.warn("[Weather] Device geolocation update failed:", detail);
+    if (error.code === 1) {
+      stopTracking({ announce: false });
+      showError(`${t("weather.locationDenied")} ${detail}`);
+      return;
+    }
+    const message = error.code === 3 ? t("weather.locationTimeout") : t("weather.locationUnavailable");
+    showError(`${message} ${detail}`);
+    // TIMEOUT and POSITION_UNAVAILABLE can be transient. Keep the watcher alive
+    // so the browser can deliver a later fix without requiring another click.
+  }
+
+  function startTracking() {
     clearMessages();
     if (!window.isSecureContext) {
       showError(t("weather.insecureContext"));
@@ -136,58 +276,19 @@ import { t } from "./i18n.js";
       showError(t("weather.geolocationUnsupported"));
       return;
     }
+    if (tracking) return;
 
-    locationButton.disabled = true;
-    approximateLocationButton.disabled = true;
-    searchButton.disabled = true;
-    setStatus(t("weather.requestingLocation"));
+    lastWeatherPosition = null;
+    latestPosition = null;
+    lastWeatherRefreshAt = 0;
+    locationMeta.textContent = "";
+    locationMeta.hidden = true;
+    setTrackingUi(true);
+    trackingWasActive = true;
+    setStatus(t("weather.trackingWaiting"));
 
-    let permissionState = "unknown";
-    const getPolicyState = () => {
-      const policy = document.permissionsPolicy || document.featurePolicy;
-      if (!policy?.allowsFeature) return "not-exposed";
-      try {
-        return policy.allowsFeature("geolocation") ? "allowed" : "blocked";
-      } catch {
-        return "check-failed";
-      }
-    };
-    const finishButtons = () => {
-      locationButton.disabled = false;
-      approximateLocationButton.disabled = false;
-      searchButton.disabled = false;
-    };
-    const diagnostic = (error) => {
-      const reason = error.code === 1 ? "PERMISSION_DENIED"
-        : error.code === 2 ? "POSITION_UNAVAILABLE"
-          : error.code === 3 ? "TIMEOUT" : "UNKNOWN";
-      return [
-        `GPS diagnostic: ${reason} (code ${error.code ?? "n/a"})`,
-        `permission=${permissionState}`,
-        `secureContext=${window.isSecureContext}`,
-        `geolocationPolicy=${getPolicyState()}`,
-        `browserMessage=${error.message || "not provided"}`
-      ].join(" · ");
-    };
-
-    const handlePosition = ({ coords }) => {
-      finishButtons();
-      setStatus(t("weather.locatingWeather"));
-      fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
-    };
-    const handleError = (error) => {
-      finishButtons();
-      const detail = diagnostic(error);
-      console.warn("[Weather] Device geolocation failed:", detail);
-      const message = error.code === 1 ? t("weather.locationDenied")
-        : error.code === 3 ? t("weather.locationTimeout")
-          : t("weather.locationUnavailable");
-      showError(`${message} ${detail}`);
-    };
-
-    // Read permission state for diagnostics, but never await it before
-    // getCurrentPosition: the geolocation request starts directly in the
-    // user's click handler so the browser can show its native permission UI.
+    // Start the native geolocation request synchronously from the user's click
+    // so the browser can display its permission prompt without delay.
     if (navigator.permissions?.query) {
       navigator.permissions.query({ name: "geolocation" })
         .then((permission) => { permissionState = permission.state; })
@@ -197,13 +298,13 @@ import { t } from "./i18n.js";
     }
 
     try {
-      navigator.geolocation.getCurrentPosition(
+      watchId = navigator.geolocation.watchPosition(
         handlePosition,
-        handleError,
-        { enableHighAccuracy: false, timeout: 45000, maximumAge: 600000 }
+        handleLocationError,
+        GEOLOCATION_OPTIONS
       );
     } catch (error) {
-      finishButtons();
+      stopTracking({ announce: false });
       const detail = `GPS diagnostic: synchronous-error · permission=${permissionState} · secureContext=${window.isSecureContext} · geolocationPolicy=${getPolicyState()} · browserMessage=${error?.message || "not provided"}`;
       console.error("[Weather] Geolocation could not start:", detail);
       showError(`${t("weather.locationUnavailable")} ${detail}`);
@@ -212,12 +313,16 @@ import { t } from "./i18n.js";
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    stopTracking({ announce: false });
     fetchWeather(input.value.trim());
   });
-  locationButton.addEventListener("click", useMyLocation);
-  // WeatherAPI auto:ip is deliberately opt-in and only used after this button
-  // is clicked. It is an approximate city-level estimate, not device GPS.
+  locationButton.addEventListener("click", startTracking);
+  stopTrackingButton.addEventListener("click", () => stopTracking());
   approximateLocationButton.addEventListener("click", () => {
+    stopTracking({ announce: false });
     fetchWeather("auto:ip", "approximate");
   });
+
+  window.addEventListener("pagehide", () => stopTracking({ announce: false }), { once: true });
+  window.addEventListener("beforeunload", () => stopTracking({ announce: false }), { once: true });
 })();
