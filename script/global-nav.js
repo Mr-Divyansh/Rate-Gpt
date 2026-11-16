@@ -192,7 +192,8 @@ function applySharedTranslations() {
     "footer.farmerHours": hi ? "टोल-फ्री · सुबह 6 से रात 10 बजे · सप्ताह के सातों दिन" : "Toll-free · 6 AM–10 PM · 7 days a week",
     "footer.officialInfo": hi ? "आधिकारिक जानकारी ↗" : "Official information ↗",
     "nav.label": hi ? "मुख्य मेनू" : "Main navigation",
-    "footer.explore": hi ? "लिंक और जानकारी" : "Explore and support"
+    "footer.explore": hi ? "लिंक और जानकारी" : "Explore and support",
+    "footer.linksHeading": hi ? "ज़रूरी लिंक" : "Quick links"
   };
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const value = labels[el.dataset.i18n];
