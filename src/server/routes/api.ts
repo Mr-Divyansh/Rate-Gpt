@@ -205,6 +205,9 @@ router.get("/prices", async (req: Request, res: Response) => {
     // The public AGMARKNET 2.0 monthly report is CAPTCHA-gated and is not
     // automated. The AGMARKNET 2.0 directory is used for selector metadata.
     const result = await fetchLivePrices(liveOptions);
+    // Short edge TTL only: source prices are daily observations, and identical
+    // queries can safely share a 15-second response. No database/persistent cache.
+    res.setHeader("Cache-Control", "public, s-maxage=15, max-age=0, must-revalidate");
     return sendSuccess(
       res,
       result.records,
