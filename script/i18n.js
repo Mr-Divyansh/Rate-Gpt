@@ -327,7 +327,7 @@ const STRINGS = {
     "weather.serviceUnavailable": "मौसम सेवा अभी उपलब्ध नहीं है। कृपया बाद में कोशिश करें।",
     "weather.fetchFailed": "मौसम नहीं मिल सका। जगह का नाम जाँचकर फिर कोशिश करें।",
     "weather.geolocationUnsupported": "इस ब्राउज़र में लोकेशन सुविधा उपलब्ध नहीं है। Chrome या किसी दूसरे ब्राउज़र में पेज खोलकर लोकेशन की अनुमति दें।",
-    "weather.insecureContext": "लोकेशन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है। Rate-GPT की आधिकारिक वेबसाइट खोलकर फिर कोशिश करें।"
+    "weather.insecureContext": "लोकेशन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है। Rate-GPT की आधिकारिक वेबसाइट खोलकर फिर कोशिश करें।",
     "weather.requestingLocation": "लोकेशन की अनुमति का इंतज़ार है…",
     "weather.locationDenied": "इस साइट की लोकेशन अनुमति ब्लॉक है। ब्राउज़र की Site settings में Location को Allow करें, पेज reload करें और फिर Use my location दबाएँ।",
     "weather.locationTimeout": "समय पर लोकेशन नहीं मिल सकी। फिर कोशिश करें या जगह खोजें।",
