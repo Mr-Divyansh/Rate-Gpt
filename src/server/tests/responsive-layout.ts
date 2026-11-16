@@ -51,9 +51,10 @@ async function main() {
   check(/\.weather-details\s*\{\s*display:grid;\s*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/s.test(weatherCss) &&
     /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-details\s*\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/s.test(weatherCss),
     "weather detail cards adapt from four desktop columns to two mobile columns");
-  check(/locationButton\.addEventListener\("click", useMyLocation\)/.test(weatherScript) &&
-    /approximateLocationButton\.addEventListener\("click", \(\) =>\s*\{\s*fetchWeather\("auto:ip", "approximate"\)/s.test(weatherScript),
-    "weather location lookups are opt-in and never triggered automatically");
+  check(/locationButton\.addEventListener\("click", startTracking\)/.test(weatherScript) &&
+    /navigator\.geolocation\.watchPosition\(/.test(weatherScript) &&
+    /approximateLocationButton\.addEventListener\("click", \(\) =>\s*\{\s*stopTracking\(\{ announce: false \}\);\s*fetchWeather\("auto:ip", "approximate"\)/s.test(weatherScript),
+    "continuous weather location tracking is opt-in and approximate lookup remains a separate user action");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
