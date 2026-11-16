@@ -1,5 +1,61 @@
 /* Shared API access + remembered location. Endpoints are unchanged from the original build. */
 
+const FILTER_CACHE_TTL_MS = 15 * 60 * 1000;
+const FILTER_CACHE_PREFIX = "rategpt.filters.v1:";
+
+function readFilterCache(key) {
+  try {
+    const raw = localStorage.getItem(FILTER_CACHE_PREFIX + key);
+    if (!raw) return null;
+    const entry = JSON.parse(raw);
+    if (!entry || !entry.data || !Number.isFinite(entry.savedAt)) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function writeFilterCache(key, data) {
+  try {
+    localStorage.setItem(
+      FILTER_CACHE_PREFIX + key,
+      JSON.stringify({ data, savedAt: Date.now() }),
+    );
+  } catch {
+    // Storage can be unavailable or full; network loading remains functional.
+  }
+}
+
+function validateFilters(data) {
+  if (
+    !data ||
+    !Array.isArray(data.states) || !data.states.every((item) => typeof item === "string") ||
+    !Array.isArray(data.districts) || !data.districts.every((item) => typeof item === "string") ||
+    !Array.isArray(data.markets) || !data.markets.every((item) => typeof item === "string") ||
+    !data.coverage ||
+    !["catalogue", "complete", "partial"].includes(data.coverage.status) ||
+    !Number.isInteger(data.coverage.pagesScanned) ||
+    !Number.isInteger(data.coverage.recordsScanned) ||
+    !Number.isInteger(data.coverage.maxOffset) ||
+    data.coverage.maxOffset < 0 ||
+    (data.coverage.total !== null &&
+      (!Number.isInteger(data.coverage.total) || data.coverage.total < 0))
+  ) {
+    throw new Error("The market filters response has an invalid format.");
+  }
+  return data;
+}
+
+async function fetchFiltersFromNetwork(query, cacheKey) {
+  const suffix = query.toString() ? `?${query}` : "";
+  const { data } = await requestJson(`/api/v1/meta/filters${suffix}`);
+  const validated = validateFilters(data);
+  writeFilterCache(cacheKey, validated);
+  return validated;
+}
+
+const filterRefreshes = new Map();
+
 export async function requestJson(path, options = {}) {
   const response = await fetch(path, {
     ...options,
@@ -22,32 +78,29 @@ export async function requestJson(path, options = {}) {
   return payload;
 }
 
-const isStringArray = (value) =>
-  Array.isArray(value) && value.every((item) => typeof item === "string");
-
 export async function fetchFilters({ state = "", district = "" } = {}) {
   const query = new URLSearchParams();
   if (state) query.set("state", state);
   if (district) query.set("district", district);
-  const suffix = query.toString() ? `?${query}` : "";
-  const { data } = await requestJson(`/api/v1/meta/filters${suffix}`);
-  if (
-    !data ||
-    !isStringArray(data.states) ||
-    !isStringArray(data.districts) ||
-    !isStringArray(data.markets) ||
-    !data.coverage ||
-    !["catalogue", "complete", "partial"].includes(data.coverage.status) ||
-    !Number.isInteger(data.coverage.pagesScanned) ||
-    !Number.isInteger(data.coverage.recordsScanned) ||
-    !Number.isInteger(data.coverage.maxOffset) ||
-    data.coverage.maxOffset < 0 ||
-    (data.coverage.total !== null &&
-      (!Number.isInteger(data.coverage.total) || data.coverage.total < 0))
-  ) {
-    throw new Error("The market filters response has an invalid format.");
+  const cacheKey = query.toString() || "all";
+  const cached = readFilterCache(cacheKey);
+
+  if (cached) {
+    const isFresh = Date.now() - cached.savedAt < FILTER_CACHE_TTL_MS;
+    if (!isFresh && !filterRefreshes.has(cacheKey)) {
+      const refresh = fetchFiltersFromNetwork(query, cacheKey)
+        .catch(() => null)
+        .finally(() => filterRefreshes.delete(cacheKey));
+      filterRefreshes.set(cacheKey, refresh);
+    }
+    return validateFilters(cached.data);
   }
-  return data;
+
+  if (filterRefreshes.has(cacheKey)) return filterRefreshes.get(cacheKey);
+  const request = fetchFiltersFromNetwork(query, cacheKey)
+    .finally(() => filterRefreshes.delete(cacheKey));
+  filterRefreshes.set(cacheKey, request);
+  return request;
 }
 
 function validPrice(value) {
@@ -71,7 +124,7 @@ export function isPriceRecord(record) {
     typeof record.district !== "string" ||
     !record.district.trim() ||
     typeof record.arrival_date !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(record.arrival_date) ||
+    !/^\\d{4}-\\d{2}-\\d{2}$/.test(record.arrival_date) ||
     typeof record.source_unit !== "string" ||
     !record.source_unit.trim() ||
     (record.variety !== null && record.variety !== undefined && typeof record.variety !== "string") ||
@@ -81,7 +134,6 @@ export function isPriceRecord(record) {
   }
 
   const prices = [record.min_price, record.max_price, record.modal_price];
-  // Missing values are valid government data and remain null in the response.
   return prices.every(validPrice);
 }
 
@@ -100,8 +152,6 @@ export async function fetchPrices(params, { signal } = {}) {
   }
   return payload;
 }
-
-
 
 export async function fetchSyncStatus() {
   const { data } = await requestJson("/api/v1/sync-status");
