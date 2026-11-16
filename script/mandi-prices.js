@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { t, tCount, onLangChange } from "./i18n.js";
-// auto-refresh test
 import { hydrateIcons, icon } from "./icons.js";
 import {
   fetchFilters, fetchPrices, fetchSyncStatus,
@@ -108,7 +107,7 @@ function renderMandis() {
     return;
   }
   if (state.filtersLoading) {
-    help.textContent = "Loading district and mandi options…";
+    help.textContent = t("finder.loading");
     return;
   }
   if (!s || !district) {
@@ -925,15 +924,8 @@ async function init() {
   renderResults();
   loadSync();
 
-  try {
-    const data = await fetchFilters();
-    if (Array.isArray(data.states) && data.states.length) state.states = data.states;
-    state.filterCoverage = data.coverage ?? null;
-  } catch (error) {
-    console.error("[Mandi prices] Unable to load mandi filters:", error);
-    state.finderError = t("finder.fail", { reason: errorText(error, "") });
-    renderFinder();
-  }
+  // State options are already available locally. Fetch only the selected state's
+  // districts, then the selected district's mandis; avoid an unnecessary full-catalog request.
   renderFinder();
 
   const params = new URLSearchParams(location.search);
