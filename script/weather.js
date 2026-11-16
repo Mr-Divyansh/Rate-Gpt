@@ -48,8 +48,9 @@ import { t } from "./i18n.js";
       return;
     }
     requestController?.abort();
-    requestController = new AbortController();
-    const timeout = window.setTimeout(() => requestController?.abort(), 12000);
+    const controller = new AbortController();
+    requestController = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
     searchButton.disabled = true;
     locationButton.disabled = true;
     searchButton.textContent = t("weather.loading");
@@ -62,7 +63,7 @@ import { t } from "./i18n.js";
       url.searchParams.set("q", query);
       url.searchParams.set("aqi", "no");
       const response = await fetch(url, {
-        signal: requestController.signal,
+        signal: controller.signal,
         headers: { Accept: "application/json" }
       });
       const data = await response.json().catch(() => null);
@@ -107,9 +108,14 @@ import { t } from "./i18n.js";
       }
     } finally {
       window.clearTimeout(timeout);
-      searchButton.disabled = false;
-      locationButton.disabled = false;
-      searchButton.textContent = t("weather.fetch");
+      // An older aborted request must not re-enable controls while a newer
+      // request is still running.
+      if (requestController === controller) {
+        requestController = null;
+        searchButton.disabled = false;
+        locationButton.disabled = false;
+        searchButton.textContent = t("weather.fetch");
+      }
     }
   }
 
