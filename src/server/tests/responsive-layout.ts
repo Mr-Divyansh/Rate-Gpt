@@ -56,7 +56,7 @@ async function main() {
     "weather location lookups are opt-in and never triggered automatically");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
-  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
+  check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
     "mobile navigation exposes its menu toggle");
   check(/\.site-nav\s*\{[\s\S]*?grid-column:auto;\s*grid-row:auto;\s*order:initial;/s.test(baseCss),
     "mobile drawer resets inherited horizontal-nav grid placement");
