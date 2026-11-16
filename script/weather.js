@@ -113,32 +113,66 @@ import { t } from "./i18n.js";
     }
   }
 
-  function useMyLocation() {
+  async function useMyLocation() {
     clearMessages();
-    if (!("geolocation" in navigator)) {
+    if (!window.isSecureContext) {
+      showError(t("weather.insecureContext"));
+      return;
+    }
+    if (!navigator.geolocation) {
       showError(t("weather.geolocationUnsupported"));
       return;
     }
+
     locationButton.disabled = true;
     searchButton.disabled = true;
     setStatus(t("weather.requestingLocation"));
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setStatus(t("weather.locatingWeather"));
-        fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
-      },
-      (error) => {
-        locationButton.disabled = false;
-        searchButton.disabled = false;
-        const message = error.code === error.PERMISSION_DENIED
+
+    try {
+      // A previously blocked permission will not trigger a new browser prompt.
+      // Detect it first and explain how the user can re-enable it.
+      if (navigator.permissions?.query) {
+        const permission = await navigator.permissions.query({ name: "geolocation" });
+        if (permission.state === "denied") {
+          showError(t("weather.locationDenied"));
+          return;
+        }
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          setStatus(t("weather.locatingWeather"));
+          fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
+        },
+        (error) => {
+          const message = error.code === error.PERMISSION_DENIED
+            ? t("weather.locationDenied")
+            : error.code === error.TIMEOUT
+              ? t("weather.locationTimeout")
+              : t("weather.locationUnavailable");
+          showError(message);
+        },
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
+      );
+    } catch (error) {
+      console.error("[Weather] Location permission check failed:", error);
+      // Permissions API is not available in every browser; geolocation itself
+      // remains the source of truth and can still display the native prompt.
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => fetchWeather(`${coords.latitude},${coords.longitude}`, "location"),
+        (geoError) => showError(geoError.code === geoError.PERMISSION_DENIED
           ? t("weather.locationDenied")
-          : error.code === error.TIMEOUT
+          : geoError.code === geoError.TIMEOUT
             ? t("weather.locationTimeout")
-            : t("weather.locationUnavailable");
-        showError(message);
-      },
-      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
-    );
+            : t("weather.locationUnavailable")),
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
+      );
+    } finally {
+      // Geolocation callbacks are asynchronous; fetchWeather applies its own
+      // loading state when coordinates arrive.
+      locationButton.disabled = false;
+      searchButton.disabled = false;
+    }
   }
 
   form.addEventListener("submit", (event) => {
