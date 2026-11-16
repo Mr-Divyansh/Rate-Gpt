@@ -44,7 +44,7 @@
             <span class="weather-location-icon" aria-hidden="true">⌖</span>
             <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
           </div>
-          <div class="weather-location-buttons"><button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Use my location</span></button><button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button></div>
+          <div class="weather-location-buttons"><button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Start live location</span></button><button class="btn btn-secondary" id="stopLocationTrackingBtn" type="button" data-i18n="weather.stopTracking" hidden>Stop tracking</button><button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button></div>
         </div>
         <div class="weather-or"><span data-i18n="weather.orSearch">OR SEARCH A PLACE</span></div>
         <form class="weather-input-wrapper" id="weatherSearchForm">
@@ -53,7 +53,7 @@
           <button class="btn btn-primary" id="getWeatherBtn" type="submit" data-i18n="weather.fetch">Search weather</button>
         </form>
         <p class="weather-privacy" data-i18n="weather.privacy">Your location is used only to find nearby weather. It is not saved.</p>
-        <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
+        <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p><p class="weather-location-meta" id="weatherLocationMeta" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
       </section>
 

@@ -56,3 +56,7 @@
 @media (max-width: 650px) {
   .weather-wrap { padding-top: 38px; }
 }
+
+.weather-location-meta { margin-top:8px; color:var(--muted); font-size:.82rem; line-height:1.5; }
+.weather-location-buttons button[hidden], .weather-location-meta[hidden] { display:none; }
+.weather-location-buttons .btn:disabled { opacity:.65; cursor:wait; }
