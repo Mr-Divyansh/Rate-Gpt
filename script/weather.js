@@ -36,6 +36,7 @@ import { t } from "./i18n.js";
   let lastWeatherPosition = null;
   let lastWeatherRefreshAt = 0;
   let pendingRefreshTimer = null;
+  let approximateFallbackAttempted = false;
 
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
   const showError = (message) => {
@@ -260,10 +261,20 @@ import { t } from "./i18n.js";
       showError(`${t("weather.locationDenied")} ${detail}`);
       return;
     }
+
+    // Some desktops (including Windows PCs without a GPS receiver) cannot
+    // provide a device position. Fall back to WeatherAPI's IP-based estimate
+    // once, rather than leaving the user with a GPS error and no weather.
+    if ((error.code === 2 || error.code === 3) && !approximateFallbackAttempted) {
+      approximateFallbackAttempted = true;
+      stopTracking({ announce: false });
+      setStatus(t("weather.approxLocationSuccess"));
+      fetchWeather("auto:ip", "approximate");
+      return;
+    }
+
     const message = error.code === 3 ? t("weather.locationTimeout") : t("weather.locationUnavailable");
     showError(`${message} ${detail}`);
-    // TIMEOUT and POSITION_UNAVAILABLE can be transient. Keep the watcher alive
-    // so the browser can deliver a later fix without requiring another click.
   }
 
   function startTracking() {
@@ -281,6 +292,7 @@ import { t } from "./i18n.js";
     lastWeatherPosition = null;
     latestPosition = null;
     lastWeatherRefreshAt = 0;
+    approximateFallbackAttempted = false;
     locationMeta.textContent = "";
     locationMeta.hidden = true;
     setTrackingUi(true);
