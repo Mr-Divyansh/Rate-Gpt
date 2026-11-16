@@ -36,9 +36,11 @@ try {
         weatherQueries.push(query);
         const name = query === "auto:ip"
           ? "Approximate City"
-          : query.includes(",")
-            ? "Dharampur"
-            : query;
+          : query.includes("31.01")
+            ? "Moved Location"
+            : query.includes(",")
+              ? "Dharampur"
+              : query;
         await route.fulfill({
           status: 200,
           contentType: "application/json",
@@ -91,8 +93,7 @@ try {
     assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), true, viewport.name + ": live tracking exposes a stop control");
     await page.waitForTimeout(15000);
     await context.setGeolocation({ latitude: 31.01, longitude: 76.01 });
-    await page.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Dharampur"), { timeout: 30000 });
-    await page.waitForFunction(() => window.__weatherTestQueries?.length >= 2, { timeout: 30000 }).catch(() => {});
+    await page.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Moved Location"), null, { timeout: 30000 });
     assert.ok(weatherQueries.length >= 2, viewport.name + ": meaningful movement triggers a fresh weather lookup");
     const movementRequestCount = weatherQueries.length;
     await context.setGeolocation({ latitude: 31.0101, longitude: 76.0101 });
