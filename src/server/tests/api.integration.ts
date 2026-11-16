@@ -495,9 +495,11 @@ async function main() {
     assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
     assert(searchResponse.headers.get("cache-control")?.includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
 
-    const comparison = await fetch(
+    const comparisonResponse = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
-    ).then((r) => r.json());
+    );
+    const comparison = await comparisonResponse.json();
+    assert(comparisonResponse.headers.get("cache-control")?.includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
     const comparisonRequest = upstreamRequests.at(-1)!;
     assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
     assert(comparisonRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "live comparison forwards commodity exact-match filter");
