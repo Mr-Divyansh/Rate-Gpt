@@ -206,7 +206,7 @@ router.get("/prices", async (req: Request, res: Response) => {
     // automated. The AGMARKNET 2.0 directory is used for selector metadata.
     const result = await fetchLivePrices(liveOptions);
     // Short edge TTL only: source prices are daily observations, and identical
-    // queries can safely share a 15-second response. No database/persistent cache.
+    // queries can safely share a 60-second edge-cached response. No database/persistent cache.
     res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
     res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
     return sendSuccess(
