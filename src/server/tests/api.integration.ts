@@ -423,7 +423,7 @@ async function main() {
     );
     assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
-    assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
+    assert(filteredResponse.headers.get("cache-control")?.includes("s-maxage=60"), "daily government price observations use a short 60-second shared cache");
 
     const delhiResponse = await fetch(`${base}/api/v1/prices?state=Delhi&limit=5`);
     const delhiPayload = await delhiResponse.json();
@@ -489,10 +489,11 @@ async function main() {
       );
     }
 
-    const search = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`)
-      .then((r) => r.json());
+    const searchResponse = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`);
+    const search = await searchResponse.json();
     assert(search.success && search.data.length === 1 && search.data[0] === "Grapes", "Hindi commodity search returns an upstream commodity only");
     assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
+    assert(searchResponse.headers.get("cache-control")?.includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
 
     const comparison = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
