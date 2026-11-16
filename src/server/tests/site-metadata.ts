@@ -5,6 +5,7 @@ const pages = [
   ["mandi-prices.html", "https://rate-gpt.vercel.app/mandi-prices.html"],
   ["about.html", "https://rate-gpt.vercel.app/about.html"],
   ["contact.html", "https://rate-gpt.vercel.app/contact.html"],
+  ["weather.html", "https://rate-gpt.vercel.app/weather.html"],
   ["privacy.html", "https://rate-gpt.vercel.app/privacy.html"],
   ["terms.html", "https://rate-gpt.vercel.app/terms.html"],
 ] as const;
