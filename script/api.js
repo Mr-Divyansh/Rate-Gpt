@@ -124,7 +124,7 @@ export function isPriceRecord(record) {
     typeof record.district !== "string" ||
     !record.district.trim() ||
     typeof record.arrival_date !== "string" ||
-    !/^\\d{4}-\\d{2}-\\d{2}$/.test(record.arrival_date) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(record.arrival_date) ||
     typeof record.source_unit !== "string" ||
     !record.source_unit.trim() ||
     (record.variety !== null && record.variety !== undefined && typeof record.variety !== "string") ||
