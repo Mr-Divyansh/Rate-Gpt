@@ -88,7 +88,15 @@ async function main(): Promise<void> {
   resetAgmarknetCatalogCache();
 
   const mock = mockFetcher();
-  const root = await fetchAgmarknet2Filters({}, mock.fetcher);
+  const [root, concurrentRootA, concurrentRootB] = await Promise.all([
+    fetchAgmarknet2Filters({}, mock.fetcher),
+    fetchAgmarknet2Filters({ state: "Himachal Pradesh" }, mock.fetcher),
+    fetchAgmarknet2Filters({ state: "Punjab" }, mock.fetcher),
+  ]);
+  check(
+    concurrentRootA.districts.includes("Kullu") && concurrentRootB.districts.includes("Ludhiana"),
+    "concurrent cold-cache callers share one upstream catalogue request and receive their own filters",
+  );
   check(root.states.includes("Himachal Pradesh") && !root.states.includes("All States/UTs"), "state catalogue excludes the all-states sentinel");
   check(
     root.states.length === 36 && root.states.includes("Ladakh"),
