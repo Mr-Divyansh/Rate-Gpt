@@ -144,9 +144,39 @@ try {
     pass(viewport.name + ": no uncaught browser JavaScript errors");
 
     await context.close();
+
+    if (viewport.name === "mobile") {
+      const deniedContext = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+      });
+      await deniedContext.addInitScript(() => {
+        Object.defineProperty(navigator, "geolocation", {
+          configurable: true,
+          value: {
+            watchPosition(_success, error) {
+              queueMicrotask(() => error({ code: 1, message: "User denied location" }));
+              return 99;
+            },
+            clearWatch() {},
+          },
+        });
+      });
+      const deniedPage = await deniedContext.newPage();
+      const deniedPageErrors = [];
+      deniedPage.on("pageerror", (error) => deniedPageErrors.push(error.message));
+      await deniedPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
+      await deniedPage.locator("#useMyLocationBtn").click();
+      await deniedPage.waitForFunction(() => document.querySelector("#weatherError")?.hidden === false);
+      assert.match(await deniedPage.locator("#weatherError").innerText(), /location is blocked for this site/i);
+      assert.equal(await deniedPage.locator("#stopLocationTrackingBtn").isVisible(), false);
+      assert.equal(await deniedPage.locator("#useMyLocationBtn").isVisible(), true);
+      assert.deepEqual(deniedPageErrors, [], "denied location permission must not cause uncaught browser errors");
+      pass("mobile: denied location permission shows actionable guidance and safely resets tracking controls");
+      await deniedContext.close();
+    }
   }
 
-  console.log("\nWeather browser checks: " + passed + " passed, 0 failed");
+  console.log("\\nWeather browser checks: " + passed + " passed, 0 failed");
 } finally {
   await browser.close();
 }
