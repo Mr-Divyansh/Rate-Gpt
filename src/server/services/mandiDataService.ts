@@ -592,7 +592,8 @@ async function requestGovernmentPage(
         },
         signal: controller.signal,
       });
-    } catch (error) {
+    } catch {
+      clearTimeout(timeout);
       if (attempt < MAX_ATTEMPTS) {
         await delay(200 * attempt);
         continue;
@@ -601,43 +602,62 @@ async function requestGovernmentPage(
         throw new GovernmentApiError("Government API request timed out.", 504);
       }
       throw new GovernmentApiError("Government API could not be reached.", 503);
-    } finally {
-      clearTimeout(timeout);
     }
 
-    if (response.status === 429 || response.status >= 500) {
-      if (attempt < MAX_ATTEMPTS) {
-        const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
-        const backoff = Math.min(
-          RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
-          RETRY_MAX_DELAY_MS,
-        );
-        await delay(retryAfter ?? backoff);
-        continue;
-      }
-      throw new GovernmentApiError(
-        response.status === 429
-          ? "Government API rate limit reached. Please try again shortly."
-          : "Government API is temporarily unavailable.",
-        response.status === 429 ? 503 : 502,
-        response.status,
-      );
-    }
-    if (!response.ok) {
-      throw new GovernmentApiError(
-        "Government API rejected the price request.",
-        502,
-        response.status,
-      );
-    }
     try {
-      const payload: unknown = await response.json();
-      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-        throw new Error("Invalid JSON object");
+      if (response.status === 429 || response.status >= 500) {
+        if (attempt < MAX_ATTEMPTS) {
+          const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
+          const backoff = Math.min(
+            RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
+            RETRY_MAX_DELAY_MS,
+          );
+          clearTimeout(timeout);
+          try {
+            await response.body?.cancel();
+          } catch {
+            // The response may already be closed; retry timing is still bounded.
+          }
+          await delay(retryAfter ?? backoff);
+          continue;
+        }
+        throw new GovernmentApiError(
+          response.status === 429
+            ? "Government API rate limit reached. Please try again shortly."
+            : "Government API is temporarily unavailable.",
+          response.status === 429 ? 503 : 502,
+          response.status,
+        );
       }
-      return payload as Record<string, unknown>;
-    } catch {
-      throw new GovernmentApiError("Government API returned invalid JSON.", 502);
+      if (!response.ok) {
+        throw new GovernmentApiError(
+          "Government API rejected the price request.",
+          502,
+          response.status,
+        );
+      }
+
+      try {
+        // Keep the request deadline active until the complete response body has
+        // been read. Fetch resolves when headers arrive, not when JSON is ready.
+        const payload: unknown = await response.json();
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          throw new Error("Invalid JSON object");
+        }
+        return payload as Record<string, unknown>;
+      } catch {
+        if (controller.signal.aborted) {
+          if (attempt < MAX_ATTEMPTS) {
+            clearTimeout(timeout);
+            await delay(200 * attempt);
+            continue;
+          }
+          throw new GovernmentApiError("Government API request timed out.", 504);
+        }
+        throw new GovernmentApiError("Government API returned invalid JSON.", 502);
+      }
+    } finally {
+      clearTimeout(timeout);
     }
   }
   throw new GovernmentApiError("Government API could not be reached.", 503);
