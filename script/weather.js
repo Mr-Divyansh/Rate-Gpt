@@ -1,29 +1,33 @@
 import { t } from "./i18n.js";
 
 (() => {
-  const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "";
-  if (currentPage !== "weather.html") return;
+  if ((window.location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
 
-  const WEATHERAPI_KEY = import.meta.env.VITE_WEATHERAPI_KEY || "c6f1a1969af64489958184521261511";
-  const locationInput = document.getElementById("locationInput");
-  const getWeatherBtn = document.getElementById("getWeatherBtn");
-  const weatherResult = document.getElementById("weatherResult");
-  const weatherError = document.getElementById("weatherError");
-  const weatherCity = document.getElementById("weatherCity");
-  const weatherTemperature = document.getElementById("weatherTemperature");
-  const weatherCondition = document.getElementById("weatherCondition");
-  const weatherDetails = document.getElementById("weatherDetails");
+  const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY || "c6f1a1969af64489958184521261511";
+  const form = document.getElementById("weatherSearchForm");
+  const input = document.getElementById("locationInput");
+  const searchButton = document.getElementById("getWeatherBtn");
+  const locationButton = document.getElementById("useMyLocationBtn");
+  const result = document.getElementById("weatherResult");
+  const errorBox = document.getElementById("weatherError");
+  const status = document.getElementById("weatherStatus");
+  const city = document.getElementById("weatherCity");
+  const temperature = document.getElementById("weatherTemperature");
+  const condition = document.getElementById("weatherCondition");
+  const details = document.getElementById("weatherDetails");
+  const updated = document.getElementById("weatherUpdated");
+  const weatherIcon = document.getElementById("weatherIcon");
 
-  if (!locationInput || !getWeatherBtn || !weatherResult || !weatherError ||
-      !weatherCity || !weatherTemperature || !weatherCondition || !weatherDetails) return;
+  if (!form || !input || !searchButton || !locationButton || !result || !errorBox || !status) return;
 
-  const defaultButtonText = getWeatherBtn.textContent.trim() || "Get Weather";
-
-  function showError(message) {
-    weatherError.textContent = message;
-    weatherError.hidden = false;
-    weatherResult.hidden = true;
-  }
+  let requestController = null;
+  const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
+  const showError = (message) => {
+    errorBox.textContent = message;
+    errorBox.hidden = false;
+    setStatus("");
+  };
+  const clearMessages = () => { errorBox.hidden = true; setStatus(""); };
 
   function addDetail(label, value) {
     const item = document.createElement("div");
@@ -31,75 +35,115 @@ import { t } from "./i18n.js";
     const name = document.createElement("span");
     name.className = "label";
     name.textContent = label;
-    const result = document.createElement("span");
-    result.className = "value";
-    result.textContent = value;
-    item.append(name, result);
+    const amount = document.createElement("span");
+    amount.className = "value";
+    amount.textContent = value;
+    item.append(name, amount);
     return item;
   }
 
-  async function fetchWeather(city) {
-    if (!city) {
-      showError("Please enter a city or district name.");
+  async function fetchWeather(query, source = "search") {
+    if (!query || !API_KEY) {
+      showError(!API_KEY ? t("weather.notConfigured") : t("weather.enterPlace"));
       return;
     }
-    if (!WEATHERAPI_KEY) {
-      showError("Weather service is not configured yet. Please try again later.");
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 10000);
-    getWeatherBtn.disabled = true;
-    getWeatherBtn.textContent = "Loading…";
-    weatherError.hidden = true;
+    requestController?.abort();
+    requestController = new AbortController();
+    const timeout = window.setTimeout(() => requestController?.abort(), 12000);
+    searchButton.disabled = true;
+    locationButton.disabled = true;
+    searchButton.textContent = t("weather.loading");
+    clearMessages();
+    if (source === "location") setStatus(t("weather.locatingWeather"));
 
     try {
-      const apiUrl = new URL("https://api.weatherapi.com/v1/current.json");
-      apiUrl.searchParams.set("key", WEATHERAPI_KEY);
-      apiUrl.searchParams.set("q", city);
-      apiUrl.searchParams.set("aqi", "no");
-
-      const response = await fetch(apiUrl, { signal: controller.signal, headers: { Accept: "application/json" } });
+      const url = new URL("https://api.weatherapi.com/v1/current.json");
+      url.searchParams.set("key", API_KEY);
+      url.searchParams.set("q", query);
+      url.searchParams.set("aqi", "no");
+      const response = await fetch(url, {
+        signal: requestController.signal,
+        headers: { Accept: "application/json" }
+      });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.location || !data?.current) {
-        const reason = data?.error?.message;
-        throw new Error(typeof reason === "string" ? reason : `Weather service returned HTTP ${response.status}.`);
+        const apiMessage = data?.error?.message;
+        throw new Error(typeof apiMessage === "string" ? apiMessage : `HTTP ${response.status}`);
       }
 
-      weatherCity.textContent = [data.location.name, data.location.region, data.location.country]
-        .filter(Boolean).join(", ");
-      weatherTemperature.textContent = `${data.current.temp_c}°C`;
-      weatherCondition.textContent = data.current.condition?.text || "Current conditions unavailable";
-      weatherDetails.replaceChildren(
-        addDetail("Feels like", `${data.current.feelslike_c}°C`),
-        addDetail("Humidity", `${data.current.humidity}%`),
-        addDetail("Wind", `${data.current.wind_kph} km/h`),
-        addDetail("Pressure", `${data.current.pressure_mb} mb`),
+      const place = data.location;
+      const current = data.current;
+      city.textContent = [place.name, place.region, place.country].filter(Boolean).join(", ");
+      temperature.textContent = `${current.temp_c}°C`;
+      condition.textContent = current.condition?.text || t("weather.conditionUnavailable");
+      const iconPath = current.condition?.icon;
+      if (iconPath) {
+        weatherIcon.src = iconPath.startsWith("//") ? `https:${iconPath}` : iconPath;
+        weatherIcon.alt = current.condition?.text || t("weather.weatherIcon");
+        weatherIcon.hidden = false;
+      } else {
+        weatherIcon.removeAttribute("src");
+        weatherIcon.hidden = true;
+      }
+      details.replaceChildren(
+        addDetail(t("weather.feelsLike"), `${current.feelslike_c}°C`),
+        addDetail(t("weather.humidity"), `${current.humidity}%`),
+        addDetail(t("weather.wind"), `${current.wind_kph} km/h`),
+        addDetail(t("weather.pressure"), `${current.pressure_mb} mb`)
       );
-      weatherResult.hidden = false;
-      weatherError.hidden = true;
-      locationInput.value = "";
+      updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
+      result.hidden = false;
+      errorBox.hidden = true;
+      setStatus(source === "location" ? t("weather.locationSuccess") : "");
     } catch (error) {
-      console.error("Weather request failed:", error);
-      const message = error?.name === "AbortError"
-        ? "Weather request timed out. Please try again."
-        : /key|api key|access denied|quota|inactive/i.test(error?.message || "")
-          ? "Weather service access is unavailable right now. Please try again later."
-          : "Weather could not be loaded. Check the location and try again.";
-      showError(message);
+      if (error?.name === "AbortError") {
+        showError(t("weather.timeout"));
+      } else {
+        console.error("[Weather] Request failed:", error);
+        const apiMessage = error?.message || "";
+        showError(/key|api key|access denied|quota|inactive/i.test(apiMessage)
+          ? t("weather.serviceUnavailable")
+          : t("weather.fetchFailed"));
+      }
     } finally {
       window.clearTimeout(timeout);
-      getWeatherBtn.disabled = false;
-      getWeatherBtn.textContent = defaultButtonText;
+      searchButton.disabled = false;
+      locationButton.disabled = false;
+      searchButton.textContent = t("weather.fetch");
     }
   }
 
-  getWeatherBtn.addEventListener("click", () => fetchWeather(locationInput.value.trim()));
-  locationInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      fetchWeather(locationInput.value.trim());
+  function useMyLocation() {
+    clearMessages();
+    if (!("geolocation" in navigator)) {
+      showError(t("weather.geolocationUnsupported"));
+      return;
     }
+    locationButton.disabled = true;
+    searchButton.disabled = true;
+    setStatus(t("weather.requestingLocation"));
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setStatus(t("weather.locatingWeather"));
+        fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
+      },
+      (error) => {
+        locationButton.disabled = false;
+        searchButton.disabled = false;
+        const message = error.code === error.PERMISSION_DENIED
+          ? t("weather.locationDenied")
+          : error.code === error.TIMEOUT
+            ? t("weather.locationTimeout")
+            : t("weather.locationUnavailable");
+        showError(message);
+      },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
+    );
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    fetchWeather(input.value.trim());
   });
+  locationButton.addEventListener("click", useMyLocation);
 })();
