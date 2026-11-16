@@ -280,6 +280,8 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
       offset: 0,
       sort: "modal_price_desc",
     });
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
     return sendSuccess(
       res,
       records.records,
@@ -337,6 +339,8 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
     } catch {
       results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
     }
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=300, stale-while-revalidate=900");
     return sendSuccess(
       res,
       results,
