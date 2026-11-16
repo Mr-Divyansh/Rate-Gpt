@@ -45,3 +45,11 @@
  .weather-condition { font-size:1rem; }
 }
 @media(prefers-reduced-motion:no-preference) { .weather-search-card,.weather-result { animation:weather-enter .35s ease both; } @keyframes weather-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } } }
+
+
+/* Keep the weather heading clear of the sticky site header. */
+.weather-wrap { padding-top: clamp(64px, 7vw, 88px); }
+.weather-intro { scroll-margin-top: 96px; }
+@media (max-width: 650px) {
+  .weather-wrap { padding-top: 38px; }
+}

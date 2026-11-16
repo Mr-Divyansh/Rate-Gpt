@@ -55,6 +55,7 @@ import { t } from "./i18n.js";
     searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
+    else if (source === "ip") setStatus(t("weather.ipFallback"));
 
     try {
       const url = new URL("https://api.weatherapi.com/v1/current.json");
@@ -145,14 +146,15 @@ import { t } from "./i18n.js";
           fetchWeather(`${coords.latitude},${coords.longitude}`, "location");
         },
         (error) => {
-          const message = error.code === error.PERMISSION_DENIED
-            ? t("weather.locationDenied")
-            : error.code === error.TIMEOUT
-              ? t("weather.locationTimeout")
-              : t("weather.locationUnavailable");
-          showError(message);
+          if (error.code === error.PERMISSION_DENIED) {
+            showError(t("weather.locationDenied"));
+            return;
+          }
+          // Fall back to approximate IP location if device positioning is slow/unavailable.
+          setStatus(t("weather.ipFallback"));
+          fetchWeather("auto:ip", "ip");
         },
-        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
+        { enableHighAccuracy: false, timeout: 35000, maximumAge: 300000 }
       );
     } catch (error) {
       console.error("[Weather] Location permission check failed:", error);
@@ -160,12 +162,15 @@ import { t } from "./i18n.js";
       // remains the source of truth and can still display the native prompt.
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => fetchWeather(`${coords.latitude},${coords.longitude}`, "location"),
-        (geoError) => showError(geoError.code === geoError.PERMISSION_DENIED
-          ? t("weather.locationDenied")
-          : geoError.code === geoError.TIMEOUT
-            ? t("weather.locationTimeout")
-            : t("weather.locationUnavailable")),
-        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
+        (geoError) => {
+          if (geoError.code === geoError.PERMISSION_DENIED) {
+            showError(t("weather.locationDenied"));
+            return;
+          }
+          setStatus(t("weather.ipFallback"));
+          fetchWeather("auto:ip", "ip");
+        },
+        { enableHighAccuracy: false, timeout: 35000, maximumAge: 300000 }
       );
     } finally {
       // Geolocation callbacks are asynchronous; fetchWeather applies its own
