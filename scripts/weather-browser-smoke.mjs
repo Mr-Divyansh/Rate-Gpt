@@ -88,6 +88,24 @@ try {
     assert.equal(weatherQueries.at(-1), "31,76", viewport.name + ": device GPS coordinates are sent to the weather lookup");
     assert.match(await page.locator("#weatherStatus").innerText(), /current location/i);
     pass(viewport.name + ": explicit device-location action loads weather from simulated browser coordinates");
+    assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), true, viewport.name + ": live tracking exposes a stop control");
+    await page.waitForTimeout(15000);
+    await context.setGeolocation({ latitude: 31.01, longitude: 76.01 });
+    await page.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Dharampur"), { timeout: 30000 });
+    await page.waitForFunction(() => window.__weatherTestQueries?.length >= 2, { timeout: 30000 }).catch(() => {});
+    assert.ok(weatherQueries.length >= 2, viewport.name + ": meaningful movement triggers a fresh weather lookup");
+    const movementRequestCount = weatherQueries.length;
+    await context.setGeolocation({ latitude: 31.0101, longitude: 76.0101 });
+    await page.waitForTimeout(1200);
+    assert.equal(weatherQueries.length, movementRequestCount, viewport.name + ": small movement does not cause unnecessary weather API requests");
+    await page.locator("#stopLocationTrackingBtn").click();
+    assert.equal(await page.locator("#useMyLocationBtn").isVisible(), true, viewport.name + ": stop restores the start control");
+    assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), false, viewport.name + ": stop hides its own control");
+    const stoppedRequestCount = weatherQueries.length;
+    await context.setGeolocation({ latitude: 31.03, longitude: 76.03 });
+    await page.waitForTimeout(1200);
+    assert.equal(weatherQueries.length, stoppedRequestCount, viewport.name + ": stopped tracking does not send more weather requests");
+    pass(viewport.name + ": movement refresh, request throttling and stop control work");
 
     await page.locator("#useApproxLocationBtn").click();
     await page.waitForFunction(() =>
