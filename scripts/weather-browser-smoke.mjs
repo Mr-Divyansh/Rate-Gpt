@@ -88,7 +88,9 @@ try {
       document.querySelector("#weatherResult")?.hidden === false,
     );
     assert.equal(weatherQueries.at(-1), "31,76", viewport.name + ": device GPS coordinates are sent to the weather lookup");
-    assert.match(await page.locator("#weatherStatus").innerText(), /current location/i);
+    assert.match(await page.locator("#weatherStatus").innerText(), /live location tracking/i);
+    assert.equal(await page.locator("#weatherLocationMeta").isVisible(), true, viewport.name + ": GPS accuracy and last-fix metadata are displayed");
+    assert.match(await page.locator("#weatherLocationMeta").innerText(), /accuracy/i);
     pass(viewport.name + ": explicit device-location action loads weather from simulated browser coordinates");
     assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), true, viewport.name + ": live tracking exposes a stop control");
     await page.waitForTimeout(15000);
