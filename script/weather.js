@@ -121,9 +121,9 @@ import { fetchFilters } from "./api.js";
     const controller = new AbortController();
     requestController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 12000);
-    if (searchButton) if (searchButton) searchButton.disabled = true;
+    if (searchButton) searchButton.disabled = true;
     approximateLocationButton.disabled = true;
-    if (searchButton) if (searchButton) searchButton.textContent = t("weather.loading");
+    if (searchButton) searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
 
@@ -184,9 +184,9 @@ import { fetchFilters } from "./api.js";
       window.clearTimeout(timeout);
       if (requestController === controller) {
         requestController = null;
-        if (searchButton) if (searchButton) searchButton.disabled = false;
+        if (searchButton) searchButton.disabled = false;
         approximateLocationButton.disabled = false;
-        if (searchButton) if (searchButton) searchButton.textContent = t("weather.fetch");
+        if (searchButton) searchButton.textContent = t("weather.fetch");
       }
     }
   }
