@@ -299,7 +299,7 @@
   position: relative;
   min-width: 0;
   min-height: clamp(280px, 29vw, 390px);
-  margin-right: calc((100vw - min(100vw, var(--content-width, 1120px))) / -2);
+  margin-right: calc((min(100vw - 48px, var(--wrap, 1180px)) - 100vw) / 2);
   overflow: hidden;
   clip-path: ellipse(100% 145% at 100% 50%);
 }
