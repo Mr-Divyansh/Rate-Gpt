@@ -392,9 +392,36 @@ function tableRow(record, ctx, showLocation) {
   return tr;
 }
 
+function cropArtwork(commodity) {
+  const value = String(commodity || "").toLowerCase();
+  const crops = [
+    [/bottle.?gourd|lauki/, "🥒"],
+    [/papaya/, "🍈"],
+    [/chilli|chili|pepper/, "🌶️"],
+    [/guava/, "🍐"],
+    [/bhindi|okra|ladies.?finger/, "🥬"],
+    [/tomato/, "🍅"],
+    [/potato|आलू/, "🥔"],
+    [/onion|प्याज/, "🧅"],
+    [/apple|सेब/, "🍎"],
+    [/mango|आम/, "🥭"],
+    [/cauliflower/, "🥦"],
+    [/cabbage/, "🥬"],
+    [/wheat|गेहूं/, "🌾"],
+    [/rice|paddy|धान/, "🌾"],
+  ];
+  return crops.find(([pattern]) => pattern.test(value))?.[1] || "🌱";
+}
+
 function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
+  const artwork = document.createElement("div");
+  artwork.className = "crop-art";
+  artwork.setAttribute("aria-hidden", "true");
+  const artworkIcon = document.createElement("span");
+  artworkIcon.textContent = cropArtwork(record.commodity);
+  artwork.append(artworkIcon);
   const top = document.createElement("div");
   top.className = "price-card-top";
   top.append(cropBlock(record, showLocation), modalBlock(record));
@@ -403,7 +430,7 @@ function cardFor(record, ctx, showLocation) {
   const date = document.createElement("span");
   date.textContent = formatDate(record.arrival_date);
   meta.append(date, createDelta(record.modal_price, ctx.previous(record)?.modal_price));
-  card.append(top, createRange(record, ctx.axis(record)), meta);
+  card.append(artwork, top, createRange(record, ctx.axis(record)), meta);
   return card;
 }
 
