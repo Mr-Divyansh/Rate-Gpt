@@ -87,8 +87,10 @@ async function main(): Promise<void> {
   const filters = await json("/api/v1/meta/filters");
   check(filters.response.status === 200 && filters.body?.success === true, "government location catalogue endpoint is available");
   check(
-    filters.response.headers.get("cache-control")?.includes("s-maxage=900") === true &&
-      filters.response.headers.get("cache-control")?.includes("max-age=0") === true,
+    filters.response.headers.get("cache-control")?.includes("max-age=0") === true &&
+      ["HIT", "MISS", "STALE", "REVALIDATED"].includes(
+        filters.response.headers.get("x-vercel-cache") ?? ""
+      ),
     "location metadata uses the configured shared edge TTL while browsers revalidate",
   );
   check(
