@@ -121,9 +121,9 @@ import { fetchFilters } from "./api.js";
     const controller = new AbortController();
     requestController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 12000);
-    if (searchButton) searchButton.disabled = true;
+    if (searchButton) if (searchButton) searchButton.disabled = true;
     approximateLocationButton.disabled = true;
-    if (searchButton) searchButton.textContent = t("weather.loading");
+    if (searchButton) if (searchButton) searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
 
@@ -184,9 +184,9 @@ import { fetchFilters } from "./api.js";
       window.clearTimeout(timeout);
       if (requestController === controller) {
         requestController = null;
-        if (searchButton) searchButton.disabled = false;
+        if (searchButton) if (searchButton) searchButton.disabled = false;
         approximateLocationButton.disabled = false;
-        if (searchButton) searchButton.textContent = t("weather.fetch");
+        if (searchButton) if (searchButton) searchButton.textContent = t("weather.fetch");
       }
     }
   }
@@ -414,6 +414,18 @@ import { fetchFilters } from "./api.js";
       if (villageInput) villageInput.value = "";
       pickerMessage(selected ? "District selected. Add a city or town to narrow the weather location." : "Choose a district or use state-level weather.");
       if (selected) fetchWeather(`${districtSelect.value}, ${stateSelect.value}, India`);
+      if (selected) fetchWeather(`${districtSelect.value}, ${stateSelect.value}, India`);
+    });
+    cityInput?.addEventListener("change", () => {
+      const cityName = cityInput.value.trim();
+      if (cityName) {
+        if (villageField) villageField.hidden = false;
+        fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
+      }
+    });
+    villageInput?.addEventListener("change", () => {
+      const villageName = villageInput.value.trim();
+      if (villageName) fetchWeather(`${villageName}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
     });
     cityInput?.addEventListener("input", () => {
       const selected = Boolean(cityInput.value.trim());
