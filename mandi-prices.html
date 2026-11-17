@@ -54,25 +54,33 @@
     <section class="finder-panel wrap" aria-labelledby="finderTitle" aria-describedby="finderDescription">
       <p class="sr-only" id="finderDescription">Choose a state, then a district, then a mandi. Location selectors use the official administrative directory; price availability is determined separately by live government observations.</p>
       <h2 class="sr-only" id="finderTitle" data-i18n="finder.title">Choose your mandi</h2>
-      <div class="recent" id="recentWrap" hidden>
-        <span class="recent-label" data-i18n="finder.recent">Recent</span>
-        <div class="chips" id="recentList"></div>
-      </div>
-      <div class="finder-selects">
-        <div class="field">
-          <label for="stateSelect" data-i18n="field.state">State</label>
-          <select id="stateSelect" name="state" disabled></select>
+      <div class="finder-main">
+        <div class="recent" id="recentWrap" hidden>
+          <span class="recent-label" data-i18n="finder.recent">Recent Markets</span>
+          <div class="chips" id="recentList"></div>
         </div>
-        <div class="field">
-          <label for="districtSelect" data-i18n="field.district">District</label>
-          <select id="districtSelect" name="district" disabled></select>
+        <div class="finder-selects">
+          <div class="field">
+            <label for="stateSelect" data-i18n="field.state">State</label>
+            <select id="stateSelect" name="state" disabled></select>
+          </div>
+          <div class="field">
+            <label for="districtSelect" data-i18n="field.district">District</label>
+            <select id="districtSelect" name="district" disabled></select>
+          </div>
+        </div>
+        <div class="mandi-block">
+          <p class="mandi-help" id="mandiHelp" aria-live="polite"></p>
+          <div class="chips" id="mandiGrid" role="group" aria-labelledby="mandiHelp"></div>
         </div>
       </div>
-      <div class="mandi-block">
-        <p class="mandi-help" id="mandiHelp" aria-live="polite"></p>
-        <div class="chips" id="mandiGrid" role="group" aria-labelledby="mandiHelp"></div>
-      </div>
-      <button class="btn india-browse" id="indiaBrowse" type="button" aria-pressed="false" data-i18n="finder.browseIndia">Browse government records across India</button>
+      <aside class="finder-side">
+        <button class="btn india-browse" id="indiaBrowse" type="button" aria-pressed="false" data-i18n="finder.browseIndia">
+          <span aria-hidden="true">▦</span>
+          Browse government records across India
+          <span aria-hidden="true">→</span>
+        </button>
+      </aside>
     </section>
 
     <!-- Step 2: read the prices -->
