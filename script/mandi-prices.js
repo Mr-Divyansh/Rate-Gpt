@@ -284,7 +284,7 @@ function updateControls() {
     state.allIndia ? "finder.browsingIndia" : "finder.browseIndia",
   );
   $("exportCsv").disabled = !(state.market || state.allIndia) || (state.loading && !state.exporting);
-  $(\"refreshPrices\").disabled = !state.market && !state.allIndia;
+  $("refreshPrices").disabled = !state.market && !state.allIndia;
   $("exportCsv").textContent = t(state.exporting ? "results.exportCancel" : "results.export");
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
