@@ -22,7 +22,7 @@ import { fetchFilters } from "./api.js";
   const updated = document.getElementById("weatherUpdated");
   const weatherIcon = document.getElementById("weatherIcon");
 
-  if (!form || !input || !searchButton || !locationButton || !stopTrackingButton ||
+  if (!form || !input || !locationButton || !stopTrackingButton ||
       !approximateLocationButton || !result || !errorBox || !status || !locationMeta) return;
 
   const MOVEMENT_THRESHOLD_METRES = 500;
@@ -121,9 +121,9 @@ import { fetchFilters } from "./api.js";
     const controller = new AbortController();
     requestController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 12000);
-    searchButton.disabled = true;
+    if (searchButton) searchButton.disabled = true;
     approximateLocationButton.disabled = true;
-    searchButton.textContent = t("weather.loading");
+    if (searchButton) searchButton.textContent = t("weather.loading");
     clearMessages();
     if (source === "location") setStatus(t("weather.locatingWeather"));
 
@@ -184,9 +184,9 @@ import { fetchFilters } from "./api.js";
       window.clearTimeout(timeout);
       if (requestController === controller) {
         requestController = null;
-        searchButton.disabled = false;
+        if (searchButton) searchButton.disabled = false;
         approximateLocationButton.disabled = false;
-        searchButton.textContent = t("weather.fetch");
+        if (searchButton) searchButton.textContent = t("weather.fetch");
       }
     }
   }
@@ -391,7 +391,7 @@ import { fetchFilters } from "./api.js";
       if (villageField) villageField.hidden = true;
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
-      if (!selectedState) { pickerMessage("Choose a state to see its approximate weather."); searchButton.disabled = true; return; }
+      if (!selectedState) { pickerMessage("Choose a state to see its approximate weather."); return; }
       pickerMessage("Loading districts…");
       try {
         const data = await fetchFilters({ state: selectedState });
@@ -404,7 +404,7 @@ import { fetchFilters } from "./api.js";
         fillLocationSelect(districtSelect, [], "Could not load districts");
         pickerMessage("Districts could not be loaded. State-level weather is still available.", true);
       }
-      searchButton.disabled = false;
+      fetchWeather(`${selectedState}, India`);
     });
     districtSelect.addEventListener("change", () => {
       const selected = Boolean(districtSelect.value);
@@ -413,11 +413,27 @@ import { fetchFilters } from "./api.js";
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
       pickerMessage(selected ? "District selected. Add a city or town to narrow the weather location." : "Choose a district or use state-level weather.");
+      if (selected) fetchWeather(`${districtSelect.value}, ${stateSelect.value}, India`);
     });
     cityInput?.addEventListener("input", () => {
       const selected = Boolean(cityInput.value.trim());
       if (villageField) villageField.hidden = !selected;
       if (villageInput && !selected) villageInput.value = "";
+      if (selected) cityInput?.addEventListener("change", () => {
+        const cityName = cityInput.value.trim();
+        if (cityName) fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
+      }, { once: true });
+    });
+    cityInput?.addEventListener("change", () => {
+      const cityName = cityInput.value.trim();
+      if (cityName) {
+        if (villageField) villageField.hidden = false;
+        fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
+      }
+    });
+    villageInput?.addEventListener("change", () => {
+      const villageName = villageInput.value.trim();
+      if (villageName) fetchWeather(`${villageName}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
     });
     loadWeatherStates();
   }
