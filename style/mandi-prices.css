@@ -259,167 +259,81 @@
 @media (max-width: 680px) { .page-prices .date-field input[type="date"] { min-height: 50px; } }
 
 
-/* ---------- Mandi hero refresh: photographic, clear and responsive ---------- */
-.page-prices .mandi-hero {
-  position: relative;
-  isolation: isolate;
+/* Plain Mandi intro: keep the original unboxed heading and place the photo on the right. */
+.page-prices .mandi-intro {
   display: grid;
-  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
-  min-height: clamp(270px, 27vw, 370px);
-  margin-top: clamp(18px, 2.5vw, 30px);
+  gap: clamp(24px, 4vw, 54px);
+  min-height: clamp(280px, 29vw, 390px);
+  padding-block: clamp(28px, 4vw, 48px);
   overflow: hidden;
-  border: 1px solid #e2eadf;
-  border-radius: 22px;
-  background:
-    radial-gradient(ellipse at 8% 100%, rgba(210, 235, 191, .62), transparent 45%),
-    linear-gradient(115deg, #f8fbf1 0%, #f3f8e9 54%, #e8f1dd 100%);
-  box-shadow: 0 14px 38px rgba(26, 65, 41, .08);
 }
-.page-prices .mandi-hero-copy {
-  position: relative;
-  z-index: 2;
+.page-prices .mandi-intro .page-head-copy {
+  align-self: center;
+  justify-self: start;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
   gap: 14px;
-  padding: clamp(26px, 4.5vw, 58px);
+  max-width: 62ch;
+  padding: 0;
 }
-.page-prices .mandi-hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 14px;
-  border: 1px solid rgba(31, 111, 67, .12);
-  border-radius: 999px;
-  background: #e4f2dc;
-  color: #17613d;
-  font-size: .9rem;
-  font-weight: 800;
-  letter-spacing: .01em;
+.page-prices .mandi-intro h1 {
+  max-width: 18ch;
+  color: var(--ink, #173c2c);
+  font-size: clamp(2.1rem, 4.3vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -.035em;
 }
-.page-prices .mandi-hero h1 {
-  max-width: 13ch;
-  color: #102f22;
-  font-size: clamp(2.25rem, 4.6vw, 4.15rem);
-  font-weight: 850;
-  line-height: .99;
-  letter-spacing: -.045em;
+.page-prices .mandi-intro .lede {
+  max-width: 56ch;
+  color: var(--muted, #58665e);
+  line-height: 1.55;
 }
-.page-prices .mandi-hero .lede {
-  max-width: 52ch;
-  color: #3e5146;
-  font-size: clamp(1rem, 1.35vw, 1.16rem);
-  line-height: 1.5;
-}
-.page-prices .mandi-hero-accent {
-  display: block;
-  width: 104px;
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #176b49 0 70%, #efb82d 70% 100%);
-}
-.page-prices .mandi-hero .sync {
+.page-prices .mandi-intro .sync {
   margin: 2px 0 0;
-  padding: 7px 11px;
-  border-color: rgba(31, 91, 57, .12);
-  background: rgba(255,255,255,.78);
-  color: #526359;
-  font-size: .78rem;
+  font-size: .84rem;
 }
-.page-prices .mandi-hero-visual {
+.page-prices .mandi-intro-visual {
   position: relative;
   min-width: 0;
-  min-height: 100%;
+  min-height: clamp(280px, 29vw, 390px);
+  margin-right: calc((100vw - min(100vw, var(--content-width, 1120px))) / -2);
   overflow: hidden;
   clip-path: ellipse(100% 145% at 100% 50%);
 }
-.page-prices .mandi-hero-visual::before {
-  position: absolute;
-  z-index: 1;
-  inset: 0 auto 0 0;
-  width: 18%;
-  content: "";
-  background: linear-gradient(90deg, rgba(243,248,233,.72), transparent);
-  pointer-events: none;
-}
-.page-prices .mandi-hero-visual img {
+.page-prices .mandi-intro-visual img {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: clamp(270px, 27vw, 370px);
+  min-height: inherit;
   object-fit: cover;
   object-position: 54% 50%;
 }
-.page-prices .finder-panel {
-  margin-top: clamp(18px, 2.5vw, 28px);
-  padding: clamp(18px, 2.5vw, 28px);
-  gap: 18px;
-  border-radius: 18px;
-  box-shadow: 0 10px 28px rgba(26, 65, 41, .065);
-}
-.page-prices .recent {
-  padding-bottom: 14px;
-  border-bottom-color: #e9eee7;
-}
-.page-prices .recent-label {
-  color: #173c2c;
-  font-weight: 800;
-}
-.page-prices .finder-selects .field > label {
-  color: #234d37;
-  font-weight: 750;
-}
-.page-prices .finder-selects select {
-  min-height: 48px;
-  border-radius: 11px;
-}
-.page-prices .india-browse {
-  justify-self: start;
-  margin-top: 0;
-  border-radius: 11px;
-}
-.page-prices .mandi-block {
-  padding-top: 2px;
-}
 @media (max-width: 760px) {
-  .page-prices .mandi-hero {
-    grid-template-columns: 1fr;
+  .page-prices .mandi-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
     min-height: 0;
+    padding-block: 26px 18px;
   }
-  .page-prices .mandi-hero-copy {
-    gap: 11px;
-    padding: 25px 22px 20px;
+  .page-prices .mandi-intro .page-head-copy { gap: 10px; }
+  .page-prices .mandi-intro h1 { max-width: 20ch; font-size: clamp(2rem, 8vw, 2.8rem); }
+  .page-prices .mandi-intro-visual {
+    min-height: 220px;
+    max-height: 290px;
+    margin-right: 0;
+    border-radius: 0 0 0 34%;
+    clip-path: ellipse(115% 100% at 100% 50%);
   }
-  .page-prices .mandi-hero h1 {
-    max-width: 15ch;
-    font-size: clamp(2.15rem, 9vw, 3.1rem);
+  .page-prices .mandi-intro-visual img {
+    min-height: 220px;
+    max-height: 290px;
+    object-position: 50% 42%;
   }
-  .page-prices .mandi-hero-visual {
-    min-height: 210px;
-    max-height: 270px;
-    clip-path: none;
-    border-top: 4px solid #d7e8bd;
-  }
-  .page-prices .mandi-hero-visual::before {
-    inset: 0 0 auto;
-    width: auto;
-    height: 24%;
-    background: linear-gradient(180deg, rgba(243,248,233,.28), transparent);
-  }
-  .page-prices .mandi-hero-visual img {
-    min-height: 210px;
-    max-height: 270px;
-    object-position: 50% 43%;
-  }
-  .page-prices .finder-panel { margin-top: 16px; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .page-prices .mandi-hero-visual img {
-    transition: transform .7s cubic-bezier(.2,.7,.2,1);
-  }
-  .page-prices .mandi-hero:hover .mandi-hero-visual img {
-    transform: scale(1.025);
-  }
+  .page-prices .mandi-intro-visual img { transition: transform .65s cubic-bezier(.2,.7,.2,1); }
+  .page-prices .mandi-intro-visual:hover img { transform: scale(1.02); }
 }
