@@ -387,18 +387,21 @@ import { fetchFilters } from "./api.js";
       fillLocationSelect(districtSelect, [], "Loading districts…");
       districtSelect.disabled = true;
       districtField.hidden = !selectedState;
-      if (cityField) cityField.hidden = !selectedState;
+      if (cityField) cityField.hidden = true;
       if (villageField) villageField.hidden = true;
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
-      if (!selectedState) { pickerMessage("Choose a state to see its approximate weather."); return; }
+      if (!selectedState) {
+        pickerMessage("Choose a state to see its approximate weather.");
+        return;
+      }
       pickerMessage("Loading districts…");
       try {
         const data = await fetchFilters({ state: selectedState });
         const districts = [...new Set(data.districts)].sort((a, b) => a.localeCompare(b));
         fillLocationSelect(districtSelect, districts, districts.length ? "Select district" : "No districts available");
         districtSelect.disabled = districts.length === 0;
-        pickerMessage("State selected. Choose a district or get state-level weather.");
+        pickerMessage("State selected. Weather is updating; choose a district to narrow it down.");
       } catch (error) {
         console.error("[Weather] District list failed:", error);
         fillLocationSelect(districtSelect, [], "Could not load districts");
@@ -406,46 +409,30 @@ import { fetchFilters } from "./api.js";
       }
       fetchWeather(`${selectedState}, India`);
     });
+
     districtSelect.addEventListener("change", () => {
-      const selected = Boolean(districtSelect.value);
-      if (cityField) cityField.hidden = !selected;
+      const selectedDistrict = districtSelect.value;
+      if (cityField) cityField.hidden = !selectedDistrict;
       if (villageField) villageField.hidden = true;
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
-      pickerMessage(selected ? "District selected. Add a city or town to narrow the weather location." : "Choose a district or use state-level weather.");
-      if (selected) fetchWeather(`${districtSelect.value}, ${stateSelect.value}, India`);
-      if (selected) fetchWeather(`${districtSelect.value}, ${stateSelect.value}, India`);
+      if (!selectedDistrict) return;
+      pickerMessage("District selected. Weather is updating; enter a city or town for more detail.");
+      fetchWeather(`${selectedDistrict}, ${stateSelect.value}, India`);
     });
-    cityInput?.addEventListener("change", () => {
-      const cityName = cityInput.value.trim();
-      if (cityName) {
-        if (villageField) villageField.hidden = false;
-        fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
-      }
-    });
-    villageInput?.addEventListener("change", () => {
-      const villageName = villageInput.value.trim();
-      if (villageName) fetchWeather(`${villageName}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
-    });
+
     cityInput?.addEventListener("input", () => {
-      const selected = Boolean(cityInput.value.trim());
-      if (villageField) villageField.hidden = !selected;
-      if (villageInput && !selected) villageInput.value = "";
-      if (selected) cityInput?.addEventListener("change", () => {
-        const cityName = cityInput.value.trim();
-        if (cityName) fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
-      }, { once: true });
+      const hasCity = Boolean(cityInput.value.trim());
+      if (villageField) villageField.hidden = !hasCity;
+      if (villageInput && !hasCity) villageInput.value = "";
     });
     cityInput?.addEventListener("change", () => {
       const cityName = cityInput.value.trim();
-      if (cityName) {
-        if (villageField) villageField.hidden = false;
-        fetchWeather(`${cityName}, ${districtSelect.value}, ${stateSelect.value}, India`);
-      }
+      if (cityName) fetchWeather(`${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
     });
     villageInput?.addEventListener("change", () => {
       const villageName = villageInput.value.trim();
-      if (villageName) fetchWeather(`${villageName}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
+      if (villageName) fetchWeather(`${villageInput.value.trim()}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
     });
     loadWeatherStates();
   }
