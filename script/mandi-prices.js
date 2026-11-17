@@ -406,11 +406,11 @@ const COMMODITY_IMAGE_ALIASES = {
 
 const normalizeCommodityKey = (value) => String(value || "")
   .normalize("NFKD")
-  .replace(/[\\u0300-\\u036f]/g, "")
+  .replace(/[\u0300-\u036f]/g, "")
   .toLocaleLowerCase("en-IN")
-  .replace(/[()\\[\\]{}.,/_-]+/g, " ")
-  .replace(/[^\\p{L}\\p{N} ]/gu, "")
-  .replace(/\\s+/g, " ")
+  .replace(/[\(\)\[\]\{\}.,/_-]+/g, " ")
+  .replace(/[^\p{L}\p{N} ]/gu, "")
+  .replace(/\s+/g, " ")
   .trim();
 
 const commodityImageIndex = new Map();
