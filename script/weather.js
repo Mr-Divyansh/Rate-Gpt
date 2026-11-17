@@ -26,12 +26,17 @@ import { t } from "./i18n.js";
 
   const MOVEMENT_THRESHOLD_METRES = 500;
   const MIN_WEATHER_REFRESH_INTERVAL_MS = 15000;
-  const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 };
+  const HIGH_ACCURACY_OPTIONS = { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 };
+  // Wi-Fi/cell-assisted browser location can work on Windows laptops that have
+  // no GPS receiver. This is still browser geolocation, never an IP-city guess.
+  const BALANCED_ACCURACY_OPTIONS = { enableHighAccuracy: false, timeout: 25000, maximumAge: 60000 };
 
   let requestController = null;
   let watchId = null;
   let tracking = false;
   let permissionState = "unknown";
+  let locationMode = "high";
+  let balancedFallbackAttempted = false;
   let latestPosition = null;
   let lastWeatherPosition = null;
   let lastWeatherRefreshAt = 0;
@@ -261,9 +266,28 @@ import { t } from "./i18n.js";
       return;
     }
 
-    // Do not silently replace a failed device GPS fix with an IP estimate:
-    // it can show a different city as if it were the user's live location.
-    // Approximate IP weather remains available only through the explicit button.
+    // First retry through the browser's network-assisted provider. Many Windows
+    // laptops have no GPS chip, but Windows can still estimate location via Wi-Fi.
+    // This does not use IP geolocation and therefore won't silently show a remote city.
+    if ((error.code === 2 || error.code === 3) && locationMode === "high" && !balancedFallbackAttempted) {
+      balancedFallbackAttempted = true;
+      locationMode = "balanced";
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      setStatus("High-accuracy GPS did not respond. Trying Windows/Wi-Fi-assisted location…");
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          handlePosition,
+          handleLocationError,
+          BALANCED_ACCURACY_OPTIONS
+        );
+        return;
+      } catch (fallbackError) {
+        console.warn("[Weather] Balanced geolocation could not start:", fallbackError);
+      }
+    }
+
+    // Never substitute an IP estimate for the user's live location.
     const message = error.code === 3 ? t("weather.locationTimeout") : t("weather.locationUnavailable");
     showError(`${message} ${detail}`);
   }
@@ -283,6 +307,8 @@ import { t } from "./i18n.js";
     lastWeatherPosition = null;
     latestPosition = null;
     lastWeatherRefreshAt = 0;
+    locationMode = "high";
+    balancedFallbackAttempted = false;
     locationMeta.textContent = "";
     locationMeta.hidden = true;
     setTrackingUi(true);
@@ -303,7 +329,7 @@ import { t } from "./i18n.js";
       watchId = navigator.geolocation.watchPosition(
         handlePosition,
         handleLocationError,
-        GEOLOCATION_OPTIONS
+        HIGH_ACCURACY_OPTIONS
       );
     } catch (error) {
       stopTracking({ announce: false });
