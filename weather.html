@@ -38,22 +38,32 @@
         <p data-i18n="weather.subtitle">Get current conditions for your location or search any city.</p>
       </div>
 
-      <section class="weather-search-card" aria-label="Find weather">
-        <div class="weather-location-action">
-          <div class="weather-location-copy">
-            <span class="weather-location-icon" aria-hidden="true">⌖</span>
-            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
-          </div>
-          <div class="weather-location-buttons"><button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Start live location</span></button><button class="btn btn-secondary" id="stopLocationTrackingBtn" type="button" data-i18n="weather.stopTracking" hidden>Stop tracking</button><button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button></div>
+      <section class="weather-search-card" aria-label="Choose your weather location">
+        <div class="weather-picker-heading">
+          <span class="weather-location-icon" aria-hidden="true">⌖</span>
+          <div><strong>Choose your location</strong><small>Select a larger area first, then narrow it down to your village.</small></div>
         </div>
-        <div class="weather-or"><span data-i18n="weather.orSearch">OR SEARCH A PLACE</span></div>
-        <form class="weather-input-wrapper" id="weatherSearchForm">
-          <label class="sr-only" for="locationInput" data-i18n="weather.placeholder">City, district or PIN code</label>
-          <input type="search" id="locationInput" placeholder="Search city, district or PIN code" autocomplete="off" data-i18n-attr="placeholder:weather.placeholder">
-          <button class="btn btn-primary" id="getWeatherBtn" type="submit" data-i18n="weather.fetch">Search weather</button>
+        <form id="weatherSearchForm" class="weather-picker-form">
+          <div class="weather-picker-field">
+            <label for="stateSelect">1. State</label>
+            <select id="stateSelect" required><option value="">Loading states…</option></select>
+          </div>
+          <div class="weather-picker-field" id="districtField" hidden>
+            <label for="districtSelect">2. District</label>
+            <select id="districtSelect" disabled><option value="">Select district</option></select>
+          </div>
+          <div class="weather-picker-field" id="cityField" hidden>
+            <label for="cityInput">3. City / Town</label>
+            <input id="cityInput" type="text" autocomplete="address-level2" placeholder="Enter city or town">
+          </div>
+          <div class="weather-picker-field" id="villageField" hidden>
+            <label for="villageInput">4. Village (optional)</label>
+            <input id="villageInput" type="text" autocomplete="address-level3" placeholder="Enter village name, e.g. Deol Khas">
+          </div>
+          <p class="weather-picker-hint" id="weatherScopeHint" aria-live="polite">Choose a state to see its overall weather.</p>
+          <button class="btn btn-primary weather-picker-submit" id="getWeatherBtn" type="submit" disabled>Get weather</button>
         </form>
-        <p class="weather-privacy" data-i18n="weather.privacy">Your location is used only to find nearby weather. It is not saved.</p>
-        <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p><p class="weather-location-meta" id="weatherLocationMeta" aria-live="polite" hidden></p>
+        <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
       </section>
 

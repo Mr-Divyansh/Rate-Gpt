@@ -60,3 +60,19 @@
 .weather-location-meta { margin-top:8px; color:var(--muted); font-size:.82rem; line-height:1.5; }
 .weather-location-buttons button[hidden], .weather-location-meta[hidden] { display:none; }
 .weather-location-buttons .btn:disabled { opacity:.65; cursor:wait; }
+
+/* Progressive state → district → city → village weather selector. */
+.weather-picker-heading { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.weather-picker-heading > div { display:grid; gap:4px; }
+.weather-picker-heading strong { color:var(--ink); font-size:1.05rem; }
+.weather-picker-heading small,.weather-picker-hint { color:var(--muted); font-size:.9rem; line-height:1.5; }
+.weather-picker-form { display:grid; gap:14px; }
+.weather-picker-field { display:grid; gap:7px; }
+.weather-picker-field[hidden] { display:none; }
+.weather-picker-field label { color:var(--ink); font-size:.9rem; font-weight:700; }
+.weather-picker-field select,.weather-picker-field input { width:100%; min-height:48px; padding:0 13px; border:1.5px solid var(--control); border-radius:10px; background:#fff; color:var(--ink); font:inherit; }
+.weather-picker-field select:disabled { opacity:.65; }
+.weather-picker-hint { margin:0; }
+.weather-picker-submit { min-height:50px; width:100%; }
+.weather-picker-submit:disabled { opacity:.55; cursor:not-allowed; }
+@media(min-width:720px) { .weather-picker-form { grid-template-columns:repeat(2,minmax(0,1fr)); } .weather-picker-hint,.weather-picker-submit { grid-column:1/-1; } }
