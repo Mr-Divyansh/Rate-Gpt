@@ -16,6 +16,24 @@ function pass(label) {
   console.log("PASS " + label);
 }
 
+// Wait (from Node) until the intercepted weather API was last called with the
+// given query. page.waitForFunction runs in the browser page context, where the
+// Node-side weatherQueries array is not defined, so we poll it from here instead.
+async function waitForLastWeatherQuery(expected, { timeout = 30000 } = {}) {
+  const deadline = Date.now() + timeout;
+  let last = null;
+  while (Date.now() < deadline) {
+    last = weatherQueries.at(-1);
+    if (last === expected) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(
+    `expected last weather query ${JSON.stringify(
+      expected
+    )} but got ${JSON.stringify(last)}`
+  );
+}
+
 try {
   for (const viewport of viewports) {
     const context = await browser.newContext({
@@ -169,23 +187,23 @@ try {
     await page.waitForFunction(() => document.querySelector("#stateSelect")?.options.length === 3);
     assert.equal(await page.locator("#weatherSearchForm button[type='submit']").count(), 0, viewport.name + ": progressive picker has no manual submit button");
     await stateSelect.selectOption("Himachal Pradesh");
-    await page.waitForFunction(() => weatherQueries.at(-1) === "Himachal Pradesh, India");
+    await waitForLastWeatherQuery("Himachal Pradesh, India");
     await page.waitForFunction(() => document.querySelector("#districtSelect")?.options.length === 3);
     assert.equal(weatherQueries.at(-1), "Himachal Pradesh, India", viewport.name + ": selecting a state automatically refreshes weather");
     await page.locator("#districtSelect").selectOption("Mandi");
-    await page.waitForFunction(() => weatherQueries.at(-1) === "Mandi, Himachal Pradesh, India");
+    await waitForLastWeatherQuery("Mandi, Himachal Pradesh, India");
     assert.equal(weatherQueries.at(-1), "Mandi, Himachal Pradesh, India", viewport.name + ": selecting a district automatically refreshes weather");
     await page.locator("#cityInput").fill("Sundernagar");
     await page.locator("#cityInput").press("Tab");
-    await page.waitForFunction(() => weatherQueries.at(-1) === "Sundernagar, Mandi, Himachal Pradesh, India");
+    await waitForLastWeatherQuery("Sundernagar, Mandi, Himachal Pradesh, India");
     await page.locator("#villageInput").fill("Deval Khas");
     await page.locator("#villageInput").press("Tab");
-    await page.waitForFunction(() => weatherQueries.at(-1) === "Deval Khas, Sundernagar, Mandi, Himachal Pradesh, India");
+    await waitForLastWeatherQuery("Deval Khas, Sundernagar, Mandi, Himachal Pradesh, India");
     pass(viewport.name + ": state, district, city and village selections automatically refresh weather without a submit button");
 
     await page.locator("#locationInput").fill("Mandi");
     await page.locator("#locationInput").press("Enter");
-    await page.waitForFunction(() => weatherQueries.at(-1) === "Mandi");
+    await waitForLastWeatherQuery("Mandi");
     assert.equal(weatherQueries.at(-1), "Mandi", viewport.name + ": manual city search sends the entered place");
     pass(viewport.name + ": manual weather search works with Enter");
 
