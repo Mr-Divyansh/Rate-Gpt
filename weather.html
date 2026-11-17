@@ -39,6 +39,19 @@
       </div>
 
       <section class="weather-search-card" aria-label="Choose your weather location">
+        <div class="weather-location-action">
+          <div class="weather-location-copy">
+            <span class="weather-location-icon" aria-hidden="true">⌖</span>
+            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
+          </div>
+          <div class="weather-location-buttons">
+            <input type="search" id="locationInput" placeholder="Search city, district or PIN code" autocomplete="off">
+            <button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Start live location</span></button>
+            <button class="btn btn-secondary" id="stopLocationTrackingBtn" type="button" data-i18n="weather.stopTracking" hidden>Stop tracking</button>
+            <button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button>
+            <p id="weatherLocationMeta" aria-live="polite" hidden></p>
+          </div>
+        </div>
         <div class="weather-picker-heading">
           <span class="weather-location-icon" aria-hidden="true">⌖</span>
           <div><strong>Choose your location</strong><small>Select a larger area first, then narrow it down to your village.</small></div>
