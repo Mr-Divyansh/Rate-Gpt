@@ -56,6 +56,24 @@ try {
     const weatherQueries = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
 
+    await page.route("**/api/v1/meta/filters**", async (route) => {
+      const url = new URL(route.request().url());
+      const state = url.searchParams.get("state");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            states: ["Himachal Pradesh", "Uttar Pradesh"],
+            districts: state === "Himachal Pradesh" ? ["Mandi", "Kangra"] : ["Aligarh", "Agra"],
+            markets: [],
+            coverage: { status: "catalogue", pagesScanned: 1, recordsScanned: 0, maxOffset: 0, total: 0 },
+          },
+        }),
+      });
+    });
+
     await page.route(
       /^https:\/\/api\.weatherapi\.com\/v1\/current\.json/,
       async (route) => {
@@ -145,11 +163,29 @@ try {
     assert.match(await page.locator("#weatherCity").innerText(), /Approximate City/);
     pass(viewport.name + ": approximate location works only after the user clicks its separate action");
 
+    const stateSelect = page.locator("#stateSelect");
+    await page.waitForFunction(() => document.querySelector("#stateSelect")?.options.length === 3);
+    assert.equal(await page.locator("#weatherSearchForm button[type='submit']").count(), 0, viewport.name + ": progressive picker has no manual submit button");
+    await stateSelect.selectOption("Himachal Pradesh");
+    await page.waitForFunction(() => weatherQueries.at(-1) === "Himachal Pradesh, India");
+    await page.waitForFunction(() => document.querySelector("#districtSelect")?.options.length === 3);
+    assert.equal(weatherQueries.at(-1), "Himachal Pradesh, India", viewport.name + ": selecting a state automatically refreshes weather");
+    await page.locator("#districtSelect").selectOption("Mandi");
+    await page.waitForFunction(() => weatherQueries.at(-1) === "Mandi, Himachal Pradesh, India");
+    assert.equal(weatherQueries.at(-1), "Mandi, Himachal Pradesh, India", viewport.name + ": selecting a district automatically refreshes weather");
+    await page.locator("#cityInput").fill("Sundernagar");
+    await page.locator("#cityInput").press("Tab");
+    await page.waitForFunction(() => weatherQueries.at(-1) === "Sundernagar, Mandi, Himachal Pradesh, India");
+    await page.locator("#villageInput").fill("Deval Khas");
+    await page.locator("#villageInput").press("Tab");
+    await page.waitForFunction(() => weatherQueries.at(-1) === "Deval Khas, Sundernagar, Mandi, Himachal Pradesh, India");
+    pass(viewport.name + ": state, district, city and village selections automatically refresh weather without a submit button");
+
     await page.locator("#locationInput").fill("Mandi");
-    await page.locator("#weatherSearchForm").locator('button[type="submit"]').click();
-    await page.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Mandi"));
+    await page.locator("#locationInput").press("Enter");
+    await page.waitForFunction(() => weatherQueries.at(-1) === "Mandi");
     assert.equal(weatherQueries.at(-1), "Mandi", viewport.name + ": manual city search sends the entered place");
-    pass(viewport.name + ": manual weather search works");
+    pass(viewport.name + ": manual weather search works with Enter");
 
     const dimensions = await page.evaluate(() => ({
       viewportWidth: document.documentElement.clientWidth,
