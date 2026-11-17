@@ -128,10 +128,8 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
   color: var(--ink); font-weight: 600; text-decoration: none; border-radius: var(--r-s);
 }
 .site-nav a:hover { background: var(--soft); }
-.site-nav a[aria-current="page"] { color: var(--forest); font-weight: 700; }
-.site-nav a[aria-current="page"]::after {
-  content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px; height: 3px; border-radius: 2px; background: var(--gold);
-}
+.site-nav a[aria-current="page"] { color: var(--forest); font-weight: 700; background: var(--soft); }
+.site-nav a[aria-current="page"]::after { content: none; }
 
 .lang-toggle { display: inline-flex; padding: 3px; border: 1.5px solid var(--control); border-radius: 999px; background: var(--surface); }
 .lang-toggle button {
@@ -144,7 +142,7 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
   .header-inner { grid-template-columns: 1fr auto; padding-block: 8px 0; gap: 4px 12px; }
   .site-nav { grid-column: 1 / -1; order: 3; gap: 0; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
   .site-nav a { flex: 1; justify-content: center; padding: 0 6px; font-size: 1rem; }
-  .site-nav a[aria-current="page"]::after { left: 12%; right: 12%; bottom: 0; }
+
   .brand-text small { display: none; }
 }
 
@@ -223,7 +221,7 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
     flex:0 0 auto; width:100%; min-height:48px; justify-content:flex-start;
     padding:10px 14px; font-size:1rem; line-height:1.25;
   }
-  .site-nav a[aria-current="page"]::after { left:14px; right:auto; bottom:4px; width:26px; }
+
   .nav-backdrop { display:block; position:fixed; z-index:70; inset:0; border:0; background:rgba(12,30,21,.42); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease,visibility .25s ease; }
   .nav-backdrop.is-visible { opacity:1; visibility:visible; pointer-events:auto; }
   body:has(.site-header.menu-open) { overflow:hidden; }
