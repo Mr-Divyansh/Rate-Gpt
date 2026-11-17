@@ -1,4 +1,5 @@
 import { t } from "./i18n.js";
+import { fetchFilters } from "./api.js";
 
 (() => {
   if ((window.location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
@@ -339,10 +340,94 @@ import { t } from "./i18n.js";
     }
   }
 
+  const stateSelect = document.getElementById("stateSelect");
+  const districtSelect = document.getElementById("districtSelect");
+  const districtField = document.getElementById("districtField");
+  const cityInput = document.getElementById("cityInput");
+  const cityField = document.getElementById("cityField");
+  const villageInput = document.getElementById("villageInput");
+  const villageField = document.getElementById("villageField");
+  const scopeHint = document.getElementById("weatherScopeHint");
+  function fillLocationSelect(select, values, placeholder) {
+    select.replaceChildren(new Option(placeholder, ""));
+    values.forEach((value) => select.add(new Option(value, value)));
+  }
+  function pickerMessage(message, isError = false) {
+    if (!scopeHint) return;
+    scopeHint.textContent = message;
+    scopeHint.dataset.state = isError ? "error" : "info";
+  }
+  async function loadWeatherStates() {
+    if (!stateSelect) return;
+    stateSelect.disabled = true;
+    fillLocationSelect(stateSelect, [], "Loading states…");
+    pickerMessage("Loading available states…");
+    try {
+      const data = await fetchFilters();
+      const states = [...new Set(data.states)].sort((a, b) => a.localeCompare(b));
+      if (!states.length) throw new Error("No states returned");
+      fillLocationSelect(stateSelect, states, "Select state");
+      stateSelect.disabled = false;
+      pickerMessage("Choose a state to see its approximate weather.");
+    } catch (error) {
+      console.error("[Weather] State list failed:", error);
+      fillLocationSelect(stateSelect, [], "Could not load states");
+      stateSelect.disabled = true;
+      pickerMessage("States could not be loaded. Check your connection and retry.", true);
+      const retry = document.createElement("button");
+      retry.type = "button"; retry.className = "btn btn-secondary";
+      retry.textContent = "Retry loading states";
+      retry.addEventListener("click", loadWeatherStates);
+      scopeHint.append(" ", retry);
+    }
+  }
+  if (stateSelect && districtSelect && districtField) {
+    stateSelect.addEventListener("change", async () => {
+      const selectedState = stateSelect.value;
+      fillLocationSelect(districtSelect, [], "Loading districts…");
+      districtSelect.disabled = true;
+      districtField.hidden = !selectedState;
+      if (cityField) cityField.hidden = !selectedState;
+      if (villageField) villageField.hidden = true;
+      if (cityInput) cityInput.value = "";
+      if (villageInput) villageInput.value = "";
+      if (!selectedState) { pickerMessage("Choose a state to see its approximate weather."); searchButton.disabled = true; return; }
+      pickerMessage("Loading districts…");
+      try {
+        const data = await fetchFilters({ state: selectedState });
+        const districts = [...new Set(data.districts)].sort((a, b) => a.localeCompare(b));
+        fillLocationSelect(districtSelect, districts, districts.length ? "Select district" : "No districts available");
+        districtSelect.disabled = districts.length === 0;
+        pickerMessage("State selected. Choose a district or get state-level weather.");
+      } catch (error) {
+        console.error("[Weather] District list failed:", error);
+        fillLocationSelect(districtSelect, [], "Could not load districts");
+        pickerMessage("Districts could not be loaded. State-level weather is still available.", true);
+      }
+      searchButton.disabled = false;
+    });
+    districtSelect.addEventListener("change", () => {
+      const selected = Boolean(districtSelect.value);
+      if (cityField) cityField.hidden = !selected;
+      if (villageField) villageField.hidden = true;
+      if (cityInput) cityInput.value = "";
+      if (villageInput) villageInput.value = "";
+      pickerMessage(selected ? "District selected. Add a city or town to narrow the weather location." : "Choose a district or use state-level weather.");
+    });
+    cityInput?.addEventListener("input", () => {
+      const selected = Boolean(cityInput.value.trim());
+      if (villageField) villageField.hidden = !selected;
+      if (villageInput && !selected) villageInput.value = "";
+    });
+    loadWeatherStates();
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     stopTracking({ announce: false });
-    fetchWeather(input.value.trim());
+    const freeText = input.value.trim();
+    const place = [villageInput?.value.trim(), cityInput?.value.trim(), districtSelect?.value, stateSelect?.value, "India"].filter(Boolean).join(", ");
+    fetchWeather(freeText || place);
   });
   locationButton.addEventListener("click", startTracking);
   stopTrackingButton.addEventListener("click", () => stopTracking());
