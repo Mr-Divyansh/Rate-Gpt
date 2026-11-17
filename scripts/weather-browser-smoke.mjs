@@ -83,9 +83,11 @@ try {
           ? "Approximate City"
           : query.includes("31.01")
             ? "Moved Location"
-            : query.includes(",")
+            : /^\\d/.test(query)
               ? "Dharampur"
-              : query;
+              : query.includes(",")
+                ? query.split(",")[0].trim()
+                : query;
         await route.fulfill({
           status: 200,
           contentType: "application/json",
