@@ -26,7 +26,7 @@ import { t } from "./i18n.js";
 
   const MOVEMENT_THRESHOLD_METRES = 500;
   const MIN_WEATHER_REFRESH_INTERVAL_MS = 15000;
-  const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 };
+  const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 };
 
   let requestController = null;
   let watchId = null;
@@ -36,7 +36,6 @@ import { t } from "./i18n.js";
   let lastWeatherPosition = null;
   let lastWeatherRefreshAt = 0;
   let pendingRefreshTimer = null;
-  let approximateFallbackAttempted = false;
 
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
   const showError = (message) => {
@@ -262,17 +261,9 @@ import { t } from "./i18n.js";
       return;
     }
 
-    // Some desktops (including Windows PCs without a GPS receiver) cannot
-    // provide a device position. Fall back to WeatherAPI's IP-based estimate
-    // once, rather than leaving the user with a GPS error and no weather.
-    if ((error.code === 2 || error.code === 3) && !approximateFallbackAttempted) {
-      approximateFallbackAttempted = true;
-      stopTracking({ announce: false });
-      setStatus(t("weather.approxLocationSuccess"));
-      fetchWeather("auto:ip", "approximate");
-      return;
-    }
-
+    // Do not silently replace a failed device GPS fix with an IP estimate:
+    // it can show a different city as if it were the user's live location.
+    // Approximate IP weather remains available only through the explicit button.
     const message = error.code === 3 ? t("weather.locationTimeout") : t("weather.locationUnavailable");
     showError(`${message} ${detail}`);
   }
@@ -292,7 +283,6 @@ import { t } from "./i18n.js";
     lastWeatherPosition = null;
     latestPosition = null;
     lastWeatherRefreshAt = 0;
-    approximateFallbackAttempted = false;
     locationMeta.textContent = "";
     locationMeta.hidden = true;
     setTrackingUi(true);

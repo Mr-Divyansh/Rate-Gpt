@@ -14,7 +14,7 @@ import {
   createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
 } from "./csv-export.js";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 10;
 const $ = (id) => document.getElementById(id);
 
 function indiaTodayIsoDate() {
@@ -593,7 +593,7 @@ function renderError() {
 
 function priceQueryParams() {
   const params = {
-    limit: "100",
+    limit: String(PAGE_SIZE),
     offset: "0",
     sort: state.sort,
   };
