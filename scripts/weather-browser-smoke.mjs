@@ -231,7 +231,7 @@ try {
       });
       const fallbackPage = await fallbackContext.newPage();
       const fallbackQueries = [];
-      await fallbackPage.route(/^https:\\/\\/api\\.weatherapi\\.com\\/v1\\/current\\.json/, async (route) => {
+      await fallbackPage.route("https://api.weatherapi.com/v1/current.json**", async (route) => {
         const query = new URL(route.request().url()).searchParams.get("q") || "";
         fallbackQueries.push(query);
         await route.fulfill({
@@ -247,7 +247,7 @@ try {
       await fallbackPage.locator("#useMyLocationBtn").click();
       await fallbackPage.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Deval Khas"));
       assert.equal(fallbackQueries.length, 1, "balanced browser location must request weather once");
-      assert.match(fallbackQueries[0], /^32\\.11,76\\.53$/);
+      assert.equal(fallbackQueries[0], "32.11,76.53");
       assert.equal(await fallbackPage.locator("#weatherLocationMeta").isVisible(), true);
       assert.match(await fallbackPage.locator("#weatherLocationMeta").innerText(), /850/);
       pass("mobile: high-accuracy timeout retries browser network-assisted geolocation without IP fallback");
