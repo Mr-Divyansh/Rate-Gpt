@@ -83,7 +83,7 @@ try {
           ? "Approximate City"
           : query.includes("31.01")
             ? "Moved Location"
-            : /^\\d/.test(query)
+            : /^\d/.test(query)
               ? "Dharampur"
               : query.includes(",")
                 ? query.split(",")[0].trim()
