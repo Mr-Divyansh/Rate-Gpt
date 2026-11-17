@@ -392,23 +392,77 @@ function tableRow(record, ctx, showLocation) {
   return tr;
 }
 
+const COMMODITY_IMAGE_ALIASES = {
+  "cucumber kheera": "cucumber",
+  "kheera": "cucumber",
+  "brinjal eggplant": "brinjal",
+  "eggplant": "brinjal",
+  "baingan": "brinjal",
+  "potatoes": "potato",
+  "apples": "apple",
+  "band gobhi": "cabbage",
+  "patta gobhi": "cabbage",
+};
+
+const normalizeCommodityKey = (value) => String(value || "")
+  .normalize("NFKD")
+  .replace(/[\\u0300-\\u036f]/g, "")
+  .toLocaleLowerCase("en-IN")
+  .replace(/[()\\[\\]{}.,/_-]+/g, " ")
+  .replace(/[^\\p{L}\\p{N} ]/gu, "")
+  .replace(/\\s+/g, " ")
+  .trim();
+
+const commodityImageIndex = new Map();
+let commodityImageManifestLoaded = false;
+
+function findCommodityImage(commodity) {
+  const key = normalizeCommodityKey(commodity);
+  const alias = COMMODITY_IMAGE_ALIASES[key];
+  if (alias && commodityImageIndex.has(alias)) return commodityImageIndex.get(alias);
+  if (commodityImageIndex.has(key)) return commodityImageIndex.get(key);
+  // Accept a manifest name with a descriptive suffix, e.g. "Brinjal (Eggplant)".
+  for (const [candidate, entry] of commodityImageIndex) {
+    if (candidate && (key.startsWith(candidate + " ") || candidate.startsWith(key + " "))) {
+      return entry;
+    }
+  }
+  return null;
+}
+
+fetch("/commodity-image-manifest.json", { cache: "force-cache" })
+  .then((response) => {
+    if (!response.ok) throw new Error("Commodity image manifest unavailable");
+    return response.json();
+  })
+  .then((manifest) => {
+    for (const item of manifest.commodities || []) {
+      if (item.status !== "available" || !item.image) continue;
+      const image = {
+        src: "/" + String(item.image).replace(/^\\/+/, ""),
+        name: item.name || item.id,
+      };
+      for (const value of [item.id, item.name, item.hindi]) {
+        const key = normalizeCommodityKey(value);
+        if (key) commodityImageIndex.set(key, image);
+      }
+    }
+    commodityImageManifestLoaded = true;
+    if (state.records.length) renderResults();
+  })
+  .catch((error) => {
+    commodityImageManifestLoaded = true;
+    console.warn("[Rate-GPT] Commodity photos could not be loaded:", error);
+  });
+
 function cropArtwork(commodity) {
   const value = String(commodity || "").toLowerCase();
   const crops = [
-    [/bottle.?gourd|lauki/, "🥒"],
-    [/papaya/, "🍈"],
-    [/chilli|chili|pepper/, "🌶️"],
-    [/guava/, "🍐"],
-    [/bhindi|okra|ladies.?finger/, "🥬"],
-    [/tomato/, "🍅"],
-    [/potato|आलू/, "🥔"],
-    [/onion|प्याज/, "🧅"],
-    [/apple|सेब/, "🍎"],
-    [/mango|आम/, "🥭"],
-    [/cauliflower/, "🥦"],
-    [/cabbage/, "🥬"],
-    [/wheat|गेहूं/, "🌾"],
-    [/rice|paddy|धान/, "🌾"],
+    [/bottle.?gourd|lauki/, "🥒"], [/papaya/, "🍈"], [/chilli|chili|pepper/, "🌶️"],
+    [/guava/, "🍐"], [/bhindi|okra|ladies.?finger/, "🥬"], [/tomato/, "🍅"],
+    [/potato|आलू/, "🥔"], [/onion|प्याज/, "🧅"], [/apple|सेब/, "🍎"],
+    [/mango|आम/, "🥭"], [/cauliflower/, "🥦"], [/cabbage/, "🥬"],
+    [/wheat|गेहूं/, "🌾"], [/rice|paddy|धान/, "🌾"],
   ];
   return crops.find(([pattern]) => pattern.test(value))?.[1] || "🌱";
 }
@@ -418,9 +472,31 @@ function cardFor(record, ctx, showLocation) {
   card.className = "price-card";
   const artwork = document.createElement("div");
   artwork.className = "crop-art";
-  artwork.setAttribute("aria-hidden", "true");
   const artworkIcon = document.createElement("span");
+  artworkIcon.className = "crop-art-fallback";
   artworkIcon.textContent = cropArtwork(record.commodity);
+  artwork.setAttribute("aria-label", `${record.commodity || "Crop"} photograph`);
+  const photo = findCommodityImage(record.commodity);
+  if (photo) {
+    const image = document.createElement("img");
+    image.className = "crop-photo";
+    image.src = photo.src;
+    image.alt = `${photo.name} photograph`;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.width = 320;
+    image.height = 180;
+    image.addEventListener("load", () => {
+      artwork.classList.add("has-photo");
+      artworkIcon.hidden = true;
+    }, { once: true });
+    image.addEventListener("error", () => {
+      image.remove();
+      artwork.classList.remove("has-photo");
+      artworkIcon.hidden = false;
+    }, { once: true });
+    artwork.append(image);
+  }
   artwork.append(artworkIcon);
   const top = document.createElement("div");
   top.className = "price-card-top";
