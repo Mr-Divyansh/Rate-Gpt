@@ -200,6 +200,58 @@ try {
       assert.deepEqual(deniedPageErrors, [], "denied location permission must not cause uncaught browser errors");
       pass("mobile: denied location permission shows actionable guidance and safely resets tracking controls");
       await deniedContext.close();
+
+      // Simulate a Windows laptop with location permission granted but no GPS fix:
+      // high-accuracy watch times out, then the browser's balanced provider succeeds.
+      const fallbackContext = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+      });
+      await fallbackContext.addInitScript(() => {
+        let nextId = 1;
+        const active = new Map();
+        Object.defineProperty(navigator, "geolocation", {
+          configurable: true,
+          value: {
+            watchPosition(success, error, options) {
+              const id = nextId++;
+              active.set(id, { success, error, options });
+              if (options.enableHighAccuracy) {
+                queueMicrotask(() => error({ code: 3, message: "High accuracy timed out" }));
+              } else {
+                queueMicrotask(() => success({
+                  coords: { latitude: 32.11, longitude: 76.53, accuracy: 850 },
+                  timestamp: Date.now(),
+                }));
+              }
+              return id;
+            },
+            clearWatch(id) { active.delete(id); },
+          },
+        });
+      });
+      const fallbackPage = await fallbackContext.newPage();
+      const fallbackQueries = [];
+      await fallbackPage.route(/^https:\\/\\/api\\.weatherapi\\.com\\/v1\\/current\\.json/, async (route) => {
+        const query = new URL(route.request().url()).searchParams.get("q") || "";
+        fallbackQueries.push(query);
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            location: { name: "Deval Khas", region: "Himachal Pradesh", country: "India", localtime: "2026-11-17 17:00" },
+            current: { temp_c: 18, feelslike_c: 18, humidity: 50, wind_kph: 4, pressure_mb: 1015, condition: { text: "Clear", icon: "" } },
+          }),
+        });
+      });
+      await fallbackPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
+      await fallbackPage.locator("#useMyLocationBtn").click();
+      await fallbackPage.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Deval Khas"));
+      assert.equal(fallbackQueries.length, 1, "balanced browser location must request weather once");
+      assert.match(fallbackQueries[0], /^32\\.11,76\\.53$/);
+      assert.equal(await fallbackPage.locator("#weatherLocationMeta").isVisible(), true);
+      assert.match(await fallbackPage.locator("#weatherLocationMeta").innerText(), /850/);
+      pass("mobile: high-accuracy timeout retries browser network-assisted geolocation without IP fallback");
+      await fallbackContext.close();
     }
   }
 
