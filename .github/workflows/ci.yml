@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -16,20 +17,18 @@ concurrency:
 jobs:
   verify:
     name: Tests, typecheck and production build
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - name: Download source archive
         env:
           SOURCE_REPOSITORY: ${{ github.repository }}
           SOURCE_SHA: ${{ github.sha }}
         run: |
-          curl --fail --silent --show-error --location \
-            "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" \
-            | tar --extract --gzip --strip-components=1
+          curl --fail --silent --show-error --location "https://codeload.github.com/${SOURCE_REPOSITORY}/tar.gz/${SOURCE_SHA}" | tar --extract --gzip --strip-components=1
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node.js 24 runtime)
         with:
           node-version: 22
           cache: npm
@@ -37,14 +36,96 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
+
       - name: Unit and service tests
         run: npm test
 
       - name: API integration tests
         run: npm run test:integration
 
+      - name: API contract and published OpenAPI checks
+        run: npm run test:api-contract
+
+      - name: AGMARKNET 2.0 service tests
+        run: npm run test:agmarknet2
+
+      - name: Verify public AGMARKNET 2.0 catalogue
+        run: npm run test:agmarknet2:live
+
       - name: Public-site SEO metadata checks
         run: npm run test:site
+
+      - name: Responsive layout regression checks
+        run: npm run test:responsive
+
+      # Keep the deterministic Weather browser suite on every PR and main push.
+      # It is local/mocked and does not depend on Vercel preview availability.
+      - name: Install pinned Playwright test runtime
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+
+      - name: Install Chromium browser
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local app for weather browser checks
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: |
+          PORT=4173 npm run dev > /tmp/rate-gpt-dev.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/weather.html >/dev/null; then
+              echo "Local app is ready for browser tests."
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/rate-gpt-dev.log
+          echo "::error::Local app did not start for weather browser checks."
+          exit 1
+
+      - name: Weather browser interaction checks
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          RATE_GPT_BASE_URL: http://127.0.0.1:4173
+        run: node scripts/weather-browser-smoke.mjs
+
+      - name: Select Vercel preview for pull-request browser checks
+        id: preview
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          preview_url=""
+          for attempt in $(seq 1 18); do
+            comments="$(curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100")"
+            preview_url="$(printf '%s' "${comments}" | jq -r '[.[] | select(.user.login == "vercel[bot]") | .body] | last // "" | if contains("Ready") then (try (capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url) catch "") else "" end')"
+            if [ -n "${preview_url}" ]; then
+              if curl --fail --silent --show-error "${preview_url}/mandi-prices.html" | grep -q 'id="stateSelect"'; then
+                echo "RATE_GPT_BASE_URL=${preview_url}" >> "${GITHUB_ENV}"
+                echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
+                echo "Browser checks will target the PR's READY Vercel preview."
+                exit 0
+              fi
+              echo "::warning::Vercel preview is READY but does not expose the app HTML to unauthenticated CI (possibly Deployment Protection); preview-only browser checks are skipped."
+              break
+            fi
+          done
+          echo "preview_url=" >> "${GITHUB_OUTPUT}"
+          echo "::warning::Vercel preview is unavailable (for example, deployment quota cooldown); preview-only browser checks are skipped. Production smoke checks remain gated on the exact deployed commit."
+
+      - name: Production browser interaction checks
+        if: github.event_name == 'pull_request' && steps.preview.outputs.preview_url != ''
+        run: node scripts/production-browser-smoke.mjs
+
+      - name: Production release-gate regression checks
+        run: npm run test:release-gate
 
       - name: TypeScript check
         run: npm run lint

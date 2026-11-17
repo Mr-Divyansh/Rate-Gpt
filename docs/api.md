@@ -20,3 +20,17 @@ The Mandi Prices page can browse the unfiltered national feed in upstream pages 
 ## Failure behavior
 
 Validation failures return 400. Upstream rejection or invalid upstream content returns 502; an unavailable or rate-limited source returns 503; a timed-out upstream request returns 504. The server does not return credentials, upstream response bodies, or stack traces in production error responses.
+
+
+## AI and agent integration
+
+AI assistants should use the REST API rather than scrape rendered HTML. The machine-readable OpenAPI contract is published at `/openapi.json`; concise agent instructions are at `/llms.txt`; `GET /api/v1/` returns a discovery document with canonical links, endpoint names and `data.commitSha` (the Vercel Git commit SHA serving that request, or `null` outside a Git-backed Vercel deployment). Release checks must compare this value with the exact source SHA they expect before running production smoke tests. All endpoints are read-only except the separately documented contact form. No authentication is required for public read endpoints. API responses are JSON and use the standard success/error envelope.
+
+Example:
+```http
+GET /api/v1/meta/filters?state=Himachal%20Pradesh
+GET /api/v1/prices?state=Himachal%20Pradesh&limit=50&offset=0
+Accept: application/json
+```
+
+Agents must preserve the source attribution, arrival date, fetch timestamp, unit, null values, pagination and coverage metadata. An administrative mandi directory is not proof that a daily price observation exists. Never infer missing prices or claim complete national coverage from one page.

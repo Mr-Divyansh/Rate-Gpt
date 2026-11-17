@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { t, tCount, onLangChange } from "./i18n.js";
-// auto-refresh test
 import { hydrateIcons, icon } from "./icons.js";
 import {
   fetchFilters, fetchPrices, fetchSyncStatus,
@@ -29,8 +28,18 @@ function indiaTodayIsoDate() {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+const INDIA_STATES_AND_UTS = [
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+  "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+];
+
 const state = {
-  states: [], districts: [], markets: [],
+  states: [...INDIA_STATES_AND_UTS], districts: [], markets: [],
+  filtersLoading: false,
   location: { state: "", district: "" },
   market: "",
   allIndia: false,
@@ -97,6 +106,10 @@ function renderMandis() {
     help.textContent = state.finderError;
     return;
   }
+  if (state.filtersLoading) {
+    help.textContent = t("finder.loading");
+    return;
+  }
   if (!s || !district) {
     help.textContent = t("finder.pick");
     return;
@@ -115,7 +128,9 @@ function renderMandis() {
         records: state.filterCoverage.recordsScanned.toLocaleString("en-IN"),
         maxOffset: state.filterCoverage.maxOffset.toLocaleString("en-IN"),
       })}`
-    : "";
+    : state.filterCoverage?.status === "complete"
+      ? ` · ${t("finder.directoryNote")}`
+      : "";
   help.textContent = `${t("finder.mandis", { district })} · ${tCount("finder.count", state.markets.length)}${coverageNote}`;
   for (const market of state.markets) {
     grid.append(
@@ -162,6 +177,7 @@ async function chooseState(name, { district = "", market = "" } = {}) {
   state.market = "";
   state.finderError = "";
   state.filterCoverage = null;
+  state.filtersLoading = Boolean(name);
   clearResults();
   renderFinder();
   if (!name) return;
@@ -170,8 +186,10 @@ async function chooseState(name, { district = "", market = "" } = {}) {
     if (token !== navToken) return;
     state.districts = data.districts;
     state.filterCoverage = data.coverage ?? null;
+    state.filtersLoading = false;
   } catch (error) {
     if (token !== navToken) return;
+    state.filtersLoading = false;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
     renderFinder();
     return;
@@ -190,6 +208,7 @@ async function chooseDistrict(name, { market = "" } = {}) {
   state.market = "";
   state.finderError = "";
   state.filterCoverage = null;
+  state.filtersLoading = Boolean(name);
   clearResults();
   renderFinder();
   if (!name) return;
@@ -198,8 +217,10 @@ async function chooseDistrict(name, { market = "" } = {}) {
     if (token !== navToken) return;
     state.markets = data.markets;
     state.filterCoverage = data.coverage ?? null;
+    state.filtersLoading = false;
   } catch (error) {
     if (token !== navToken) return;
+    state.filtersLoading = false;
     state.finderError = t("finder.fail", { reason: errorText(error, "") });
     renderFinder();
     return;
@@ -329,6 +350,11 @@ function cropBlock(record, showLocation = false) {
     names.secondary,
     typeof record.variety === "string" ? record.variety.trim() : "",
     typeof record.grade === "string" ? record.grade.trim() : "",
+    typeof record.display_unit === "string" && record.display_unit.trim()
+      ? record.display_unit
+      : typeof record.source_unit === "string" && record.source_unit.trim()
+        ? record.source_unit
+      : t("results.unitUnavailable"),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -381,17 +407,37 @@ function cardFor(record, ctx, showLocation) {
   return card;
 }
 
-function messageRows(message) {
+function messageRows(message, { actionLabel = "", onAction = null } = {}) {
   const tr = document.createElement("tr");
   const td = document.createElement("td");
   td.colSpan = 5;
   td.className = "state-cell";
-  td.textContent = message;
+  td.setAttribute("role", "status");
+  const rowMessage = document.createElement("p");
+  rowMessage.className = "state-message-text";
+  rowMessage.textContent = message;
+  td.append(rowMessage);
   tr.append(td);
-  const p = document.createElement("p");
-  p.className = "state-message";
-  p.textContent = message;
-  return { row: tr, card: p };
+
+  const card = document.createElement("div");
+  card.className = "state-message";
+  card.setAttribute("role", "status");
+  const cardMessage = document.createElement("p");
+  cardMessage.className = "state-message-text";
+  cardMessage.textContent = message;
+  card.append(cardMessage);
+
+  if (actionLabel && typeof onAction === "function") {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn";
+    button.textContent = actionLabel;
+    button.addEventListener("click", onAction);
+    td.append(button);
+    card.append(button.cloneNode(true));
+    card.lastElementChild.addEventListener("click", onAction);
+  }
+  return { row: tr, card };
 }
 
 function skeletonRows() {
@@ -433,9 +479,15 @@ function renderResults() {
   );
 
   const busy = state.loading && state.records.length === 0;
-  const unitLabel = state.priceUnit === "kg" ? "₹ / KG" : "₹ / Quintal";
   const unitControl = $("priceUnit");
-  if (unitControl) unitControl.value = state.priceUnit;
+  const hasKnownQuintalUnit = state.records.some((record) =>
+    typeof record.source_unit === "string" && /rs\.?\s*\/\s*quintal/i.test(record.source_unit),
+  );
+  if (!hasKnownQuintalUnit && state.priceUnit === "kg") state.priceUnit = "quintal";
+  if (unitControl) {
+    unitControl.disabled = !hasKnownQuintalUnit;
+    unitControl.value = state.priceUnit;
+  }
   let announcement = "";
 
   if (busy) {
@@ -449,20 +501,41 @@ function renderResults() {
     body.replaceChildren(m.row);
     list.replaceChildren(m.card);
     $("resultCount").textContent = "";
-  } else if (state.records.length === 0 && !state.error) {
-    const m = messageRows(t("results.none"));
+  } else if (state.records.length === 0 && state.error) {
+    const message = t("results.unavailable");
+    const m = messageRows(message);
+    body.replaceChildren(m.row);
+    list.replaceChildren(m.card);
+    $("resultCount").textContent = "";
+    announcement = message;
+  } else if (state.records.length === 0) {
+    const hasNarrowFilters = Boolean($("cropSearch").value.trim() || state.arrivalDate);
+    const message = hasNarrowFilters
+      ? t("results.noMatches")
+      : t("results.none");
+    const action = hasNarrowFilters
+      ? { actionLabel: t("results.clearSearchFilters"), onAction: clearSearchAndDateFilters }
+      : !state.allIndia
+        ? { actionLabel: t("results.browseIndia"), onAction: toggleIndiaBrowse }
+        : {};
+    const m = messageRows(message, action);
     body.replaceChildren(m.row);
     list.replaceChildren(m.card);
     $("resultCount").textContent = tCount("results.count", 0);
-    announcement = t("results.none");
+    announcement = message;
   } else {
-    const divisor = state.priceUnit === "kg" ? 100 : 1;
-    const displayRecords = state.records.map((record) => ({
-      ...record,
-      min_price: record.min_price === null ? null : record.min_price / divisor,
-      max_price: record.max_price === null ? null : record.max_price / divisor,
-      modal_price: record.modal_price === null ? null : record.modal_price / divisor,
-    }));
+    const displayRecords = state.records.map((record) => {
+      const isQuintal = typeof record.source_unit === "string" &&
+        /rs\.?\s*\/\s*quintal/i.test(record.source_unit);
+      const divisor = state.priceUnit === "kg" && isQuintal ? 100 : 1;
+      return {
+        ...record,
+        display_unit: state.priceUnit === "kg" && isQuintal ? "₹ / kg" : record.source_unit,
+        min_price: record.min_price === null ? null : record.min_price / divisor,
+        max_price: record.max_price === null ? null : record.max_price / divisor,
+        modal_price: record.modal_price === null ? null : record.modal_price / divisor,
+      };
+    });
     const ctx = buildContext(displayRecords);
     body.replaceChildren(...displayRecords.map((r) => tableRow(r, ctx, state.allIndia)));
     list.replaceChildren(...displayRecords.map((r) => cardFor(r, ctx, state.allIndia)));
@@ -487,8 +560,7 @@ function renderResults() {
   $("loadPrevious").hidden = state.pageOffsets.length < 2;
   $("loadPrevious").disabled = state.loading || state.exporting;
   $("priceMessage").textContent = announcement;
-  const unitNote = document.querySelector(".unit-field label");
-  if (unitNote) unitNote.textContent = `Price unit (${unitLabel})`;
+  // Keep the control label static; unit availability is represented by the selector state.
   $("exportStatus").textContent = state.exportStatus
     ? t(state.exportStatus.key, state.exportStatus.vars)
     : "";
@@ -496,6 +568,13 @@ function renderResults() {
 }
 
 
+
+function clearSearchAndDateFilters() {
+  $("cropSearch").value = "";
+  $("arrivalDate").value = "";
+  state.arrivalDate = "";
+  loadPrices();
+}
 
 function renderError() {
   const box = $("priceError");
@@ -698,7 +777,7 @@ function renderSync() {
   }
   text.textContent = data.fetchedAt
     ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
-    : t("sync.lastFetched", { time: fetched, upstream: upstream });
+    : t("sync.noFetchYet");
   dot.dataset.state = data.fetchedAt ? "live" : "none";
   const transparency = data.fetchedAt
     ? t("sync.transparency", {
@@ -715,12 +794,16 @@ function renderSync() {
 
 async function loadSync() {
   try {
+    // fetchSyncStatus() unwraps the API envelope and returns its `data` object.
+    // Keep this response shape consistent; reading status.data here throws.
     const status = await fetchSyncStatus();
-    state.lastFetchedAt = status.data.lastFetchedAt;
-    state.upstreamUpdatedAt = status.data.upstreamUpdatedAt;
+    state.lastFetchedAt = status.lastFetchedAt ?? null;
+    state.upstreamUpdatedAt = status.upstreamUpdatedAt ?? null;
     state.sync = {
       ...status,
-      fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt,
+      // A successful price request may have completed while this status
+      // request was in flight. Never overwrite its newer fetch timestamp.
+      fetchedAt: state.sync?.fetchedAt || status.lastFetchedAt || null,
     };
   } catch (error) {
     console.error("[Mandi prices] Unable to load sync status:", error);
@@ -752,13 +835,10 @@ function bind() {
   });
   $("exportCsv").addEventListener("click", exportCsv);
   $("refreshPrices").addEventListener("click", () => {
-    state.loading = true;
-    state.error = "";
-    renderResults();
+    // loadPrices owns the loading state and aborts any older request.
+    // Do not toggle state.loading around the async call.
     renderSync();
-    loadPrices();
-    state.loading = false;
-    renderResults();
+    void loadPrices();
   });
   $("loadMore").addEventListener("click", () => {
     state.meta.offset = state.meta.nextOffset;
@@ -844,16 +924,8 @@ async function init() {
   renderResults();
   loadSync();
 
-  try {
-    const data = await fetchFilters();
-    state.states = data.states;
-    state.filterCoverage = data.coverage ?? null;
-  } catch (error) {
-    console.error("[Mandi prices] Unable to load mandi filters:", error);
-    state.finderError = t("finder.fail", { reason: errorText(error, "") });
-    renderFinder();
-    return;
-  }
+  // State options are already available locally. Fetch only the selected state's
+  // districts, then the selected district's mandis; avoid an unnecessary full-catalog request.
   renderFinder();
 
   const params = new URLSearchParams(location.search);

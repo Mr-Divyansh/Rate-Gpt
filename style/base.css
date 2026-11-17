@@ -205,12 +205,25 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
 @media (max-width:720px) {
   .site-header.menu-open { z-index:100; }
   .header-inner { grid-template-columns:1fr auto; align-items:center; padding-block:8px; }
-  .header-actions { grid-column:2; grid-row:1; }
-  .menu-toggle { display:block; }
-  .site-nav { position:fixed; z-index:80; top:0; right:0; bottom:0; width:min(84vw,360px); margin:0; padding:92px 22px 28px; display:flex; flex-direction:column; align-items:stretch; gap:8px; background:#fff; box-shadow:-18px 0 48px rgba(16,48,32,.16); transform:translateX(105%); visibility:hidden; transition:transform .25s ease,visibility .25s ease; }
+  .header-actions { grid-column:2; grid-row:1; position:relative; z-index:120; }
+  .menu-toggle { display:block; position:relative; z-index:121; }
+  .site-nav {
+    position:fixed; z-index:110; top:0; right:0; bottom:0; left:auto;
+    grid-column:auto; grid-row:auto; order:initial;
+    width:min(86vw,340px); max-width:100%; margin:0;
+    padding:88px 20px 24px; display:flex; flex-direction:column;
+    align-items:stretch; justify-content:flex-start; gap:6px;
+    background:#fff; box-shadow:-18px 0 48px rgba(16,48,32,.16);
+    transform:translateX(105%); visibility:hidden;
+    transition:transform .25s ease,visibility .25s ease;
+    overflow-y:auto; overscroll-behavior:contain;
+  }
   .site-nav.is-open { transform:translateX(0); visibility:visible; }
-  .site-nav a { min-height:52px; justify-content:flex-start; padding-inline:16px; font-size:1.05rem; }
-  .site-nav a[aria-current="page"]::after { left:16px; right:auto; bottom:7px; width:28px; }
+  .site-nav a {
+    flex:0 0 auto; width:100%; min-height:48px; justify-content:flex-start;
+    padding:10px 14px; font-size:1rem; line-height:1.25;
+  }
+  .site-nav a[aria-current="page"]::after { left:14px; right:auto; bottom:4px; width:26px; }
   .nav-backdrop { display:block; position:fixed; z-index:70; inset:0; border:0; background:rgba(12,30,21,.42); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease,visibility .25s ease; }
   .nav-backdrop.is-visible { opacity:1; visibility:visible; pointer-events:auto; }
   body:has(.site-header.menu-open) { overflow:hidden; }
@@ -398,7 +411,7 @@ input:focus, select:focus, textarea:focus {
   .wrap { width: min(calc(100% - 32px), var(--wrap)); }
   .header-inner { min-height: 64px; }
   .brand-mark { width: 40px; height: 40px; }
-  .site-nav { padding-top: 84px; }
+  .site-nav { padding-top: 88px; }
   .site-footer { margin-top: 48px; }
 }
 @media (max-width: 380px) {

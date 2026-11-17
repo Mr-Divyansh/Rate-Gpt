@@ -14,9 +14,40 @@ import {
   normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
-import { summarizeModalComparison } from "../../../script/price-comparison.js";
+import {
+  fetchAgmarknet2Filters,
+  normalizeAgmarknetStateName,
+  searchAgmarknet2Commodities,
+} from "../services/agmarknet2Service.js";
 
 const router = Router();
+
+// Machine-readable API discovery for AI agents and developer tools.
+router.get("/", (_req: Request, res: Response) => {
+  return sendSuccess(res, {
+    name: "Rate-GPT Mandi Prices API",
+    version: "1.0.0",
+    commitSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
+    description: "On-demand government-reported Indian mandi price observations and a consent-based contact form. Price records are not stored by Rate-GPT.",
+    documentation: "https://rate-gpt.vercel.app/docs/api.md",
+    openapi: "https://rate-gpt.vercel.app/openapi.json",
+    llms: "https://rate-gpt.vercel.app/llms.txt",
+    endpoints: {
+      filters: "/api/v1/meta/filters",
+      prices: "/api/v1/prices",
+      compare: "/api/v1/prices/compare",
+      commoditySearch: "/api/v1/commodities/search",
+      syncStatus: "/api/v1/sync-status",
+      health: "/api/v1/health",
+      trend: "/api/v1/prices/trend",
+      contact: "/api/v1/contact"
+    },
+    responseFormat: "{ success, data, meta, message }",
+    priceDataMode: "live-on-demand",
+    priceStorage: "disabled",
+    source: "Government of India OGD / AGMARKNET"
+  }, undefined, "API discovery document");
+});
 
 function sendSuccess<T>(
   res: Response,
@@ -81,12 +112,27 @@ router.get("/meta/filters", async (req: Request, res: Response) => {
   }
 
   try {
-    const data = await fetchLiveFilters(parsed.data);
+    const data = await fetchAgmarknet2Filters(parsed.data).catch((error: unknown) => {
+      // Keep the OGD resource as a live fallback if the newer AGMARKNET 2.0
+      // directory is temporarily unavailable, but leave a safe diagnostic so
+      // silent source fallback can be investigated from server logs.
+      console.warn("[AGMARKNET 2.0] Directory unavailable; using OGD filter fallback", {
+        name: error instanceof Error ? error.name : "UnknownError",
+        message: error instanceof Error ? error.message : "Unknown directory error",
+      });
+      return fetchLiveFilters(parsed.data);
+    });
+    // This endpoint contains only the public administrative directory (not prices or user data).
+    // Let Vercel edge cache it so cold starts do not repeatedly wait on AGMARKNET.
+    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=3600, max-age=0");
+    const source = "source" in data && typeof data.source === "string"
+      ? data.source
+      : "Government of India OGD / AGMARKNET";
     return sendSuccess(
       res,
       data,
       {
-        source: "Government of India OGD / AGMARKNET",
+        source,
         scope: data.coverage.message,
         coverage: data.coverage,
         filterCacheStatus: data.cache.status,
@@ -150,11 +196,25 @@ router.get("/prices", async (req: Request, res: Response) => {
 
   try {
     const { date, ...filters } = parsed.data;
-    const { records, meta } = await fetchLivePrices({
+    const liveOptions = {
       ...filters,
+      state: filters.state ? normalizeAgmarknetStateName(filters.state) : undefined,
       arrivalDate: date,
-    });
-    return sendSuccess(res, records, meta, "Latest government-reported prices fetched successfully");
+    };
+    // Price records come only from the key-authenticated OGD resource.
+    // The public AGMARKNET 2.0 monthly report is CAPTCHA-gated and is not
+    // automated. The AGMARKNET 2.0 directory is used for selector metadata.
+    const result = await fetchLivePrices(liveOptions);
+    // Short edge TTL only: source prices are daily observations, and identical
+    // queries can safely share a 60-second edge-cached response. No database/persistent cache.
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
+    return sendSuccess(
+      res,
+      result.records,
+      result.meta,
+      "Latest government-reported prices fetched successfully",
+    );
   } catch (err: any) {
     if (err instanceof GovernmentApiError) {
       return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
@@ -220,6 +280,8 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
       offset: 0,
       sort: "modal_price_desc",
     });
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
     return sendSuccess(
       res,
       records.records,
@@ -233,7 +295,6 @@ router.get("/prices/compare", async (req: Request, res: Response) => {
           normalizeArrivalDate(parsed.data.date) ??
           parsed.data.date,
         comparisonMayBePartial: records.meta.upstreamHasNext,
-        comparison: summarizeModalComparison(records.records),
         comparisonRule:
           "Compare only records with the same commodity and source unit; matching variety is required before treating prices as like-for-like. This endpoint returns observations and does not recommend travelling to a mandi.",
         scope: "One live government API page for the requested commodity and arrival date; use pagination for more records.",
@@ -272,13 +333,20 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
   }
 
   try {
-    const results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    let results: string[];
+    try {
+      results = await searchAgmarknet2Commodities(parsed.data.q, parsed.data.limit);
+    } catch {
+      results = await searchLiveCommodities(parsed.data.q, parsed.data.limit);
+    }
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=300, stale-while-revalidate=900");
     return sendSuccess(
       res,
       results,
       {
         count: results.length,
-        source: "Government of India OGD / AGMARKNET",
+        source: "Government of India AGMARKNET 2.0",
         sourceDerived: true,
       },
       "Government-reported commodity search completed",

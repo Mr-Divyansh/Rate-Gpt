@@ -3,9 +3,10 @@ const RESOURCE_ID =
 const DEFAULT_BASE_URL = "https://api.data.gov.in/resource";
 const MAX_PAGE_SIZE = 100;
 const MAX_OFFSET = 1_000_000;
-const REQUEST_TIMEOUT_MS = 8_000;
+const REQUEST_TIMEOUT_MS = 6_000;
+// Three total attempts (initial request plus two bounded retries).
 const MAX_ATTEMPTS = 3;
-const RETRY_BASE_DELAY_MS = 200;
+const RETRY_BASE_DELAY_MS = 100;
 const RETRY_MAX_DELAY_MS = 2_000;
 const FILTER_DISCOVERY_PAGE_DELAY_MS = 100;
 
@@ -68,7 +69,7 @@ const HINDI_CROP_NAMES: Record<string, string> = {
   मशरूम: "mushroom",
 };
 
-const STATES_AND_UTS = [
+export const STATES_AND_UTS = [
   "Andaman and Nicobar Islands",
   "Andhra Pradesh",
   "Arunachal Pradesh",
@@ -252,9 +253,9 @@ export function mapUpstreamRecord(raw: unknown): RawMandiInput | null {
 }
 
 function normalizeSourceUnit(value: unknown): string {
-  if (typeof value !== "string") return "Rs/Quintal";
+  if (typeof value !== "string") return "Not provided by source";
   const trimmed = value.trim();
-  return trimmed || "Rs/Quintal";
+  return trimmed || "Not provided by source";
 }
 
 export function parsePageInteger(value: unknown): number | null {
@@ -591,7 +592,8 @@ async function requestGovernmentPage(
         },
         signal: controller.signal,
       });
-    } catch (error) {
+    } catch {
+      clearTimeout(timeout);
       if (attempt < MAX_ATTEMPTS) {
         await delay(200 * attempt);
         continue;
@@ -600,43 +602,62 @@ async function requestGovernmentPage(
         throw new GovernmentApiError("Government API request timed out.", 504);
       }
       throw new GovernmentApiError("Government API could not be reached.", 503);
-    } finally {
-      clearTimeout(timeout);
     }
 
-    if (response.status === 429 || response.status >= 500) {
-      if (attempt < MAX_ATTEMPTS) {
-        const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
-        const backoff = Math.min(
-          RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
-          RETRY_MAX_DELAY_MS,
-        );
-        await delay(retryAfter ?? backoff);
-        continue;
-      }
-      throw new GovernmentApiError(
-        response.status === 429
-          ? "Government API rate limit reached. Please try again shortly."
-          : "Government API is temporarily unavailable.",
-        response.status === 429 ? 503 : 502,
-        response.status,
-      );
-    }
-    if (!response.ok) {
-      throw new GovernmentApiError(
-        "Government API rejected the price request.",
-        502,
-        response.status,
-      );
-    }
     try {
-      const payload: unknown = await response.json();
-      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-        throw new Error("Invalid JSON object");
+      if (response.status === 429 || response.status >= 500) {
+        if (attempt < MAX_ATTEMPTS) {
+          const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
+          const backoff = Math.min(
+            RETRY_BASE_DELAY_MS * 2 ** (attempt - 1),
+            RETRY_MAX_DELAY_MS,
+          );
+          clearTimeout(timeout);
+          try {
+            await response.body?.cancel();
+          } catch {
+            // The response may already be closed; retry timing is still bounded.
+          }
+          await delay(retryAfter ?? backoff);
+          continue;
+        }
+        throw new GovernmentApiError(
+          response.status === 429
+            ? "Government API rate limit reached. Please try again shortly."
+            : "Government API is temporarily unavailable.",
+          response.status === 429 ? 503 : 502,
+          response.status,
+        );
       }
-      return payload as Record<string, unknown>;
-    } catch {
-      throw new GovernmentApiError("Government API returned invalid JSON.", 502);
+      if (!response.ok) {
+        throw new GovernmentApiError(
+          "Government API rejected the price request.",
+          502,
+          response.status,
+        );
+      }
+
+      try {
+        // Keep the request deadline active until the complete response body has
+        // been read. Fetch resolves when headers arrive, not when JSON is ready.
+        const payload: unknown = await response.json();
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          throw new Error("Invalid JSON object");
+        }
+        return payload as Record<string, unknown>;
+      } catch {
+        if (controller.signal.aborted) {
+          if (attempt < MAX_ATTEMPTS) {
+            clearTimeout(timeout);
+            await delay(200 * attempt);
+            continue;
+          }
+          throw new GovernmentApiError("Government API request timed out.", 504);
+        }
+        throw new GovernmentApiError("Government API returned invalid JSON.", 502);
+      }
+    } finally {
+      clearTimeout(timeout);
     }
   }
   throw new GovernmentApiError("Government API could not be reached.", 503);
@@ -828,7 +849,8 @@ export async function fetchLiveFilters(options: {
     });
     return {
       ...value,
-      cache: filterCacheInfo(false, storedAt),
+      // The metadata has been inserted into the in-process cache above.
+      cache: filterCacheInfo(true, storedAt),
     };
   })();
 
@@ -846,18 +868,45 @@ export async function searchLiveCommodities(
   fetcher: typeof fetch = fetch,
 ): Promise<string[]> {
   const normalizedQuery = normalizeCommoditySearch(query);
-  const { records } = await fetchLivePrices({
-    search: normalizedQuery,
-    limit: MAX_PAGE_SIZE,
-    offset: 0,
-    sort: "commodity_asc",
-  }, fetcher);
-  const matches = records
-    .map((record) => record.commodity)
-    .filter((commodity) => commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()));
+  const suggestionLimit = Math.min(Math.max(Math.trunc(limit) || 10, 1), 50);
+  const matches = new Set<string>();
+  let offset = 0;
+  let upstreamHasNext = true;
+
+  // Search results can repeat the same commodity across many markets. Continue
+  // through upstream pages until enough distinct source commodities are found
+  // or the source confirms that no more matching records remain.
+  while (upstreamHasNext && matches.size < suggestionLimit) {
+    const result = await fetchLivePrices({
+      search: normalizedQuery,
+      limit: MAX_PAGE_SIZE,
+      offset,
+      sort: "commodity_asc",
+    }, fetcher);
+
+    for (const record of result.records) {
+      if (record.commodity.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase())) {
+        matches.add(record.commodity);
+      }
+    }
+
+    const nextOffset = result.meta.nextOffset;
+    if (nextOffset <= offset) {
+      throw new GovernmentApiError(
+        "Government API pagination stopped advancing during commodity search.",
+        502,
+      );
+    }
+    offset = nextOffset;
+    upstreamHasNext = result.meta.upstreamHasNext && !result.meta.truncated;
+    if (upstreamHasNext && matches.size < suggestionLimit) {
+      await delay(FILTER_DISCOVERY_PAGE_DELAY_MS);
+    }
+  }
+
   // Suggestions must be observed upstream commodities, never a hand-written
   // crop catalogue that could imply unsupported price coverage.
-  return uniqueSorted(matches).slice(0, Math.min(limit, 50));
+  return uniqueSorted([...matches]).slice(0, suggestionLimit);
 }
 
 function uniqueSorted(values: string[]): string[] {

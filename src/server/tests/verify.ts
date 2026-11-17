@@ -86,6 +86,11 @@ async function main(): Promise<void> {
   const mapped = mapUpstreamRecord({ ...upstreamRecord, Min_Price: null, Max_Price: "", Modal_Price: null });
   check(mapped?.arrivalDate === "2026-11-13", "OGD arrival dates are mapped exactly");
   check(mapped?.minPrice === null && mapped?.maxPrice === null && mapped?.modalPrice === null, "missing source prices remain null");
+  check(mapped?.sourceUnit === "Not provided by source", "missing upstream unit is not fabricated as Rs/Quintal");
+  check(
+    mapUpstreamRecord({ ...upstreamRecord, Unit: "Rs/Number" })?.sourceUnit === "Rs/Number",
+    "an explicit upstream price unit is preserved",
+  );
   check(mapUpstreamRecord({ Commodity: "Apple" }) === null, "incomplete source records are rejected");
 
   let filtersUrl: URL | undefined;
@@ -258,6 +263,61 @@ async function main(): Promise<void> {
     );
   }
 
+  // Fetch resolves as soon as headers arrive. The same deadline must also
+  // cover a response body that stalls while JSON is being read.
+  const originalSetTimeout = globalThis.setTimeout;
+  const originalClearTimeout = globalThis.clearTimeout;
+  let bodyTimeoutAttempts = 0;
+  let bodyTimeoutGuard: ReturnType<typeof setTimeout> | undefined;
+  globalThis.setTimeout = ((...args: any[]) => {
+    const [handler, timeoutMs, ...rest] = args;
+    if (timeoutMs === 6_000) {
+      bodyTimeoutAttempts += 1;
+      return originalSetTimeout(handler, 0, ...rest);
+    }
+    return originalSetTimeout(handler, timeoutMs, ...rest);
+  }) as typeof globalThis.setTimeout;
+  try {
+    const stalledBodyRequest = fetchLivePrices({ limit: 1 }, async (_input, init) => {
+      const signal = init?.signal as AbortSignal;
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ "Content-Type": "application/json" }),
+        body: null,
+        json: () => new Promise((_resolve, reject) => {
+          if (signal.aborted) {
+            reject(new DOMException("The operation was aborted.", "AbortError"));
+            return;
+          }
+          signal.addEventListener("abort", () => {
+            reject(new DOMException("The operation was aborted.", "AbortError"));
+          }, { once: true });
+        }),
+      } as Response;
+    });
+    const guard = new Promise<never>((_resolve, reject) => {
+      bodyTimeoutGuard = originalSetTimeout(
+        () => reject(new Error("Response body timeout was not enforced.")),
+        1_500,
+      );
+    });
+    try {
+      await Promise.race([stalledBodyRequest, guard]);
+      check(false, "upstream request deadline covers stalled response-body parsing");
+    } catch (error) {
+      check(
+        error instanceof GovernmentApiError &&
+          error.httpStatus === 504 &&
+          bodyTimeoutAttempts === 3,
+        "upstream request deadline covers stalled response-body parsing and bounded retries",
+      );
+    }
+  } finally {
+    if (bodyTimeoutGuard) originalClearTimeout(bodyTimeoutGuard);
+    globalThis.setTimeout = originalSetTimeout;
+  }
+
   let searchedUrl: URL | undefined;
   const commodities = await searchLiveCommodities("अंगूर", 10, async (input) => {
     searchedUrl = new URL(String(input));
@@ -265,6 +325,24 @@ async function main(): Promise<void> {
   });
   check(searchedUrl?.searchParams.get("q") === "Grapes", "Hindi commodity search is translated before the upstream request");
   check(commodities.length === 1 && commodities[0] === "Grapes", "commodity suggestions are limited to upstream records");
+
+  let commoditySearchPages = 0;
+  const paginatedCommodities = await searchLiveCommodities("a", 10, async (input) => {
+    commoditySearchPages += 1;
+    const offset = Number(new URL(String(input)).searchParams.get("offset"));
+    const rows = offset === 0
+      ? Array.from({ length: 100 }, (_, index) => ({
+          ...upstreamRecord, id: `apple-${index}`, Commodity: "Apple",
+        }))
+      : [{ ...upstreamRecord, id: "mango-last-page", Commodity: "Mango" }];
+    return responseFor(rows, input, "101");
+  });
+  check(
+    commoditySearchPages === 2 &&
+      paginatedCommodities.includes("Apple") &&
+      paginatedCommodities.includes("Mango"),
+    "commodity suggestions paginate past repeated first-page matches",
+  );
 
   const discoveryRecords = Array.from({ length: 1_205 }, (_, index) => ({
     ...upstreamRecord,
@@ -293,6 +371,23 @@ async function main(): Promise<void> {
       discovered.coverage.total === 1_206 &&
       discovered.coverage.maxOffset === 1_000_000,
     "filter discovery reports complete coverage and its supported offset boundary",
+  );
+  check(
+    discovered.cache.status === "temporary-cache" &&
+      discovered.cache.storedAt !== null &&
+      discovered.cache.ttlMs === 60_000,
+    "newly discovered filter metadata reports its active temporary cache",
+  );
+  let cachedDiscoveryRequests = 0;
+  const cachedDiscovery = await fetchLiveFilters({ state: "Discovery State" }, async (input) => {
+    cachedDiscoveryRequests += 1;
+    return responseFor([], input, "0");
+  });
+  check(
+    cachedDiscoveryRequests === 0 &&
+      cachedDiscovery.cache.status === "temporary-cache" &&
+      cachedDiscovery.cache.storedAt === discovered.cache.storedAt,
+    "cached filter metadata is reused and reports its stored timestamp",
   );
 
   const largeDiscoveryTotal = 10_001;

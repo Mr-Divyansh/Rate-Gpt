@@ -98,12 +98,81 @@ const sourceRecords = [
     Max_Price: "7,300",
     Modal_Price: "7,300",
   },
+  {
+    id: "delhi-apple-1",
+    State: "NCT of Delhi",
+    District: "New Delhi",
+    Market: "Azadpur APMC",
+    Commodity: "Apple",
+    Variety: "Red",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "1,700",
+    Max_Price: "2,300",
+    Modal_Price: "2,000",
+  },
 ];
+
+const expectedStatesAndUnionTerritories = [
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka",
+  "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+];
+
+const stateIds = new Map(expectedStatesAndUnionTerritories.map((name, index) => [name, index + 1]));
+const districtDirectory = new Map<string, { id: number; state_id: number; district_name: string }>();
+const marketDirectory = new Map<string, { id: number; state_id: number; district_id: number; mkt_name: string }>();
+const commodityDirectory = new Map<string, { cmdt_id: number; cmdt_name: string; cmdt_group_id: number }>();
+let nextDistrictId = 100;
+let nextMarketId = 1_000;
+let nextCommodityId = 1;
+for (const record of sourceRecords as any[]) {
+  const state_id = stateIds.get(record.State);
+  if (!state_id) continue;
+  const districtKey = `${record.State}| ${record.District}`;
+  if (!districtDirectory.has(districtKey)) {
+    districtDirectory.set(districtKey, {
+      id: nextDistrictId++, state_id, district_name: record.District,
+    });
+  }
+  const district = districtDirectory.get(districtKey)!;
+  const marketKey = `${districtKey}| ${record.Market}`;
+  if (!marketDirectory.has(marketKey)) {
+    marketDirectory.set(marketKey, {
+      id: nextMarketId++, state_id, district_id: district.id, mkt_name: record.Market,
+    });
+  }
+  if (!commodityDirectory.has(record.Commodity)) {
+    commodityDirectory.set(record.Commodity, {
+      cmdt_id: nextCommodityId++, cmdt_name: record.Commodity, cmdt_group_id: 4,
+    });
+  }
+}
 
 const upstreamRequests: URL[] = [];
 const upstream = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
   upstreamRequests.push(url);
+
+  if (url.pathname.endsWith("/daily-price-arrival/filters")) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      status: true,
+      message: "Filters fetched successfully",
+      data: {
+        state_data: expectedStatesAndUnionTerritories.map((state_name) => ({
+          state_id: stateIds.get(state_name), state_name,
+        })),
+        district_data: [...districtDirectory.values()],
+        market_data: [...marketDirectory.values()],
+        cmdt_data: [...commodityDirectory.values()],
+      },
+    }));
+    return;
+  }
+
   const filters = [
     ["filters[state.keyword]", "State"],
     ["filters[district.keyword]", "District"],
@@ -111,7 +180,7 @@ const upstream = http.createServer((req, res) => {
     ["filters[commodity.keyword]", "Commodity"],
     ["filters[arrival_date]", "Arrival_Date"],
   ] as const;
-  let records = sourceRecords.filter((record) =>
+  let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
       const filter = url.searchParams.get(parameter);
       const sourceValue = field === "Arrival_Date"
@@ -168,7 +237,10 @@ async function main() {
   process.env.DATA_GOV_API_KEY = apiKey;
   process.env.DATA_GOV_API_BASE_URL =
     `http://127.0.0.1:${upstreamAddress.port}/resource`;
+  process.env.AGMARKNET_API_BASE_URL =
+    `http://127.0.0.1:${upstreamAddress.port}/v1`;
   process.env.NODE_ENV = "test";
+  process.env.VERCEL_GIT_COMMIT_SHA = "integration-test-commit";
   const app = createApiApp();
   const apiServer = http.createServer(app);
   const apiAddress = await listen(apiServer);
@@ -190,6 +262,10 @@ async function main() {
     assert(health.success && health.data.status === "ok", "health returns minimal service status");
     assert(!("upstreamSource" in health.data) && !("apiKeyConfigured" in health.data), "health does not disclose upstream credential configuration");
     assert(!JSON.stringify(health).includes(apiKey), "health never returns government key");
+    assert(
+      (healthResponse.headers.get("permissions-policy") || "").includes("geolocation=(self)"),
+      "same-origin weather page is allowed to request browser geolocation",
+    );
     const securityHeaders = {
       csp: healthResponse.headers.get("content-security-policy") || "",
       hsts: healthResponse.headers.get("strict-transport-security") || "",
@@ -203,7 +279,7 @@ async function main() {
     assert(securityHeaders.frame === "DENY", "API responses deny framing");
     assert(securityHeaders.noSniff === "nosniff", "API responses set nosniff");
     assert(securityHeaders.referrer === "strict-origin-when-cross-origin", "API responses use a strict referrer policy");
-    assert(securityHeaders.permissions.includes("camera=()") && securityHeaders.permissions.includes("geolocation=()"), "API responses disable unused powerful browser features");
+    assert(securityHeaders.permissions.includes("camera=()") && securityHeaders.permissions.includes("microphone=()") && securityHeaders.permissions.includes("geolocation=(self)"), "API responses disable camera and microphone while allowing same-origin weather geolocation");
     assert(healthResponse.headers.get("access-control-allow-origin") === null, "API does not enable cross-origin access");
 
     const docs = await fetch(`${base}/api/v1/docs`);
@@ -259,20 +335,75 @@ async function main() {
     if (previousContactKey === undefined) delete process.env.WEB3FORMS_ACCESS_KEY;
     else process.env.WEB3FORMS_ACCESS_KEY = previousContactKey;
 
+    const discoveryResponse = await fetch(`${base}/api/v1/`);
+    const discovery = await discoveryResponse.json();
+    assert(
+      discoveryResponse.status === 200 &&
+        discovery.success &&
+        discovery.data.openapi.endsWith("/openapi.json") &&
+        discovery.data.priceStorage === "disabled" &&
+        discovery.data.commitSha === "integration-test-commit" &&
+        discovery.data.endpoints?.contact === "/api/v1/contact" &&
+        discovery.data.endpoints?.trend === "/api/v1/prices/trend",
+      "API root provides machine-readable discovery for all public endpoints, including contact and disabled historical trends",
+    );
+
     const filters = await fetch(`${base}/api/v1/meta/filters?state=Maharashtra&district=Pune`)
       .then((r) => r.json());
     assert(filters.success && filters.data.districts.includes("Pune"), "live filters return selected-state districts");
     assert(filters.data.markets.includes("Pune Market"), "live filters return selected-district markets");
+    const initialFilterRequest = upstreamRequests.at(-1)!;
+
+    assert(
+      filters.data.states.length === 36 &&
+        expectedStatesAndUnionTerritories.every((state) => filters.data.states.includes(state)),
+      "state selector contains all 28 States and 8 Union Territories",
+    );
+
+    // Exercise every official selector value against the AGMARKNET 2.0 master
+    // directory. The fixture deliberately has market rows for only four states;
+    // other states must return empty location lists rather than borrowed or
+    // fabricated market data.
+    for (const stateName of expectedStatesAndUnionTerritories) {
+      const stateResponse = await fetch(
+        `${base}/api/v1/meta/filters?state=${encodeURIComponent(stateName)}`,
+      );
+      const statePayload = await stateResponse.json();
+      const expectedDistricts = [...new Set(
+        sourceRecords
+          .filter((record) => record.State === stateName)
+          .map((record) => record.District),
+      )].sort((left, right) => left.localeCompare(right));
+      assert(
+        stateResponse.status === 200 &&
+          statePayload.success &&
+          statePayload.data.states.includes(stateName),
+        `state selector request succeeds for ${stateName}`,
+      );
+      assert(
+        JSON.stringify(statePayload.data.districts) === JSON.stringify(expectedDistricts) &&
+          statePayload.data.coverage.status === "complete",
+        `district discovery is state-scoped and complete for ${stateName}`,
+      );
+    }
     assert(filters.data.coverage.status === "complete" && filters.meta.coverage.pagesScanned === 1, "filter responses expose their actual scanned coverage");
-    const filterRequest = upstreamRequests.at(-1)!;
-    assert(filterRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "state is sent as upstream filter");
-    assert(filterRequest.searchParams.get("filters[district.keyword]") === "Pune", "district is sent as exact-match upstream filter");
+    assert(
+      initialFilterRequest.pathname.endsWith("/daily-price-arrival/filters"),
+      "state and mandi options request the official AGMARKNET 2.0 directory endpoint",
+      `actual path: ${initialFilterRequest.pathname}`,
+    );
+    assert(
+      filters.meta.source === "Government of India AGMARKNET 2.0",
+      "filter metadata identifies the official AGMARKNET 2.0 directory source",
+      `actual source: ${JSON.stringify(filters.meta.source)}`,
+    );
 
     const filteredResponse = await fetch(
       `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
     );
     const filtered = await filteredResponse.json();
     const filteredRequest = upstreamRequests.at(-1)!;
+    assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "prices pass state filter upstream");
     assert(filteredRequest.searchParams.get("filters[district.keyword]") === "Pune", "prices pass district exact-match filter upstream");
@@ -282,7 +413,7 @@ async function main() {
     assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
-    assert(filtered.meta.total === 2, "upstream result totals are parsed");
+    assert(filtered.meta.total === 2 && filtered.data.length === 1, "upstream totals are retained while duplicate daily records are removed");
     assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
     assert(
@@ -290,8 +421,22 @@ async function main() {
         filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
       "upstream dataset update time is returned separately from the successful fetch time",
     );
+    assert(filtered.data[0]?.source_unit === "Not provided by source", "missing source unit is not fabricated as Rs/Quintal");
     assert(!JSON.stringify(filtered).includes(apiKey), "price response never returns government key");
-    assert(filteredResponse.headers.get("cache-control") === "no-store", "live response is not cacheable");
+    assert((filteredResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "daily government price observations use a short 60-second shared cache");
+
+    const delhiResponse = await fetch(`${base}/api/v1/prices?state=Delhi&limit=5`);
+    const delhiPayload = await delhiResponse.json();
+    const delhiRequest = upstreamRequests.at(-1)!;
+    assert(
+      delhiResponse.status === 200 &&
+        delhiPayload.data.some((record: any) => record.state === "NCT of Delhi"),
+      "canonical Delhi selection returns OGD records published under NCT of Delhi",
+    );
+    assert(
+      delhiRequest.searchParams.get("filters[state.keyword]") === "NCT of Delhi",
+      "canonical Delhi filter is normalized to the exact OGD state spelling",
+    );
 
     const firstPage = await fetch(`${base}/api/v1/prices?limit=2&offset=0`).then((r) => r.json());
     const secondPage = await fetch(`${base}/api/v1/prices?limit=2&offset=2`).then((r) => r.json());
@@ -319,6 +464,7 @@ async function main() {
         state: "Andhra Pradesh",
         district: "Alluri Sitharama Raju",
         market: item.market,
+        commodity: item.commodity,
         limit: "100",
         offset: "0",
       });
@@ -332,24 +478,28 @@ async function main() {
           marketPayload.data[0]?.market === item.market &&
           marketPayload.data[0]?.commodity === item.commodity &&
           marketPayload.data[0]?.grade === item.grade,
-        `${item.market} regression preserves the sole matching source observation`,
+        `${item.market} regression preserves the source observation`,
       );
       assert(
         sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
           sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
-          sourceRequest.searchParams.get("filters[market.keyword]") === item.market,
-        `${item.market} regression sends exact state, district, and market filters upstream`,
+          sourceRequest.searchParams.get("filters[market.keyword]") === item.market &&
+          sourceRequest.searchParams.get("filters[commodity.keyword]") === item.commodity,
+        `${item.market} regression sends exact state, district, market and commodity filters upstream`,
       );
     }
 
-    const search = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`)
-      .then((r) => r.json());
+    const searchResponse = await fetch(`${base}/api/v1/commodities/search?q=%E0%A4%85%E0%A4%82%E0%A4%97%E0%A5%82%E0%A4%B0`);
+    const search = await searchResponse.json();
     assert(search.success && search.data.length === 1 && search.data[0] === "Grapes", "Hindi commodity search returns an upstream commodity only");
     assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
+    assert((searchResponse.headers.get("cache-control") || "").includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
 
-    const comparison = await fetch(
+    const comparisonResponse = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
-    ).then((r) => r.json());
+    );
+    const comparison = await comparisonResponse.json();
+    assert((comparisonResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
     const comparisonRequest = upstreamRequests.at(-1)!;
     assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
     assert(comparisonRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "live comparison forwards commodity exact-match filter");
@@ -368,6 +518,8 @@ async function main() {
     assert(status.data.mode === "on-demand" && !status.data.bulkSyncEnabled, "sync status confirms bulk sync is disabled");
     assert(status.data.schedulerEnabled === false, "sync status confirms no scheduler");
     assert(status.data.priceStorage === "disabled", "sync status confirms price storage is disabled");
+    assert(status.data.lastFetchedAt === null && status.data.upstreamUpdatedAt === null, "sync status does not invent fetch or upstream update timestamps");
+    assert(typeof status.data.timestamp === "string" && Number.isFinite(Date.parse(status.data.timestamp)), "sync status exposes a valid response timestamp");
 
     const invalid = await fetch(`${base}/api/v1/prices?offset=-1`);
     assert(invalid.status === 400, "invalid pagination is rejected");

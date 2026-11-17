@@ -31,24 +31,41 @@
   <header class="site-header"></header>
   
   <main id="main-content" tabindex="-1">
-    <section class="weather-wrap">
-      <div class="weather-card">
-        <div class="weather-header">
-          <h2 data-i18n="weather.title">Weather by Location</h2>
-          <p data-i18n="weather.subtitle">Check current conditions</p>
-        </div>
-        <div class="weather-input-wrapper">
-          <input type="text" id="locationInput" placeholder="Enter city name" data-i18n="weather.placeholder">
-          <button class="btn btn-primary" id="getWeatherBtn" data-i18n="weather.fetch">Get Weather</button>
-        </div>
-        <div class="weather-result" id="weatherResult" hidden>
-          <div class="weather-city" id="weatherCity"></div>
-          <div class="weather-temperature" id="weatherTemperature"></div>
-          <div class="weather-condition" id="weatherCondition"></div>
-          <div class="weather-details" id="weatherDetails"></div>
-        </div>
-        <div class="weather-error" id="weatherError" hidden></div>
+    <section class="weather-wrap wrap" aria-labelledby="weatherPageTitle">
+      <div class="weather-intro">
+        <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
+        <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
+        <p data-i18n="weather.subtitle">Get current conditions for your location or search any city.</p>
       </div>
+
+      <section class="weather-search-card" aria-label="Find weather">
+        <div class="weather-location-action">
+          <div class="weather-location-copy">
+            <span class="weather-location-icon" aria-hidden="true">⌖</span>
+            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
+          </div>
+          <div class="weather-location-buttons"><button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Start live location</span></button><button class="btn btn-secondary" id="stopLocationTrackingBtn" type="button" data-i18n="weather.stopTracking" hidden>Stop tracking</button><button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button></div>
+        </div>
+        <div class="weather-or"><span data-i18n="weather.orSearch">OR SEARCH A PLACE</span></div>
+        <form class="weather-input-wrapper" id="weatherSearchForm">
+          <label class="sr-only" for="locationInput" data-i18n="weather.placeholder">City, district or PIN code</label>
+          <input type="search" id="locationInput" placeholder="Search city, district or PIN code" autocomplete="off" data-i18n-attr="placeholder:weather.placeholder">
+          <button class="btn btn-primary" id="getWeatherBtn" type="submit" data-i18n="weather.fetch">Search weather</button>
+        </form>
+        <p class="weather-privacy" data-i18n="weather.privacy">Your location is used only to find nearby weather. It is not saved.</p>
+        <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p><p class="weather-location-meta" id="weatherLocationMeta" aria-live="polite" hidden></p>
+        <div class="weather-error" id="weatherError" role="alert" hidden></div>
+      </section>
+
+      <section class="weather-result" id="weatherResult" aria-live="polite" hidden>
+        <div class="weather-result-top">
+          <div><span class="weather-result-label" data-i18n="weather.current">CURRENT WEATHER</span><h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
+          <img class="weather-condition-icon" id="weatherIcon" alt="" width="88" height="88" hidden>
+        </div>
+        <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong><span class="weather-condition" id="weatherCondition"></span></div>
+        <div class="weather-details" id="weatherDetails"></div>
+        <p class="weather-source" data-i18n="weather.source">Current conditions · WeatherAPI</p>
+      </section>
     </section>
   </main>
   
