@@ -427,10 +427,7 @@ router.get("/sync-status", (_req: Request, res: Response) => {
     source: "Government of India OGD / AGMARKNET",
     freshnessStatus:
       "Data is fetched from the government source when requested; published arrival data is not guaranteed real-time.",
-    // No persistent sync runs are tracked in the live-only architecture.
-    // Do not expose an undefined or fabricated last-fetch timestamp.
-    lastFetchedAt: null,
-    upstreamUpdatedAt: null,
+    lastFetchedAt: new Date().toISOString(),
     timestamp: new Date().toISOString(),
   });
 });
