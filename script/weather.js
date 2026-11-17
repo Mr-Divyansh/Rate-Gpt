@@ -437,12 +437,12 @@ import { fetchFilters } from "./api.js";
     loadWeatherStates();
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", (event) => event.preventDefault());
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
     event.preventDefault();
     stopTracking({ announce: false });
-    const freeText = input.value.trim();
-    const place = [villageInput?.value.trim(), cityInput?.value.trim(), districtSelect?.value, stateSelect?.value, "India"].filter(Boolean).join(", ");
-    fetchWeather(freeText || place);
+    fetchWeather(input.value.trim());
   });
   locationButton.addEventListener("click", startTracking);
   stopTrackingButton.addEventListener("click", () => stopTracking());
