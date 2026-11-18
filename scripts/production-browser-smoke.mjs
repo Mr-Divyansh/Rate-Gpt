@@ -186,8 +186,8 @@ try {
       for (let offset = 0; offset < entries.length; offset += 12) {
         const batch = entries.slice(offset, offset + 12);
         const results = await Promise.all(batch.map(async (item) => {
-          const base = String(manifest.imageBase || "/Images").replace(/\\/+$/, "");
-          const relative = String(item.image).replace(/^\\/+/, "");
+          const base = String(manifest.imageBase || "/Images").replace(/\/+$/, "");
+          const relative = String(item.image).replace(/^\/+/, "");
           const url = relative.startsWith("Images/") ? "/" + relative : base + "/" + relative;
           try {
             const response = await fetch(url, { method: "HEAD", cache: "no-store" });
