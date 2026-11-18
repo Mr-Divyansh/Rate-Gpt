@@ -148,7 +148,7 @@ async function main() {
     version: "1.0.0",
     generatedAt: new Date().toISOString(),
     imageBase: "/Images",
-    fallbackImage: "/Images/Vegetables/other/fallback.webp",
+    fallbackImage: null,
     note:
       "Images sourced from Wikimedia Commons under free licenses. See per-entry source/license for attribution.",
     commodities: [],
