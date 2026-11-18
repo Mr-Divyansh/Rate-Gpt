@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "generatedAt": "2026-11-17T16:23:49.294Z",
-  "imageBase": "/Images/Vegetables",
+  "imageBase": "/Images",
   "fallbackImage": "/Images/Vegetables/other/fallback.webp",
   "note": "Images sourced from Wikimedia Commons under free licenses. See per-entry source/license for attribution.",
   "commodities": [
