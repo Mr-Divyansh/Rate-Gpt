@@ -237,6 +237,47 @@ async function main(): Promise<void> {
   check(page.headers.get("x-content-type-options") === "nosniff", "production page sends X-Content-Type-Options: nosniff");
   check(page.headers.has("strict-transport-security"), "production page sends HSTS");
 
+  const imageManifest = await json("/commodity-image-manifest.json");
+  const imageEntries = Array.isArray(imageManifest.body?.commodities)
+    ? imageManifest.body.commodities.filter((item: any) => item.status === "available" && item.image)
+    : [];
+  check(
+    imageManifest.response.status === 200 &&
+      imageManifest.body?.imageBase === "/Images" &&
+      imageEntries.length === 147,
+    "production publishes the manifest for all 147 local commodity photographs",
+  );
+
+  const imageFailures: string[] = [];
+  for (let offset = 0; offset < imageEntries.length; offset += 12) {
+    const batch = imageEntries.slice(offset, offset + 12);
+    const results = await Promise.all(batch.map(async (item: any) => {
+      const imageBase = String(imageManifest.body.imageBase || "/Images").replace(/\\/+$/, "");
+      const relative = String(item.image).replace(/^\\/+/, "");
+      const imagePath = relative.startsWith("Images/")
+        ? "/" + relative
+        : imageBase + "/" + relative;
+      try {
+        const response = await fetch(new URL(imagePath, BASE_URL), {
+          method: "HEAD",
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+        const contentType = response.headers.get("content-type") || "";
+        return response.ok && contentType.includes("image/")
+          ? null
+          : item.id + " (" + response.status + ", " + contentType + ")";
+      } catch (error) {
+        return item.id + " (" + String(error) + ")";
+      }
+    }));
+    imageFailures.push(...results.filter((result): result is string => Boolean(result)));
+  }
+  check(
+    imageEntries.length === 147 && imageFailures.length === 0,
+    "all 147 production commodity photo URLs return successful image responses" +
+      (imageFailures.length ? ": " + imageFailures.join(", ") : ""),
+  );
+
   console.log(`\nProduction smoke checks: ${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
 }
