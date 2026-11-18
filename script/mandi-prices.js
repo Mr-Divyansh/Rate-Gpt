@@ -13,6 +13,7 @@ import { buildPreviousObservationIndex } from "./price-comparison.js";
 import {
   createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
 } from "./csv-export.js";
+import { commodityImageUrl, resolveId } from "../scripts/commodity-image-map.js";
 
 const PAGE_SIZE = 10;
 const $ = (id) => document.getElementById(id);
@@ -285,6 +286,7 @@ function resetResultState() {
 
 function clearResults() {
   resetResultState();
+  pruneQueuedCommodityImages([]);
   history.replaceState(null, "", location.pathname);
   updateControls();
   renderResults();
@@ -392,45 +394,18 @@ function tableRow(record, ctx, showLocation) {
   return tr;
 }
 
-const COMMODITY_IMAGE_ALIASES = {
-  "cucumber kheera": "cucumber",
-  "kheera": "cucumber",
-  "brinjal eggplant": "brinjal",
-  "eggplant": "brinjal",
-  "baingan": "brinjal",
-  "potatoes": "potato",
-  "apples": "apple",
-  "band gobhi": "cabbage",
-  "patta gobhi": "cabbage",
-};
-
-const normalizeCommodityKey = (value) => String(value || "")
-  .normalize("NFKD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .toLocaleLowerCase("en-IN")
-  .replace(/[\(\)\[\]\{\}.,/_-]+/g, " ")
-  .replace(/[^\p{L}\p{N} ]/gu, "")
-  .replace(/\s+/g, " ")
-  .trim();
-
 const commodityImageIndex = new Map();
 let commodityImageManifestLoaded = false;
+const commodityImageQueue = [];
+const commodityImageRequests = new Map();
+let activeCommodityImageRequest = null;
 
 function findCommodityImage(commodity) {
-  const key = normalizeCommodityKey(commodity);
-  const alias = COMMODITY_IMAGE_ALIASES[key];
-  if (alias && commodityImageIndex.has(alias)) return commodityImageIndex.get(alias);
-  if (commodityImageIndex.has(key)) return commodityImageIndex.get(key);
-  // Accept a manifest name with a descriptive suffix, e.g. "Brinjal (Eggplant)".
-  for (const [candidate, entry] of commodityImageIndex) {
-    if (candidate && (key.startsWith(candidate + " ") || candidate.startsWith(key + " "))) {
-      return entry;
-    }
-  }
-  return null;
+  const id = resolveId(commodity);
+  return id ? commodityImageIndex.get(id) || null : null;
 }
 
-fetch("/commodity-image-manifest.json", { cache: "force-cache" })
+fetch("/commodity-image-manifest.json", { cache: "no-cache" })
   .then((response) => {
     if (!response.ok) throw new Error("Commodity image manifest unavailable");
     return response.json();
@@ -438,14 +413,13 @@ fetch("/commodity-image-manifest.json", { cache: "force-cache" })
   .then((manifest) => {
     for (const item of manifest.commodities || []) {
       if (item.status !== "available" || !item.image) continue;
+      const src = commodityImageUrl(manifest.imageBase, item.image);
+      if (!src) continue;
       const image = {
-        src: "/" + String(item.image).replace(/^\/+/, ""),
+        src,
         name: item.name || item.id,
       };
-      for (const value of [item.id, item.name, item.hindi]) {
-        const key = normalizeCommodityKey(value);
-        if (key) commodityImageIndex.set(key, image);
-      }
+      commodityImageIndex.set(item.id, image);
     }
     commodityImageManifestLoaded = true;
     if (state.records.length) renderResults();
@@ -453,51 +427,122 @@ fetch("/commodity-image-manifest.json", { cache: "force-cache" })
   .catch((error) => {
     commodityImageManifestLoaded = true;
     console.warn("[Rate-GPT] Commodity photos could not be loaded:", error);
+    if (state.records.length) renderResults();
   });
 
-function cropArtwork(commodity) {
-  const value = String(commodity || "").toLowerCase();
-  const crops = [
-    [/bottle.?gourd|lauki/, "🥒"], [/papaya/, "🍈"], [/chilli|chili|pepper/, "🌶️"],
-    [/guava/, "🍐"], [/bhindi|okra|ladies.?finger/, "🥬"], [/tomato/, "🍅"],
-    [/potato|आलू/, "🥔"], [/onion|प्याज/, "🧅"], [/apple|सेब/, "🍎"],
-    [/mango|आम/, "🥭"], [/cauliflower/, "🥦"], [/cabbage/, "🥬"],
-    [/wheat|गेहूं/, "🌾"], [/rice|paddy|धान/, "🌾"],
-  ];
-  return crops.find(([pattern]) => pattern.test(value))?.[1] || "🌱";
+function showCommodityImage(target, request) {
+  if (request.status === "loaded") {
+    target.image.src = request.objectUrl;
+    target.artwork.classList.add("has-photo");
+    target.placeholder.hidden = true;
+    return;
+  }
+  target.placeholder.textContent = "Photo unavailable";
+  target.placeholder.classList.add("unavailable");
+  target.image.removeAttribute("src");
+}
+
+async function startNextCommodityImage() {
+  if (activeCommodityImageRequest) return;
+  const request = commodityImageQueue.shift();
+  if (!request) return;
+
+  activeCommodityImageRequest = request;
+  request.status = "loading";
+  try {
+    const response = await fetch(request.src, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    if (!blob.type.toLowerCase().includes("image/webp")) {
+      throw new Error(`Unexpected content type: ${blob.type || "unknown"}`);
+    }
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const decodedImage = new Image();
+      decodedImage.src = objectUrl;
+      await decodedImage.decode();
+    } catch (error) {
+      URL.revokeObjectURL(objectUrl);
+      throw error;
+    }
+    request.objectUrl = objectUrl;
+    request.status = "loaded";
+    for (const target of request.targets) showCommodityImage(target, request);
+  } catch (error) {
+    request.status = "failed";
+    console.warn(`[Rate-GPT] Commodity photo failed: ${request.src}`, error);
+    for (const target of request.targets) showCommodityImage(target, request);
+  } finally {
+    activeCommodityImageRequest = null;
+    startNextCommodityImage();
+  }
+}
+
+function enqueueCommodityImage(target) {
+  const cached = commodityImageRequests.get(target.src);
+  if (cached) {
+    if (cached.status === "loaded" || cached.status === "failed") showCommodityImage(target, cached);
+    else cached.targets.add(target);
+    return;
+  }
+
+  const request = { src: target.src, status: "queued", targets: new Set([target]) };
+  commodityImageRequests.set(target.src, request);
+  commodityImageQueue.push(request);
+  startNextCommodityImage();
+}
+
+function pruneQueuedCommodityImages(records) {
+  const wantedImages = new Set(
+    records
+      .map((record) => findCommodityImage(record.commodity)?.src)
+      .filter(Boolean),
+  );
+  for (let index = commodityImageQueue.length - 1; index >= 0; index -= 1) {
+    const request = commodityImageQueue[index];
+    if (request.status === "queued" && !wantedImages.has(request.src)) {
+      request.status = "cancelled";
+      request.targets.clear();
+      commodityImageRequests.delete(request.src);
+      commodityImageQueue.splice(index, 1);
+    }
+  }
+}
+
+function commodityArtwork(record) {
+  const artwork = document.createElement("div");
+  artwork.className = "crop-art";
+  const placeholder = document.createElement("span");
+  placeholder.className = "crop-art-placeholder";
+  artwork.append(placeholder);
+
+  const photo = findCommodityImage(record.commodity);
+  if (!photo) {
+    placeholder.textContent = commodityImageManifestLoaded ? "Photo unavailable" : "Loading photo…";
+    if (commodityImageManifestLoaded) placeholder.classList.add("unavailable");
+    return artwork;
+  }
+
+  const image = document.createElement("img");
+  image.className = "crop-photo";
+  image.alt = `${photo.name} photograph`;
+  image.decoding = "async";
+  image.width = 320;
+  image.height = 180;
+  image.addEventListener("error", () => {
+    artwork.classList.remove("has-photo");
+    placeholder.textContent = "Photo unavailable";
+    placeholder.classList.add("unavailable");
+    placeholder.hidden = false;
+  }, { once: true });
+  artwork.append(image);
+  enqueueCommodityImage({ src: photo.src, image, artwork, placeholder });
+  return artwork;
 }
 
 function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
-  const artwork = document.createElement("div");
-  artwork.className = "crop-art";
-  const artworkIcon = document.createElement("span");
-  artworkIcon.className = "crop-art-fallback";
-  artworkIcon.textContent = cropArtwork(record.commodity);
-  artwork.setAttribute("aria-label", `${record.commodity || "Crop"} photograph`);
-  const photo = findCommodityImage(record.commodity);
-  if (photo) {
-    const image = document.createElement("img");
-    image.className = "crop-photo";
-    image.src = photo.src;
-    image.alt = `${photo.name} photograph`;
-    image.loading = "lazy";
-    image.decoding = "async";
-    image.width = 320;
-    image.height = 180;
-    image.addEventListener("load", () => {
-      artwork.classList.add("has-photo");
-      artworkIcon.hidden = true;
-    }, { once: true });
-    image.addEventListener("error", () => {
-      image.remove();
-      artwork.classList.remove("has-photo");
-      artworkIcon.hidden = false;
-    }, { once: true });
-    artwork.append(image);
-  }
-  artwork.append(artworkIcon);
   const top = document.createElement("div");
   top.className = "price-card-top";
   top.append(cropBlock(record, showLocation), modalBlock(record));
@@ -506,7 +551,7 @@ function cardFor(record, ctx, showLocation) {
   const date = document.createElement("span");
   date.textContent = formatDate(record.arrival_date);
   meta.append(date, createDelta(record.modal_price, ctx.previous(record)?.modal_price));
-  card.append(artwork, top, createRange(record, ctx.axis(record)), meta);
+  card.append(commodityArtwork(record), top, createRange(record, ctx.axis(record)), meta);
   return card;
 }
 
@@ -829,6 +874,7 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
     state.records = append
       ? [...state.records, ...payload.data.filter((record) => !state.records.some((seen) => seen.id === record.id))]
       : payload.data;
+    pruneQueuedCommodityImages(state.records);
     state.meta = {
       limit: meta.limit,
       offset: meta.offset,
@@ -856,6 +902,7 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
     if (controller.signal.aborted) return;
     state.error = errorText(error, "Unable to load mandi prices.");
     if (!append) state.meta = { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false };
+    pruneQueuedCommodityImages(append ? state.records : []);
   } finally {
     if (state.controller === controller) {
       state.loading = false;
