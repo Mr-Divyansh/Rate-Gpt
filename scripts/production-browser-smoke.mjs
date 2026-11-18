@@ -170,6 +170,47 @@ try {
     await page.close();
   }
 
+  // Verify every locally managed commodity photograph is publicly served by the preview.
+  const imagePage = await browser.newPage();
+  try {
+    await imagePage.goto(baseUrl + "/mandi-prices.html", { waitUntil: "domcontentloaded" });
+    const imageAudit = await imagePage.evaluate(async () => {
+      const manifestResponse = await fetch("/commodity-image-manifest.json", { cache: "no-store" });
+      if (!manifestResponse.ok) {
+        return { manifestStatus: manifestResponse.status, total: 0, checked: 0, failures: ["manifest HTTP " + manifestResponse.status] };
+      }
+      const manifest = await manifestResponse.json();
+      const entries = (manifest.commodities || []).filter((item) => item.status === "available" && item.image);
+      const failures = [];
+      let checked = 0;
+      for (let offset = 0; offset < entries.length; offset += 12) {
+        const batch = entries.slice(offset, offset + 12);
+        const results = await Promise.all(batch.map(async (item) => {
+          const base = String(manifest.imageBase || "/Images").replace(/\/+$/, "");
+          const relative = String(item.image).replace(/^\/+/, "");
+          const url = relative.startsWith("Images/") ? "/" + relative : base + "/" + relative;
+          try {
+            const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+            const type = response.headers.get("content-type") || "";
+            return { id: item.id, ok: response.ok && type.includes("image/"), status: response.status, type };
+          } catch (error) {
+            return { id: item.id, ok: false, status: 0, type: String(error) };
+          }
+        }));
+        checked += results.length;
+        failures.push(...results.filter((result) => !result.ok));
+      }
+      return { manifestStatus: manifestResponse.status, total: entries.length, checked, failures };
+    });
+    assert.equal(imageAudit.manifestStatus, 200, "commodity image manifest must be public");
+    assert.equal(imageAudit.total, 147, "all 147 commodity photographs must be listed");
+    assert.equal(imageAudit.checked, 147, "all listed commodity images must be checked");
+    assert.deepEqual(imageAudit.failures, [], "all commodity image URLs must return successful image responses");
+    pass("all 147 deployed commodity photo URLs return HTTP 200 image content");
+  } finally {
+    await imagePage.close();
+  }
+
   console.log("\nProduction browser smoke checks: " + passed + " passed, 0 failed");
 } finally {
   await browser.close();
