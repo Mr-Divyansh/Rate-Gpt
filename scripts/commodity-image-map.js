@@ -7,7 +7,7 @@
  * dedicated photograph stored under Images/Vegetables/<category>/.
  *
  * Commodities not listed here resolve to the neutral fallback image
- * (Images/Vegetables/other/fallback.webp) — we deliberately do NOT use
+ * (Images/Vegetables/other/fallback.svg) — we deliberately do NOT use
  * an unrelated vegetable photograph as a fallback.
  */
 
@@ -181,36 +181,46 @@ const COMMODITY_IMAGE_MAP = [
 // Duplicate id entries (same image, different AGMARKNET spelling variants) are
 // resolved at runtime by the normalizer; they share one image file.
 const ALIAS_MAP = {
-  // Common mandi / Hindi transliterations
-  "aloo": "potato",
-  "aaloo": "potato",
-  "alu": "potato",
-  "aal": "potato",
-  "आलू": "potato",
-  "baingan": "brinjal",
-  "बैंगन": "brinjal",
-  "baigan": "brinjal",
-  "kheera": "cucumber",
-  "khira": "cucumber",
-  "खीरा": "cucumber",
-  "kakdi": "cucumber",
   // vegetables aliases
   "ladies finger": "okra",
   "bhindi": "okra",
+  "okra": "okra",
   "eggplant": "brinjal",
   "aubergine": "brinjal",
+  "baingan": "brinjal",
+  "baigan": "brinjal",
+  "aalu": "potato",
+  "aloo": "potato",
+  "aaloo": "potato",
+  "alu": "potato",
+  "potatoes": "potato",
+  "pyaz": "onion",
+  "pyaaz": "onion",
+  "onions": "onion",
+  "tamatar": "tomato",
+  "tomatoes": "tomato",
+  "kheera": "cucumber",
+  "khira": "cucumber",
+  "cucumbers": "cucumber",
+  "ridge guard": "ridge-gourd",
+  "ridgeguard": "ridge-gourd",
+  "tori": "ridge-gourd",
+  "thondekai": "little-gourd",
+  "band gobhi": "cabbage",
+  "patta gobhi": "cabbage",
   "green chili": "green-chilli",
   "green chilly": "green-chilli",
   "shimla mirch": "capsicum",
   "bell pepper": "capsicum",
   "sweet pepper": "capsicum",
   "lauki": "bottle-gourd",
+  "ghiya": "bottle-gourd",
   "dudhi": "bottle-gourd",
   "karela": "bitter-gourd",
   "parwal": "pointed-gourd",
   "kundru": "little-gourd",
-  "tinda": "round-gourd",
   "arbi": "colocasia",
+  "colacasia": "colocasia",
   "suran": "elephant-yam",
   "jimikand": "elephant-yam",
   "guar": "cluster-beans",
@@ -232,8 +242,14 @@ const ALIAS_MAP = {
   "santra": "orange",
   "tarbooj": "watermelon",
   "kharbooj": "muskmelon",
+  "kharbooja": "muskmelon",
+  "kharbuja": "muskmelon",
+  "karbuja": "muskmelon",
   "nimbu": "lemon",
   "sitaphal": "custard-apple",
+  "seetapal": "custard-apple",
+  "seetaphal": "custard-apple",
+  "sita phal": "custard-apple",
   "kathal": "jackfruit",
   "ananas": "pineapple",
   "chiku": "chikoo",
@@ -330,6 +346,8 @@ const ALIAS_MAP = {
 
 function normalizeKey(value) {
   return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim()
     .toLocaleLowerCase("en-IN")
     // Keep Unicode letters (incl. Devanagari) while dropping punctuation.
@@ -341,23 +359,51 @@ function normalizeKey(value) {
 function resolveId(commodity) {
   const key = normalizeKey(commodity);
   if (!key) return null;
-  // Direct id match
-  const direct = COMMODITY_IMAGE_MAP.find((c) => c.id === key);
+  const normalizeId = (id) => normalizeKey(id);
+  const direct = COMMODITY_IMAGE_MAP.find((c) => normalizeId(c.id) === key);
   if (direct) return direct.id;
-  // Name-based match (English name or Hindi name)
+
+  const aliases = Object.entries(ALIAS_MAP)
+    .map(([alias, target]) => [normalizeKey(alias), target])
+    .filter(([alias]) => alias)
+    .sort(([a], [b]) => b.length - a.length);
+  const exactAlias = aliases.find(([alias]) => alias === key);
+  if (exactAlias) return exactAlias[1];
+
   const byName = COMMODITY_IMAGE_MAP.find(
     (c) =>
       normalizeKey(c.name) === key ||
-      key.includes(normalizeKey(c.name)) ||
-      (c.hindi && normalizeKey(c.hindi) === key) ||
-      (c.hindi && key.includes(normalizeKey(c.hindi))),
+      (c.hindi && normalizeKey(c.hindi) === key),
   );
   if (byName) return byName.id;
-  // Alias (exact or substring match so "Bhindi(Ladies Finger)" -> "bhindi")
-  for (const [alias, target] of Object.entries(ALIAS_MAP)) {
-    if (key === alias || key.includes(alias) || alias.includes(key)) return target;
-  }
+
+  const aliasMatch = aliases.find(([alias]) => ` ${key} `.includes(` ${alias} `));
+  if (aliasMatch) return aliasMatch[1];
+
+  const namedMatch = COMMODITY_IMAGE_MAP
+    .map((c) => [c.id, normalizeKey(c.name), normalizeKey(c.hindi || "")])
+    .sort((a, b) => Math.max(b[1].length, b[2].length) - Math.max(a[1].length, a[2].length))
+    .find(([, name, hindi]) =>
+      [name, hindi].some((candidate) =>
+        candidate && (key.startsWith(`${candidate} `) || key.endsWith(` ${candidate}`)),
+      ),
+    );
+  if (namedMatch) return namedMatch[0];
+
   return null;
+}
+
+function commodityImageUrl(imageBase, imagePath) {
+  const base = String(imageBase || "").replace(/\/+$/, "");
+  const parts = String(imagePath || "")
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .split("/")
+    .filter(Boolean);
+  const baseName = base.split("/").filter(Boolean).pop();
+  if (baseName && parts[0] === baseName) parts.shift();
+  if (!base || !parts.length) return null;
+  return `${base}/${parts.map((part) => encodeURIComponent(part)).join("/")}`;
 }
 
 export {
@@ -366,4 +412,5 @@ export {
   CATEGORIES,
   resolveId,
   normalizeKey,
+  commodityImageUrl,
 };

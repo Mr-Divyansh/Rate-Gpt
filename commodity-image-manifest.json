@@ -1,9 +1,9 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-11-17T16:23:49.294Z",
+  "generatedAt": "2026-11-18T13:31:49.925Z",
   "imageBase": "/Images",
-  "fallbackImage": null,
-  "note": "Images sourced from Wikimedia Commons under free licenses. See per-entry source/license for attribution.",
+  "fallbackImage": "/Images/Vegetables/other/fallback.svg",
+  "note": "Wikimedia Commons images use the per-entry reusable license. See sourceUrl, imageUrl, license, and author for attribution.",
   "commodities": [
     {
       "id": "ajwain",
@@ -12,10 +12,10 @@
       "category": "spices",
       "image": "Vegetables/spices/ajwain.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ATrachyspermum_ammi-1-xavier_cottage-yercaud-salem-India.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Trachyspermum_ammi-1-xavier_cottage-yercaud-salem-India.jpg/960px-Trachyspermum_ammi-1-xavier_cottage-yercaud-salem-India.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Yercaud-elango",
       "status": "available"
     },
     {
@@ -25,10 +25,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/almond.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAlmond_with_two_kernels.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Almond_with_two_kernels.jpg/960px-Almond_with_two_kernels.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ivar Leidus",
       "status": "available"
     },
     {
@@ -38,10 +38,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/amaranthus.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAmaranthus_hybridus_01.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Amaranthus_hybridus_01.JPG/960px-Amaranthus_hybridus_01.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "H. Zell",
       "status": "available"
     },
     {
@@ -51,10 +51,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/amla.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAmla_(Gujarati-_%E0%AA%86%E0%AA%AE%E0%AA%B3%E0%AA%BE)_(4938449876).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Amla_%28Gujarati-_%E0%AA%86%E0%AA%AE%E0%AA%B3%E0%AA%BE%29_%284938449876%29.jpg/960px-Amla_%28Gujarati-_%E0%AA%86%E0%AA%AE%E0%AA%B3%E0%AA%BE%29_%284938449876%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0",
+      "author": "Dinesh Valke from Thane, India",
       "status": "available"
     },
     {
@@ -64,10 +64,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/apple.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALiat_Portal_for_Foodie_Disorder_-_Red_Apple_(Whole_Fruit).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Liat_Portal_for_Foodie_Disorder_-_Red_Apple_%28Whole_Fruit%29.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Red_Apple_%28Whole_Fruit%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "HaJunkiyada",
       "status": "available"
     },
     {
@@ -77,10 +77,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/apricot.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AYellow_apricot_(20240603).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Yellow_apricot_%2820240603%29.jpg/960px-Yellow_apricot_%2820240603%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Fumikas Sagisavas",
       "status": "available"
     },
     {
@@ -90,10 +90,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/arecanut.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_aesthetic_arecanut.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/A_aesthetic_arecanut.JPG/960px-A_aesthetic_arecanut.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -103,10 +103,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/arhar.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACajanus_cajan_fruits_on_white_background.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Cajanus_cajan_fruits_on_white_background.jpg/960px-Cajanus_cajan_fruits_on_white_background.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Filo gèn'",
       "status": "available"
     },
     {
@@ -116,10 +116,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/arhar-dal.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APigeon_Pea_(Toor_Dal)_(49683602388).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Pigeon_Pea_%28Toor_Dal%29_%2849683602388%29.jpg/960px-Pigeon_Pea_%28Toor_Dal%29_%2849683602388%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "Ajay Suresh from New York, NY, USA",
       "status": "available"
     },
     {
@@ -129,10 +129,10 @@
       "category": "spices",
       "image": "Vegetables/spices/asafoetida.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAsafoetida_resin_(Iran).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Asafoetida_resin_%28Iran%29.jpg/960px-Asafoetida_resin_%28Iran%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Tricholome",
       "status": "available"
     },
     {
@@ -142,10 +142,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/ash-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARaw_winter_melon.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Raw_winter_melon.jpg/960px-Raw_winter_melon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Fumikas Sagisavas",
       "status": "available"
     },
     {
@@ -155,10 +155,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/baby-corn.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABaby_corn_(1).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Baby_corn_%281%29.jpg/960px-Baby_corn_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Fumikas Sagisavas",
       "status": "available"
     },
     {
@@ -168,10 +168,10 @@
       "category": "grains",
       "image": "Vegetables/grains/bajra.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_closeup_of_Pearl_Millet_(Cumbu).JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/A_closeup_of_Pearl_Millet_%28Cumbu%29.JPG/960px-A_closeup_of_Pearl_Millet_%28Cumbu%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -181,10 +181,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/bamboo-shoot.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABamboo_Shoot.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Bamboo_Shoot.jpg/960px-Bamboo_Shoot.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gaurav Dhwaj Khadka",
       "status": "available"
     },
     {
@@ -194,10 +194,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/banana.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABanana_on_white_background_POST%C3%89RIS.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Banana_on_white_background_POST%C3%89RIS.jpg/960px-Banana_on_white_background_POST%C3%89RIS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Filo gèn'",
       "status": "available"
     },
     {
@@ -207,10 +207,10 @@
       "category": "grains",
       "image": "Vegetables/grains/barley.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABarley_Seeds.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Barley_Seeds.jpg/960px-Barley_Seeds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -220,10 +220,10 @@
       "category": "grains",
       "image": "Vegetables/grains/barnyard-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AJapanese_barnyard_millet.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/Japanese_barnyard_millet.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 3.0",
+      "author": "ja:利用者:ウミユスリカ",
       "status": "available"
     },
     {
@@ -233,10 +233,10 @@
       "category": "spices",
       "image": "Vegetables/spices/bay-leaf.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AIndian_bay_leaf_-_tejpatta_-_indisches_Lorbeerblatt.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Indian_bay_leaf_-_tejpatta_-_indisches_Lorbeerblatt.jpg/960px-Indian_bay_leaf_-_tejpatta_-_indisches_Lorbeerblatt.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Sonja Pauen",
       "status": "available"
     },
     {
@@ -246,10 +246,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/beans.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGreen_Beans%2C_greengrocers_display%2C_Redruth%2C_Cornwall_-_October_2022.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Green_Beans%2C_greengrocers_display%2C_Redruth%2C_Cornwall_-_October_2022.jpg/960px-Green_Beans%2C_greengrocers_display%2C_Redruth%2C_Cornwall_-_October_2022.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Mutney",
       "status": "available"
     },
     {
@@ -259,10 +259,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/beetroot.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABeetroot_jm27950.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Beetroot_jm27950.jpg/960px-Beetroot_jm27950.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "joergens.mi",
       "status": "available"
     },
     {
@@ -272,10 +272,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/bitter-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABitter_Gourd_%E1%80%80%E1%80%BC%E1%80%80%E1%80%BA%E1%80%9F%E1%80%84%E1%80%BA%E1%80%B8%E1%80%81%E1%80%AB%E1%80%B8%E1%80%9E%E1%80%AE%E1%80%B8.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Bitter_Gourd_%E1%80%80%E1%80%BC%E1%80%80%E1%80%BA%E1%80%9F%E1%80%84%E1%80%BA%E1%80%B8%E1%80%81%E1%80%AB%E1%80%B8%E1%80%9E%E1%80%AE%E1%80%B8.jpg/960px-Bitter_Gourd_%E1%80%80%E1%80%BC%E1%80%80%E1%80%BA%E1%80%9F%E1%80%84%E1%80%BA%E1%80%B8%E1%80%81%E1%80%AB%E1%80%B8%E1%80%9E%E1%80%AE%E1%80%B8.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "SarKaLay စာကလေး",
       "status": "available"
     },
     {
@@ -285,10 +285,10 @@
       "category": "spices",
       "image": "Vegetables/spices/black-pepper.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABlack_pepper_whole.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Black_pepper_whole.JPG/960px-Black_pepper_whole.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Miansari66",
       "status": "available"
     },
     {
@@ -298,10 +298,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/blueberry.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AErgaki%2C_Blueberry_fruit_and_leaves%2C_Sayan_Mountains%2C_Russia.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Ergaki%2C_Blueberry_fruit_and_leaves%2C_Sayan_Mountains%2C_Russia.jpg/960px-Ergaki%2C_Blueberry_fruit_and_leaves%2C_Sayan_Mountains%2C_Russia.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Vyacheslav Argenberg",
       "status": "available"
     },
     {
@@ -311,10 +311,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/bottle-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AFresh_Bottle_Gourd_(Lauki)_from_Home_Garden.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Fresh_Bottle_Gourd_%28Lauki%29_from_Home_Garden.jpg/960px-Fresh_Bottle_Gourd_%28Lauki%29_from_Home_Garden.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "MohitSinghRazput",
       "status": "available"
     },
     {
@@ -324,10 +324,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/brinjal.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AEggplant_aubergine_brinjal.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Eggplant_aubergine_brinjal.jpg/960px-Eggplant_aubergine_brinjal.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "A3 Baard",
       "status": "available"
     },
     {
@@ -337,10 +337,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/broccoli.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALiat_Portal_for_Foodie_Disorder_-_Fresh_Broccoli.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Liat_Portal_for_Foodie_Disorder_-_Fresh_Broccoli.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Fresh_Broccoli.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "HaJunkiyada",
       "status": "available"
     },
     {
@@ -350,10 +350,10 @@
       "category": "grains",
       "image": "Vegetables/grains/browntop-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AUrochloa_ramosa_181533395.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Urochloa_ramosa_181533395.jpg/960px-Urochloa_ramosa_181533395.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Augustin Soulard",
       "status": "available"
     },
     {
@@ -363,10 +363,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/cabbage.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACabbage_001.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Cabbage_001.jpg/960px-Cabbage_001.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Flixtey",
       "status": "available"
     },
     {
@@ -376,10 +376,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/capsicum.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARed_bell_pepper.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Red_bell_pepper.jpg/960px-Red_bell_pepper.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "AntanO",
       "status": "available"
     },
     {
@@ -389,10 +389,10 @@
       "category": "spices",
       "image": "Vegetables/spices/cardamom.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACardamom_(Elaichi)_from_India.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Cardamom_%28Elaichi%29_from_India.jpg/960px-Cardamom_%28Elaichi%29_from_India.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Libreravi",
       "status": "available"
     },
     {
@@ -402,10 +402,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/carrot.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AVegetable-Carrot-Bundle-wStalks.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Vegetable-Carrot-Bundle-wStalks.jpg/960px-Vegetable-Carrot-Bundle-wStalks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Evan-Amos",
       "status": "available"
     },
     {
@@ -415,10 +415,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/cashew.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACashew_nut_with_fruit.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Cashew_nut_with_fruit.jpg/960px-Cashew_nut_with_fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Vinayaraj",
       "status": "available"
     },
     {
@@ -428,10 +428,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/cauliflower.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AStack_of_cauliflower_heads.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Stack_of_cauliflower_heads.jpg/960px-Stack_of_cauliflower_heads.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Jeffery Martin",
       "status": "available"
     },
     {
@@ -441,10 +441,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/celery.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABundles_of_celery_for_sale_in_supermarket.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Bundles_of_celery_for_sale_in_supermarket.jpg/960px-Bundles_of_celery_for_sale_in_supermarket.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Fumikas Sagisavas",
       "status": "available"
     },
     {
@@ -454,10 +454,10 @@
       "category": "spices",
       "image": "Vegetables/spices/celery-seed.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AStarr-080815-9789-Apium_graveolens-seeds-Makawao-Maui_(24831975011).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Starr-080815-9789-Apium_graveolens-seeds-Makawao-Maui_%2824831975011%29.jpg/960px-Starr-080815-9789-Apium_graveolens-seeds-Makawao-Maui_%2824831975011%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 3.0 us",
+      "author": "Forest and Kim Starr",
       "status": "available"
     },
     {
@@ -467,10 +467,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/chana.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AChickpeas-whole-split.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Chickpeas-whole-split.jpg/960px-Chickpeas-whole-split.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "Leslie Seaton from Seattle, WA, USA",
       "status": "available"
     },
     {
@@ -480,10 +480,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/chana-dal.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASplit_Chickpeas.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Split_Chickpeas.jpg/960px-Split_Chickpeas.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gaurav Dhwaj Khadka",
       "status": "available"
     },
     {
@@ -493,10 +493,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/cherry.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_cherry_is_the_fruit_of_many_plants_of_the_genus_Prunus.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/A_cherry_is_the_fruit_of_many_plants_of_the_genus_Prunus.JPG/960px-A_cherry_is_the_fruit_of_many_plants_of_the_genus_Prunus.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "David Adam Kess",
       "status": "available"
     },
     {
@@ -506,10 +506,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/chikoo.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASapodilla_Hasya02_F%26SPark_Asit.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Sapodilla_Hasya02_F%26SPark_Asit.jpg/960px-Sapodilla_Hasya02_F%26SPark_Asit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Asit K. Ghosh Thaumaturgist",
       "status": "available"
     },
     {
@@ -519,10 +519,10 @@
       "category": "spices",
       "image": "Vegetables/spices/cinnamon.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGround_Cinnamon_Powder_and_a_Cinnamon_Stick_adjusted.png",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Ground_Cinnamon_Powder_and_a_Cinnamon_Stick_adjusted.png/960px-Ground_Cinnamon_Powder_and_a_Cinnamon_Stick_adjusted.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.5",
+      "author": "formulatehealth",
       "status": "available"
     },
     {
@@ -532,10 +532,10 @@
       "category": "spices",
       "image": "Vegetables/spices/cloves.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACloves_Munduk_MRD.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Cloves_Munduk_MRD.jpg/960px-Cloves_Munduk_MRD.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Mike Dickison",
       "status": "available"
     },
     {
@@ -545,10 +545,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/cluster-beans.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACluster_bean.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Cluster_bean.jpg/960px-Cluster_bean.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -558,10 +558,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/coconut.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AThe_fruit_of_coconut.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/The_fruit_of_coconut.jpg/960px-The_fruit_of_coconut.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Lotadegbemijowa",
       "status": "available"
     },
     {
@@ -571,10 +571,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/colocasia.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AColocasia_Sp_6064.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Colocasia_Sp_6064.jpg/960px-Colocasia_Sp_6064.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Vengolis",
       "status": "available"
     },
     {
@@ -584,10 +584,10 @@
       "category": "spices",
       "image": "Vegetables/spices/coriander.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_scene_of_Coriander_leaves.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/A_scene_of_Coriander_leaves.JPG/960px-A_scene_of_Coriander_leaves.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -597,10 +597,10 @@
       "category": "spices",
       "image": "Vegetables/spices/coriander-seed.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACoriander_Seeds.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Coriander_Seeds.jpg/960px-Coriander_Seeds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -610,10 +610,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/corn.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACorn_close-up.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Corn_close-up.jpg/960px-Corn_close-up.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "liz west",
       "status": "available"
     },
     {
@@ -623,10 +623,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/cowpea.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APatterned_cowpea_(20240605).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Patterned_cowpea_%2820240605%29.jpg/960px-Patterned_cowpea_%2820240605%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Fumikas Sagisavas",
       "status": "available"
     },
     {
@@ -636,10 +636,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/cucumber.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AKyuri_%E3%82%AD%E3%83%A5%E3%82%A6%E3%83%AA_2026-10-19_Japanese_cucumber_02.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Kyuri_%E3%82%AD%E3%83%A5%E3%82%A6%E3%83%AA_2026-10-19_Japanese_cucumber_02.jpg/960px-Kyuri_%E3%82%AD%E3%83%A5%E3%82%A6%E3%83%AA_2026-10-19_Japanese_cucumber_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "P1898",
       "status": "available"
     },
     {
@@ -649,10 +649,10 @@
       "category": "spices",
       "image": "Vegetables/spices/cumin.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACumin_seed_whole.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Cumin_seed_whole.JPG/960px-Cumin_seed_whole.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Miansari66",
       "status": "available"
     },
     {
@@ -662,10 +662,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/curry-leaf.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3A20260317_Murraya_koenigii_01.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/20260317_Murraya_koenigii_01.jpg/960px-20260317_Murraya_koenigii_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Flocci Nivis",
       "status": "available"
     },
     {
@@ -675,10 +675,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/custard-apple.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAnnona_squamosa_(Custurd_Apple)_fruit_in_Hyderabad%2C_AP_W_IMG_9353.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Annona_squamosa_%28Custurd_Apple%29_fruit_in_Hyderabad%2C_AP_W_IMG_9353.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 4.0",
+      "author": "J.M.Garg",
       "status": "available"
     },
     {
@@ -688,10 +688,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/date.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADry_Dates_(Debino).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Dry_Dates_%28Debino%29.jpg/960px-Dry_Dates_%28Debino%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ogalihillary",
       "status": "available"
     },
     {
@@ -701,10 +701,10 @@
       "category": "spices",
       "image": "Vegetables/spices/dill-seed.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAnethum_graveolens_seeds.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Anethum_graveolens_seeds.JPG/960px-Anethum_graveolens_seeds.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Reaperman",
       "status": "available"
     },
     {
@@ -714,10 +714,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/dragon-fruit.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADragon_fruit_(pitaya)_on_white_background.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Dragon_fruit_%28pitaya%29_on_white_background.jpg/960px-Dragon_fruit_%28pitaya%29_on_white_background.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Teknad",
       "status": "available"
     },
     {
@@ -727,10 +727,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/drumstick.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMoringa_oleifera_drumstick_pods.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Moringa_oleifera_drumstick_pods.JPG/960px-Moringa_oleifera_drumstick_pods.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Erector",
       "status": "available"
     },
     {
@@ -740,10 +740,10 @@
       "category": "spices",
       "image": "Vegetables/spices/dry-chilli.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADried_chilli.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Dried_chilli.jpg/960px-Dried_chilli.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "ProjectManhattan",
       "status": "available"
     },
     {
@@ -753,10 +753,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/elephant-yam.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AElephant_foot_yam.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Elephant_foot_yam.jpg/960px-Elephant_foot_yam.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Aravind Sivaraj",
       "status": "available"
     },
     {
@@ -766,10 +766,10 @@
       "category": "spices",
       "image": "Vegetables/spices/fennel.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASaunf_or_Fennel_seeds_used_as_an_after-mint_in_India.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Saunf_or_Fennel_seeds_used_as_an_after-mint_in_India.jpg/960px-Saunf_or_Fennel_seeds_used_as_an_after-mint_in_India.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "Jeeheon Cho from Surat Thani, Thailand",
       "status": "available"
     },
     {
@@ -779,10 +779,10 @@
       "category": "spices",
       "image": "Vegetables/spices/fenugreek.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AFenugreek_seed.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Fenugreek_seed.JPG/960px-Fenugreek_seed.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Miansari66",
       "status": "available"
     },
     {
@@ -792,10 +792,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/field-bean.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALablab_pods.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Lablab_pods.jpg/960px-Lablab_pods.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Microrao",
       "status": "available"
     },
     {
@@ -805,10 +805,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/fig.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_closeup_of_fig_fruit.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/A_closeup_of_fig_fruit.JPG/960px-A_closeup_of_fig_fruit.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -818,10 +818,10 @@
       "category": "grains",
       "image": "Vegetables/grains/foxtail-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AJapanese_Foxtail_millet_02.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Japanese_Foxtail_millet_02.jpg/960px-Japanese_Foxtail_millet_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "STRONGlk7",
       "status": "available"
     },
     {
@@ -831,10 +831,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/garlic.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGarlic_Bulbs_(Unsplash).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Garlic_Bulbs_%28Unsplash%29.jpg/960px-Garlic_Bulbs_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Matthew Pilachowski matthewpilachowski",
       "status": "available"
     },
     {
@@ -844,10 +844,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/ginger.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALiat_Portal_for_Foodie_Disorder_-_Fresh_Ginger_Root.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Liat_Portal_for_Foodie_Disorder_-_Fresh_Ginger_Root.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Fresh_Ginger_Root.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "HaJunkiyada",
       "status": "available"
     },
     {
@@ -857,10 +857,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/grapes.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGrapes_(Vitis_cultivars)%3B_three_bunches_of_fruit._Coloured_a_Wellcome_V0044247.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Grapes_%28Vitis_cultivars%29%3B_three_bunches_of_fruit._Coloured_a_Wellcome_V0044247.jpg/960px-Grapes_%28Vitis_cultivars%29%3B_three_bunches_of_fruit._Coloured_a_Wellcome_V0044247.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "https://wellcomeimages.org/indexplus/obf_images/7c/57/91916609b2916603d04c29c31069.jpg Gallery: https://wellcomeimages.org/indexplus/image/V0044247.html Wellcome Collection gallery (2018-03-29): https://wellcomecollection.org/works/em89wtqk CC-BY-4.0",
       "status": "available"
     },
     {
@@ -870,10 +870,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/green-chilli.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASpicy_green_chilli.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Spicy_green_chilli.jpg/960px-Spicy_green_chilli.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Bhuvaneshwari kandhasamy",
       "status": "available"
     },
     {
@@ -883,10 +883,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/green-peas.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASmall_spherical_seeds_of_fresh_matar_(green_peas)%2C_photographed_in_West_Bengal%2C_India%2C_on_November_19%2C_2023.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Small_spherical_seeds_of_fresh_matar_%28green_peas%29%2C_photographed_in_West_Bengal%2C_India%2C_on_November_19%2C_2023.jpg/960px-Small_spherical_seeds_of_fresh_matar_%28green_peas%29%2C_photographed_in_West_Bengal%2C_India%2C_on_November_19%2C_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Billjones94",
       "status": "available"
     },
     {
@@ -896,10 +896,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/groundnut.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGroundnut_of_Salem.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Groundnut_of_Salem.jpg/960px-Groundnut_of_Salem.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -909,10 +909,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/guava.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGuava_4.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Guava_4.jpg/960px-Guava_4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gaurav Dhwaj Khadka",
       "status": "available"
     },
     {
@@ -922,10 +922,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/jackfruit.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADFC_4176_Golden_jackfruit_bulbs_piled_together_ready_to_eat.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/DFC_4176_Golden_jackfruit_bulbs_piled_together_ready_to_eat.jpg/960px-DFC_4176_Golden_jackfruit_bulbs_piled_together_ready_to_eat.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "PattayaPatrol",
       "status": "available"
     },
     {
@@ -935,10 +935,10 @@
       "category": "grains",
       "image": "Vegetables/grains/jowar.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AJowar_Sorghum.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Jowar_Sorghum.JPG/960px-Jowar_Sorghum.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Azhar feder",
       "status": "available"
     },
     {
@@ -948,10 +948,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/kidney-beans.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AChitra_Rajma.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Chitra_Rajma.jpg/960px-Chitra_Rajma.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -961,10 +961,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/kinnow.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AKinnow_fruits.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Kinnow_fruits.JPG/960px-Kinnow_fruits.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Rattanpal",
       "status": "available"
     },
     {
@@ -974,10 +974,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/kiwi.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AKiwi_fruit_open.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Kiwi_fruit_open.jpg/960px-Kiwi_fruit_open.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Microrao",
       "status": "available"
     },
     {
@@ -987,10 +987,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/knol-khol.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABrassica_oleracea_var._gongylodes_(kohlrabi).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Brassica_oleracea_var._gongylodes_%28kohlrabi%29.jpg/960px-Brassica_oleracea_var._gongylodes_%28kohlrabi%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Unknown",
       "status": "available"
     },
     {
@@ -1000,10 +1000,10 @@
       "category": "grains",
       "image": "Vegetables/grains/kodo-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AKodo_Millet_in_Chhattisgarh.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/48/Kodo_Millet_in_Chhattisgarh.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 3.0",
+      "author": "Pankaj Oudhia",
       "status": "available"
     },
     {
@@ -1013,10 +1013,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/kulthi.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AHorse_Gram_Seeds.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Horse_Gram_Seeds.jpg/960px-Horse_Gram_Seeds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -1026,10 +1026,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/leek.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALeek_on_white_background_-_0947.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Leek_on_white_background_-_0947.jpg/960px-Leek_on_white_background_-_0947.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Amada44",
       "status": "available"
     },
     {
@@ -1039,10 +1039,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/lemon.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALemon_-_whole_and_split.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Lemon_-_whole_and_split.jpg/960px-Lemon_-_whole_and_split.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ivar Leidus",
       "status": "available"
     },
     {
@@ -1052,10 +1052,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/lettuce.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALettuce_(%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0_%D1%81%D0%B0%D0%BB%D0%B0%D1%82%D0%B0).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Lettuce_%28%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0_%D1%81%D0%B0%D0%BB%D0%B0%D1%82%D0%B0%29.jpg/960px-Lettuce_%28%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0_%D1%81%D0%B0%D0%BB%D0%B0%D1%82%D0%B0%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "SA, The Green Ark, Bostanie",
       "status": "available"
     },
     {
@@ -1065,10 +1065,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/lichi.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALitchi_chinensis190714mx.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Litchi_chinensis190714mx.jpg/960px-Litchi_chinensis190714mx.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Carlos Valenzuela",
       "status": "available"
     },
     {
@@ -1078,10 +1078,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/lime.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALime_-_whole_and_halved.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Lime_-_whole_and_halved.jpg/960px-Lime_-_whole_and_halved.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ivar Leidus",
       "status": "available"
     },
     {
@@ -1091,10 +1091,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/little-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AIvy_Gourd_(Coccinia_grandis)scarlet_gourd_tindora%2C_or_kowai_fruit_KhaWiiTee.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ivy_Gourd_%28Coccinia_grandis%29scarlet_gourd_tindora%2C_or_kowai_fruit_KhaWiiTee.jpg/960px-Ivy_Gourd_%28Coccinia_grandis%29scarlet_gourd_tindora%2C_or_kowai_fruit_KhaWiiTee.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "စာကလေး SarKaLay",
       "status": "available"
     },
     {
@@ -1104,10 +1104,10 @@
       "category": "grains",
       "image": "Vegetables/grains/little-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALittle_millet.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Little_millet.jpg/960px-Little_millet.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Vis M",
       "status": "available"
     },
     {
@@ -1117,10 +1117,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/lobia.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALobia.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/08/Lobia.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 3.0",
+      "author": "HeraldDesa at English Wikipedia",
       "status": "available"
     },
     {
@@ -1130,10 +1130,10 @@
       "category": "spices",
       "image": "Vegetables/spices/mace.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ANutmeg_mace_from_Kerala.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Nutmeg_mace_from_Kerala.jpg/960px-Nutmeg_mace_from_Kerala.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Vis M",
       "status": "available"
     },
     {
@@ -1143,10 +1143,10 @@
       "category": "grains",
       "image": "Vegetables/grains/maize.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADrying_maize_corns_(Himachal_Pradesh)%2C1.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Drying_maize_corns_%28Himachal_Pradesh%29%2C1.jpg/960px-Drying_maize_corns_%28Himachal_Pradesh%29%2C1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Rajani Gairshail",
       "status": "available"
     },
     {
@@ -1156,10 +1156,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/mango.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMango_on_white.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Mango_on_white.jpg/960px-Mango_on_white.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Rhododendrites",
       "status": "available"
     },
     {
@@ -1169,10 +1169,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/mangosteen.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AFresh_mangosteen_fruit.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Fresh_mangosteen_fruit.jpg/960px-Fresh_mangosteen_fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Zulf",
       "status": "available"
     },
     {
@@ -1182,10 +1182,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/masur.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASplit_Red_Lentil.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Split_Red_Lentil.jpg/960px-Split_Red_Lentil.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -1195,10 +1195,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/masur-dal.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASplit_Red_Lentil.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Split_Red_Lentil.jpg/960px-Split_Red_Lentil.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Sanjay Acharya",
       "status": "available"
     },
     {
@@ -1208,10 +1208,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/matki.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMatki.JPG",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Matki.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 3.0",
+      "author": "Lalitstar at English Wikipedia",
       "status": "available"
     },
     {
@@ -1221,10 +1221,10 @@
       "category": "grains",
       "image": "Vegetables/grains/millets.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMillet_grains_sold_at_Kargil_Bazaar.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Millet_grains_sold_at_Kargil_Bazaar.jpg/960px-Millet_grains_sold_at_Kargil_Bazaar.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Rajani Gairshail",
       "status": "available"
     },
     {
@@ -1234,10 +1234,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/moong.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AGreen_gram_gs.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Green_gram_gs.jpg/960px-Green_gram_gs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gausanchennai",
       "status": "available"
     },
     {
@@ -1247,10 +1247,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/moong-dal.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMoong_Dal.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Moong_Dal.jpg/960px-Moong_Dal.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Sudeshna Banerjee",
       "status": "available"
     },
     {
@@ -1260,10 +1260,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/mousambi.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACitrus_limetta_At_home_garden.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Citrus_limetta_At_home_garden.jpg/960px-Citrus_limetta_At_home_garden.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ompatel9033",
       "status": "available"
     },
     {
@@ -1273,10 +1273,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/mushroom.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARoyal_Trumpet_mushroom_20161028-AMS-LSC-0329_(30749384831).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Royal_Trumpet_mushroom_20161028-AMS-LSC-0329_%2830749384831%29.jpg/960px-Royal_Trumpet_mushroom_20161028-AMS-LSC-0329_%2830749384831%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "U.S. Department of Agriculture Lance Cheung/Visual Information Photographer/USDA/Lance Cheung",
       "status": "available"
     },
     {
@@ -1286,10 +1286,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/muskmelon.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_growing_muskmelon.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/A_growing_muskmelon.jpg/960px-A_growing_muskmelon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Oleg Yunakov",
       "status": "available"
     },
     {
@@ -1299,10 +1299,10 @@
       "category": "spices",
       "image": "Vegetables/spices/mustard.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMustard_Seeds_(Sarson)_(49696132737).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Mustard_Seeds_%28Sarson%29_%2849696132737%29.jpg/960px-Mustard_Seeds_%28Sarson%29_%2849696132737%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "Ajay Suresh from New York, NY, USA",
       "status": "available"
     },
     {
@@ -1312,10 +1312,10 @@
       "category": "spices",
       "image": "Vegetables/spices/nigella.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ANigella_sativa_seeds.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Nigella_sativa_seeds.jpg/960px-Nigella_sativa_seeds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gaurav Dhwaj Khadka",
       "status": "available"
     },
     {
@@ -1325,10 +1325,10 @@
       "category": "spices",
       "image": "Vegetables/spices/nutmeg.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ANutmeg_whole.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Nutmeg_whole.JPG/960px-Nutmeg_whole.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "author": "Miansari66",
       "status": "available"
     },
     {
@@ -1338,10 +1338,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/okra.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABucket_of_raw_okra_pods.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/32/Bucket_of_raw_okra_pods.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "Public domain",
+      "author": "Bill Tarpenning",
       "status": "available"
     },
     {
@@ -1351,10 +1351,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/onion.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARed_Onion_on_White.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Red_Onion_on_White.JPG/960px-Red_Onion_on_White.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Colin",
       "status": "available"
     },
     {
@@ -1364,10 +1364,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/orange.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AOrange_--_2022_--_9721.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Orange_--_2022_--_9721.jpg/960px-Orange_--_2022_--_9721.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Dietmar Rabich",
       "status": "available"
     },
     {
@@ -1377,10 +1377,10 @@
       "category": "grains",
       "image": "Vegetables/grains/paddy.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APaddy_crop_near_Malkapuram%2C_Eluru.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Paddy_crop_near_Malkapuram%2C_Eluru.jpg/960px-Paddy_crop_near_Malkapuram%2C_Eluru.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "iMahesh",
       "status": "available"
     },
     {
@@ -1390,10 +1390,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/papaya.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APapaya_-_longitudinal_section_close-up_view.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Papaya_-_longitudinal_section_close-up_view.jpg/960px-Papaya_-_longitudinal_section_close-up_view.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ivar Leidus",
       "status": "available"
     },
     {
@@ -1403,10 +1403,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/peach.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALiat_Portal_for_Foodie_Disorder_-_Peach.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Liat_Portal_for_Foodie_Disorder_-_Peach.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Peach.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "HaJunkiyada",
       "status": "available"
     },
     {
@@ -1416,10 +1416,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/pear.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AD'anjou_pear.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/D%27anjou_pear.jpg/960px-D%27anjou_pear.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Rhododendrites",
       "status": "available"
     },
     {
@@ -1429,10 +1429,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/peas.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APeas_Peas_Peas_(16573570910).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Peas_Peas_Peas_%2816573570910%29.jpg/960px-Peas_Peas_Peas_%2816573570910%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0",
+      "author": "Ritesh Man Tamrakar",
       "status": "available"
     },
     {
@@ -1442,10 +1442,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/pineapple.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APineapple_on_white.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Pineapple_on_white.jpg/960px-Pineapple_on_white.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Rhododendrites",
       "status": "available"
     },
     {
@@ -1455,10 +1455,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/pistachio.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AClose_up_of_Pistachio_Nuts_(16656177641).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Close_up_of_Pistachio_Nuts_%2816656177641%29.jpg/960px-Close_up_of_Pistachio_Nuts_%2816656177641%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0",
+      "author": "Willis Lam",
       "status": "available"
     },
     {
@@ -1468,10 +1468,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/plum.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APlum-sardrood-TBZ.png",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Plum-sardrood-TBZ.png/960px-Plum-sardrood-TBZ.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "F4fluids",
       "status": "available"
     },
     {
@@ -1481,10 +1481,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/pointed-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APointed_gourd_20220828_165647.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/Pointed_gourd_20220828_165647.jpg/960px-Pointed_gourd_20220828_165647.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Dr. Satish Upalkar",
       "status": "available"
     },
     {
@@ -1494,10 +1494,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/pomegranate.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APomegranate_fruit_-_whole_and_piece_with_arils.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/Pomegranate_fruit_-_whole_and_piece_with_arils.jpg/960px-Pomegranate_fruit_-_whole_and_piece_with_arils.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ivar Leidus",
       "status": "available"
     },
     {
@@ -1507,10 +1507,10 @@
       "category": "spices",
       "image": "Vegetables/spices/poppy-seed.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APoppy_seed_2025.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Poppy_seed_2025.jpg/960px-Poppy_seed_2025.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "ThomasLendt",
       "status": "available"
     },
     {
@@ -1520,10 +1520,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/potato.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APotato_for_sale_in_Nigeria.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Potato_for_sale_in_Nigeria.jpg/960px-Potato_for_sale_in_Nigeria.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Iyinolamercy",
       "status": "available"
     },
     {
@@ -1533,10 +1533,10 @@
       "category": "grains",
       "image": "Vegetables/grains/proso-millet.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMature_Proso_Millet_Panicles.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Mature_Proso_Millet_Panicles.jpg/960px-Mature_Proso_Millet_Panicles.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Jschnable",
       "status": "available"
     },
     {
@@ -1546,10 +1546,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/pumpkin.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APumpkin_2108-1292.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Pumpkin_2108-1292.jpg/960px-Pumpkin_2108-1292.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Mozzihh",
       "status": "available"
     },
     {
@@ -1559,10 +1559,10 @@
       "category": "grains",
       "image": "Vegetables/grains/quinoa.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARed_quinoa_closeup.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Red_quinoa_closeup.JPG/960px-Red_quinoa_closeup.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Michael Hermann",
       "status": "available"
     },
     {
@@ -1572,10 +1572,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/radish.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ADaikon_radish_-_Minowase.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Daikon_radish_-_Minowase.jpg/960px-Daikon_radish_-_Minowase.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Eric Polk",
       "status": "available"
     },
     {
@@ -1585,10 +1585,10 @@
       "category": "grains",
       "image": "Vegetables/grains/ragi.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARagi_gs.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Ragi_gs.jpg/960px-Ragi_gs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gausanchennai",
       "status": "available"
     },
     {
@@ -1598,10 +1598,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/red-cabbage.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARed_cabbage_which_is_actually_purple.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Red_cabbage_which_is_actually_purple.jpg/960px-Red_cabbage_which_is_actually_purple.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Ser Amantio di Nicolao",
       "status": "available"
     },
     {
@@ -1611,10 +1611,10 @@
       "category": "grains",
       "image": "Vegetables/grains/rice.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABasmati_Rice_India%2C_raw.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Basmati_Rice_India%2C_raw.jpg/960px-Basmati_Rice_India%2C_raw.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "author": "cookbookman17",
       "status": "available"
     },
     {
@@ -1624,10 +1624,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/ridge-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALuffa_acutangula_(ridged_gourd)%2C_view_2_(SaatPilot).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Luffa_acutangula_%28ridged_gourd%29%2C_view_2_%28SaatPilot%29.jpg/960px-Luffa_acutangula_%28ridged_gourd%29%2C_view_2_%28SaatPilot%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Steffen Bauer ( saatpilot.de )",
       "status": "available"
     },
     {
@@ -1637,10 +1637,10 @@
       "category": "grains",
       "image": "Vegetables/grains/sajje.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AMature_pearl_millet_crops_and_clouds_2.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Mature_pearl_millet_crops_and_clouds_2.jpg/960px-Mature_pearl_millet_crops_and_clouds_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Shikoha Tautiko",
       "status": "available"
     },
     {
@@ -1650,9 +1650,9 @@
       "category": "pulses",
       "image": "Vegetables/pulses/soyabean.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASoybean.USDA.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/82/Soybean.USDA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "Public domain",
       "author": null,
       "status": "available"
     },
@@ -1663,9 +1663,9 @@
       "category": "pulses",
       "image": "Vegetables/pulses/soybean.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASoybean.USDA.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/82/Soybean.USDA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "Public domain",
       "author": null,
       "status": "available"
     },
@@ -1676,10 +1676,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/spinach.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ALiat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Liat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "HaJunkiyada",
       "status": "available"
     },
     {
@@ -1689,10 +1689,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/sponge-gourd.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ASponge_gourd_of_Bangladesh.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Sponge_gourd_of_Bangladesh.jpg/960px-Sponge_gourd_of_Bangladesh.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Salim_Khandoker",
       "status": "available"
     },
     {
@@ -1702,10 +1702,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/star-fruit.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AStar_Fruit_(74851).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Star_Fruit_%2874851%29.jpg/960px-Star_Fruit_%2874851%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "SarKaLay စာကလေး",
       "status": "available"
     },
     {
@@ -1715,10 +1715,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/strawberry.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AStrawberry_on_white_background.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Strawberry_on_white_background.jpg/960px-Strawberry_on_white_background.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Joselodos",
       "status": "available"
     },
     {
@@ -1728,10 +1728,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/sweet-corn.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARaw_Sweet_Corn.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Raw_Sweet_Corn.jpg/960px-Raw_Sweet_Corn.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "author": "Bim24",
       "status": "available"
     },
     {
@@ -1741,10 +1741,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/sweet-potato.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACamote_Murasaki.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Camote_Murasaki.jpg/960px-Camote_Murasaki.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "Mtenaespinoza",
       "status": "available"
     },
     {
@@ -1754,10 +1754,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/sweet-pumpkin.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AHolme_Hale_Hall_Gardens%2C_Winter_squash_-_geograph.org.uk_-_7928288.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Holme_Hale_Hall_Gardens%2C_Winter_squash_-_geograph.org.uk_-_7928288.jpg/960px-Holme_Hale_Hall_Gardens%2C_Winter_squash_-_geograph.org.uk_-_7928288.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 2.0",
+      "author": "Michael Garlick",
       "status": "available"
     },
     {
@@ -1767,10 +1767,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/tamarind.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ATamarind_pods_edible_part.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Tamarind_pods_edible_part.jpg/960px-Tamarind_pods_edible_part.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0 de",
+      "author": "Sonja Pauen - Stanhopea",
       "status": "available"
     },
     {
@@ -1780,10 +1780,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/tapioca.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APeeLawPeeNam_Cassava_root_Yuca_Manioc.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/PeeLawPeeNam_Cassava_root_Yuca_Manioc.jpg/960px-PeeLawPeeNam_Cassava_root_Yuca_Manioc.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC0",
+      "author": "စာကလေး SarKaLay",
       "status": "available"
     },
     {
@@ -1793,10 +1793,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/tomato.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ARed_Tomato_with_red_background.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Red_Tomato_with_red_background.jpg/960px-Red_Tomato_with_red_background.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Deepakfly",
       "status": "available"
     },
     {
@@ -1806,8 +1806,8 @@
       "category": "pulses",
       "image": "Vegetables/pulses/tur.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACajanus%20cajan%2C%20flowers.jpg",
-      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Cajanus_cajan%2C_flowers.jpg/960px-Cajanus_cajan%2C_flowers.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ACajanus_cajan_fruits_on_white_background.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Cajanus_cajan_fruits_on_white_background.jpg/960px-Cajanus_cajan_fruits_on_white_background.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
       "license": "CC BY-SA 4.0",
       "author": "Filo gèn'",
       "status": "available"
@@ -1819,7 +1819,7 @@
       "category": "spices",
       "image": "Vegetables/spices/turmeric.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AOrganic%20Turmeric%20Rhizome%20(Root).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AOrganic_Turmeric_Rhizome_(Root).jpg",
       "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Organic_Turmeric_Rhizome_%28Root%29.jpg/960px-Organic_Turmeric_Rhizome_%28Root%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
       "license": "CC BY-SA 4.0",
       "author": "MattPicks",
@@ -1832,10 +1832,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/turnip.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3APrize_winning_turnip.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Prize_winning_turnip.jpg/960px-Prize_winning_turnip.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Eric Polk",
       "status": "available"
     },
     {
@@ -1845,10 +1845,10 @@
       "category": "pulses",
       "image": "Vegetables/pulses/urad.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AA_closeup_scene_of_black_gram_in_a_bag.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/A_closeup_scene_of_black_gram_in_a_bag.JPG/960px-A_closeup_scene_of_black_gram_in_a_bag.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Thamizhpparithi Maari",
       "status": "available"
     },
     {
@@ -1858,10 +1858,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/walnut.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3ABlk_Walnut_8688.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Blk_Walnut_8688.jpg/960px-Blk_Walnut_8688.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Chris Light",
       "status": "available"
     },
     {
@@ -1871,10 +1871,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/watermelon.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AWatermelon_3.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Watermelon_3.jpg/960px-Watermelon_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Gaurav Dhwaj Khadka",
       "status": "available"
     },
     {
@@ -1884,10 +1884,10 @@
       "category": "grains",
       "image": "Vegetables/grains/wheat.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AWheat_ear.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Wheat_ear.jpg/960px-Wheat_ear.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Optograph",
       "status": "available"
     },
     {
@@ -1897,10 +1897,10 @@
       "category": "fruits",
       "image": "Vegetables/fruits/wood-apple.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AAegle_marmelos_(%E0%A8%AC%E0%A8%BF%E0%A8%B2)fruit.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Aegle_marmelos_%28%E0%A8%AC%E0%A8%BF%E0%A8%B2%29fruit.jpg/960px-Aegle_marmelos_%28%E0%A8%AC%E0%A8%BF%E0%A8%B2%29fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "author": "Charan Gill",
       "status": "available"
     },
     {
@@ -1910,10 +1910,10 @@
       "category": "vegetables",
       "image": "Vegetables/vegetables/yam.webp",
       "source": "Wikimedia Commons",
-      "sourceUrl": null,
-      "imageUrl": null,
-      "license": null,
-      "author": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File%3AYam_(kaachil).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Yam_%28kaachil%29.jpg/960px-Yam_%28kaachil%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "author": "Sajetpa at Malayalam Wikipedia",
       "status": "available"
     }
   ]

@@ -10,10 +10,10 @@ import {
   formatDate, formatDateTime, formatPrice,
 } from "./rate-ui.js";
 import { buildPreviousObservationIndex } from "./price-comparison.js";
-import { resolveId } from "../scripts/commodity-image-map.js";
 import {
   createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
 } from "./csv-export.js";
+import { commodityImageUrl, resolveId } from "../scripts/commodity-image-map.js";
 
 const PAGE_SIZE = 10;
 const $ = (id) => document.getElementById(id);
@@ -286,6 +286,7 @@ function resetResultState() {
 
 function clearResults() {
   resetResultState();
+  pruneQueuedCommodityImages([]);
   history.replaceState(null, "", location.pathname);
   updateControls();
   renderResults();
@@ -393,153 +394,155 @@ function tableRow(record, ctx, showLocation) {
   return tr;
 }
 
-const normalizeCommodityKey = (value) => String(value || "")
-  .normalize("NFKD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .toLocaleLowerCase("en-IN")
-  .replace(/[\(\)\[\]\{\}.,/_-]+/g, " ")
-  .replace(/[^\p{L}\p{N} ]/gu, "")
-  .replace(/\s+/g, " ")
-  .trim();
-
 const commodityImageIndex = new Map();
-let commodityImageManifest = null;
 let commodityImageManifestLoaded = false;
+const commodityImageQueue = [];
+const commodityImageRequests = new Map();
+let activeCommodityImageRequest = null;
 
 function findCommodityImage(commodity) {
-  const key = normalizeCommodityKey(commodity);
-  const resolvedId = resolveId(commodity);
-  const candidates = [resolvedId, key].filter(Boolean);
-  for (const candidate of candidates) {
-    const direct = commodityImageIndex.get(normalizeCommodityKey(candidate));
-    if (direct) return direct;
-  }
-  // Match manifest names and aliases even when AGMARKNET adds brackets,
-  // Hindi transliterations, grade labels, or spelling variations.
-  for (const [candidate, entry] of commodityImageIndex) {
-    if (!candidate) continue;
-    if (
-      key === candidate ||
-      key.startsWith(candidate + " ") ||
-      candidate.startsWith(key + " ") ||
-      (resolvedId && normalizeCommodityKey(resolvedId) === candidate)
-    ) return entry;
-  }
-  return null;
+  const id = resolveId(commodity);
+  return id ? commodityImageIndex.get(id) || null : null;
 }
 
-function commodityImageUrl(manifest, item) {
-  const base = String(manifest.imageBase || "/Images").replace(/\/+$/, "");
-  const image = String(item.image || "").replace(/^\/+/, "");
-  return image.startsWith("Images/") ? "/" + image : base + "/" + image;
-}
-
-fetch("/commodity-image-manifest.json", { cache: "force-cache" })
+fetch("/commodity-image-manifest.json", { cache: "no-cache" })
   .then((response) => {
     if (!response.ok) throw new Error("Commodity image manifest unavailable");
     return response.json();
   })
   .then((manifest) => {
-    commodityImageManifest = manifest;
     for (const item of manifest.commodities || []) {
       if (item.status !== "available" || !item.image) continue;
+      const src = commodityImageUrl(manifest.imageBase, item.image);
+      if (!src) continue;
       const image = {
-        src: commodityImageUrl(manifest, item),
+        src,
         name: item.name || item.id,
       };
-      for (const value of [item.id, item.name, item.hindi]) {
-        const key = normalizeCommodityKey(value);
-        if (key) commodityImageIndex.set(key, image);
-      }
+      commodityImageIndex.set(item.id, image);
     }
     commodityImageManifestLoaded = true;
     if (state.records.length) renderResults();
   })
   .catch((error) => {
     commodityImageManifestLoaded = true;
-    console.error("[Rate-GPT] Commodity photo manifest failed:", error);
+    console.warn("[Rate-GPT] Commodity photos could not be loaded:", error);
+    if (state.records.length) renderResults();
   });
 
-const commodityImageQueue = [];
-let commodityImageQueueBusy = false;
-const loadedCommodityImageUrls = new Set();
-
-function enqueueCommodityImage(image, src, placeholder, artwork, commodity) {
-  if (loadedCommodityImageUrls.has(src)) {
-    image.addEventListener("load", () => {
-      artwork.classList.add("has-photo");
-      placeholder.hidden = true;
-    }, { once: true });
+function showCommodityImage(target, request) {
+  if (request.status === "loaded") {
+    target.image.src = request.objectUrl;
+    target.artwork.classList.add("has-photo");
+    target.placeholder.hidden = true;
+    return;
   }
-  commodityImageQueue.push({ image, src, placeholder, artwork, commodity });
-  void processNextCommodityImage();
+  target.placeholder.textContent = "Photo unavailable";
+  target.placeholder.classList.add("unavailable");
+  target.image.removeAttribute("src");
 }
 
-async function processNextCommodityImage() {
-  if (commodityImageQueueBusy) return;
-  commodityImageQueueBusy = true;
+async function startNextCommodityImage() {
+  if (activeCommodityImageRequest) return;
+  const request = commodityImageQueue.shift();
+  if (!request) return;
+
+  activeCommodityImageRequest = request;
+  request.status = "loading";
   try {
-    while (commodityImageQueue.length) {
-      const job = commodityImageQueue.shift();
-      const { image, src, placeholder, artwork, commodity } = job;
-      if (!image.isConnected) continue;
-      await new Promise((resolve) => {
-        let settled = false;
-        const finish = (loaded) => {
-          if (settled) return;
-          settled = true;
-          image.removeEventListener("load", onLoad);
-          image.removeEventListener("error", onError);
-          if (loaded && image.naturalWidth > 0) {
-            loadedCommodityImageUrls.add(src);
-            artwork.classList.add("has-photo");
-            placeholder.hidden = true;
-          } else {
-            artwork.classList.remove("has-photo");
-            placeholder.hidden = false;
-            console.error("[Rate-GPT] Commodity photo failed:", { commodity, src });
-          }
-          resolve();
-        };
-        const onLoad = () => finish(true);
-        const onError = () => finish(false);
-        image.addEventListener("load", onLoad, { once: true });
-        image.addEventListener("error", onError, { once: true });
-        // Only this worker assigns src. The next image cannot start until
-        // this request has loaded or failed, guaranteeing max concurrency = 1.
-        image.src = src;
-        if (image.complete) queueMicrotask(() => finish(image.naturalWidth > 0));
-      });
+    const response = await fetch(request.src, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    if (!blob.type.toLowerCase().includes("image/webp")) {
+      throw new Error(`Unexpected content type: ${blob.type || "unknown"}`);
     }
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const decodedImage = new Image();
+      decodedImage.src = objectUrl;
+      await decodedImage.decode();
+    } catch (error) {
+      URL.revokeObjectURL(objectUrl);
+      throw error;
+    }
+    request.objectUrl = objectUrl;
+    request.status = "loaded";
+    for (const target of request.targets) showCommodityImage(target, request);
+  } catch (error) {
+    request.status = "failed";
+    console.warn(`[Rate-GPT] Commodity photo failed: ${request.src}`, error);
+    for (const target of request.targets) showCommodityImage(target, request);
   } finally {
-    commodityImageQueueBusy = false;
-    if (commodityImageQueue.length) void processNextCommodityImage();
+    activeCommodityImageRequest = null;
+    startNextCommodityImage();
   }
+}
+
+function enqueueCommodityImage(target) {
+  const cached = commodityImageRequests.get(target.src);
+  if (cached) {
+    if (cached.status === "loaded" || cached.status === "failed") showCommodityImage(target, cached);
+    else cached.targets.add(target);
+    return;
+  }
+
+  const request = { src: target.src, status: "queued", targets: new Set([target]) };
+  commodityImageRequests.set(target.src, request);
+  commodityImageQueue.push(request);
+  startNextCommodityImage();
+}
+
+function pruneQueuedCommodityImages(records) {
+  const wantedImages = new Set(
+    records
+      .map((record) => findCommodityImage(record.commodity)?.src)
+      .filter(Boolean),
+  );
+  for (let index = commodityImageQueue.length - 1; index >= 0; index -= 1) {
+    const request = commodityImageQueue[index];
+    if (request.status === "queued" && !wantedImages.has(request.src)) {
+      request.status = "cancelled";
+      request.targets.clear();
+      commodityImageRequests.delete(request.src);
+      commodityImageQueue.splice(index, 1);
+    }
+  }
+}
+
+function commodityArtwork(record) {
+  const artwork = document.createElement("div");
+  artwork.className = "crop-art";
+  const placeholder = document.createElement("span");
+  placeholder.className = "crop-art-placeholder";
+  artwork.append(placeholder);
+
+  const photo = findCommodityImage(record.commodity);
+  if (!photo) {
+    placeholder.textContent = commodityImageManifestLoaded ? "Photo unavailable" : "Loading photo…";
+    if (commodityImageManifestLoaded) placeholder.classList.add("unavailable");
+    return artwork;
+  }
+
+  const image = document.createElement("img");
+  image.className = "crop-photo";
+  image.alt = `${photo.name} photograph`;
+  image.decoding = "async";
+  image.width = 320;
+  image.height = 180;
+  image.addEventListener("error", () => {
+    artwork.classList.remove("has-photo");
+    placeholder.textContent = "Photo unavailable";
+    placeholder.classList.add("unavailable");
+    placeholder.hidden = false;
+  }, { once: true });
+  artwork.append(image);
+  enqueueCommodityImage({ src: photo.src, image, artwork, placeholder });
+  return artwork;
 }
 
 function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
-  const artwork = document.createElement("div");
-  artwork.className = "crop-art";
-  artwork.setAttribute("role", "img");
-  artwork.setAttribute("aria-label", (record.commodity || "Commodity") + " photograph");
-  const placeholder = document.createElement("span");
-  placeholder.className = "crop-art-placeholder";
-  placeholder.textContent = "Photo unavailable";
-  const photo = findCommodityImage(record.commodity);
-  if (photo) {
-    const image = document.createElement("img");
-    image.className = "crop-photo";
-    image.alt = (photo.name || record.commodity || "Commodity") + " photograph";
-    image.decoding = "async";
-    image.width = 320;
-    image.height = 180;
-    image.dataset.commodityImage = photo.src;
-    artwork.append(image);
-    enqueueCommodityImage(image, photo.src, placeholder, artwork, record.commodity);
-  }
-  artwork.append(placeholder);
   const top = document.createElement("div");
   top.className = "price-card-top";
   top.append(cropBlock(record, showLocation), modalBlock(record));
@@ -548,7 +551,7 @@ function cardFor(record, ctx, showLocation) {
   const date = document.createElement("span");
   date.textContent = formatDate(record.arrival_date);
   meta.append(date, createDelta(record.modal_price, ctx.previous(record)?.modal_price));
-  card.append(artwork, top, createRange(record, ctx.axis(record)), meta);
+  card.append(commodityArtwork(record), top, createRange(record, ctx.axis(record)), meta);
   return card;
 }
 
@@ -871,6 +874,7 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
     state.records = append
       ? [...state.records, ...payload.data.filter((record) => !state.records.some((seen) => seen.id === record.id))]
       : payload.data;
+    pruneQueuedCommodityImages(state.records);
     state.meta = {
       limit: meta.limit,
       offset: meta.offset,
@@ -898,6 +902,7 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
     if (controller.signal.aborted) return;
     state.error = errorText(error, "Unable to load mandi prices.");
     if (!append) state.meta = { limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0, hasNext: false };
+    pruneQueuedCommodityImages(append ? state.records : []);
   } finally {
     if (state.controller === controller) {
       state.loading = false;

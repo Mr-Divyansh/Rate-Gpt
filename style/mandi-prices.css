@@ -489,7 +489,7 @@
 .page-prices .table-wrap { display: none; }
 .page-prices .mobile-list {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
   gap: 14px;
 }
 .page-prices .price-card {
@@ -504,23 +504,12 @@
 }
 .page-prices .crop-art {
   display: grid;
+  position: relative;
   min-height: 112px;
   place-items: center;
   overflow: hidden;
   border-radius: 13px;
-  background: radial-gradient(ellipse at 50% 72%, #edf5df 0%, #f8fbf4 62%, #fff 100%);
-}
-.page-prices .crop-art .crop-art-placeholder {
-  display: grid;
-  place-items: center;
-  min-height: 112px;
-  padding: 12px;
-  color: var(--muted);
-  font-size: .82rem;
-  font-weight: 600;
-}
-.page-prices .crop-art {
-  position: relative;
+  background: #f0f2ed;
 }
 .page-prices .crop-art .crop-photo {
   display: block;
@@ -537,7 +526,14 @@
 .page-prices .crop-art .crop-art-placeholder {
   position: absolute;
   inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: #68746d;
+  font: 600 .78rem/1.3 var(--font);
+  text-align: center;
 }
+.page-prices .crop-art .crop-art-placeholder.unavailable { color: #788078; }
 .page-prices .crop-art .crop-art-placeholder[hidden] { display: none; }
 .page-prices .price-card-top {
   display: grid;
@@ -654,8 +650,7 @@
   box-shadow: 0 13px 28px rgba(22,64,39,.11);
 }
 .page-prices .price-card .crop-art {
-  background:
-    radial-gradient(ellipse at 50% 76%, #e8f1db 0%, #f5f8ee 58%, #fff 100%);
+  background: #f0f2ed;
 }
 .page-prices .results-actions .btn-primary {
   box-shadow: 0 5px 14px rgba(23,77,56,.13);

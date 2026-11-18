@@ -1,11 +1,24 @@
+import { cp } from "node:fs/promises";
 import path from "path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
+const imageLibraryPlugin = {
+  name: "copy-image-library",
+  apply: "build" as const,
+  async closeBundle() {
+    await cp(
+      path.resolve(rootDir, "Images"),
+      path.resolve(rootDir, "dist", "Images"),
+      { recursive: true },
+    );
+  },
+};
 
 export default defineConfig(() => {
   return {
+    plugins: [imageLibraryPlugin],
     resolve: {
       alias: {
         "@": rootDir,
