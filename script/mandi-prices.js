@@ -407,16 +407,23 @@ let commodityImageManifest = null;
 let commodityImageManifestLoaded = false;
 
 function findCommodityImage(commodity) {
-  const resolvedId = resolveId(commodity);
-  if (resolvedId && commodityImageIndex.has(resolvedId)) {
-    return commodityImageIndex.get(resolvedId);
-  }
   const key = normalizeCommodityKey(commodity);
-  if (commodityImageIndex.has(key)) return commodityImageIndex.get(key);
+  const resolvedId = resolveId(commodity);
+  const candidates = [resolvedId, key].filter(Boolean);
+  for (const candidate of candidates) {
+    const direct = commodityImageIndex.get(normalizeCommodityKey(candidate));
+    if (direct) return direct;
+  }
+  // Match manifest names and aliases even when AGMARKNET adds brackets,
+  // Hindi transliterations, grade labels, or spelling variations.
   for (const [candidate, entry] of commodityImageIndex) {
-    if (candidate && (key.startsWith(candidate + " ") || candidate.startsWith(key + " "))) {
-      return entry;
-    }
+    if (!candidate) continue;
+    if (
+      key === candidate ||
+      key.startsWith(candidate + " ") ||
+      candidate.startsWith(key + " ") ||
+      (resolvedId && normalizeCommodityKey(resolvedId) === candidate)
+    ) return entry;
   }
   return null;
 }
@@ -453,6 +460,63 @@ fetch("/commodity-image-manifest.json", { cache: "force-cache" })
     console.error("[Rate-GPT] Commodity photo manifest failed:", error);
   });
 
+const commodityImageQueue = [];
+let commodityImageQueueBusy = false;
+const loadedCommodityImageUrls = new Set();
+
+function enqueueCommodityImage(image, src, placeholder, artwork, commodity) {
+  if (loadedCommodityImageUrls.has(src)) {
+    image.addEventListener("load", () => {
+      artwork.classList.add("has-photo");
+      placeholder.hidden = true;
+    }, { once: true });
+  }
+  commodityImageQueue.push({ image, src, placeholder, artwork, commodity });
+  void processNextCommodityImage();
+}
+
+async function processNextCommodityImage() {
+  if (commodityImageQueueBusy) return;
+  commodityImageQueueBusy = true;
+  try {
+    while (commodityImageQueue.length) {
+      const job = commodityImageQueue.shift();
+      const { image, src, placeholder, artwork, commodity } = job;
+      if (!image.isConnected) continue;
+      await new Promise((resolve) => {
+        let settled = false;
+        const finish = (loaded) => {
+          if (settled) return;
+          settled = true;
+          image.removeEventListener("load", onLoad);
+          image.removeEventListener("error", onError);
+          if (loaded && image.naturalWidth > 0) {
+            loadedCommodityImageUrls.add(src);
+            artwork.classList.add("has-photo");
+            placeholder.hidden = true;
+          } else {
+            artwork.classList.remove("has-photo");
+            placeholder.hidden = false;
+            console.error("[Rate-GPT] Commodity photo failed:", { commodity, src });
+          }
+          resolve();
+        };
+        const onLoad = () => finish(true);
+        const onError = () => finish(false);
+        image.addEventListener("load", onLoad, { once: true });
+        image.addEventListener("error", onError, { once: true });
+        // Only this worker assigns src. The next image cannot start until
+        // this request has loaded or failed, guaranteeing max concurrency = 1.
+        image.src = src;
+        if (image.complete) queueMicrotask(() => finish(image.naturalWidth > 0));
+      });
+    }
+  } finally {
+    commodityImageQueueBusy = false;
+    if (commodityImageQueue.length) void processNextCommodityImage();
+  }
+}
+
 function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
@@ -468,36 +532,12 @@ function cardFor(record, ctx, showLocation) {
     const image = document.createElement("img");
     image.className = "crop-photo";
     image.alt = (photo.name || record.commodity || "Commodity") + " photograph";
-    image.loading = "lazy";
     image.decoding = "async";
     image.width = 320;
     image.height = 180;
-
-    const showPhoto = () => {
-      if (!image.naturalWidth) return;
-      artwork.classList.add("has-photo");
-      placeholder.hidden = true;
-    };
-    const showPlaceholder = () => {
-      artwork.classList.remove("has-photo");
-      placeholder.hidden = false;
-      console.error("[Rate-GPT] Commodity photo failed to load:", {
-        commodity: record.commodity,
-        src: image.currentSrc || image.src,
-      });
-    };
-
-    // Attach handlers and put the element in the DOM BEFORE setting src.
-    // Cached images can finish loading immediately; assigning src first can
-    // miss the load event and leave the "Photo unavailable" placeholder visible.
-    image.addEventListener("load", showPhoto, { once: true });
-    image.addEventListener("error", showPlaceholder, { once: true });
+    image.dataset.commodityImage = photo.src;
     artwork.append(image);
-    image.src = photo.src;
-    if (image.complete) {
-      if (image.naturalWidth > 0) showPhoto();
-      else showPlaceholder();
-    }
+    enqueueCommodityImage(image, photo.src, placeholder, artwork, record.commodity);
   }
   artwork.append(placeholder);
   const top = document.createElement("div");
