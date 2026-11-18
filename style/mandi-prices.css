@@ -663,6 +663,7 @@
   .page-prices .chip,
   .page-prices .india-browse,
   .page-prices .price-card,
+  .page-prices .crop-photo,
   .page-prices .finder-selects select,
   .page-prices .toolbar input,
   .page-prices .toolbar select { transition: none; }
