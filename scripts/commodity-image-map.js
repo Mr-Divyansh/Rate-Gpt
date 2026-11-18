@@ -7,7 +7,7 @@
  * dedicated photograph stored under Images/Vegetables/<category>/.
  *
  * Commodities not listed here resolve to the neutral fallback image
- * (Images/Vegetables/other/fallback.webp) — we deliberately do NOT use
+ * (Images/Vegetables/other/fallback.svg) — we deliberately do NOT use
  * an unrelated vegetable photograph as a fallback.
  */
 
