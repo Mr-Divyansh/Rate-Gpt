@@ -438,8 +438,8 @@ fetch("/commodity-image-manifest.json", { cache: "force-cache" })
   .then((manifest) => {
     for (const item of manifest.commodities || []) {
       if (item.status !== "available" || !item.image) continue;
+      const img = {
         src: "/" + String(item.image).replace(/^\/+/, ""),
-        src: "/" + String(item.image).replace(/^\\/+/, ""),
         name: item.name || item.id,
       };
       for (const value of [item.id, item.name, item.hindi]) {
