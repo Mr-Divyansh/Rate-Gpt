@@ -685,10 +685,10 @@
   will-change: transform, opacity;
 }
 .page-prices .crop-art.has-photo .crop-photo {
-  animation: commodity-photo-pop .52s cubic-bezier(.2,.82,.24,1.12) both;
+  animation: commodity-photo-pop .52s cubic-bezier(.2,.82,.24,1.12);
 }
 .page-prices .price-card {
-  animation: commodity-card-enter .42s cubic-bezier(.2,.72,.24,1) both;
+  animation: commodity-card-enter .42s cubic-bezier(.2,.72,.24,1);
 }
 .page-prices .mobile-list > .price-card:nth-child(2) { animation-delay: 45ms; }
 .page-prices .mobile-list > .price-card:nth-child(3) { animation-delay: 90ms; }

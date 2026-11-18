@@ -466,7 +466,7 @@ function matchCommodityImageStage(image, artwork) {
 function showCommodityImage(target, request) {
   if (request.status === "loaded") {
     target.image.src = request.objectUrl;
-    matchCommodityImageStage(target.image, target.artwork);
+    matchCommodityImageStage(request.decodedImage, target.artwork);
     target.artwork.classList.add("has-photo");
     target.placeholder.hidden = true;
     return;
@@ -495,6 +495,7 @@ async function startNextCommodityImage() {
       const decodedImage = new Image();
       decodedImage.src = objectUrl;
       await decodedImage.decode();
+      request.decodedImage = decodedImage;
     } catch (error) {
       URL.revokeObjectURL(objectUrl);
       throw error;
