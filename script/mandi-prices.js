@@ -467,26 +467,37 @@ function cardFor(record, ctx, showLocation) {
   if (photo) {
     const image = document.createElement("img");
     image.className = "crop-photo";
-    image.src = photo.src;
     image.alt = (photo.name || record.commodity || "Commodity") + " photograph";
     image.loading = "lazy";
     image.decoding = "async";
     image.width = 320;
     image.height = 180;
-    image.addEventListener("load", () => {
+
+    const showPhoto = () => {
+      if (!image.naturalWidth) return;
       artwork.classList.add("has-photo");
       placeholder.hidden = true;
-    }, { once: true });
-    image.addEventListener("error", () => {
-      image.remove();
+    };
+    const showPlaceholder = () => {
       artwork.classList.remove("has-photo");
       placeholder.hidden = false;
       console.error("[Rate-GPT] Commodity photo failed to load:", {
         commodity: record.commodity,
         src: image.currentSrc || image.src,
       });
-    }, { once: true });
+    };
+
+    // Attach handlers and put the element in the DOM BEFORE setting src.
+    // Cached images can finish loading immediately; assigning src first can
+    // miss the load event and leave the "Photo unavailable" placeholder visible.
+    image.addEventListener("load", showPhoto, { once: true });
+    image.addEventListener("error", showPlaceholder, { once: true });
     artwork.append(image);
+    image.src = photo.src;
+    if (image.complete) {
+      if (image.naturalWidth > 0) showPhoto();
+      else showPlaceholder();
+    }
   }
   artwork.append(placeholder);
   const top = document.createElement("div");
