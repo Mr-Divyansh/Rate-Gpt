@@ -592,3 +592,84 @@
 @media (max-width: 420px) {
   .page-prices .mobile-list { grid-template-columns: 1fr; }
 }
+
+/* Refined market dashboard surfaces and controls */
+.page-prices {
+  background:
+    radial-gradient(ellipse at 8% 12%, rgba(231,239,222,.58), transparent 30%),
+    #f7f8f3;
+}
+.page-prices .mandi-intro {
+  position: relative;
+  isolation: isolate;
+}
+.page-prices .mandi-intro .page-head-copy { padding-block: 8px; }
+.page-prices .mandi-intro h1 { max-width: 15ch; }
+.page-prices .sync {
+  border-color: #dfe8de;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 4px 14px rgba(23,55,38,.045);
+}
+.page-prices .finder-panel {
+  border-color: #dce7dc;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 14px 34px rgba(23,55,38,.075);
+}
+.page-prices .finder-selects select,
+.page-prices .toolbar input,
+.page-prices .toolbar select {
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.page-prices .finder-selects select:hover:not(:disabled),
+.page-prices .toolbar input:hover:not(:disabled),
+.page-prices .toolbar select:hover:not(:disabled) {
+  border-color: #a9bea9;
+}
+.page-prices .chip {
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.page-prices .chip:hover { transform: translateY(-1px); }
+.page-prices .india-browse {
+  border-color: #cbdccc;
+  background: linear-gradient(135deg, #f8fbf6, #fff);
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.page-prices .india-browse:hover {
+  transform: translateY(-1px);
+  border-color: #87aa8e;
+  box-shadow: 0 7px 18px rgba(20,80,50,.1);
+}
+.page-prices .results-head {
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e2e9e0;
+}
+.page-prices .price-card {
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.page-prices .price-card:hover {
+  transform: translateY(-3px);
+  border-color: #c7d9c8;
+  box-shadow: 0 13px 28px rgba(22,64,39,.11);
+}
+.page-prices .price-card .crop-art {
+  background:
+    radial-gradient(ellipse at 50% 76%, #e8f1db 0%, #f5f8ee 58%, #fff 100%);
+}
+.page-prices .results-actions .btn-primary {
+  box-shadow: 0 5px 14px rgba(23,77,56,.13);
+}
+@media (max-width: 760px) {
+  .page-prices .mandi-intro h1 { max-width: 18ch; }
+  .page-prices .price-card:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-prices .chip,
+  .page-prices .india-browse,
+  .page-prices .price-card,
+  .page-prices .finder-selects select,
+  .page-prices .toolbar input,
+  .page-prices .toolbar select { transition: none; }
+  .page-prices .chip:hover,
+  .page-prices .india-browse:hover,
+  .page-prices .price-card:hover { transform: none; }
+}

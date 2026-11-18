@@ -534,3 +534,64 @@
 @media (prefers-reduced-motion: reduce) {
   .journey-point { transition: none; }
 }
+
+/* Editorial finish for the project story */
+.page-about {
+  background:
+    radial-gradient(ellipse at 92% 18%, rgba(227, 239, 222, .58), transparent 28%),
+    #f7f8f4;
+}
+.about-hero {
+  padding-top: clamp(42px, 6vw, 76px);
+}
+.about-eyebrow {
+  padding: 8px 12px;
+  border: 1px solid #e3eadf;
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+  letter-spacing: .075em;
+}
+.about-visual {
+  border-color: #dce8dc;
+  background:
+    radial-gradient(circle at 50% 43%, rgba(255,255,255,.98) 0 23%, transparent 58%),
+    linear-gradient(145deg, #e6f0e2, #e4f2ee 58%, #fbf2dd);
+}
+.about-story,
+.about-journey {
+  border-color: #dfe7dd;
+}
+.story-detail {
+  padding-block: 4px;
+}
+.journey-point {
+  transition: padding .18s ease, border-color .18s ease;
+}
+.journey-point:hover {
+  padding-left: 8px;
+  border-color: #cbd9cc;
+}
+.step-card,
+.team-card {
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.team-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbdccc;
+  box-shadow: 0 14px 32px rgba(23,55,38,.09);
+}
+.team-focus {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #eef4ec;
+}
+@media (max-width: 760px) {
+  .about-hero { padding-top: 32px; }
+  .journey-point:hover { padding-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-point,
+  .team-card { transition: none; }
+  .team-card:hover { transform: none; }
+}
