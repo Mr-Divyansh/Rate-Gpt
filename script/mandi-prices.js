@@ -464,29 +464,31 @@ function cardFor(record, ctx, showLocation) {
   placeholder.className = "crop-art-placeholder";
   placeholder.textContent = "Photo unavailable";
   const photo = findCommodityImage(record.commodity);
-  const fallback = commodityImageManifest?.fallbackImage || "/Images/Vegetables/other/fallback.webp";
-  const image = document.createElement("img");
-  image.className = "crop-photo";
-  image.src = photo?.src || fallback;
-  image.alt = (photo?.name || record.commodity || "Commodity") + " photograph";
-  image.loading = "lazy";
-  image.decoding = "async";
-  image.width = 320;
-  image.height = 180;
-  image.addEventListener("load", () => {
-    artwork.classList.add("has-photo");
-    placeholder.hidden = true;
-  }, { once: true });
-  image.addEventListener("error", () => {
-    image.remove();
-    artwork.classList.remove("has-photo");
-    placeholder.hidden = false;
-    console.error("[Rate-GPT] Commodity photo failed to load:", {
-      commodity: record.commodity,
-      src: image.currentSrc || image.src,
-    });
-  }, { once: true });
-  artwork.append(image, placeholder);
+  if (photo) {
+    const image = document.createElement("img");
+    image.className = "crop-photo";
+    image.src = photo.src;
+    image.alt = (photo.name || record.commodity || "Commodity") + " photograph";
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.width = 320;
+    image.height = 180;
+    image.addEventListener("load", () => {
+      artwork.classList.add("has-photo");
+      placeholder.hidden = true;
+    }, { once: true });
+    image.addEventListener("error", () => {
+      image.remove();
+      artwork.classList.remove("has-photo");
+      placeholder.hidden = false;
+      console.error("[Rate-GPT] Commodity photo failed to load:", {
+        commodity: record.commodity,
+        src: image.currentSrc || image.src,
+      });
+    }, { once: true });
+    artwork.append(image);
+  }
+  artwork.append(placeholder);
   const top = document.createElement("div");
   top.className = "price-card-top";
   top.append(cropBlock(record, showLocation), modalBlock(record));
