@@ -181,6 +181,19 @@ const COMMODITY_IMAGE_MAP = [
 // Duplicate id entries (same image, different AGMARKNET spelling variants) are
 // resolved at runtime by the normalizer; they share one image file.
 const ALIAS_MAP = {
+  // Common mandi / Hindi transliterations
+  "aloo": "potato",
+  "aaloo": "potato",
+  "alu": "potato",
+  "aal": "potato",
+  "आलू": "potato",
+  "baingan": "brinjal",
+  "बैंगन": "brinjal",
+  "baigan": "brinjal",
+  "kheera": "cucumber",
+  "khira": "cucumber",
+  "खीरा": "cucumber",
+  "kakdi": "cucumber",
   // vegetables aliases
   "ladies finger": "okra",
   "bhindi": "okra",
