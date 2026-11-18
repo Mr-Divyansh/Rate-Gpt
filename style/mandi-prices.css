@@ -510,10 +510,14 @@
   border-radius: 13px;
   background: radial-gradient(ellipse at 50% 72%, #edf5df 0%, #f8fbf4 62%, #fff 100%);
 }
-.page-prices .crop-art span {
-  font-size: clamp(3.4rem, 5vw, 4.6rem);
-  line-height: 1;
-  filter: drop-shadow(0 7px 5px rgba(25,55,30,.12));
+.page-prices .crop-art .crop-art-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 112px;
+  padding: 12px;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 600;
 }
 .page-prices .crop-art {
   position: relative;
@@ -530,13 +534,11 @@
   transition: opacity .18s ease;
 }
 .page-prices .crop-art.has-photo .crop-photo { opacity: 1; }
-.page-prices .crop-art .crop-art-fallback {
+.page-prices .crop-art .crop-art-placeholder {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
 }
-.page-prices .crop-art .crop-art-fallback[hidden] { display: none; }
+.page-prices .crop-art .crop-art-placeholder[hidden] { display: none; }
 .page-prices .price-card-top {
   display: grid;
   justify-items: center;

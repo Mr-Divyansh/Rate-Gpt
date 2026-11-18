@@ -147,7 +147,7 @@ async function main() {
   const manifest = {
     version: "1.0.0",
     generatedAt: new Date().toISOString(),
-    imageBase: "/Images/Vegetables",
+    imageBase: "/Images",
     fallbackImage: "/Images/Vegetables/other/fallback.webp",
     note:
       "Images sourced from Wikimedia Commons under free licenses. See per-entry source/license for attribution.",

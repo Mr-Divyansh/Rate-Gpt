@@ -12,7 +12,6 @@ export default defineConfig(() => {
       },
     },
     build: {
-      copy: ["Images"],
       rollupOptions: {
         input: {
           home: path.resolve(rootDir, "index.html"),

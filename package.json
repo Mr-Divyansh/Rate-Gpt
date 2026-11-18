@@ -18,7 +18,9 @@
     "test:production": "tsx src/server/tests/production-smoke.ts",
     "test:responsive": "tsx src/server/tests/responsive-layout.ts",
     "test:release-gate": "tsx src/server/tests/release-gate.ts",
-    "test:api-contract": "tsx src/server/tests/api-contract.ts"
+    "test:api-contract": "tsx src/server/tests/api-contract.ts",
+    "prebuild": "node scripts/prepare-public-assets.js",
+    "predev": "node scripts/prepare-public-assets.js"
   },
   "npmConfig": {
     "allow-scripts": true
