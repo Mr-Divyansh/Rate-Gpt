@@ -40,3 +40,6 @@ __pycache__/
 # Editor and OS
 .vscode/*
 !.vscode/extensions.json
+
+# Generated public copy of the source commodity photo library
+public/Images/
