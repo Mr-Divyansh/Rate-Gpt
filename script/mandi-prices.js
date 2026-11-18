@@ -10,6 +10,7 @@ import {
   formatDate, formatDateTime, formatPrice,
 } from "./rate-ui.js";
 import { buildPreviousObservationIndex } from "./price-comparison.js";
+import { resolveId } from "../scripts/commodity-image-map.js";
 import {
   createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
 } from "./csv-export.js";
@@ -392,18 +393,6 @@ function tableRow(record, ctx, showLocation) {
   return tr;
 }
 
-const COMMODITY_IMAGE_ALIASES = {
-  "cucumber kheera": "cucumber",
-  "kheera": "cucumber",
-  "brinjal eggplant": "brinjal",
-  "eggplant": "brinjal",
-  "baingan": "brinjal",
-  "potatoes": "potato",
-  "apples": "apple",
-  "band gobhi": "cabbage",
-  "patta gobhi": "cabbage",
-};
-
 const normalizeCommodityKey = (value) => String(value || "")
   .normalize("NFKD")
   .replace(/[\u0300-\u036f]/g, "")
@@ -414,14 +403,16 @@ const normalizeCommodityKey = (value) => String(value || "")
   .trim();
 
 const commodityImageIndex = new Map();
+let commodityImageManifest = null;
 let commodityImageManifestLoaded = false;
 
 function findCommodityImage(commodity) {
+  const resolvedId = resolveId(commodity);
+  if (resolvedId && commodityImageIndex.has(resolvedId)) {
+    return commodityImageIndex.get(resolvedId);
+  }
   const key = normalizeCommodityKey(commodity);
-  const alias = COMMODITY_IMAGE_ALIASES[key];
-  if (alias && commodityImageIndex.has(alias)) return commodityImageIndex.get(alias);
   if (commodityImageIndex.has(key)) return commodityImageIndex.get(key);
-  // Accept a manifest name with a descriptive suffix, e.g. "Brinjal (Eggplant)".
   for (const [candidate, entry] of commodityImageIndex) {
     if (candidate && (key.startsWith(candidate + " ") || candidate.startsWith(key + " "))) {
       return entry;
@@ -430,16 +421,23 @@ function findCommodityImage(commodity) {
   return null;
 }
 
+function commodityImageUrl(manifest, item) {
+  const base = String(manifest.imageBase || "/Images").replace(/\/+$/, "");
+  const image = String(item.image || "").replace(/^\/+/, "");
+  return image.startsWith("Images/") ? "/" + image : base + "/" + image;
+}
+
 fetch("/commodity-image-manifest.json", { cache: "force-cache" })
   .then((response) => {
     if (!response.ok) throw new Error("Commodity image manifest unavailable");
     return response.json();
   })
   .then((manifest) => {
+    commodityImageManifest = manifest;
     for (const item of manifest.commodities || []) {
       if (item.status !== "available" || !item.image) continue;
       const image = {
-        src: "/" + String(item.image).replace(/^\/+/, ""),
+        src: commodityImageUrl(manifest, item),
         name: item.name || item.id,
       };
       for (const value of [item.id, item.name, item.hindi]) {
@@ -452,52 +450,43 @@ fetch("/commodity-image-manifest.json", { cache: "force-cache" })
   })
   .catch((error) => {
     commodityImageManifestLoaded = true;
-    console.warn("[Rate-GPT] Commodity photos could not be loaded:", error);
+    console.error("[Rate-GPT] Commodity photo manifest failed:", error);
   });
-
-function cropArtwork(commodity) {
-  const value = String(commodity || "").toLowerCase();
-  const crops = [
-    [/bottle.?gourd|lauki/, "🥒"], [/papaya/, "🍈"], [/chilli|chili|pepper/, "🌶️"],
-    [/guava/, "🍐"], [/bhindi|okra|ladies.?finger/, "🥬"], [/tomato/, "🍅"],
-    [/potato|आलू/, "🥔"], [/onion|प्याज/, "🧅"], [/apple|सेब/, "🍎"],
-    [/mango|आम/, "🥭"], [/cauliflower/, "🥦"], [/cabbage/, "🥬"],
-    [/wheat|गेहूं/, "🌾"], [/rice|paddy|धान/, "🌾"],
-  ];
-  return crops.find(([pattern]) => pattern.test(value))?.[1] || "🌱";
-}
 
 function cardFor(record, ctx, showLocation) {
   const card = document.createElement("article");
   card.className = "price-card";
   const artwork = document.createElement("div");
   artwork.className = "crop-art";
-  const artworkIcon = document.createElement("span");
-  artworkIcon.className = "crop-art-fallback";
-  artworkIcon.textContent = cropArtwork(record.commodity);
-  artwork.setAttribute("aria-label", `${record.commodity || "Crop"} photograph`);
+  artwork.setAttribute("role", "img");
+  artwork.setAttribute("aria-label", (record.commodity || "Commodity") + " photograph");
+  const placeholder = document.createElement("span");
+  placeholder.className = "crop-art-placeholder";
+  placeholder.textContent = "Photo unavailable";
   const photo = findCommodityImage(record.commodity);
-  if (photo) {
-    const image = document.createElement("img");
-    image.className = "crop-photo";
-    image.src = photo.src;
-    image.alt = `${photo.name} photograph`;
-    image.loading = "lazy";
-    image.decoding = "async";
-    image.width = 320;
-    image.height = 180;
-    image.addEventListener("load", () => {
-      artwork.classList.add("has-photo");
-      artworkIcon.hidden = true;
-    }, { once: true });
-    image.addEventListener("error", () => {
-      image.remove();
-      artwork.classList.remove("has-photo");
-      artworkIcon.hidden = false;
-    }, { once: true });
-    artwork.append(image);
-  }
-  artwork.append(artworkIcon);
+  const fallback = commodityImageManifest?.fallbackImage || "/Images/Vegetables/other/fallback.webp";
+  const image = document.createElement("img");
+  image.className = "crop-photo";
+  image.src = photo?.src || fallback;
+  image.alt = (photo?.name || record.commodity || "Commodity") + " photograph";
+  image.loading = "lazy";
+  image.decoding = "async";
+  image.width = 320;
+  image.height = 180;
+  image.addEventListener("load", () => {
+    artwork.classList.add("has-photo");
+    placeholder.hidden = true;
+  }, { once: true });
+  image.addEventListener("error", () => {
+    image.remove();
+    artwork.classList.remove("has-photo");
+    placeholder.hidden = false;
+    console.error("[Rate-GPT] Commodity photo failed to load:", {
+      commodity: record.commodity,
+      src: image.currentSrc || image.src,
+    });
+  }, { once: true });
+  artwork.append(image, placeholder);
   const top = document.createElement("div");
   top.className = "price-card-top";
   top.append(cropBlock(record, showLocation), modalBlock(record));
