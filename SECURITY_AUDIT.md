@@ -9,7 +9,7 @@
 
 The reviewed source has several good foundations: Zod validation for public API query parameters, bounded request bodies, Helmet security headers, a server-side government-data credential, short-lived edge caching, and honest documentation of upstream data limitations.
 
-The highest-confidence issue found in this pass was a **privacy-policy accuracy defect**: the policy described contact messages and the Web3Forms credential as passing through the Rate-GPT server, while the deployed contact implementation sends the form directly from the visitor's browser to Web3Forms. This was corrected in this branch in both English and Hindi.
+The highest-confidence issue found in this pass was a **privacy-policy accuracy defect**: the policy described contact messages and the Web3Forms credential as passing through the Rate-GPT server, while the contact implementation sends the form directly from the visitor's browser to Web3Forms. The English and Hindi policy text is corrected in this branch. The same branch removes the WeatherAPI source fallback and the unfinished homepage demo CTA.
 
 This is an initial static audit, not a penetration-test certification. The production host could not be reached from the available network environment, so live response headers, deployed page behavior, and public endpoint behavior remain unverified in this pass.
 
@@ -27,21 +27,21 @@ This is an initial static audit, not a penetration-test certification. The produ
 - **Evidence:** `server.ts` uses the default in-memory store from `express-rate-limit`. `docs/security.md` explicitly documents that quotas are process-local and not shared across Vercel instances.
 - **Impact:** Requests distributed across serverless instances can exceed the nominal per-instance limit. Cold starts also reset in-memory counters.
 - **Recommendation:** If abuse becomes material, use a supported shared rate-limit store or Vercel firewall/rate-limit controls. Keep limits endpoint-specific and monitor false positives. Do not claim a globally enforced quota while using process-local storage.
-- **Status:** Not changed in this audit pass; deployment/account configuration and traffic patterns need review before selecting a control.
+- **Status:** Open. Vercel project currently has no custom firewall configuration. A shared edge limiter is the preferred next control, but no untested firewall rule was enabled because incorrect limits could block legitimate mandi users. Existing Express limits remain instance-local.
 
 ### F-03 — Public contact form bypasses the application's contact limiter
 - **Severity:** Medium — abuse-control gap
 - **Evidence:** `server.ts` applies a five-attempt limiter to `/api/v1/contact`, but `script/contact.js` submits directly to Web3Forms. The public form therefore does not traverse the Express contact route or its limiter.
 - **Impact:** The application-level five-attempt limit does not protect the actual public contact submission path. Protection depends on Web3Forms' own anti-spam, domain restrictions and account controls.
 - **Recommendation:** Confirm provider-side domain restrictions, spam controls, notification controls and any available quotas. If a server-side proxy is desired, first verify the provider plan and server IP allowlisting; do not switch back to a server-side request that the provider rejects.
-- **Status:** Not changed; requires provider account review.
+- **Status:** Partially mitigated in source by documenting the actual boundary; still open pending Web3Forms account review. The browser form includes consent and a honeypot, but those do not replace provider-side spam controls, allowed-domain restrictions or quotas.
 
 ### F-04 — Weather API key is intentionally public, with a hard-coded fallback
 - **Severity:** Low to Medium — third-party quota/abuse exposure
 - **Evidence:** `script/weather.js` reads `VITE_WEATHERAPI_KEY` and falls back to a literal key in browser code. `docs/environment.md` correctly acknowledges that Vite-prefixed values are visible to visitors.
 - **Impact:** The key can be copied and used outside the site, potentially consuming its quota. A hard-coded fallback also makes the active key difficult to rotate or disable through deployment configuration alone.
 - **Recommendation:** Confirm the key is restricted through WeatherAPI's available controls and has suitable quotas. Prefer explicit deployment configuration and a graceful “weather unavailable” state over a permanent hard-coded fallback, after confirming production environment configuration.
-- **Status:** Not changed; removing the fallback without confirming a replacement could break the weather feature.
+- **Status:** Source fix applied in this branch and a Production environment variable configured. Provider-side restrictions remain unverified and still require the WeatherAPI account owner.
 
 ### F-05 — CSP permits inline styles
 - **Severity:** Low — defense-in-depth opportunity
@@ -55,7 +55,7 @@ This is an initial static audit, not a penetration-test certification. The produ
 - **Evidence:** `index.html` opens a dialog whose content says “Video coming soon”.
 - **Impact:** A primary-looking action leads to an unfinished experience.
 - **Recommendation:** Either add a real, accessible walkthrough or remove/rename the CTA until the demo is ready.
-- **Status:** Not changed; product decision required.
+- **Status:** Fixed in this branch; homepage now keeps the primary price-discovery action without a nonfunctional demo control.
 
 ### F-07 — Production security posture could not be independently checked
 - **Severity:** Verification gap, not a confirmed vulnerability
