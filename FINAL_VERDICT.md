@@ -44,7 +44,7 @@ The contact-fix deployment was additionally checked:
 - PR #126 changes the public contact page to use Web3Forms' standard browser-side submission flow.
 - Vercel Production now has the public build variable `VITE_WEB3FORMS_ACCESS_KEY` configured. It is intentionally exposed in the built browser bundle.
 - The production build and CSP changes are deployed and verified.
-- A real browser-side provider submission and receipt in the configured inbox are **not yet confirmed**. The available verification sandbox could not launch Chromium because its runtime image lacks the browser's required shared libraries. Server-side test requests still return the provider's expected 403 and cannot substitute for a browser submission.
+- The site owner confirmed that two test submissions appeared in the configured Web3Forms inbox (13 and 19 November 2026). This confirms the browser-side delivery path at the owner-observed level; the assistant did not independently access the private inbox. The earlier verification sandbox could not launch Chromium because its runtime image lacked required browser shared libraries.
 
 The form continues to require consent and includes a honeypot. Contact submissions are not written to a Rate-GPT database. The optional server-side API proxy requires Web3Forms Pro and server-IP safelisting.
 
@@ -81,7 +81,7 @@ See [live-data coverage and source limitations](docs/live-data-coverage.md).
 | Web3Forms browser-side integration fix | Complete — PR #126 merged and deployed |
 | Public key configured in Vercel Production build | Complete |
 | Production contact-page and CSP checks | Complete |
-| Real browser-side provider acceptance | Pending — browser runtime unavailable in verification sandbox |
-| Inbox receipt | Pending confirmation |
+| Web3Forms provider acceptance and inbox receipt | Confirmed by site owner: two test submissions received |
+| Inbox receipt | Confirmed by site owner |
 
-**Current verdict:** The Web3Forms integration has been corrected, merged and deployed. The previous claim that the public Web3Forms Access Key had to be rotated solely because it was visible was incorrect; Web3Forms documents these form keys as public. The only unverified part is the final end-to-end browser submission and inbox receipt. Do not claim 100% email delivery until that final result is observed.
+**Current verdict:** The Web3Forms integration has been corrected, merged and deployed, and the site owner has confirmed two submissions in the configured inbox. The previous claim that the public Web3Forms Access Key had to be rotated solely because it was visible was incorrect; Web3Forms documents these form keys as public. This owner confirmation is not an independent audit of inbox configuration or provider retention.
