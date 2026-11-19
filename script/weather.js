@@ -4,7 +4,7 @@ import { fetchFilters } from "./api.js";
 (() => {
   if ((window.location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
 
-  const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY || "c6f1a1969af64489958184521261511";
+  const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY?.trim() ?? "";
   const form = document.getElementById("weatherSearchForm");
   const input = document.getElementById("locationInput");
   const searchButton = document.getElementById("getWeatherBtn");
