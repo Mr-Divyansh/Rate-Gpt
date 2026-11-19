@@ -28,11 +28,11 @@ if (form) {
   // Web3Forms access keys are public form identifiers. Their standard API is
   // intended for browser submissions; server-side calls require Pro + IP safelisting.
   form.action = "https://api.web3forms.com/submit";
-  const accessKeyInput = document.createElement("input");
+  const accessKeyInput = form.querySelector('input[name="access_key"]') || document.createElement("input");
   accessKeyInput.type = "hidden";
   accessKeyInput.name = "access_key";
   accessKeyInput.value = WEB3FORMS_ACCESS_KEY;
-  form.append(accessKeyInput);
+  if (!accessKeyInput.isConnected) form.append(accessKeyInput);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
