@@ -36,14 +36,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Vite and its glob-matching toolchain are build/dev-only. Keep the release gate focused on runtime dependencies.
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
-
-      # GHSA-fc5q-39xc-vjpf currently affects picomatch through 4.0.7; no patched npm release is published.
-      # Surface the development-toolchain advisory without blocking unrelated production releases.
-      - name: Report development dependency advisories
-        continue-on-error: true
+      # Development tooling is part of the software supply chain and must pass the same security gate.
+      - name: Audit all dependencies
         run: npm audit --audit-level=high
 
       - name: Unit and service tests
