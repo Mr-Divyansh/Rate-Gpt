@@ -73,6 +73,11 @@ jobs:
 
       - name: Start local app for weather browser checks
         if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          # Weather browser tests intercept the provider request, but the app
+          # still requires a non-empty public key before it issues that request.
+          # This deterministic dummy value is never sent to a real provider.
+          VITE_WEATHERAPI_KEY: browser-test-only-key
         run: |
           PORT=4173 npm run dev > /tmp/rate-gpt-dev.log 2>&1 &
           for attempt in $(seq 1 30); do
