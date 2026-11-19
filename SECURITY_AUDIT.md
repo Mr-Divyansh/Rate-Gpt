@@ -27,14 +27,14 @@ This is an initial static audit, not a penetration-test certification. The produ
 - **Evidence:** `server.ts` uses the default in-memory store from `express-rate-limit`. `docs/security.md` explicitly documents that quotas are process-local and not shared across Vercel instances.
 - **Impact:** Requests distributed across serverless instances can exceed the nominal per-instance limit. Cold starts also reset in-memory counters.
 - **Recommendation:** If abuse becomes material, use a supported shared rate-limit store or Vercel firewall/rate-limit controls. Keep limits endpoint-specific and monitor false positives. Do not claim a globally enforced quota while using process-local storage.
-- **Status:** Open. Vercel project currently has no custom firewall configuration. A shared edge limiter is the preferred next control, but no untested firewall rule was enabled because incorrect limits could block legitimate mandi users. Existing Express limits remain instance-local.
+- **Status:** Partially remediated. A Vercel Firewall rule is now active for `/api/v1/`: fixed-window 100 requests per 300 seconds using IP + JA4 counting keys, with a 429 rate-limit response. Express instance-local limits remain as defense in depth. Vercel WAF counters are per region, so this is not one mathematically global counter; review traffic and adjust only with observed data.
 
 ### F-03 — Public contact form bypasses the application's contact limiter
 - **Severity:** Medium — abuse-control gap
 - **Evidence:** `server.ts` applies a five-attempt limiter to `/api/v1/contact`, but `script/contact.js` submits directly to Web3Forms. The public form therefore does not traverse the Express contact route or its limiter.
 - **Impact:** The application-level five-attempt limit does not protect the actual public contact submission path. Protection depends on Web3Forms' own anti-spam, domain restrictions and account controls.
 - **Recommendation:** Confirm provider-side domain restrictions, spam controls, notification controls and any available quotas. If a server-side proxy is desired, first verify the provider plan and server IP allowlisting; do not switch back to a server-side request that the provider rejects.
-- **Status:** Partially mitigated in source by documenting the actual boundary; still open pending Web3Forms account review. The browser form includes consent and a honeypot, but those do not replace provider-side spam controls, allowed-domain restrictions or quotas.
+- **Status:** Partially mitigated. The form now submits directly to Web3Forms with a build-injected public key, explicit consent and a honeypot; native submission can work without JavaScript. The new Vercel `/api/v1/` WAF rule does not cover the direct provider request. Provider-side spam controls, allowed-domain restrictions and quotas remain unverified.
 
 ### F-04 — Weather API key is public and requires provider-side restrictions
 - **Severity:** Low to Medium — third-party quota/abuse exposure
@@ -85,7 +85,7 @@ This is an initial static audit, not a penetration-test certification. The produ
 
 1. Verify provider-side Web3Forms anti-spam, allowed-domain settings, quotas and retention.
 2. Confirm WeatherAPI key restrictions and quotas with the provider.
-3. Decide and implement a shared edge/global rate-limit control for public API endpoints.
-4. Run browser regression tests against the tightened CSP and all dynamic price visualizations.
+3. Observe the active Vercel API rate-limit rule and tune it from real traffic; counters are regional.
+4. Run browser regression tests against the tightened CSP, native contact form fallback and all dynamic price visualizations.
 5. Run read-only production header and endpoint checks from a working network.
 6. Obtain qualified legal review of the privacy and terms pages.
