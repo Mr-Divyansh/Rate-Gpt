@@ -11,14 +11,44 @@ function check(condition: boolean, label: string): void {
   console.log(`PASS ${label}`);
 }
 
+async function fetchPublicCatalogue(): Promise<Response> {
+  const url = `${BASE_URL}/daily-price-arrival/filters`;
+  let lastError: unknown;
+
+  // This is an external government API, so transient latency must not make
+  // the entire CI run fail on the first slow response.
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: HEADERS,
+        cache: "no-store",
+        signal: AbortSignal.timeout(60_000),
+      });
+
+      if (response.ok || (response.status < 500 && response.status !== 429)) {
+        return response;
+      }
+      lastError = new Error(`AGMARKNET returned HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (attempt < 4) {
+      const delayMs = attempt * 2_000;
+      console.warn(`AGMARKNET catalogue request attempt ${attempt}/4 failed; retrying in ${delayMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("AGMARKNET catalogue request failed after 4 attempts");
+}
+
 async function main(): Promise<void> {
   console.log("Checking the public AGMARKNET 2.0 administrative catalogue");
 
-  const response = await fetch(`${BASE_URL}/daily-price-arrival/filters`, {
-    headers: HEADERS,
-    cache: "no-store",
-    signal: AbortSignal.timeout(20_000),
-  });
+  const response = await fetchPublicCatalogue();
   check(response.ok, "official filter endpoint returns HTTP success");
   const payload = await response.json() as any;
   check(payload?.status === true && payload?.data, "official filter response has the documented success envelope");
