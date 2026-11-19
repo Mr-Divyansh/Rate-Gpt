@@ -11,7 +11,7 @@ Base path: `/api/v1`. All successful responses use `{ success: true, data, meta?
 - `GET /prices/compare?commodity=&date=` — a bounded live observation page for a required commodity and arrival date. It does not calculate price differences; consumers should compare only matching varieties and source units. `meta.comparisonMayBePartial` indicates upstream records remain.
 - `GET /prices/trend` — returns HTTP 410 with `HISTORICAL_STORAGE_DISABLED`; Rate-GPT does not store price history.
 - `GET /sync-status` — describes the on-demand, no-storage data mode; it does not represent a database sync.
-- `POST /contact` — validates a consented contact request and forwards it server-to-server to Web3Forms when `WEB3FORMS_ACCESS_KEY` is configured.
+- `POST /contact` — optional server-side contact proxy. It validates consent and forwards to Web3Forms only when the account has a Pro plan and the Vercel server IP is allowlisted. The public `contact.html` form uses the browser-side Web3Forms API instead, which is the standard supported integration for an access key.
 
 `/prices` metadata includes the upstream `total` where available, the next raw upstream offset, source attribution, an ISO `fetchedAt` timestamp for the successful API request, and `upstreamUpdatedAt` when the source provides its dataset update time. The record's `arrival_date` remains the government-reported arrival date and is not inferred from either timestamp. `upstreamHasNext` reports upstream coverage; `hasNext` is false when the supported offset boundary prevents another request, and `truncated` identifies that case. Date and modal-price sorting apply to each returned page; page offsets still follow upstream order and do not imply a globally ranked result. API data uses `Cache-Control: no-store`.
 
@@ -20,7 +20,6 @@ The Mandi Prices page can browse the unfiltered national feed in upstream pages 
 ## Failure behavior
 
 Validation failures return 400. Upstream rejection or invalid upstream content returns 502; an unavailable or rate-limited source returns 503; a timed-out upstream request returns 504. The server does not return credentials, upstream response bodies, or stack traces in production error responses.
-
 
 ## AI and agent integration
 
