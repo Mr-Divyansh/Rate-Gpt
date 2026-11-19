@@ -8,16 +8,15 @@
 
 ## 1. Release identity and CI
 
-- Latest verified production main commit before this contact fix: `0b289b06e3711c7d8dab975c6e1ba1f9d2aede61`.
-- PR #123 (dependency security and production browser verification) is merged.
-- PR #124 (Playwright-compatible production runner) is merged.
-- GitHub main CI run **44446711303** passed. This includes the blocking full dependency audit, unit/service tests, API integration, API contract/OpenAPI, AGMARKNET checks, site metadata, responsive checks, browser test setup, TypeScript and production build.
+- Latest contact-fix production main commit: `003d63b710f0cf701513fd903d870c5d6f1755fa`.
+- PR #123 (dependency security and production browser verification), PR #124 (Playwright-compatible production runner), and PR #126 (Web3Forms browser-side delivery) are merged.
 - The full npm audit passed with **0 vulnerabilities** after upgrading Vite from 6.2.7 to **6.4.6** and regenerating `package-lock.json`.
-- Latest pre-contact-fix production deployment **dpl_5VGyRM9CP6fQCvF6Razk4zGtC3xB** is READY.
+- The contact-fix branch passed local verification: 79 unit tests, API integration tests, 86 site metadata checks, TypeScript lint, and production build.
+- Vercel deployment **dpl_CTERDaKKHSVjeYbs918KF5DyGoLy** is READY for the latest main commit. The production alias includes `rate-gpt.vercel.app`.
 
 ## 2. Production verification
 
-Production smoke workflow run **44446966345** passed:
+The previous production smoke workflow run **44446966345** passed:
 
 - **45/45 public production smoke checks**
 - **25/25 real-browser production checks**
@@ -25,7 +24,11 @@ Production smoke workflow run **44446966345** passed:
 - Browser viewports: mobile 390px, tablet 768px and desktop 1440px.
 - **147/147** deployed commodity photographs returned successful image responses.
 
-The browser suite verified the Mandi page, government state options, dependent district and mandi selectors, live-price or honest empty-state behavior, no horizontal overflow, and no uncaught browser JavaScript errors at all three viewports.
+The contact-fix deployment was additionally checked:
+- `/contact.html` returns HTTP 200.
+- The deployed contact JavaScript bundle includes the Web3Forms endpoint and the configured public access key.
+- Production CSP allows `https://api.web3forms.com` in `connect-src` and `form-action`.
+- Vercel reports the new production deployment as READY.
 
 ## 3. Dependency security
 
@@ -38,11 +41,12 @@ The browser suite verified the Mandi page, government state options, dependent d
 
 - Web3Forms documentation identifies its form Access Key as a public form identifier that is safe for browser-side use; it is not an account password or private API secret.
 - The previous implementation sent requests from a Vercel server function. A controlled production request returned HTTP 502, and a direct provider request from the server environment returned HTTP 403 with Web3Forms' message that server-side calls require a Pro plan and server-IP safelisting.
-- The contact page is being changed to submit directly from the browser, Web3Forms' standard supported integration. The Vercel CSP is being updated to allow `https://api.web3forms.com`.
+- PR #126 changes the public contact page to use Web3Forms' standard browser-side submission flow.
 - Vercel Production now has the public build variable `VITE_WEB3FORMS_ACCESS_KEY` configured. It is intentionally exposed in the built browser bundle.
-- A successful provider response and receipt in the configured inbox must still be verified after the browser-side fix is deployed. No inbox receipt is claimed at this stage.
+- The production build and CSP changes are deployed and verified.
+- A real browser-side provider submission and receipt in the configured inbox are **not yet confirmed**. The available verification sandbox could not launch Chromium because its runtime image lacks the browser's required shared libraries. Server-side test requests still return the provider's expected 403 and cannot substitute for a browser submission.
 
-The form continues to require consent, has a honeypot, and sends contact details directly to Web3Forms. Contact submissions are not written to a Rate-GPT database. The optional server-side API proxy requires Web3Forms Pro and server-IP safelisting.
+The form continues to require consent and includes a honeypot. Contact submissions are not written to a Rate-GPT database. The optional server-side API proxy requires Web3Forms Pro and server-IP safelisting.
 
 ## 5. Government data source and honest limitations
 
@@ -72,9 +76,12 @@ See [live-data coverage and source limitations](docs/live-data-coverage.md).
 |---|---|
 | Vite security upgrade and lockfile refresh | Complete |
 | Blocking full dependency audit | Complete — 0 vulnerabilities |
-| Production mobile/tablet/desktop browser checks | Complete — 25/25 |
-| Public production smoke checks | Complete — 45/45 |
-| Web3Forms integration correction | Implemented on branch; awaiting CI, merge and production browser verification |
-| Real provider acceptance and inbox receipt | Pending post-deployment verification |
+| Production mobile/tablet/desktop browser checks | Complete — 25/25 on previous verified release |
+| Public production smoke checks | Complete — 45/45 on previous verified release |
+| Web3Forms browser-side integration fix | Complete — PR #126 merged and deployed |
+| Public key configured in Vercel Production build | Complete |
+| Production contact-page and CSP checks | Complete |
+| Real browser-side provider acceptance | Pending — browser runtime unavailable in verification sandbox |
+| Inbox receipt | Pending confirmation |
 
-**Current verdict:** Core Rate-GPT code release is merged, CI-green and production-verified. The contact delivery failure was traced to unsupported server-side Web3Forms calls on the current plan. The browser-side integration is now the selected fix; do not mark the contact task 100% complete until the deployed browser form receives a successful provider response and the configured inbox is checked.
+**Current verdict:** The Web3Forms integration has been corrected, merged and deployed. The previous claim that the public Web3Forms Access Key had to be rotated solely because it was visible was incorrect; Web3Forms documents these form keys as public. The only unverified part is the final end-to-end browser submission and inbox receipt. Do not claim 100% email delivery until that final result is observed.
