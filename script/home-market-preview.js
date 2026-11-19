@@ -8,14 +8,6 @@ import {
 const $ = (id) => document.getElementById(id);
 const BOARD_ROWS = 5;
 
-/* ---------------- interactive product demo ---------------- */
-const demoDialog = $("demoDialog");
-$("watchDemo")?.addEventListener("click", () => demoDialog?.showModal());
-$("demoClose")?.addEventListener("click", () => demoDialog?.close());
-demoDialog?.addEventListener("click", (event) => {
-  if (event.target === demoDialog) demoDialog.close();
-});
-
 /* ---------------- rate board ---------------- */
 let board = null; // { latest, rows, history } | { error } | { empty: true }
 

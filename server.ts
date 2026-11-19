@@ -55,7 +55,8 @@ export function createApiApp() {
         baseUri: ["'self'"],
         objectSrc: ["'none'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
+        styleSrcAttr: ["'none'"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "blob:", "data:", "https://cdn.weatherapi.com"],
         connectSrc: process.env.NODE_ENV === "production"
