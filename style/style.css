@@ -544,3 +544,179 @@
   .demo-video-placeholder { min-height: 190px; max-height: 52vh; }
   .demo-dialog-foot { align-items: flex-start; flex-direction: column; }
 }
+
+
+/* ---------- Reference-led homepage polish: light market panel ---------- */
+.page-home {
+  background:
+    radial-gradient(ellipse at 78% 15%, rgba(225, 238, 222, .55), transparent 38%),
+    linear-gradient(112deg, #f7f7f0 0%, #f4f7ef 58%, #eef4e9 100%);
+}
+.page-home #main-content { min-height: calc(100svh - 68px); }
+.page-home .hero.wrap {
+  width: min(calc(100% - clamp(40px, 6vw, 96px)), 1420px);
+  min-height: calc(100svh - 68px);
+  grid-template-columns: minmax(0, 1.02fr) minmax(420px, .98fr);
+  gap: clamp(24px, 3vw, 48px);
+  padding-block: clamp(28px, 5vh, 58px);
+}
+.page-home .hero-copy { max-width: 590px; gap: clamp(13px, 2vh, 21px); }
+.page-home .hero-copy h1 {
+  max-width: 15ch;
+  font-size: clamp(2.8rem, 4.35vw, 4.45rem);
+  line-height: .99;
+  letter-spacing: -.045em;
+}
+.page-home .hero-copy .lede {
+  max-width: 47ch;
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.65;
+  color: #526159;
+}
+.page-home .hero-kicker {
+  border: 1px solid rgba(40, 122, 82, .08);
+  border-radius: 9px;
+  padding: 8px 13px;
+  background: #e8f1e8;
+}
+.page-home .hero-actions .btn {
+  min-height: 54px;
+  padding-inline: 25px;
+  border-radius: 9px;
+  background: #086344;
+  box-shadow: 0 8px 18px rgba(8, 99, 68, .13);
+}
+.page-home .hero-actions .btn:hover { background: #064d35; transform: translateY(-1px); }
+.page-home .fine { max-width: 54ch; color: #42564a; font-size: .9rem; }
+.page-home .hero-farmer {
+  right: 25%;
+  bottom: 0;
+  width: min(53vw, 740px);
+  height: 88%;
+  object-position: center bottom;
+  opacity: .98;
+  filter: saturate(.86) drop-shadow(0 12px 20px rgba(24, 58, 38, .08));
+}
+.page-home .board {
+  width: min(100%, 540px);
+  justify-self: end;
+  align-self: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(23, 77, 56, .10);
+  border-radius: 17px;
+  background: #fff;
+  color: #202b25;
+  box-shadow: 0 22px 55px rgba(28, 64, 43, .14);
+  transform: translateY(2px);
+}
+.page-home .board-head {
+  padding: 22px 22px 15px;
+  align-items: flex-start;
+}
+.page-home .board-head h2 {
+  color: #172b21;
+  font-size: clamp(1.22rem, 1.7vw, 1.52rem);
+  letter-spacing: -.025em;
+}
+.page-home .board-chart-mark { color: #8b9e35; }
+.page-home .board-meta {
+  margin-top: 5px;
+  color: #66736b;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+.page-home .board-rows { gap: 5px; padding: 0 16px 14px; }
+.page-home .board-row {
+  min-height: 61px;
+  grid-template-columns: minmax(0, 1.18fr) minmax(74px, .72fr) auto;
+  gap: 13px;
+  padding: 9px 12px;
+  border: 1px solid #edf1ec;
+  border-radius: 10px;
+  background: #f7f9f7;
+}
+.page-home .board-row .crop-name strong { color: #26352c; font-size: .96rem; }
+.page-home .board-row .crop-name small {
+  color: #68756d;
+  font-size: .75rem;
+  line-height: 1.28;
+}
+.page-home .board-row .range-track { background: #dfe9e1; }
+.page-home .board-row .range-fill { background: #238b58; }
+.page-home .board-row .range-modal { background: #087047; box-shadow: 0 0 0 1px #087047; }
+.page-home .board-modal strong {
+  color: #087047;
+  font-size: clamp(1.22rem, 1.9vw, 1.62rem);
+  letter-spacing: -.025em;
+}
+.page-home .board-modal small { color: #60786a; font-size: .7rem; }
+.page-home .board-trend {
+  min-height: 48px;
+  margin: 0 20px 12px;
+  padding: 9px 2px 0;
+  border-top: 1px solid #e8eee8;
+  color: #66736b;
+}
+.page-home .board-trend p { color: #617168; font-size: .78rem; }
+.page-home .spark-line { stroke: #238b58; }
+.page-home .spark-area { fill: rgba(35, 139, 88, .10); }
+.page-home .spark-dot { fill: #238b58; stroke: #fff; }
+.page-home .board-status { padding: 15px 22px; color: #526159; }
+.page-home .board-status .btn { border-color: #cbd9cf; color: #174d38; }
+.page-home .board-foot {
+  margin: 0;
+  padding: 13px 21px;
+  border: 0;
+  background: #104d36;
+}
+.page-home .board-foot a {
+  min-height: 35px;
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 700;
+}
+.page-home .board-foot a:hover { color: #e9f4e9; }
+.page-home .board[aria-busy="true"] .board-foot { visibility: hidden; }
+
+@media (max-width: 1000px) and (min-width: 761px) {
+  .page-home .hero.wrap {
+    width: min(calc(100% - 40px), 900px);
+    grid-template-columns: minmax(0, .96fr) minmax(360px, 1.04fr);
+    gap: 18px;
+  }
+  .page-home .hero-copy h1 { font-size: clamp(2.35rem, 4.6vw, 3.3rem); }
+  .page-home .hero-farmer { right: 31%; width: 46vw; opacity: .72; }
+  .page-home .board-head { padding: 18px 17px 12px; }
+  .page-home .board-rows { padding-inline: 12px; }
+  .page-home .board-row { gap: 8px; padding-inline: 9px; }
+}
+@media (max-width: 760px) {
+  .page-home #main-content { min-height: 0; }
+  .page-home .hero.wrap {
+    width: min(calc(100% - 32px), 620px);
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    padding-block: 27px 10px;
+    gap: 22px;
+  }
+  .page-home .hero-copy { max-width: none; gap: 12px; }
+  .page-home .hero-copy h1 { max-width: 16ch; font-size: clamp(2.35rem, 8vw, 3.35rem); line-height: 1.02; }
+  .page-home .hero-farmer { display: none; }
+  .page-home .board { width: 100%; max-height: none; transform: none; }
+  .page-home .board-head { padding: 17px 16px 11px; }
+  .page-home .board-rows { padding: 0 10px 12px; }
+  .page-home .board-row { min-height: 52px; grid-template-columns: minmax(0, 1fr) minmax(48px, .5fr) auto; }
+  .page-home .board-trend { margin-inline: 15px; }
+  .page-home .board-foot { display: block; padding: 11px 16px; }
+}
+@media (max-width: 420px) {
+  .page-home .hero.wrap { padding-top: 21px; gap: 18px; }
+  .page-home .board-head h2 { font-size: 1.08rem; }
+  .page-home .board-meta { font-size: .72rem; }
+  .page-home .board-row { grid-template-columns: minmax(0, 1fr) minmax(34px, .4fr) auto; gap: 6px; padding-inline: 8px; }
+  .page-home .board-row .crop-name strong { font-size: .84rem; }
+  .page-home .board-row .crop-name small { font-size: .68rem; }
+  .page-home .board-modal strong { font-size: 1.08rem; }
+}
