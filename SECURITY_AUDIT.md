@@ -36,23 +36,23 @@ This is an initial static audit, not a penetration-test certification. The produ
 - **Recommendation:** Confirm provider-side domain restrictions, spam controls, notification controls and any available quotas. If a server-side proxy is desired, first verify the provider plan and server IP allowlisting; do not switch back to a server-side request that the provider rejects.
 - **Status:** Partially mitigated in source by documenting the actual boundary; still open pending Web3Forms account review. The browser form includes consent and a honeypot, but those do not replace provider-side spam controls, allowed-domain restrictions or quotas.
 
-### F-04 — Weather API key is intentionally public, with a hard-coded fallback
+### F-04 — Weather API key is public and requires provider-side restrictions
 - **Severity:** Low to Medium — third-party quota/abuse exposure
-- **Evidence:** `script/weather.js` reads `VITE_WEATHERAPI_KEY` and falls back to a literal key in browser code. `docs/environment.md` correctly acknowledges that Vite-prefixed values are visible to visitors.
+- **Evidence:** The original source contained a literal fallback. This branch removes it and reads only `VITE_WEATHERAPI_KEY`. The existing public key was moved into the Vercel Production environment configuration so the current production feature can continue working.
 - **Impact:** The key can be copied and used outside the site, potentially consuming its quota. A hard-coded fallback also makes the active key difficult to rotate or disable through deployment configuration alone.
-- **Recommendation:** Confirm the key is restricted through WeatherAPI's available controls and has suitable quotas. Prefer explicit deployment configuration and a graceful “weather unavailable” state over a permanent hard-coded fallback, after confirming production environment configuration.
+- **Recommendation:** Confirm the key is restricted through WeatherAPI's available controls and has suitable quotas. Vite-prefixed values remain public in the generated browser bundle; moving the value to deployment configuration improves rotation and source hygiene, not secrecy.
 - **Status:** Source fix applied in this branch and a Production environment variable configured. Provider-side restrictions remain unverified and still require the WeatherAPI account owner.
 
-### F-05 — CSP permits inline styles
+### F-05 — CSP previously permitted inline style attributes
 - **Severity:** Low — defense-in-depth opportunity
-- **Evidence:** `vercel.json` and `server.ts` include `'unsafe-inline'` in `style-src`.
+- **Evidence:** The original `vercel.json` and `server.ts` included `'unsafe-inline'` in `style-src`. This branch removes it and adds `style-src-attr 'none'` to both the static Vercel header and Express Helmet policy. A repository search found no static HTML style attributes; dynamic visualizations use CSSOM style properties.
 - **Impact:** This weakens the policy's ability to constrain injected style markup. It is not, by itself, proof of an exploitable XSS vulnerability.
-- **Recommendation:** Inventory inline style attributes and dynamically generated style values, then migrate to external styles or a nonce/hash strategy where practical. Do not remove the directive blindly because it may break price-bar rendering.
-- **Status:** Not changed; requires a complete inline-style inventory and browser regression test.
+- **Recommendation:** Run the full browser regression suite and inspect browser CSP violation reports for every page, especially price bars and skeleton states.
+- **Status:** Source hardening applied in this branch; browser regression verification is pending.
 
 ### F-06 — Homepage demo CTA opens a “coming soon” placeholder
 - **Severity:** Low — product polish/trust
-- **Evidence:** `index.html` opens a dialog whose content says “Video coming soon”.
+- **Evidence:** The previous homepage demo CTA opened a “Video coming soon” dialog. This branch removes the button, dialog and unused event handlers.
 - **Impact:** A primary-looking action leads to an unfinished experience.
 - **Recommendation:** Either add a real, accessible walkthrough or remove/rename the CTA until the demo is ready.
 - **Status:** Fixed in this branch; homepage now keeps the primary price-discovery action without a nonfunctional demo control.
@@ -83,10 +83,9 @@ This is an initial static audit, not a penetration-test certification. The produ
 
 ## Next verification priorities
 
-1. Verify provider-side Web3Forms anti-spam and allowed-domain settings.
-2. Confirm WeatherAPI key restrictions and production environment configuration.
-3. Decide whether global rate limiting is required and implement a shared control if needed.
-4. Test CSP tightening against all pages and dynamic price visualizations.
-5. Replace or remove the placeholder demo CTA.
-6. Run the read-only production header/endpoint checks from a working network.
-7. Obtain qualified legal review of the privacy and terms pages.
+1. Verify provider-side Web3Forms anti-spam, allowed-domain settings, quotas and retention.
+2. Confirm WeatherAPI key restrictions and quotas with the provider.
+3. Decide and implement a shared edge/global rate-limit control for public API endpoints.
+4. Run browser regression tests against the tightened CSP and all dynamic price visualizations.
+5. Run read-only production header and endpoint checks from a working network.
+6. Obtain qualified legal review of the privacy and terms pages.
