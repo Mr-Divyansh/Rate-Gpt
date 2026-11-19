@@ -4,16 +4,16 @@
 **Repository:** https://github.com/Mr-Divyansh/Rate-Gpt  
 **Production URL:** https://rate-gpt.vercel.app/
 
-> This report records the actual deployed release and completed checks. It does not claim universal daily mandi coverage, physical-device certification, or verified Web3Forms delivery.
+> This report records the actual deployed release and completed checks. It does not claim universal daily mandi coverage, physical-device certification, or inbox receipt that has not been confirmed.
 
 ## 1. Release identity and CI
 
-- Latest verified production main commit: `0b289b06e3711c7d8dab975c6e1ba1f9d2aede61`.
+- Latest verified production main commit before this contact fix: `0b289b06e3711c7d8dab975c6e1ba1f9d2aede61`.
 - PR #123 (dependency security and production browser verification) is merged.
 - PR #124 (Playwright-compatible production runner) is merged.
 - GitHub main CI run **44446711303** passed. This includes the blocking full dependency audit, unit/service tests, API integration, API contract/OpenAPI, AGMARKNET checks, site metadata, responsive checks, browser test setup, TypeScript and production build.
 - The full npm audit passed with **0 vulnerabilities** after upgrading Vite from 6.2.7 to **6.4.6** and regenerating `package-lock.json`.
-- Vercel production deployment **dpl_z8GHHdpZRjW1KkCMT5y4CV39UpUk** is READY and built from the exact same main SHA. The production alias includes `rate-gpt.vercel.app`.
+- Latest pre-contact-fix production deployment **dpl_5VGyRM9CP6fQCvF6Razk4zGtC3xB** is READY.
 
 ## 2. Production verification
 
@@ -23,40 +23,26 @@ Production smoke workflow run **44446966345** passed:
 - **25/25 real-browser production checks**
 - Exact production commit identity verified before running tests.
 - Browser viewports: mobile 390px, tablet 768px and desktop 1440px.
+- **147/147** deployed commodity photographs returned successful image responses.
 
-The browser suite verified:
-
-| Area | Result |
-|---|---|
-| Mandi page loads | Passed at all 3 viewports |
-| Government state options | Passed |
-| State selection loads districts | Passed |
-| District selection loads mandi choices | Passed |
-| Mandi selection requests live prices | Passed |
-| Price or honest empty-state UI | Passed |
-| No horizontal overflow | Passed at all 3 viewports |
-| No uncaught browser JavaScript errors | Passed at all 3 viewports |
-| Deployed commodity photographs | 147/147 returned successful image responses |
-
-The 45 public checks also verified API discovery, exact deployed SHA, health, live-only mode, government location catalogue, Himachal Pradesh filter/price consistency, pagination, price record schema, OpenAPI, AI usage guide, mandi page and security headers.
+The browser suite verified the Mandi page, government state options, dependent district and mandi selectors, live-price or honest empty-state behavior, no horizontal overflow, and no uncaught browser JavaScript errors at all three viewports.
 
 ## 3. Dependency security
 
 - Vite upgraded from 6.2.7 to 6.4.6.
 - `package.json` and `package-lock.json` are synchronized.
 - The previous non-blocking development audit was replaced with a blocking `npm audit --audit-level=high`.
-- Both the dependency-refresh validation and main CI completed successfully with zero reported vulnerabilities.
+- The full npm audit passed with zero reported vulnerabilities.
 
-## 4. Contact form security — owner action still required
+## 4. Web3Forms contact delivery
 
-- Contact submissions are handled server-side through Web3Forms; the key is not intentionally exposed in the browser bundle.
-- The Vercel project has a `WEB3FORMS_ACCESS_KEY` environment-variable entry. Its secret value was not inspected.
-- A previous Web3Forms key was exposed in public source and must be treated as compromised.
-- **Rotation and real provider delivery are not verified yet.** No live contact message was sent as part of this audit.
-- The account owner must revoke/rotate the old key in Web3Forms, update the Vercel Production `WEB3FORMS_ACCESS_KEY` value, redeploy, and submit one controlled test through the public form. Verify receipt in the configured inbox.
-- Never paste the replacement key into chat, source code, a commit, or a public issue.
+- Web3Forms documentation identifies its form Access Key as a public form identifier that is safe for browser-side use; it is not an account password or private API secret.
+- The previous implementation sent requests from a Vercel server function. A controlled production request returned HTTP 502, and a direct provider request from the server environment returned HTTP 403 with Web3Forms' message that server-side calls require a Pro plan and server-IP safelisting.
+- The contact page is being changed to submit directly from the browser, Web3Forms' standard supported integration. The Vercel CSP is being updated to allow `https://api.web3forms.com`.
+- Vercel Production now has the public build variable `VITE_WEB3FORMS_ACCESS_KEY` configured. It is intentionally exposed in the built browser bundle.
+- A successful provider response and receipt in the configured inbox must still be verified after the browser-side fix is deployed. No inbox receipt is claimed at this stage.
 
-The contact route's existing server-side validation, consent check, honeypot and mocked integration coverage remain in place. Mocked provider tests do not prove real email delivery.
+The form continues to require consent, has a honeypot, and sends contact details directly to Web3Forms. Contact submissions are not written to a Rate-GPT database. The optional server-side API proxy requires Web3Forms Pro and server-IP safelisting.
 
 ## 5. Government data source and honest limitations
 
@@ -88,8 +74,7 @@ See [live-data coverage and source limitations](docs/live-data-coverage.md).
 | Blocking full dependency audit | Complete — 0 vulnerabilities |
 | Production mobile/tablet/desktop browser checks | Complete — 25/25 |
 | Public production smoke checks | Complete — 45/45 |
-| Documentation consistency | This report updated to the deployed release |
-| Web3Forms key rotation | **Pending account owner** |
-| Real contact-provider delivery test | **Pending account owner** |
+| Web3Forms integration correction | Implemented on branch; awaiting CI, merge and production browser verification |
+| Real provider acceptance and inbox receipt | Pending post-deployment verification |
 
-**Current verdict:** Rate-GPT's code release is merged, CI-green, production-deployed on the exact expected SHA, and production verification passed 45/45 public checks plus 25/25 browser checks. The project is not honestly 100% complete until the previously exposed Web3Forms key is rotated and a controlled real delivery is confirmed. No key should be shared in chat to complete that step.
+**Current verdict:** Core Rate-GPT code release is merged, CI-green and production-verified. The contact delivery failure was traced to unsupported server-side Web3Forms calls on the current plan. The browser-side integration is now the selected fix; do not mark the contact task 100% complete until the deployed browser form receives a successful provider response and the configured inbox is checked.
