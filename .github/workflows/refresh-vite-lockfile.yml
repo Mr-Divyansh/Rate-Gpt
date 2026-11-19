@@ -1,0 +1,54 @@
+name: Refresh patched Vite lockfile
+
+on:
+  push:
+    branches: [chore/production-readiness-final-audit]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-vite-lockfile
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: ${{ !contains(github.event.head_commit.message, '[lockfile-bot]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Resolve patched Vite and regenerate npm lockfile
+        run: npm install --save-dev --save-prefix='^' 'vite@^6.4.6'
+      - name: Audit the complete dependency tree
+        run: npm audit --audit-level=high
+      - name: Run project tests and release checks
+        run: |
+          npm test
+          npm run test:integration
+          npm run test:api-contract
+          npm run test:agmarknet2
+          npm run test:site
+          npm run test:responsive
+          npm run test:release-gate
+          npm run lint
+          npm run build
+      - name: Commit regenerated dependency files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "Dependency files are already current."
+            exit 0
+          fi
+          git commit -m "chore(deps): patch Vite security advisories [lockfile-bot]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
