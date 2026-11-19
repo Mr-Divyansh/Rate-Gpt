@@ -50,6 +50,7 @@
             Please provide an email address or phone number so we can respond.
           </p>
           <form id="contactForm" action="https://api.web3forms.com/submit" method="POST" novalidate>
+            <input type="hidden" name="access_key" value="%VITE_WEB3FORMS_ACCESS_KEY%">
             <input type="checkbox" name="botcheck" class="botcheck" tabindex="-1" autocomplete="off">
             <div class="form-field">
               <label for="contactName" data-en="Your name" data-hi="आपका नाम">
