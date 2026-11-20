@@ -177,3 +177,4 @@ onLangChange(() => {
 });
 
 loadBoard();
+

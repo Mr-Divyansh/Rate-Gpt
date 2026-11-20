@@ -28,7 +28,7 @@ Copy-Item .env.example .env
 npm run dev
 ```
 
-Set `DATA_GOV_API_KEY` in `.env`; do not commit it or put it in browser code. `WEB3FORMS_ACCESS_KEY` is needed only to enable the contact form. WeatherAPI configuration is documented in `docs/environment.md`.
+Set `DATA_GOV_API_KEY` in `.env`; do not commit it or put it in browser code. Set `VITE_WEB3FORMS_ACCESS_KEY` to enable the public contact form. Web3Forms access keys are public form identifiers intended for browser-side submission; they are not account passwords. WeatherAPI configuration is documented in `docs/environment.md`.
 
 The local API and site are available at `http://localhost:3000`. Use `/api/v1/health` for a basic process check; it does not verify a particular government-data request.
 

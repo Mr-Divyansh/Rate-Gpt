@@ -29,7 +29,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data: https://cdn.weatherapi.com; connect-src 'self' https://api.weatherapi.com; form-action 'self'; frame-ancestors 'none'"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; style-src-attr 'none'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data: https://cdn.weatherapi.com; connect-src 'self' https://api.weatherapi.com https://api.web3forms.com; form-action 'self' https://api.web3forms.com; frame-ancestors 'none'"
         },
         {
           "key": "Strict-Transport-Security",

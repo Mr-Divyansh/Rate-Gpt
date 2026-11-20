@@ -671,3 +671,50 @@
   .page-prices .india-browse:hover,
   .page-prices .price-card:hover { transform: none; }
 }
+
+/* Commodity gallery: cohesive image stages and gentle sequential reveal. */
+.page-prices .crop-art {
+  background: #fff;
+  isolation: isolate;
+  contain: paint;
+}
+.page-prices .crop-art.has-light-backdrop {
+  background: var(--crop-image-backdrop, #fff);
+}
+.page-prices .crop-art .crop-photo {
+  transform: scale(.94);
+  will-change: transform, opacity;
+}
+.page-prices .crop-art.has-photo .crop-photo {
+  animation: commodity-photo-pop .52s cubic-bezier(.2,.82,.24,1.12);
+}
+.page-prices .price-card {
+  animation: commodity-card-enter .42s cubic-bezier(.2,.72,.24,1);
+}
+.page-prices .mobile-list > .price-card:nth-child(2) { animation-delay: 45ms; }
+.page-prices .mobile-list > .price-card:nth-child(3) { animation-delay: 90ms; }
+.page-prices .mobile-list > .price-card:nth-child(4) { animation-delay: 135ms; }
+.page-prices .mobile-list > .price-card:nth-child(5) { animation-delay: 180ms; }
+.page-prices .mobile-list > .price-card:nth-child(6) { animation-delay: 225ms; }
+.page-prices .mobile-list > .price-card:nth-child(7) { animation-delay: 270ms; }
+.page-prices .mobile-list > .price-card:nth-child(8) { animation-delay: 315ms; }
+.page-prices .mobile-list > .price-card:nth-child(9) { animation-delay: 360ms; }
+.page-prices .mobile-list > .price-card:nth-child(10) { animation-delay: 405ms; }
+
+@keyframes commodity-photo-pop {
+  0% { opacity: 0; transform: scale(.88) translateY(7px); }
+  68% { opacity: 1; transform: scale(1.035) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes commodity-card-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-prices .price-card,
+  .page-prices .crop-art.has-photo .crop-photo {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+}

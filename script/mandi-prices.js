@@ -430,9 +430,43 @@ fetch("/commodity-image-manifest.json", { cache: "no-cache" })
     if (state.records.length) renderResults();
   });
 
+function matchCommodityImageStage(image, artwork) {
+  // Match clean studio-white image backgrounds to the image stage. Keep
+  // photographic/colored backgrounds untouched so produce colors stay natural.
+  try {
+    if (!image.naturalWidth || !image.naturalHeight) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 8;
+    canvas.height = 8;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+    context.drawImage(image, 0, 0, 8, 8);
+    const pixels = context.getImageData(0, 0, 8, 8).data;
+    const samples = [
+      [0, 0], [7, 0], [0, 7], [7, 7], [3, 0], [4, 0],
+      [3, 7], [4, 7], [0, 3], [0, 4], [7, 3], [7, 4],
+    ].map(([x, y]) => {
+      const offset = (y * 8 + x) * 4;
+      return [pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]];
+    }).filter((pixel) => pixel[3] > 220);
+    if (samples.length < 8) return;
+    const average = [0, 1, 2].map((channel) =>
+      Math.round(samples.reduce((sum, pixel) => sum + pixel[channel], 0) / samples.length),
+    );
+    const channels = samples.flatMap((pixel) => pixel.slice(0, 3));
+    const spread = Math.max(...channels) - Math.min(...channels);
+    if (!average.every((channel) => channel >= 226) || spread > 34) return;
+    artwork.classList.add("has-light-backdrop");
+    artwork.style.setProperty("--crop-image-backdrop", `rgb(${average.join(", ")})`);
+  } catch {
+    // Canvas may be unavailable in constrained browsers; retain the default stage.
+  }
+}
+
 function showCommodityImage(target, request) {
   if (request.status === "loaded") {
     target.image.src = request.objectUrl;
+    matchCommodityImageStage(request.decodedImage, target.artwork);
     target.artwork.classList.add("has-photo");
     target.placeholder.hidden = true;
     return;
@@ -461,6 +495,7 @@ async function startNextCommodityImage() {
       const decodedImage = new Image();
       decodedImage.src = objectUrl;
       await decodedImage.decode();
+      request.decodedImage = decodedImage;
     } catch (error) {
       URL.revokeObjectURL(objectUrl);
       throw error;
@@ -527,6 +562,7 @@ function commodityArtwork(record) {
   image.className = "crop-photo";
   image.alt = `${photo.name} photograph`;
   image.decoding = "async";
+  image.fetchPriority = "low";
   image.width = 320;
   image.height = 180;
   image.addEventListener("error", () => {

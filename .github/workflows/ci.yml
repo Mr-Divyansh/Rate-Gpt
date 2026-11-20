@@ -36,14 +36,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Vite and its glob-matching toolchain are build/dev-only. Keep the release gate focused on runtime dependencies.
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
-
-      # GHSA-fc5q-39xc-vjpf currently affects picomatch through 4.0.7; no patched npm release is published.
-      # Surface the development-toolchain advisory without blocking unrelated production releases.
-      - name: Report development dependency advisories
-        continue-on-error: true
+      # Development tooling is part of the software supply chain and must pass the same security gate.
+      - name: Audit all dependencies
         run: npm audit --audit-level=high
 
       - name: Unit and service tests
@@ -79,6 +73,11 @@ jobs:
 
       - name: Start local app for weather browser checks
         if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          # Weather browser tests intercept the provider request, but the app
+          # still requires a non-empty public key before it issues that request.
+          # This deterministic dummy value is never sent to a real provider.
+          VITE_WEATHERAPI_KEY: browser-test-only-key
         run: |
           PORT=4173 npm run dev > /tmp/rate-gpt-dev.log 2>&1 &
           for attempt in $(seq 1 30); do

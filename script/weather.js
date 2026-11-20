@@ -4,7 +4,7 @@ import { fetchFilters } from "./api.js";
 (() => {
   if ((window.location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
 
-  const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY;
+  const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY?.trim() ?? "";
   const form = document.getElementById("weatherSearchForm");
   const input = document.getElementById("locationInput");
   const searchButton = document.getElementById("getWeatherBtn");
@@ -451,3 +451,4 @@ import { fetchFilters } from "./api.js";
   window.addEventListener("pagehide", () => stopTracking({ announce: false }), { once: true });
   window.addEventListener("beforeunload", () => stopTracking({ announce: false }), { once: true });
 })();
+
