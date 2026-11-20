@@ -10,10 +10,19 @@ const BOARD_ROWS = 5;
 
 /* ---------------- interactive product demo ---------------- */
 const demoDialog = $("demoDialog");
-$("watchDemo")?.addEventListener("click", () => demoDialog?.showModal());
+const demoVideoFrame = $("demoVideoFrame");
+const DEMO_VIDEO_SRC = "https://www.youtube-nocookie.com/embed/AsImBHSFDtI?autoplay=1&rel=0";
+$("watchDemo")?.addEventListener("click", () => {
+  if (demoVideoFrame) demoVideoFrame.src = DEMO_VIDEO_SRC;
+  demoDialog?.showModal();
+});
 $("demoClose")?.addEventListener("click", () => demoDialog?.close());
 demoDialog?.addEventListener("click", (event) => {
   if (event.target === demoDialog) demoDialog.close();
+});
+// Fires on every close path (button, Escape key, backdrop click) — stop playback either way.
+demoDialog?.addEventListener("close", () => {
+  if (demoVideoFrame) demoVideoFrame.src = "";
 });
 
 /* ---------------- rate board ---------------- */

@@ -33,7 +33,7 @@
   <main id="main-content" tabindex="-1">
     <section class="weather-wrap wrap" aria-labelledby="weatherPageTitle">
       <div class="weather-intro">
-        <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
+        <span class="weather-eyebrow" data-i18n="weather.eyebrow">Weather near you</span>
         <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
         <p data-i18n="weather.subtitle">Get current conditions for your location or search any city.</p>
       </div>
@@ -54,26 +54,26 @@
         </div>
         <div class="weather-picker-heading">
           <span class="weather-location-icon" aria-hidden="true">⌖</span>
-          <div><strong>Choose your location</strong><small>Select a larger area first, then narrow it down to your village.</small></div>
+          <div><strong data-i18n="weather.picker.heading">Choose your location</strong><small data-i18n="weather.picker.sub">Select a larger area first, then narrow it down to your village.</small></div>
         </div>
         <form id="weatherSearchForm" class="weather-picker-form">
           <div class="weather-picker-field">
-            <label for="stateSelect">1. State</label>
-            <select id="stateSelect"><option value="">Loading states…</option></select>
+            <label for="stateSelect" data-i18n="weather.picker.stateLabel">1. State</label>
+            <select id="stateSelect"><option value="" data-i18n="weather.picker.loadingStates">Loading states…</option></select>
           </div>
           <div class="weather-picker-field" id="districtField" hidden>
-            <label for="districtSelect">2. District</label>
-            <select id="districtSelect" disabled><option value="">Select district</option></select>
+            <label for="districtSelect" data-i18n="weather.picker.districtLabel">2. District</label>
+            <select id="districtSelect" disabled><option value="" data-i18n="weather.picker.selectDistrict">Select district</option></select>
           </div>
           <div class="weather-picker-field" id="cityField" hidden>
-            <label for="cityInput">3. City / Town</label>
-            <input id="cityInput" type="text" autocomplete="address-level2" placeholder="Enter city or town">
+            <label for="cityInput" data-i18n="weather.picker.cityLabel">3. City / Town</label>
+            <input id="cityInput" type="text" autocomplete="address-level2" data-i18n-attr="placeholder:weather.picker.cityPh" placeholder="Enter city or town">
           </div>
           <div class="weather-picker-field" id="villageField" hidden>
-            <label for="villageInput">4. Village (optional)</label>
-            <input id="villageInput" type="text" autocomplete="address-level3" placeholder="Enter village name, e.g. Deol Khas">
+            <label for="villageInput" data-i18n="weather.picker.villageLabel">4. Village (optional)</label>
+            <input id="villageInput" type="text" autocomplete="address-level3" data-i18n-attr="placeholder:weather.picker.villagePh" placeholder="Enter village name, e.g. Deol Khas">
           </div>
-          <p class="weather-picker-hint" id="weatherScopeHint" aria-live="polite">Choose a state to see its overall weather.</p>
+          <p class="weather-picker-hint" id="weatherScopeHint" aria-live="polite" data-i18n="weather.picker.hintChooseState">Choose a state to see its overall weather.</p>
         </form>
         <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
@@ -81,7 +81,7 @@
 
       <section class="weather-result" id="weatherResult" aria-live="polite" hidden>
         <div class="weather-result-top">
-          <div><span class="weather-result-label" data-i18n="weather.current">CURRENT WEATHER</span><h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
+          <div><span class="weather-result-label" data-i18n="weather.current">Right now</span><h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
           <img class="weather-condition-icon" id="weatherIcon" alt="" width="88" height="88" hidden>
         </div>
         <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong><span class="weather-condition" id="weatherCondition"></span></div>

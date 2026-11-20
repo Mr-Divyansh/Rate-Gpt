@@ -169,19 +169,6 @@
   align-items: flex-start;
   gap: 17px;
 }
-.section-index {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  flex: none;
-  place-items: center;
-  border: 1px solid rgba(23, 77, 56, .18);
-  border-radius: 50%;
-  color: #287a52;
-  font-size: .8rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
 .section-heading .section-kicker { margin: 2px 0 7px; }
 .section-heading h2 {
   color: #183c2b;
@@ -450,7 +437,6 @@
   .about-hero-actions .btn { min-height: 46px; padding-inline: 16px; }
   .about-visual { min-height: 235px; border-radius: 24px; }
   .about-visual img { width: 165px; }
-  .section-index { width: 36px; height: 36px; }
   .section-heading { gap: 12px; }
   .steps { grid-template-columns: 1fr; }
   .step-card { min-height: 0; gap: 17px; }
