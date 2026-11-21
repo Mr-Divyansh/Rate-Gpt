@@ -2,6 +2,55 @@ import { applyI18n, getLang, setLang, onLangChange, t } from "./i18n.js";
 import { hydrateIcons, icon } from "./icons.js";
 
 const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
+
+function showStartupSplash() {
+  let alreadyShown = false;
+  try {
+    alreadyShown = sessionStorage.getItem("rate-gpt:splash-shown") === "1";
+    if (!alreadyShown) sessionStorage.setItem("rate-gpt:splash-shown", "1");
+  } catch {
+    // Storage can be unavailable in private browsing; still show the splash.
+  }
+  if (alreadyShown) return;
+
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = new URL("../style/splash-loader.css", import.meta.url).href;
+  document.head.append(stylesheet);
+
+  const playerScript = document.createElement("script");
+  playerScript.type = "module";
+  playerScript.src = "https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs";
+  document.head.append(playerScript);
+
+  const overlay = document.createElement("div");
+  overlay.className = "startup-splash";
+  overlay.setAttribute("role", "status");
+  overlay.setAttribute("aria-label", "Loading Rate-GPT");
+  overlay.innerHTML = `
+    <div class="startup-splash__content">
+      <img class="startup-splash__logo" src="${LOGO_URL}" alt="Rate-GPT" width="76" height="76">
+      <dotlottie-player
+        class="startup-splash__animation"
+        src="/animations/loading.lottie"
+        autoplay
+        loop
+        aria-hidden="true">
+      </dotlottie-player>
+    </div>
+  `;
+  document.body.append(overlay);
+  document.body.classList.add("startup-splash-active");
+
+  window.setTimeout(() => {
+    overlay.classList.add("startup-splash--leaving");
+    window.setTimeout(() => {
+      overlay.remove();
+      document.body.classList.remove("startup-splash-active");
+    }, 260);
+  }, 3000);
+}
+
 const LINKS = [
   ["nav.home", "index.html"],
   ["nav.prices", "mandi-prices.html"],
@@ -10,6 +59,8 @@ const LINKS = [
   ["nav.contact", "contact.html"],
 ];
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
+
+showStartupSplash();
 
 function navLink([key, href]) {
   const a = document.createElement("a");
