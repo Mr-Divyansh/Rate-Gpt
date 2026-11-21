@@ -737,3 +737,35 @@
   .page-home .board-modal strong { font-size: 1.08rem; }
 }
 
+
+
+/* Performance guardrails for low-power phones and constrained mobile networks.
+   The page remains fully styled; only decorative work is reduced. */
+@media (max-width: 760px) {
+  .page-home {
+    background: #f5f7f0;
+  }
+  .page-home .hero::before {
+    background: linear-gradient(180deg, rgba(247,248,241,.35), rgba(247,248,241,.9));
+    opacity: .22;
+  }
+  .page-home .board {
+    box-shadow: 0 8px 22px rgba(28, 64, 43, .09);
+  }
+  .page-home .hero-copy,
+  .page-home .board {
+    animation: none;
+  }
+}
+
+/* Avoid delaying the first meaningful paint for decorative entrance effects. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-home .hero-kicker,
+  .page-home .hero-copy h1,
+  .page-home .hero-copy .lede,
+  .page-home .hero-actions,
+  .page-home .hero-copy .fine,
+  .page-home .board {
+    animation: none;
+  }
+}
