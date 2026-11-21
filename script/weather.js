@@ -227,17 +227,20 @@ import { t } from "./i18n.js";
     closeSuggestions();
     if (!isSecureContext) { showError(t("weather.insecureContext")); return; }
     if (!navigator.geolocation?.getCurrentPosition) { showError(t("weather.geolocationUnsupported")); return; }
+
     setBusy(true);
     setStatus(t("weather.locatingWeather"));
     try {
-      let position;
-      try {
-        position = await getPosition({enableHighAccuracy:true,timeout:9000,maximumAge:30000});
-      } catch (error) {
-        // Retry once with the browser's network-assisted provider on laptops without GPS.
-        if (error.code === 1) throw error;
-        position = await getPosition({enableHighAccuracy:false,timeout:14000,maximumAge:60000});
-      }
+      // Weather only needs a useful nearby location, not turn-by-turn GPS precision.
+      // Ask the browser for its network-assisted/cached position first. High-accuracy
+      // GPS can take 10–20 seconds on desktop PCs that have no GPS hardware.
+      // A short timeout keeps the button responsive; users can retry or choose the
+      // clearly-labelled approximate-IP option if their browser cannot locate them.
+      const position = await getPosition({
+        enableHighAccuracy: false,
+        timeout: 6000,
+        maximumAge: 300000,
+      });
       const {latitude,longitude,accuracy} = position.coords;
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("invalid-position");
       await fetchWeather(`${latitude},${longitude}`,"device",accuracy);
