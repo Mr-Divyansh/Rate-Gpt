@@ -890,7 +890,6 @@ async function loadPrices({ append = false, offset = 0, preserveHistory = false 
   if (state.location.state) params.state = state.location.state;
   if (state.location.district) params.district = state.location.district;
   if (state.market) params.market = state.market;
-  if (state.arrivalDate) params.date = state.arrivalDate;
   const search = $("cropSearch").value.trim();
   if (search) params.search = search;
 
@@ -1014,8 +1013,6 @@ function bind() {
   });
   $("clearFilters").addEventListener("click", () => {
     $("cropSearch").value = "";
-    $("arrivalDate").value = "";
-    state.arrivalDate = "";
     $("sortFilter").value = "date_desc";
     state.sort = "date_desc";
     loadPrices();
