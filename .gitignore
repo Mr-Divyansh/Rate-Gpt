@@ -43,3 +43,7 @@ __pycache__/
 
 # Generated public copy of the source commodity photo library
 public/Images/
+
+# Generated local test output (do not commit)
+/test_output.txt
+/verify_output*.txt

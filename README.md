@@ -49,6 +49,10 @@ npm run build
 
 The CI workflow also runs the deterministic Weather browser interaction suite on pull requests and every push to `main`. Production smoke checks run after a successful main-branch CI workflow and verify that the exact commit is deployed before checking public endpoints.
 
+## Releases
+
+- [Rate-GPT 2.0.1 release notes](docs/releases/v2.0.1.md)
+
 ## Documentation
 
 - [Architecture](docs/architecture.md)

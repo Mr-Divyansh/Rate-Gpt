@@ -1,3 +1,5 @@
+> **Archived historical snapshot — not current project guidance.** Refer to the root README and maintained documentation under `docs/` for current behavior.
+
 # Rate GPT --- Design System
 
 **Document:** `design.md`\

@@ -1,3 +1,5 @@
+> **Archived historical snapshot — not current project guidance.** Refer to the root README and maintained documentation under `docs/` for current behavior.
+
 # RATE-GPT Engineering Work Complete
 
 ## Engineering Summary

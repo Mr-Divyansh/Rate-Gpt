@@ -1,3 +1,5 @@
+> **Archived historical snapshot — not current project guidance.** Refer to the root README and maintained documentation under `docs/` for current behavior.
+
 # Rate-GPT UI/UX upgrade — what changed
 
 Copy these into your project (same paths), overwriting existing files:
