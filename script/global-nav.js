@@ -1,5 +1,6 @@
 import { applyI18n, getLang, setLang, onLangChange, t } from "./i18n.js";
 import { hydrateIcons, icon } from "./icons.js";
+import { showFirstVisitWelcome } from "./onboarding.js";
 
 const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
 
@@ -231,6 +232,7 @@ let footer=document.querySelector("footer.site-footer");
 if(!footer){footer=document.createElement("footer");document.body.append(footer);}
 renderFooter(footer);
 applyI18n();
+showFirstVisitWelcome();
 function applySharedTranslations() {
   const hi = getLang() === "hi";
   const labels = {
