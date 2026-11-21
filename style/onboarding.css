@@ -855,3 +855,18 @@
     animation: none;
   }
 }
+
+
+/* Equal fractional rows make the three benefit panels the same height even
+   when one sentence wraps onto an extra line on narrow phone screens. */
+.onboarding-card--benefits .onboarding-benefits,
+.onboarding-card--solution .onboarding-solution-points {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  align-content: stretch;
+}
+@media (max-width: 700px) {
+  .onboarding-card--benefits .onboarding-benefits,
+  .onboarding-card--solution .onboarding-solution-points {
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+}
