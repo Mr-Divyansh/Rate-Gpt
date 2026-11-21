@@ -16,59 +16,62 @@ function pass(label) {
   console.log("PASS " + label);
 }
 
-async function dismissWelcomeDialog(page, label) {
-  // The onboarding dialog intentionally remains open after "Skip tutorial":
-  // that action advances to the farmer-benefits / thank-you screen. The
-  // weather smoke test does not need to exercise the full tour, but it must
-  // complete the real user flow rather than assuming the first click closes
-  // the native <dialog> element.
+async function verifyHomepageOnboarding(page, label) {
+  // Onboarding belongs to the homepage only. Exercise all three screens here
+  // so the weather page can stay clear of modal overlays during its own tests.
   const dialog = page.locator("dialog.onboarding-dialog");
+  await dialog.waitFor({ state: "visible", timeout: 5000 });
 
-  // A dialog may not be present on pages where onboarding is not enabled.
-  // Avoid waiting for an element that the page is not expected to create.
-  if (await dialog.count() && await dialog.isVisible()) {
-    const skip = dialog.locator("button.onboarding-skip");
+  const imageSizes = [];
+  const readIllustrationSize = async (screenName) => {
+    const image = dialog.locator(".onboarding-art");
+    await image.waitFor({ state: "visible", timeout: 5000 });
+    await image.evaluate((element) => element.decode());
+    const size = await image.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: Math.round(rect.width), height: Math.round(rect.height) };
+    });
+    imageSizes.push({ screenName, ...size });
+  };
 
-    if (await skip.isVisible()) {
-      // Step 1: Skip the interactive tour. This should reveal the thank-you
-      // screen, not detach the dialog from the document.
-      await skip.click();
+  // Welcome screen — Namaste farmer illustration.
+  await readIllustrationSize("welcome");
+  await dialog.locator("button.onboarding-view").click();
 
-      // Step 2: Confirm that the farmer-benefits screen is visible and
-      // its Continue action is available.
-      const continueButton = dialog.locator("button.onboarding-continue");
-      await continueButton.waitFor({ state: "visible", timeout: 5000 });
+  // Farmer challenges screen — Thinking illustration and three aligned cards.
+  await dialog.locator(".onboarding-card--benefits").waitFor({ state: "visible" });
+  await readIllustrationSize("benefits");
+  const benefitHeights = await dialog.locator(".onboarding-benefits li").evaluateAll((items) =>
+    items.map((item) => Math.round(item.getBoundingClientRect().height))
+  );
+  assert.equal(benefitHeights.length, 3, label + ": three farmer-benefit cards are present");
+  assert.ok(Math.max(...benefitHeights) - Math.min(...benefitHeights) <= 1,
+    label + ": farmer-benefit cards have equal heights");
+  await dialog.locator("button.onboarding-continue").click();
 
-      // Step 3: Continue to the Rate-GPT solution story. The Tell illustration
-      // must load, and this compact screen must fit without an inner scrollbar.
-      await continueButton.click();
-      const solution = dialog.locator(".onboarding-card--solution");
-      await solution.waitFor({ state: "visible", timeout: 5000 });
-      const solutionImage = solution.locator('img[src*="Characte_For_RateGPT_Tell.png"]');
-      await solutionImage.waitFor({ state: "visible", timeout: 5000 });
-      await solutionImage.evaluate((image) => image.decode());
-      const fitsWithoutScrolling = await solution.evaluate((card) =>
-        card.scrollHeight <= card.clientHeight + 1
-      );
-      if (!fitsWithoutScrolling) {
-        throw new Error("Rate-GPT solution onboarding screen overflows and requires scrolling");
-      }
+  // Rate-GPT solution screen — Tell illustration, with no inner scrollbar.
+  const solution = dialog.locator(".onboarding-card--solution");
+  await solution.waitFor({ state: "visible" });
+  await readIllustrationSize("solution");
+  const fitsWithoutScrolling = await solution.evaluate((card) =>
+    card.scrollHeight <= card.clientHeight + 1
+  );
+  assert.ok(fitsWithoutScrolling, label + ": solution screen fits without scrolling");
+  const solutionHeights = await dialog.locator(".onboarding-solution-points li").evaluateAll((items) =>
+    items.map((item) => Math.round(item.getBoundingClientRect().height))
+  );
+  assert.equal(solutionHeights.length, 3, label + ": three solution cards are present");
+  assert.ok(Math.max(...solutionHeights) - Math.min(...solutionHeights) <= 1,
+    label + ": solution cards have equal heights");
 
-      // Step 4: Finish the intro. This final action should close and remove
-      // the dialog before the weather page interaction checks begin.
-      await dialog.locator("button.onboarding-finish").click();
-    } else {
-      // Some onboarding variants (for example, a later tutorial step) do not
-      // expose Skip. Close those safely using the accessible close control.
-      await dialog.getByRole("button", { name: /close|बंद करें/i }).click();
-    }
+  // The same illustration frame must be used on all three screens.
+  assert.ok(imageSizes.every((size) =>
+    size.width === imageSizes[0].width && size.height === imageSizes[0].height
+  ), label + ": all three farmer illustrations have matching dimensions");
 
-    // Wait for the actual close lifecycle to finish. Checking "detached"
-    // ensures the modal no longer intercepts clicks on weather controls.
-    await dialog.waitFor({ state: "detached", timeout: 5000 });
-  }
-
-  pass(label + ": onboarding and thank-you dialogs dismissed before page interactions");
+  await dialog.locator("button.onboarding-finish").click();
+  await dialog.waitFor({ state: "detached", timeout: 5000 });
+  pass(label + ": homepage onboarding has equal illustrations/cards and a scroll-free final screen");
 }
 
 // Wait (from Node) until the intercepted weather API was last called with the
@@ -184,6 +187,17 @@ try {
       },
     );
 
+    // Verify the complete onboarding flow only on the homepage at every
+    // responsive viewport before opening the weather page.
+    const homePage = await context.newPage();
+    const homeResponse = await homePage.goto(baseUrl + "/index.html", {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+    assert.equal(homeResponse?.status(), 200, viewport.name + ": homepage returns HTTP 200");
+    await verifyHomepageOnboarding(homePage, viewport.name);
+    await homePage.close();
+
     const response = await page.goto(baseUrl + "/weather.html", {
       waitUntil: "domcontentloaded",
       timeout: 30_000,
@@ -191,10 +205,9 @@ try {
     assert.equal(response?.status(), 200, viewport.name + ": weather page returns HTTP 200");
     await page.waitForSelector("#useMyLocationBtn");
     assert.equal(weatherQueries.length, 0, viewport.name + ": location is not requested automatically");
-    pass(viewport.name + ": weather page opens without silently requesting location");
-
-    // The welcome dialog appears on every page load during onboarding development.
-    await dismissWelcomeDialog(page, viewport.name);
+    assert.equal(await page.locator("dialog.onboarding-dialog").count(), 0,
+      viewport.name + ": onboarding is not shown outside index.html");
+    pass(viewport.name + ": weather page opens without onboarding or silently requesting location");
 
     await page.locator('[data-lang="hi"]').click();
     await page.waitForFunction(() =>
@@ -306,7 +319,6 @@ try {
       const deniedPageErrors = [];
       deniedPage.on("pageerror", (error) => deniedPageErrors.push(error.message));
       await deniedPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
-      await dismissWelcomeDialog(deniedPage, "mobile denied-location scenario");
       await deniedPage.locator("#useMyLocationBtn").click();
       await deniedPage.waitForFunction(() => document.querySelector("#weatherError")?.hidden === false);
       assert.match(await deniedPage.locator("#weatherError").innerText(), /location is blocked for this site/i);
@@ -359,7 +371,6 @@ try {
         });
       });
       await fallbackPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
-      await dismissWelcomeDialog(fallbackPage, "mobile fallback-location scenario");
       await fallbackPage.locator("#useMyLocationBtn").click();
       await fallbackPage.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Deval Khas"));
       assert.equal(fallbackQueries.length, 1, "balanced browser location must request weather once");
