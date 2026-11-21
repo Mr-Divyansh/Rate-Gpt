@@ -664,12 +664,19 @@ function renderResults() {
 
   const busy = state.loading && state.records.length === 0;
   const unitControl = $("priceUnit");
-  const hasKnownQuintalUnit = state.records.some((record) =>
-    typeof record.source_unit === "string" && /rs\.?\s*\/\s*quintal/i.test(record.source_unit),
-  );
-  if (!hasKnownQuintalUnit && state.priceUnit === "kg") state.priceUnit = "quintal";
+  // AGMARKNET's daily mandi price resource reports min/max/modal rates per
+  // quintal. Some upstream responses omit the optional unit field entirely;
+  // treat that documented resource default as quintal, while preserving any
+  // explicit non-quintal unit supplied by the source.
+  const isQuintalSourceUnit = (unit) =>
+    typeof unit !== "string" ||
+    !unit.trim() ||
+    /rs\.?\s*\/\s*quintal/i.test(unit) ||
+    /not provided by source/i.test(unit);
   if (unitControl) {
-    unitControl.disabled = !hasKnownQuintalUnit;
+    // Keep the switch usable even before records arrive so users can choose
+    // their preferred display unit before selecting a mandi.
+    unitControl.disabled = false;
     unitControl.value = state.priceUnit;
   }
   let announcement = "";
@@ -709,12 +716,13 @@ function renderResults() {
     announcement = message;
   } else {
     const displayRecords = state.records.map((record) => {
-      const isQuintal = typeof record.source_unit === "string" &&
-        /rs\.?\s*\/\s*quintal/i.test(record.source_unit);
+      const isQuintal = isQuintalSourceUnit(record.source_unit);
       const divisor = state.priceUnit === "kg" && isQuintal ? 100 : 1;
       return {
         ...record,
-        display_unit: state.priceUnit === "kg" && isQuintal ? "₹ / kg" : record.source_unit,
+        display_unit: isQuintal
+          ? (state.priceUnit === "kg" ? "₹ / kg" : "₹ / Quintal")
+          : record.source_unit,
         min_price: record.min_price === null ? null : record.min_price / divisor,
         max_price: record.max_price === null ? null : record.max_price / divisor,
         modal_price: record.modal_price === null ? null : record.modal_price / divisor,
