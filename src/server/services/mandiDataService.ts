@@ -113,7 +113,6 @@ export interface LiveQueryOptions {
   district?: string;
   market?: string;
   commodity?: string;
-  arrivalDate?: string;
   search?: string;
   sort?: string;
   limit?: number;
@@ -326,11 +325,6 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   if (options.district) url.searchParams.set("filters[district]", options.district);
   if (options.market) url.searchParams.set("filters[market]", options.market);
   if (options.commodity) url.searchParams.set("filters[commodity]", options.commodity);
-  if (options.arrivalDate) {
-    const isoDate = normalizeArrivalDate(options.arrivalDate);
-    if (!isoDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
-    url.searchParams.set("filters[arrival_date]", isoDate);
-  }
   if (options.search) url.searchParams.set("q", normalizeCommoditySearch(options.search));
   const sort = upstreamSort(options.sort);
   if (sort) {
@@ -409,13 +403,6 @@ export async function fetchLivePrices(
 }> {
   const limit = options.limit ?? 50;
   const offset = options.offset ?? 0;
-  if (options.arrivalDate) {
-    const requestedDate = normalizeArrivalDate(options.arrivalDate);
-    if (!requestedDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
-    if (isFutureArrivalDate(requestedDate)) {
-      throw new GovernmentApiError("Future arrival dates are not available. Choose today or an earlier date.", 400);
-    }
-  }
   const url = buildUrl(options, getApiKey());
   const payload = await requestGovernmentPage(url, fetcher);
   // data.gov.in normally returns { records: [...] }. Some upstream error
@@ -475,9 +462,6 @@ export async function fetchLivePrices(
   for (const raw of rawRecords) {
     const mapped = mapUpstreamRecord(raw);
     if (!mapped) continue;
-    // Never display a neighbouring arrival date if the upstream index ignores
-    // or loosely applies its date filter. A date selection is an exact match.
-    if (options.arrivalDate && mapped.arrivalDate !== normalizeArrivalDate(options.arrivalDate)) continue;
     const key = mapped.sourceRecordId
       ? `id:${mapped.sourceRecordId}`
       : [
