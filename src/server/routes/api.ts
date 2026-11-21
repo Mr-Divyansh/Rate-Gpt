@@ -262,11 +262,6 @@ router.get("/prices/trend", (_req: Request, res: Response) => {
  * 5. Live market comparison endpoint
  * GET /api/v1/prices/compare?commodity=...&date=...
  */
-const compareQuerySchema = z.object({
-  commodity: z.string().trim().min(1).max(100),
-  date: z.string().trim().min(1).max(20),
-});
-
 router.get("/prices/compare", (_req: Request, res: Response) => {
   // The selected OGD feed cannot reliably retrieve arbitrary historical dates.
   // Do not compare a current response as if it belonged to a requested past date.
