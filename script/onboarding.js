@@ -24,7 +24,7 @@ export function showFirstVisitWelcome() {
       <div class="onboarding-card onboarding-card--thanks onboarding-card--benefits">
         <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
         <div class="onboarding-art-wrap">
-          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Thinking.png" alt="${hi ? "सोचता हुआ किसान" : "Farmer thinking about crop prices"}" width="320" height="320" fetchpriority="high" decoding="async">
+          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Thinking.png" alt="${hi ? "सोचता हुआ किसान" : "Farmer thinking about crop prices"}" width="320" height="320" loading="lazy" fetchpriority="high" decoding="async">
         </div>
         <div class="onboarding-copy">
           <div class="onboarding-progress" role="group" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}">
@@ -107,7 +107,7 @@ export function showFirstVisitWelcome() {
     <div class="onboarding-card">
       <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
       <div class="onboarding-art-wrap">
-        <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Namaste.png" alt="" width="320" height="320" fetchpriority="low" decoding="async">
+        <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Namaste.png" alt="" width="320" height="320" loading="lazy" fetchpriority="low" decoding="async">
       </div>
       <div class="onboarding-copy">
         <p class="onboarding-eyebrow">${hi ? "RATE-GPT में आपका स्वागत है" : "WELCOME TO RATE-GPT"}</p>
