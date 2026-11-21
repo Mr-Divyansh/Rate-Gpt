@@ -1,18 +1,4 @@
-const STORAGE_KEY = "rate-gpt:onboarding:v1";
-
-function readChoice() {
-  try { return localStorage.getItem(STORAGE_KEY); }
-  catch { return null; }
-}
-
-function saveChoice(value) {
-  try { localStorage.setItem(STORAGE_KEY, value); }
-  catch { /* The dialog still works when storage is unavailable. */ }
-}
-
 export function showFirstVisitWelcome() {
-  if (readChoice()) return;
-
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = new URL("../style/onboarding.css", import.meta.url).href;
@@ -31,10 +17,10 @@ export function showFirstVisitWelcome() {
       </div>
       <div class="onboarding-copy">
         <p class="onboarding-eyebrow">${hi ? "RATE-GPT में आपका स्वागत है" : "WELCOME TO RATE-GPT"}</p>
-        <h2 id="onboardingTitle">${hi ? "नमस्ते! पहली बार आए हैं?" : "Welcome! First time here?"}</h2>
+        <h2 id="onboardingTitle">${hi ? "नमस्ते! Rate-GPT में आपका स्वागत है" : "Hello! Welcome to Rate-GPT"}</h2>
         <p class="onboarding-message">${hi
-          ? "बधाई हो! Rate-GPT पर आपका स्वागत है। हमारा Farmer Assistant आपको मंडी भाव देखने और वेबसाइट इस्तेमाल करने का आसान तरीका बताएगा।"
-          : "Congratulations on your first visit! Your Farmer Assistant can show you how to explore mandi prices and use Rate-GPT with ease."}</p>
+          ? "क्या आप Rate-GPT इस्तेमाल करना सीखना चाहेंगे? हमारा Farmer Assistant आपको मंडी भाव देखने और वेबसाइट की सुविधाएँ समझने में मदद करेगा।"
+          : "Would you like a quick tour? Your Farmer Assistant can show you how to explore mandi prices and use Rate-GPT with ease."}</p>
         <div class="onboarding-actions">
           <button class="btn btn-primary onboarding-view" type="button">${hi ? "ट्यूटोरियल देखें" : "View tutorial"}</button>
           <button class="btn onboarding-skip" type="button">${hi ? "ट्यूटोरियल छोड़ें" : "Skip tutorial"}</button>
@@ -47,7 +33,6 @@ export function showFirstVisitWelcome() {
   document.body.append(dialog);
 
   const finish = (choice) => {
-    saveChoice(choice);
     if (dialog.open) dialog.close();
     dialog.remove();
   };
@@ -57,7 +42,6 @@ export function showFirstVisitWelcome() {
   dialog.addEventListener("cancel", event => { event.preventDefault(); finish("skipped"); }, { once: true });
 
   dialog.querySelector(".onboarding-view").addEventListener("click", () => {
-    saveChoice("started");
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--step">
         <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
@@ -79,7 +63,6 @@ export function showFirstVisitWelcome() {
     `;
     dialog.querySelector(".onboarding-close").addEventListener("click", () => finish("started"));
     dialog.querySelector(".onboarding-done").addEventListener("click", () => finish("started"));
-    dialog.querySelector(".onboarding-explore").addEventListener("click", () => saveChoice("completed"));
     dialog.querySelector(".onboarding-close").focus();
   });
 
