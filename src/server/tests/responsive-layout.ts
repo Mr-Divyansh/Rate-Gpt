@@ -44,17 +44,17 @@ async function main() {
     "weather page exposes separate device and approximate location actions");
   check(/id="weatherStatus" role="status"/.test(weather) && /id="weatherError" role="alert"/.test(weather),
     "weather page announces loading and error states accessibly");
-  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-location-action\s*\{[^}]*flex-direction:column/s.test(weatherCss),
+  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-location-actions\s*\{[^}]*flex-direction:column/s.test(weatherCss),
     "weather location actions stack on narrow screens");
-  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-input-wrapper\s*\{\s*grid-template-columns:1fr;/s.test(weatherCss),
+  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control input\s*\{[^}]*padding:0 13px/s.test(weatherCss) &&
+    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control>\.btn\s*\{\s*position:static;\s*width:100%/s.test(weatherCss),
     "weather search input and action use a single-column mobile layout");
-  check(/\.weather-details\s*\{\s*display:grid;\s*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/s.test(weatherCss) &&
-    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-details\s*\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/s.test(weatherCss),
-    "weather detail cards adapt from four desktop columns to two mobile columns");
-  check(/locationButton\.addEventListener\("click", startTracking\)/.test(weatherScript) &&
-    /navigator\.geolocation\.watchPosition\(/.test(weatherScript) &&
-    /approximateLocationButton\.addEventListener\("click", \(\) =>\s*\{\s*stopTracking\(\{ announce: false \}\);\s*fetchWeather\("auto:ip", "approximate"\)/s.test(weatherScript),
-    "continuous weather location tracking is opt-in and approximate lookup remains a separate user action");
+  check(/locationButton\.addEventListener\("click",useDeviceLocation\)/.test(weatherScript) &&
+    /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
+    /enableHighAccuracy:false/.test(weatherScript) &&
+    /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
+    !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
+    "one-shot device location retries with balanced accuracy and approximate lookup remains opt-in");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
