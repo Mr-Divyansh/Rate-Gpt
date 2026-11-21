@@ -611,3 +611,247 @@
 @media (prefers-reduced-motion: reduce) {
   .onboarding-card--solution { scroll-behavior: auto; }
 }
+
+
+/* -------------------------------------------------------------------------
+   Final visual consistency pass
+   - Keep the three farmer illustrations at one shared visual size.
+   - Give all three onboarding screens the same dialog width and finish.
+   - Make the three farmer-benefit panels equal-height and easy to scan.
+   - Fit small screens without horizontal overflow or inner scrollbars.
+   ------------------------------------------------------------------------- */
+
+/* One shared illustration frame prevents the character jumping in size
+   between Namaste, Thinking and Tell when the visitor moves between steps. */
+.onboarding-card .onboarding-art-wrap {
+  flex: 0 0 184px;
+  width: 100%;
+  height: 184px;
+  min-height: 184px;
+  margin: 0;
+}
+.onboarding-card .onboarding-art {
+  display: block;
+  width: 210px;
+  max-width: min(58vw, 210px);
+  height: 184px;
+  max-height: 184px;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+/* Keep the dialog proportions consistent across the three stages while
+   allowing each stage to use only the height its content actually needs. */
+.onboarding-dialog:has(.onboarding-card),
+.onboarding-dialog:has(.onboarding-card--benefits),
+.onboarding-dialog:has(.onboarding-card--solution) {
+  width: min(92vw, 560px);
+  height: fit-content;
+  max-height: min(92dvh, 720px);
+  aspect-ratio: auto;
+  overflow: hidden;
+  border: 1px solid rgba(42, 105, 73, .16);
+  border-radius: 28px;
+  box-shadow: 0 28px 90px rgba(10, 35, 23, .25), 0 8px 24px rgba(10, 35, 23, .09);
+}
+
+/* The welcome screen uses the same art frame and comfortable spacing as
+   the two following screens, rather than a different thumbnail treatment. */
+.onboarding-card:not(.onboarding-card--benefits):not(.onboarding-card--solution) {
+  height: auto;
+  min-height: 0;
+  max-height: min(92dvh, 720px);
+  padding: 30px 42px 28px;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* Benefit panels share a common grid row size. The tallest line determines
+   the row height, so all three panels remain visually aligned. */
+.onboarding-card--benefits .onboarding-benefits,
+.onboarding-card--solution .onboarding-solution-points {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(3, minmax(58px, auto));
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+.onboarding-card--benefits .onboarding-benefits li,
+.onboarding-card--solution .onboarding-solution-points li {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  box-sizing: border-box;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  line-height: 1.38;
+}
+
+/* Keep the solution screen visually balanced with the benefits screen:
+   same character frame, same dialog width, same three-panel rhythm. */
+.onboarding-card--solution {
+  max-height: min(92dvh, 720px);
+  padding: 28px 38px 26px;
+  gap: 7px;
+  overflow: hidden;
+}
+.onboarding-card--solution .onboarding-art-wrap,
+.onboarding-card--benefits .onboarding-art-wrap {
+  flex-basis: 184px;
+  height: 184px;
+  min-height: 184px;
+}
+.onboarding-card--solution .onboarding-art,
+.onboarding-card--benefits .onboarding-art {
+  width: 210px;
+  height: 184px;
+  max-width: min(58vw, 210px);
+  max-height: 184px;
+}
+.onboarding-card--solution .onboarding-copy,
+.onboarding-card--benefits .onboarding-copy {
+  max-width: 465px;
+}
+.onboarding-card--solution .onboarding-solution-points {
+  margin: 10px 0 2px;
+}
+.onboarding-card--solution .onboarding-solution-points li {
+  font-size: .82rem;
+}
+.onboarding-card--benefits .onboarding-benefits {
+  margin-top: 10px;
+}
+
+/* Close button stays consistent and thumb-friendly on touch screens. */
+.onboarding-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(237, 244, 236, .96);
+}
+
+/* Tablet and mobile: scale all three illustrations together, preserve the
+   same centered composition, and keep all action buttons comfortably tappable. */
+@media (max-width: 700px) {
+  .onboarding-dialog:has(.onboarding-card),
+  .onboarding-dialog:has(.onboarding-card--benefits),
+  .onboarding-dialog:has(.onboarding-card--solution) {
+    width: min(92vw, 480px);
+    max-height: min(92dvh, 760px);
+    border-radius: 24px;
+  }
+  .onboarding-card .onboarding-art-wrap,
+  .onboarding-card--benefits .onboarding-art-wrap,
+  .onboarding-card--solution .onboarding-art-wrap {
+    flex-basis: 146px;
+    height: 146px;
+    min-height: 146px;
+  }
+  .onboarding-card .onboarding-art,
+  .onboarding-card--benefits .onboarding-art,
+  .onboarding-card--solution .onboarding-art {
+    width: 168px;
+    max-width: min(58vw, 168px);
+    height: 146px;
+    max-height: 146px;
+  }
+  .onboarding-card:not(.onboarding-card--benefits):not(.onboarding-card--solution),
+  .onboarding-card--benefits,
+  .onboarding-card--solution {
+    height: auto;
+    min-height: 0;
+    max-height: min(92dvh, 760px);
+    padding: 42px 22px 22px;
+    gap: 7px;
+    overflow: hidden;
+  }
+  .onboarding-card--benefits .onboarding-benefits,
+  .onboarding-card--solution .onboarding-solution-points {
+    grid-template-rows: repeat(3, minmax(54px, auto));
+    gap: 7px;
+    margin-top: 8px;
+  }
+  .onboarding-card--benefits .onboarding-benefits li,
+  .onboarding-card--solution .onboarding-solution-points li {
+    min-height: 54px;
+    padding: 8px 10px 8px 36px;
+    font-size: .77rem;
+    line-height: 1.32;
+  }
+  .onboarding-card--benefits .onboarding-benefits li::before,
+  .onboarding-card--solution .onboarding-solution-points li::before {
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .onboarding-card--solution .onboarding-copy h2,
+  .onboarding-card--benefits .onboarding-copy h2,
+  .onboarding-card:not(.onboarding-card--benefits):not(.onboarding-card--solution) .onboarding-copy h2 {
+    font-size: clamp(1.22rem, 5.2vw, 1.55rem);
+    line-height: 1.16;
+  }
+  .onboarding-card--solution .onboarding-message,
+  .onboarding-card--benefits .onboarding-message {
+    font-size: .8rem;
+    line-height: 1.4;
+  }
+  .onboarding-card--solution .onboarding-assistant-note,
+  .onboarding-card--benefits .onboarding-assistant-note {
+    font-size: .72rem;
+    line-height: 1.35;
+  }
+  .onboarding-actions .btn {
+    min-height: 46px;
+  }
+}
+
+/* Very short mobile viewports get a denser but still readable layout.
+   The card remains centered and the page itself never needs horizontal scroll. */
+@media (max-width: 700px) and (max-height: 720px) {
+  .onboarding-card .onboarding-art-wrap,
+  .onboarding-card--benefits .onboarding-art-wrap,
+  .onboarding-card--solution .onboarding-art-wrap {
+    flex-basis: 112px;
+    height: 112px;
+    min-height: 112px;
+  }
+  .onboarding-card .onboarding-art,
+  .onboarding-card--benefits .onboarding-art,
+  .onboarding-card--solution .onboarding-art {
+    height: 112px;
+    max-height: 112px;
+    width: 138px;
+  }
+  .onboarding-card:not(.onboarding-card--benefits):not(.onboarding-card--solution),
+  .onboarding-card--benefits,
+  .onboarding-card--solution {
+    padding-top: 38px;
+    padding-bottom: 16px;
+    gap: 5px;
+  }
+  .onboarding-card--benefits .onboarding-benefits,
+  .onboarding-card--solution .onboarding-solution-points {
+    grid-template-rows: repeat(3, minmax(48px, auto));
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .onboarding-card--benefits .onboarding-benefits li,
+  .onboarding-card--solution .onboarding-solution-points li {
+    min-height: 48px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: .72rem;
+  }
+  .onboarding-card--solution .onboarding-actions--single,
+  .onboarding-card--benefits .onboarding-actions--single {
+    margin-top: 6px;
+  }
+}
+
+/* Honor reduced-motion preferences for every onboarding step. */
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-dialog {
+    animation: none;
+  }
+}
