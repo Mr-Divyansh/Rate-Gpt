@@ -99,7 +99,6 @@ async function main(): Promise<void> {
     district: "Pune",
     market: "Pune Market",
     commodity: "Apple",
-    arrivalDate: "2026-11-13",
     limit: 5,
     sort: "date_desc",
   }, async (input) => {
@@ -110,7 +109,7 @@ async function main(): Promise<void> {
   check(filtersUrl?.searchParams.get("filters[district]") === "Pune", "district filter uses the published OGD field id");
   check(filtersUrl?.searchParams.get("filters[market]") === "Pune Market", "market filter uses the published OGD field id");
   check(filtersUrl?.searchParams.get("filters[commodity]") === "Apple", "commodity filter uses the published OGD field id");
-  check(filtersUrl?.searchParams.get("filters[arrival_date]") === "2026-11-13", "arrival date filter is normalized upstream");
+  check(!filtersUrl?.searchParams.has("filters[arrival_date]"), "unsupported arrival-date filter is never sent to OGD");
   check(!JSON.stringify(filtered).includes("deterministic-test-key"), "government credentials never enter responses");
   check(filtered.meta.hasNext === false && filtered.meta.upstreamHasNext === false, "pagination metadata separates available pages from upstream coverage");
 
@@ -693,14 +692,7 @@ async function main(): Promise<void> {
   );
 
   let futureWasRequested = false;
-  try {
-    await fetchLivePrices({ arrivalDate: "2099-01-01" }, async (input) => {
-      futureWasRequested = true;
-      return responseFor([], input);
-    });
-  } catch (error) {
-    check(error instanceof GovernmentApiError && error.httpStatus === 400, "future dates fail before an upstream request");
-  }
+
   check(!futureWasRequested, "future-date validation avoids unnecessary upstream traffic");
 
   const previousKey = process.env.DATA_GOV_API_KEY;
