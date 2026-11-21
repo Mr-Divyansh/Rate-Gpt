@@ -43,7 +43,7 @@
 .count { margin-top: 6px; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
 .unit-note { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.9375rem; }
 
-.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 220px) minmax(0, 180px) auto; gap: 12px; align-items: end; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 180px) auto; gap: 12px; align-items: end; }
 .search-wrap { position: relative; display: block; }
 .search-wrap > [data-icon] { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; display: grid; }
 .search-wrap input { padding-left: 44px; padding-right: 72px; }
@@ -53,44 +53,6 @@
 }
 @media (hover: none) { .search-wrap kbd { display: none; } .search-wrap input { padding-right: 14px; } }
 .toolbar .btn { min-width: 96px; }
-
-/* Clear, accessible native arrival-date picker */
-.page-prices .date-field input[type="date"] {
-  min-height: 48px;
-  width: 100%;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--ink);
-  color-scheme: light;
-  font: 600 0.95rem var(--font);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
-}
-.page-prices .date-field input[type="date"]:hover:not(:disabled) {
-  border-color: var(--green, #176b49);
-  background: #fff;
-}
-.page-prices .date-field input[type="date"]:focus-visible {
-  outline: none;
-  border-color: var(--green, #176b49);
-  box-shadow: 0 0 0 3px rgba(23, 107, 73, .15);
-}
-.page-prices .date-field input[type="date"]:disabled {
-  cursor: not-allowed;
-  opacity: .58;
-}
-.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 6px;
-  opacity: .78;
-}
-.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  background: rgba(23, 107, 73, .10);
-}
 
 .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); overflow-x: auto; }
 .price-table { width: 100%; border-collapse: collapse; min-width: 760px; }
@@ -218,7 +180,7 @@
   .page-prices .chip { min-height: 40px; padding-inline: 12px; font-size: .9rem; }
   .page-prices .results-head { align-items: flex-start; flex-direction: column; gap: 9px; }
   .page-prices .toolbar { grid-template-columns: minmax(0,1fr); }
-  .page-prices .search-field, .page-prices .sort-field, .page-prices .date-field, .page-prices .toolbar .btn { grid-column: 1; }
+  .page-prices .search-field, .page-prices .sort-field, .page-prices .toolbar .btn { grid-column: 1; }
   .page-prices .toolbar .btn { width: 100%; }
   .page-prices .price-card-top { align-items: flex-start; }
   .page-prices .price-card .modal-price strong { font-size: 1.25rem; }
@@ -232,31 +194,6 @@
 }
 
 
-
-/* Refined arrival date control (calendar popup is browser-native). */
-.page-prices .date-field { gap: 7px; }
-.page-prices .date-field > label { color: var(--forest); font-weight: 750; }
-.page-prices .date-field input[type="date"] {
-  min-height: 54px; padding: 0 15px; border: 1.5px solid #cbd9ce;
-  border-radius: 12px; background: linear-gradient(180deg, #fff 0%, #f8fbf7 100%);
-  color: #174d38; color-scheme: light; font-size: 1rem; font-weight: 700;
-  font-variant-numeric: tabular-nums; box-shadow: 0 3px 12px rgba(23, 77, 56, .045);
-  transition: border-color .18s ease, box-shadow .18s ease;
-}
-.page-prices .date-field input[type="date"]:hover:not(:disabled) {
-  border-color: #287a52; box-shadow: 0 5px 16px rgba(23, 77, 56, .09);
-}
-.page-prices .date-field input[type="date"]:focus-visible {
-  outline: 0; border-color: #176b49;
-  box-shadow: 0 0 0 4px rgba(40, 122, 82, .15), 0 5px 16px rgba(23, 77, 56, .08);
-}
-.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator {
-  width: 20px; height: 20px; padding: 5px; margin-left: 8px;
-  border-radius: 7px; cursor: pointer; opacity: .9; background-color: #eaf3ec;
-}
-.page-prices .date-field input[type="date"]::-webkit-calendar-picker-indicator:hover { background-color: #dcecdf; }
-.page-prices .date-field .date-hint { color: #718078; font-size: .78rem; line-height: 1.25; }
-@media (max-width: 680px) { .page-prices .date-field input[type="date"] { min-height: 50px; } }
 
 
 /* Plain Mandi intro: keep the original unboxed heading and place the photo on the right. */
@@ -466,7 +403,7 @@
 .page-prices .count { margin-top: 2px; }
 .page-prices .results-head .unit-field { min-width: 150px; }
 .page-prices .toolbar {
-  grid-template-columns: minmax(220px, 1fr) minmax(150px, .65fr) minmax(210px, .9fr) auto;
+  grid-template-columns: minmax(220px, 1fr) minmax(210px, .9fr) auto;
   align-items: center;
   gap: 12px;
 }
