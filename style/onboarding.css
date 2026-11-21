@@ -870,3 +870,30 @@
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
 }
+
+
+/* Lock the rendered illustration box dimensions at the component boundary.
+   The explicit priority neutralizes older per-step sizing rules above, so
+   each uploaded farmer PNG occupies exactly the same frame on every screen. */
+.onboarding-dialog .onboarding-card .onboarding-art {
+  width: 210px !important;
+  max-width: min(58vw, 210px) !important;
+  height: 184px !important;
+  max-height: 184px !important;
+}
+@media (max-width: 700px) {
+  .onboarding-dialog .onboarding-card .onboarding-art {
+    width: 168px !important;
+    max-width: min(58vw, 168px) !important;
+    height: 146px !important;
+    max-height: 146px !important;
+  }
+}
+@media (max-width: 700px) and (max-height: 720px) {
+  .onboarding-dialog .onboarding-card .onboarding-art {
+    width: 138px !important;
+    max-width: min(58vw, 138px) !important;
+    height: 112px !important;
+    max-height: 112px !important;
+  }
+}
