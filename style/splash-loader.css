@@ -1,0 +1,51 @@
+.startup-splash {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(155, 211, 174, .22), transparent 31%),
+    #f7f7f0;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 260ms ease, visibility 260ms ease;
+}
+
+.startup-splash__content {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(86vw, 320px);
+}
+
+.startup-splash__logo {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  border-radius: 20px;
+  filter: drop-shadow(0 8px 18px rgba(23, 77, 56, .12));
+}
+
+.startup-splash__animation {
+  display: block;
+  width: min(72vw, 240px);
+  height: min(72vw, 240px);
+}
+
+body.startup-splash-active {
+  overflow: hidden;
+}
+
+.startup-splash--leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-splash {
+    transition-duration: 1ms;
+  }
+}
