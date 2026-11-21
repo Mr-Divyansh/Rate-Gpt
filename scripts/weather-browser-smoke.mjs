@@ -11,8 +11,12 @@ try{
  for(const viewport of viewports){
   const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
   await context.addInitScript(()=>{
+   window.__weatherGeoOptions = null;
    Object.defineProperty(navigator,"geolocation",{configurable:true,value:{
-    getCurrentPosition(success){queueMicrotask(()=>success({coords:{latitude:31.708,longitude:76.932,accuracy:42},timestamp:Date.now()}));}
+    getCurrentPosition(success,error,options){
+     window.__weatherGeoOptions = options;
+     queueMicrotask(()=>success({coords:{latitude:31.708,longitude:76.932,accuracy:42},timestamp:Date.now()}));
+    }
    }});
   });
   const page=await context.newPage();
@@ -58,7 +62,10 @@ try{
   await page.waitForFunction(()=>document.querySelector("#weatherSourceLabel")?.textContent==="DEVICE LOCATION");
   assert.equal(weatherQueries.at(-1),"31.708,76.932");
   assert.match(await page.locator("#weatherStatus").innerText(),/accuracy.*42/i);
-  pass(viewport.name+": device location uses coordinates and reports accuracy");
+  const geoOptions=await page.evaluate(()=>window.__weatherGeoOptions);
+  assert.deepEqual(geoOptions,{enableHighAccuracy:false,timeout:6000,maximumAge:300000},
+    viewport.name+": desktop location uses a fast network-assisted request");
+  pass(viewport.name+": device location uses fast cached/network-assisted coordinates and reports accuracy");
 
   await page.locator("#useApproxLocationBtn").click();
   await page.waitForFunction(()=>document.querySelector("#weatherSourceLabel")?.textContent==="APPROXIMATE LOCATION");
