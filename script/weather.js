@@ -1,454 +1,288 @@
 import { t } from "./i18n.js";
-import { fetchFilters } from "./api.js";
 
 (() => {
-  if ((window.location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
+  // Weather is a standalone page; do not run this module elsewhere.
+  if ((location.pathname.split("/").pop() || "").toLowerCase() !== "weather.html") return;
 
   const API_KEY = import.meta.env.VITE_WEATHERAPI_KEY?.trim() ?? "";
   const form = document.getElementById("weatherSearchForm");
   const input = document.getElementById("locationInput");
   const searchButton = document.getElementById("getWeatherBtn");
   const locationButton = document.getElementById("useMyLocationBtn");
-  const stopTrackingButton = document.getElementById("stopLocationTrackingBtn");
-  const approximateLocationButton = document.getElementById("useApproxLocationBtn");
+  const approximateButton = document.getElementById("useApproxLocationBtn");
+  const suggestions = document.getElementById("weatherSuggestions");
   const result = document.getElementById("weatherResult");
   const errorBox = document.getElementById("weatherError");
   const status = document.getElementById("weatherStatus");
-  const locationMeta = document.getElementById("weatherLocationMeta");
   const city = document.getElementById("weatherCity");
   const temperature = document.getElementById("weatherTemperature");
   const condition = document.getElementById("weatherCondition");
+  const feelsLike = document.getElementById("weatherFeelsLike");
   const details = document.getElementById("weatherDetails");
   const updated = document.getElementById("weatherUpdated");
+  const sourceLabel = document.getElementById("weatherSourceLabel");
   const weatherIcon = document.getElementById("weatherIcon");
 
-  if (!form || !input || !locationButton || !stopTrackingButton ||
-      !approximateLocationButton || !result || !errorBox || !status || !locationMeta) return;
+  if (![form,input,searchButton,locationButton,approximateButton,suggestions,result,errorBox,status,city,temperature,condition,feelsLike,details,updated,sourceLabel,weatherIcon].every(Boolean)) return;
 
-  const MOVEMENT_THRESHOLD_METRES = 500;
-  const MIN_WEATHER_REFRESH_INTERVAL_MS = 15000;
-  const HIGH_ACCURACY_OPTIONS = { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 };
-  // Wi-Fi/cell-assisted browser location can work on Windows laptops that have
-  // no GPS receiver. This is still browser geolocation, never an IP-city guess.
-  const BALANCED_ACCURACY_OPTIONS = { enableHighAccuracy: false, timeout: 25000, maximumAge: 60000 };
-
-  let requestController = null;
-  let watchId = null;
-  let tracking = false;
-  let permissionState = "unknown";
-  let locationMode = "high";
-  let balancedFallbackAttempted = false;
-  let latestPosition = null;
-  let lastWeatherPosition = null;
-  let lastWeatherRefreshAt = 0;
-  let pendingRefreshTimer = null;
+  const API = "https://api.weatherapi.com/v1";
+  let searchController = null;
+  let weatherController = null;
+  let suggestionTimer = null;
+  let matches = [];
+  let activeIndex = -1;
+  let sequence = 0;
 
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
-  const showError = (message) => {
-    errorBox.textContent = message;
-    errorBox.hidden = false;
-    setStatus("");
+  const clearMessages = () => { errorBox.textContent = ""; errorBox.hidden = true; setStatus(""); };
+  const showError = (message) => { errorBox.textContent = message; errorBox.hidden = false; setStatus(""); };
+  const setBusy = (busy) => {
+    searchButton.disabled = busy;
+    locationButton.disabled = busy;
+    approximateButton.disabled = busy;
+    searchButton.textContent = busy ? t("weather.loading") : t("weather.fetch");
   };
-  const clearMessages = () => { errorBox.hidden = true; setStatus(""); };
+  const label = (place) => [place.name,place.region,place.country].filter(Boolean).join(", ");
 
-  function addDetail(label, value) {
-    const item = document.createElement("div");
-    item.className = "weather-detail";
+  function closeSuggestions() {
+    suggestions.replaceChildren();
+    suggestions.hidden = true;
+    input.setAttribute("aria-expanded","false");
+    input.removeAttribute("aria-activedescendant");
+    matches = [];
+    activeIndex = -1;
+  }
+
+  function renderSuggestions(places) {
+    closeSuggestions();
+    matches = places;
+    places.slice(0,7).forEach((place,index) => {
+      const li = document.createElement("li");
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "weather-suggestion";
+      option.id = `weather-suggestion-${index}`;
+      option.setAttribute("role","option");
+      option.setAttribute("aria-selected","false");
+      const name = document.createElement("strong");
+      name.textContent = place.name || t("weather.unknownPlace");
+      const detail = document.createElement("span");
+      detail.textContent = [place.region,place.country].filter(Boolean).join(" · ");
+      option.append(name,detail);
+      option.addEventListener("click",() => selectPlace(place));
+      li.append(option);
+      suggestions.append(li);
+    });
+    if (places.length) {
+      suggestions.hidden = false;
+      input.setAttribute("aria-expanded","true");
+    }
+  }
+
+  function focusSuggestion(index) {
+    if (!matches.length) return;
+    activeIndex = (index + matches.length) % matches.length;
+    const options = suggestions.querySelectorAll('[role="option"]');
+    options.forEach((option,i) => {
+      const selected = i === activeIndex;
+      option.setAttribute("aria-selected",String(selected));
+      if (selected) {
+        input.setAttribute("aria-activedescendant",option.id);
+        option.scrollIntoView({block:"nearest"});
+      }
+    });
+  }
+
+  async function request(endpoint, query, signal) {
+    if (!API_KEY) throw new Error("not-configured");
+    const url = new URL(`${API}/${endpoint}`);
+    url.searchParams.set("key",API_KEY);
+    url.searchParams.set("q",query);
+    if (endpoint === "current.json") url.searchParams.set("aqi","no");
+    const response = await fetch(url,{signal,headers:{Accept:"application/json"}});
+    const data = await response.json().catch(() => null);
+    const code = data?.error?.code;
+    if (!response.ok || data?.error) {
+      if (code === 1006) throw new Error("place-not-found");
+      if ([2006,2007,2008,2009].includes(code)) throw new Error("service-unavailable");
+      throw new Error("request-failed");
+    }
+    return data;
+  }
+
+  function detail(labelText,value) {
+    const card = document.createElement("div");
+    card.className = "weather-detail";
     const name = document.createElement("span");
     name.className = "label";
-    name.textContent = label;
+    name.textContent = labelText;
     const amount = document.createElement("span");
     amount.className = "value";
     amount.textContent = value;
-    item.append(name, amount);
-    return item;
+    card.append(name,amount);
+    return card;
   }
 
-  function setTrackingUi(active) {
-    tracking = active;
-    locationButton.disabled = active;
-    locationButton.hidden = active;
-    stopTrackingButton.hidden = !active;
-    stopTrackingButton.disabled = false;
-    locationMeta.hidden = !active && !locationMeta.textContent;
-  }
-
-  function stopTracking({ announce = true } = {}) {
-    if (watchId !== null && navigator.geolocation) {
-      navigator.geolocation.clearWatch(watchId);
+  function renderWeather(data,source,accuracy) {
+    const place = data.location;
+    const current = data.current;
+    city.textContent = label(place);
+    temperature.textContent = `${current.temp_c}°C`;
+    condition.textContent = current.condition?.text || t("weather.conditionUnavailable");
+    feelsLike.textContent = `${t("weather.feelsLike")}: ${current.feelslike_c}°C`;
+    if (current.condition?.icon) {
+      weatherIcon.src = current.condition.icon.startsWith("//") ? `https:${current.condition.icon}` : current.condition.icon;
+      weatherIcon.alt = current.condition.text || t("weather.weatherIcon");
+      weatherIcon.hidden = false;
+    } else {
+      weatherIcon.removeAttribute("src");
+      weatherIcon.hidden = true;
     }
-    watchId = null;
-    if (pendingRefreshTimer !== null) window.clearTimeout(pendingRefreshTimer);
-    pendingRefreshTimer = null;
-    latestPosition = null;
-    setTrackingUi(false);
-    if (announce && trackingWasActive) setStatus(t("weather.trackingStopped"));
-    trackingWasActive = false;
+    details.replaceChildren(
+      detail(t("weather.humidity"),`${current.humidity}%`),
+      detail(t("weather.wind"),`${current.wind_kph} km/h`),
+      detail(t("weather.pressure"),`${current.pressure_mb} mb`),
+      detail(t("weather.uv"),String(current.uv ?? "—"))
+    );
+    updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
+    sourceLabel.textContent = source === "device" ? t("weather.deviceLocation")
+      : source === "approximate" ? t("weather.approximateLabel") : t("weather.searchResult");
+    result.hidden = false;
+    if (source === "device" && Number.isFinite(accuracy)) setStatus(t("weather.locationAccuracy",{meters:Math.round(accuracy)}));
+    else if (source === "approximate") setStatus(t("weather.approxLocationSuccess"));
+    else setStatus("");
   }
 
-  let trackingWasActive = false;
-
-  function distanceMetres(a, b) {
-    const radians = (degrees) => degrees * Math.PI / 180;
-    const lat1 = radians(a.latitude);
-    const lat2 = radians(b.latitude);
-    const deltaLat = lat2 - lat1;
-    const deltaLon = radians(b.longitude - a.longitude);
-    const value = Math.sin(deltaLat / 2) ** 2 +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
-    return 6371000 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
-  }
-
-  function updateLocationMeta(position) {
-    const accuracy = Number.isFinite(position.coords.accuracy)
-      ? Math.max(1, Math.round(position.coords.accuracy))
-      : null;
-    const time = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-      .format(new Date(position.timestamp || Date.now()));
-    locationMeta.textContent = t("weather.trackingAccuracy", {
-      meters: accuracy === null ? "—" : accuracy,
-      time
-    });
-    locationMeta.hidden = false;
-  }
-
-  async function fetchWeather(query, source = "search") {
-    if (!query || !API_KEY) {
-      showError(!API_KEY ? t("weather.notConfigured") : t("weather.enterPlace"));
-      return false;
-    }
-    requestController?.abort();
+  async function fetchWeather(query,source,accuracy = null) {
+    const currentSequence = ++sequence;
+    weatherController?.abort();
     const controller = new AbortController();
-    requestController = controller;
-    const timeout = window.setTimeout(() => controller.abort(), 12000);
-    if (searchButton) searchButton.disabled = true;
-    approximateLocationButton.disabled = true;
-    if (searchButton) searchButton.textContent = t("weather.loading");
-    clearMessages();
-    if (source === "location") setStatus(t("weather.locatingWeather"));
-
+    weatherController = controller;
+    const timeout = setTimeout(() => controller.abort(),12000);
+    setBusy(true);
+    errorBox.hidden = true;
+    setStatus(t("weather.loading"));
     try {
-      const url = new URL("https://api.weatherapi.com/v1/current.json");
-      url.searchParams.set("key", API_KEY);
-      url.searchParams.set("q", query);
-      url.searchParams.set("aqi", "no");
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" }
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.location || !data?.current) {
-        const apiMessage = data?.error?.message;
-        throw new Error(typeof apiMessage === "string" ? apiMessage : `HTTP ${response.status}`);
-      }
-
-      const place = data.location;
-      const current = data.current;
-      city.textContent = [place.name, place.region, place.country].filter(Boolean).join(", ");
-      temperature.textContent = `${current.temp_c}°C`;
-      condition.textContent = current.condition?.text || t("weather.conditionUnavailable");
-      const iconPath = current.condition?.icon;
-      if (iconPath) {
-        weatherIcon.src = iconPath.startsWith("//") ? `https:${iconPath}` : iconPath;
-        weatherIcon.alt = current.condition?.text || t("weather.weatherIcon");
-        weatherIcon.hidden = false;
-      } else {
-        weatherIcon.removeAttribute("src");
-        weatherIcon.hidden = true;
-      }
-      details.replaceChildren(
-        addDetail(t("weather.feelsLike"), `${current.feelslike_c}°C`),
-        addDetail(t("weather.humidity"), `${current.humidity}%`),
-        addDetail(t("weather.wind"), `${current.wind_kph} km/h`),
-        addDetail(t("weather.pressure"), `${current.pressure_mb} mb`)
-      );
-      updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
-      result.hidden = false;
-      errorBox.hidden = true;
-      setStatus(source === "location" ? t("weather.trackingActive")
-        : source === "approximate" ? t("weather.approxLocationSuccess") : "");
+      const data = await request("current.json",query,controller.signal);
+      if (currentSequence !== sequence) return false;
+      if (!data?.location || !data?.current) throw new Error("request-failed");
+      renderWeather(data,source,accuracy);
       return true;
     } catch (error) {
-      if (requestController !== controller) return false;
-      if (error?.name === "AbortError") {
-        showError(t("weather.timeout"));
-      } else {
-        console.error("[Weather] Request failed:", error);
-        const apiMessage = error?.message || "";
-        showError(/key|api key|access denied|quota|inactive/i.test(apiMessage)
-          ? t("weather.serviceUnavailable")
-          : t("weather.fetchFailed"));
-      }
+      if (currentSequence !== sequence) return false;
+      if (error.name === "AbortError") showError(t("weather.timeout"));
+      else if (error.message === "not-configured") showError(t("weather.notConfigured"));
+      else if (error.message === "place-not-found") showError(t("weather.placeNotFound"));
+      else if (error.message === "service-unavailable") showError(t("weather.serviceUnavailable"));
+      else showError(t("weather.fetchFailed"));
       return false;
     } finally {
-      window.clearTimeout(timeout);
-      if (requestController === controller) {
-        requestController = null;
-        if (searchButton) searchButton.disabled = false;
-        approximateLocationButton.disabled = false;
-        if (searchButton) searchButton.textContent = t("weather.fetch");
+      clearTimeout(timeout);
+      if (currentSequence === sequence) {
+        weatherController = null;
+        setBusy(false);
       }
     }
   }
 
-  function maybeRefreshWeather(position) {
-    latestPosition = position;
-    if (!lastWeatherPosition) {
-      lastWeatherPosition = position.coords;
-      lastWeatherRefreshAt = Date.now();
-      fetchWeather(`${position.coords.latitude},${position.coords.longitude}`, "location");
-      return;
-    }
-
-    const moved = distanceMetres(lastWeatherPosition, position.coords);
-    if (moved < MOVEMENT_THRESHOLD_METRES || pendingRefreshTimer !== null) return;
-
-    const elapsed = Date.now() - lastWeatherRefreshAt;
-    const refresh = () => {
-      pendingRefreshTimer = null;
-      if (!tracking || !latestPosition) return;
-      if (distanceMetres(lastWeatherPosition, latestPosition.coords) < MOVEMENT_THRESHOLD_METRES) return;
-      const next = latestPosition;
-      lastWeatherPosition = next.coords;
-      lastWeatherRefreshAt = Date.now();
-      fetchWeather(`${next.coords.latitude},${next.coords.longitude}`, "location");
-    };
-
-    if (elapsed >= MIN_WEATHER_REFRESH_INTERVAL_MS) {
-      refresh();
-    } else {
-      pendingRefreshTimer = window.setTimeout(refresh, MIN_WEATHER_REFRESH_INTERVAL_MS - elapsed);
-    }
-  }
-
-  function getPolicyState() {
-    const policy = document.permissionsPolicy || document.featurePolicy;
-    if (!policy?.allowsFeature) return "not-exposed";
+  async function searchPlaces(query) {
+    if (query.trim().length < 2) { closeSuggestions(); return []; }
+    if (!API_KEY) { showError(t("weather.notConfigured")); return []; }
+    searchController?.abort();
+    const controller = new AbortController();
+    searchController = controller;
+    const timeout = setTimeout(() => controller.abort(),12000);
+    setStatus(t("weather.searchingPlaces"));
+    errorBox.hidden = true;
     try {
-      return policy.allowsFeature("geolocation") ? "allowed" : "blocked";
-    } catch {
-      return "check-failed";
+      const places = await request("search.json",query.trim(),controller.signal);
+      if (searchController !== controller) return [];
+      const found = Array.isArray(places) ? places.filter(p => Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon))) : [];
+      renderSuggestions(found.slice(0,7));
+      setStatus(found.length ? t("weather.chooseMatch") : t("weather.noPlacesFound"));
+      return found;
+    } catch (error) {
+      if (searchController !== controller || error.name === "AbortError") return [];
+      closeSuggestions();
+      showError(error.message === "service-unavailable" ? t("weather.serviceUnavailable") : t("weather.searchFailed"));
+      return [];
+    } finally {
+      clearTimeout(timeout);
+      if (searchController === controller) searchController = null;
     }
   }
 
-  function locationDiagnostic(error) {
-    const reason = error.code === 1 ? "PERMISSION_DENIED"
-      : error.code === 2 ? "POSITION_UNAVAILABLE"
-        : error.code === 3 ? "TIMEOUT" : "UNKNOWN";
-    return [
-      `GPS diagnostic: ${reason} (code ${error.code ?? "n/a"})`,
-      `permission=${permissionState}`,
-      `secureContext=${window.isSecureContext}`,
-      `geolocationPolicy=${getPolicyState()}`,
-      `browserMessage=${error.message || "not provided"}`
-    ].join(" · ");
+  async function selectPlace(place) {
+    closeSuggestions();
+    input.value = label(place);
+    await fetchWeather(`${place.lat},${place.lon}`,"search");
   }
 
-  function handlePosition(position) {
-    if (!tracking) return;
-    updateLocationMeta(position);
-    if (lastWeatherPosition) {
-      const moved = distanceMetres(lastWeatherPosition, position.coords);
-      if (moved < MOVEMENT_THRESHOLD_METRES) {
-        setStatus(t("weather.trackingActive"));
-        return;
-      }
-    }
-    maybeRefreshWeather(position);
+  function getPosition(options) {
+    return new Promise((resolve,reject) => navigator.geolocation.getCurrentPosition(resolve,reject,options));
   }
 
-  function handleLocationError(error) {
-    if (!tracking) return;
-    const detail = locationDiagnostic(error);
-    console.warn("[Weather] Device geolocation update failed:", detail);
-    if (error.code === 1) {
-      stopTracking({ announce: false });
-      showError(`${t("weather.locationDenied")} ${detail}`);
-      return;
-    }
-
-    // First retry through the browser's network-assisted provider. Many Windows
-    // laptops have no GPS chip, but Windows can still estimate location via Wi-Fi.
-    // This does not use IP geolocation and therefore won't silently show a remote city.
-    if ((error.code === 2 || error.code === 3) && locationMode === "high" && !balancedFallbackAttempted) {
-      balancedFallbackAttempted = true;
-      locationMode = "balanced";
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-      setStatus("High-accuracy GPS did not respond. Trying Windows/Wi-Fi-assisted location…");
-      try {
-        watchId = navigator.geolocation.watchPosition(
-          handlePosition,
-          handleLocationError,
-          BALANCED_ACCURACY_OPTIONS
-        );
-        return;
-      } catch (fallbackError) {
-        console.warn("[Weather] Balanced geolocation could not start:", fallbackError);
-      }
-    }
-
-    // Never substitute an IP estimate for the user's live location.
-    const message = error.code === 3 ? t("weather.locationTimeout") : t("weather.locationUnavailable");
-    showError(`${message} ${detail}`);
-  }
-
-  function startTracking() {
+  async function useDeviceLocation() {
     clearMessages();
-    if (!window.isSecureContext) {
-      showError(t("weather.insecureContext"));
-      return;
-    }
-    if (!navigator.geolocation) {
-      showError(t("weather.geolocationUnsupported"));
-      return;
-    }
-    if (tracking) return;
-
-    lastWeatherPosition = null;
-    latestPosition = null;
-    lastWeatherRefreshAt = 0;
-    locationMode = "high";
-    balancedFallbackAttempted = false;
-    locationMeta.textContent = "";
-    locationMeta.hidden = true;
-    setTrackingUi(true);
-    trackingWasActive = true;
-    setStatus(t("weather.trackingWaiting"));
-
-    // Start the native geolocation request synchronously from the user's click
-    // so the browser can display its permission prompt without delay.
-    if (navigator.permissions?.query) {
-      navigator.permissions.query({ name: "geolocation" })
-        .then((permission) => { permissionState = permission.state; })
-        .catch(() => { permissionState = "query-unavailable"; });
-    } else {
-      permissionState = "permissions-api-unavailable";
-    }
-
+    closeSuggestions();
+    if (!isSecureContext) { showError(t("weather.insecureContext")); return; }
+    if (!navigator.geolocation?.getCurrentPosition) { showError(t("weather.geolocationUnsupported")); return; }
+    setBusy(true);
+    setStatus(t("weather.locatingWeather"));
     try {
-      watchId = navigator.geolocation.watchPosition(
-        handlePosition,
-        handleLocationError,
-        HIGH_ACCURACY_OPTIONS
-      );
-    } catch (error) {
-      stopTracking({ announce: false });
-      const detail = `GPS diagnostic: synchronous-error · permission=${permissionState} · secureContext=${window.isSecureContext} · geolocationPolicy=${getPolicyState()} · browserMessage=${error?.message || "not provided"}`;
-      console.error("[Weather] Geolocation could not start:", detail);
-      showError(`${t("weather.locationUnavailable")} ${detail}`);
-    }
-  }
-
-  const stateSelect = document.getElementById("stateSelect");
-  const districtSelect = document.getElementById("districtSelect");
-  const districtField = document.getElementById("districtField");
-  const cityInput = document.getElementById("cityInput");
-  const cityField = document.getElementById("cityField");
-  const villageInput = document.getElementById("villageInput");
-  const villageField = document.getElementById("villageField");
-  const scopeHint = document.getElementById("weatherScopeHint");
-  function fillLocationSelect(select, values, placeholder) {
-    select.replaceChildren(new Option(placeholder, ""));
-    values.forEach((value) => select.add(new Option(value, value)));
-  }
-  function pickerMessage(message, isError = false) {
-    if (!scopeHint) return;
-    scopeHint.textContent = message;
-    scopeHint.dataset.state = isError ? "error" : "info";
-  }
-  async function loadWeatherStates() {
-    if (!stateSelect) return;
-    stateSelect.disabled = true;
-    fillLocationSelect(stateSelect, [], t("weather.picker.loadingStates"));
-    pickerMessage(t("weather.picker.hintLoadingStates"));
-    try {
-      const data = await fetchFilters();
-      const states = [...new Set(data.states)].sort((a, b) => a.localeCompare(b));
-      if (!states.length) throw new Error("No states returned");
-      fillLocationSelect(stateSelect, states, t("weather.picker.selectState"));
-      stateSelect.disabled = false;
-      pickerMessage(t("weather.picker.hintChooseState"));
-    } catch (error) {
-      console.error("[Weather] State list failed:", error);
-      fillLocationSelect(stateSelect, [], t("weather.picker.statesFailed"));
-      stateSelect.disabled = true;
-      pickerMessage(t("weather.picker.hintStatesError"), true);
-      const retry = document.createElement("button");
-      retry.type = "button"; retry.className = "btn btn-secondary";
-      retry.textContent = t("weather.picker.retryStates");
-      retry.addEventListener("click", loadWeatherStates);
-      scopeHint.append(" ", retry);
-    }
-  }
-  if (stateSelect && districtSelect && districtField) {
-    stateSelect.addEventListener("change", async () => {
-      const selectedState = stateSelect.value;
-      fillLocationSelect(districtSelect, [], t("weather.picker.loadingDistricts"));
-      districtSelect.disabled = true;
-      districtField.hidden = !selectedState;
-      if (cityField) cityField.hidden = true;
-      if (villageField) villageField.hidden = true;
-      if (cityInput) cityInput.value = "";
-      if (villageInput) villageInput.value = "";
-      if (!selectedState) {
-        pickerMessage(t("weather.picker.hintChooseState"));
-        return;
-      }
-      pickerMessage(t("weather.picker.loadingDistricts"));
+      let position;
       try {
-        const data = await fetchFilters({ state: selectedState });
-        const districts = [...new Set(data.districts)].sort((a, b) => a.localeCompare(b));
-        fillLocationSelect(districtSelect, districts, districts.length ? t("weather.picker.selectDistrict") : t("weather.picker.noDistricts"));
-        districtSelect.disabled = districts.length === 0;
-        pickerMessage(t("weather.picker.hintStateSelected"));
+        position = await getPosition({enableHighAccuracy:true,timeout:9000,maximumAge:30000});
       } catch (error) {
-        console.error("[Weather] District list failed:", error);
-        fillLocationSelect(districtSelect, [], t("weather.picker.districtsFailed"));
-        pickerMessage(t("weather.picker.hintDistrictsError"), true);
+        // Retry once with the browser's network-assisted provider on laptops without GPS.
+        if (error.code === 1) throw error;
+        position = await getPosition({enableHighAccuracy:false,timeout:14000,maximumAge:60000});
       }
-      fetchWeather(`${selectedState}, India`);
-    });
-
-    districtSelect.addEventListener("change", () => {
-      const selectedDistrict = districtSelect.value;
-      if (cityField) cityField.hidden = !selectedDistrict;
-      if (villageField) villageField.hidden = true;
-      if (cityInput) cityInput.value = "";
-      if (villageInput) villageInput.value = "";
-      if (!selectedDistrict) return;
-      pickerMessage(t("weather.picker.hintDistrictSelected"));
-      fetchWeather(`${selectedDistrict}, ${stateSelect.value}, India`);
-    });
-
-    cityInput?.addEventListener("input", () => {
-      const hasCity = Boolean(cityInput.value.trim());
-      if (villageField) villageField.hidden = !hasCity;
-      if (villageInput && !hasCity) villageInput.value = "";
-    });
-    cityInput?.addEventListener("change", () => {
-      const cityName = cityInput.value.trim();
-      if (cityName) fetchWeather(`${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
-    });
-    villageInput?.addEventListener("change", () => {
-      const villageName = villageInput.value.trim();
-      if (villageName) fetchWeather(`${villageInput.value.trim()}, ${cityInput.value.trim()}, ${districtSelect.value}, ${stateSelect.value}, India`);
-    });
-    loadWeatherStates();
+      const {latitude,longitude,accuracy} = position.coords;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("invalid-position");
+      await fetchWeather(`${latitude},${longitude}`,"device",accuracy);
+    } catch (error) {
+      if (error.code === 1) showError(t("weather.locationDenied"));
+      else if (error.code === 3) showError(t("weather.locationTimeout"));
+      else showError(t("weather.locationUnavailable"));
+    } finally { setBusy(false); }
   }
 
-  form.addEventListener("submit", (event) => event.preventDefault());
-  input.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") return;
+  form.addEventListener("submit",async event => {
     event.preventDefault();
-    stopTracking({ announce: false });
-    fetchWeather(input.value.trim());
+    const query = input.value.trim();
+    if (!query) { showError(t("weather.enterPlace")); return; }
+    const found = await searchPlaces(query);
+    if (found.length === 1) await selectPlace(found[0]);
+    else if (found.length > 1) setStatus(t("weather.chooseMatch"));
   });
-  locationButton.addEventListener("click", startTracking);
-  stopTrackingButton.addEventListener("click", () => stopTracking());
-  approximateLocationButton.addEventListener("click", () => { stopTracking({ announce: false }); fetchWeather("auto:ip", "approximate"); });
-
-  window.addEventListener("pagehide", () => stopTracking({ announce: false }), { once: true });
-  window.addEventListener("beforeunload", () => stopTracking({ announce: false }), { once: true });
+  input.addEventListener("input",() => {
+    clearTimeout(suggestionTimer);
+    const query = input.value.trim();
+    if (query.length < 2) { closeSuggestions(); clearMessages(); return; }
+    suggestionTimer = setTimeout(() => searchPlaces(query),280);
+  });
+  input.addEventListener("keydown",async event => {
+    if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); focusSuggestion(activeIndex + 1); }
+    else if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); focusSuggestion(activeIndex - 1); }
+    else if (event.key === "Escape") closeSuggestions();
+    else if (event.key === "Enter" && matches.length) {
+      event.preventDefault();
+      await selectPlace(matches[activeIndex >= 0 ? activeIndex : 0]);
+    }
+  });
+  document.addEventListener("click",event => {
+    if (!event.target.closest(".weather-search-control")) closeSuggestions();
+  });
+  locationButton.addEventListener("click",useDeviceLocation);
+  approximateButton.addEventListener("click",async () => {
+    clearMessages();
+    closeSuggestions();
+    await fetchWeather("auto:ip","approximate");
+  });
+  window.addEventListener("pagehide",() => {
+    searchController?.abort();
+    weatherController?.abort();
+    clearTimeout(suggestionTimer);
+  },{once:true});
 })();
-
