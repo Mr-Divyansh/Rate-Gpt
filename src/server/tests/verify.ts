@@ -107,9 +107,9 @@ async function main(): Promise<void> {
     return responseFor([upstreamRecord], input);
   });
   check(filtersUrl?.searchParams.get("filters[state.keyword]") === "Maharashtra", "state filter uses the OGD field id");
-  check(filtersUrl?.searchParams.get("filters[district.keyword]") === "Pune", "district filter uses its exact-match field");
-  check(filtersUrl?.searchParams.get("filters[market.keyword]") === "Pune Market", "market filter uses its exact-match field");
-  check(filtersUrl?.searchParams.get("filters[commodity.keyword]") === "Apple", "commodity filter uses its exact-match field");
+  check(filtersUrl?.searchParams.get("filters[district]") === "Pune", "district filter uses the published OGD field id");
+  check(filtersUrl?.searchParams.get("filters[market]") === "Pune Market", "market filter uses the published OGD field id");
+  check(filtersUrl?.searchParams.get("filters[commodity]") === "Apple", "commodity filter uses the published OGD field id");
   check(filtersUrl?.searchParams.get("filters[arrival_date]") === "2026-11-13", "arrival date filter is normalized upstream");
   check(!JSON.stringify(filtered).includes("deterministic-test-key"), "government credentials never enter responses");
   check(filtered.meta.hasNext === false && filtered.meta.upstreamHasNext === false, "pagination metadata separates available pages from upstream coverage");
@@ -170,8 +170,8 @@ async function main(): Promise<void> {
     const record = result.records[0];
     check(
       requestUrl?.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
-        requestUrl.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
-        requestUrl.searchParams.get("filters[market.keyword]") === observation.market,
+        requestUrl.searchParams.get("filters[district]") === "Alluri Sitharama Raju" &&
+        requestUrl.searchParams.get("filters[market]") === observation.market,
       `${observation.market} regression preserves exact government location filters`,
     );
     check(
