@@ -132,11 +132,14 @@ export function createRange(record, axis, { labels = true } = {}) {
   if (labels) {
     const row = el("span", "range-labels");
     row.setAttribute("aria-hidden", "true");
-    const a = el("span");
-    a.textContent = formatPrice(min);
-    const b = el("span");
-    b.textContent = formatPrice(max);
-    row.append(a, b);
+    // Keep all three values visible so the scale explains itself without a tooltip.
+    const a = el("span", "range-min-label");
+    a.textContent = t("range.minLabel", { value: formatPrice(min) });
+    const marker = el("span", "range-modal-label");
+    marker.textContent = t("range.modalLabel", { value: formatPrice(modal) });
+    const b = el("span", "range-max-label");
+    b.textContent = t("range.maxLabel", { value: formatPrice(max) });
+    row.append(a, marker, b);
     wrap.append(row);
   }
   return wrap;

@@ -979,3 +979,94 @@
     transition: none;
   }
 }
+
+
+/* ---------- self-explanatory price range + cleaner crop cards ---------- */
+/* The labels map directly to the three market figures: minimum, modal and maximum. */
+.page-prices .price-card {
+  border-radius: 14px;
+  border-color: #dce7dd;
+  box-shadow: 0 5px 16px rgba(22, 64, 39, .055);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.page-prices .price-card:hover {
+  border-color: #b9d3c0;
+  box-shadow: 0 10px 24px rgba(22, 64, 39, .095);
+  transform: translateY(-2px);
+}
+.page-prices .price-card-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-align: center;
+}
+.page-prices .price-card .crop-name {
+  width: 100%;
+  justify-items: center;
+  text-align: center;
+  line-height: 1.25;
+}
+.page-prices .price-card .crop-name strong,
+.page-prices .price-card .crop-name small {
+  width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.page-prices .price-card .crop-name small {
+  color: #68796e;
+  line-height: 1.3;
+}
+.page-prices .price-card .modal-price {
+  justify-content: center;
+  text-align: center;
+}
+.page-prices .price-card .range-labels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.page-prices .price-card .range-labels > span {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.page-prices .price-card .range-min-label {
+  color: #397b83;
+  text-align: left;
+}
+.page-prices .price-card .range-modal-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border: 1px solid #f1d8a9;
+  border-radius: 999px;
+  background: #fff8e9;
+  color: #986018;
+  text-align: center;
+  font-size: .68rem;
+}
+.page-prices .price-card .range-modal-label::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: #e99a27;
+  content: "";
+}
+.page-prices .price-card .range-max-label {
+  color: #24704c;
+  text-align: right;
+}
+@media (max-width: 420px) {
+  .page-prices .price-card { border-radius: 13px; }
+  .page-prices .price-card .range-labels { font-size: .68rem; gap: 3px; }
+  .page-prices .price-card .range-modal-label { padding: 3px 4px; font-size: .64rem; }
+}
