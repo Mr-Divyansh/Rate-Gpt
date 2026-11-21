@@ -11,7 +11,6 @@ import {
   fetchLiveFilters,
   fetchLivePrices,
   GovernmentApiError,
-  normalizeArrivalDate,
   searchLiveCommodities,
 } from "../services/mandiDataService.js";
 import {
@@ -164,7 +163,6 @@ const pricesQuerySchema = z.object({
   district: z.string().trim().min(1).max(100).optional(),
   market: z.string().trim().min(1).max(100).optional(),
   commodity: z.string().trim().min(1).max(100).optional(),
-  date: z.string().trim().min(1).max(20).optional(),
   search: z.string().trim().min(1).max(100).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
@@ -183,6 +181,17 @@ const pricesQuerySchema = z.object({
 });
 
 router.get("/prices", async (req: Request, res: Response) => {
+  // The public OGD price resource does not expose a reliable historical date filter.
+  // Reject legacy date queries instead of silently returning an unrelated live page.
+  if (req.query.date !== undefined) {
+    return sendError(
+      res,
+      "HISTORICAL_DATE_UNAVAILABLE",
+      "The government price feed does not support reliable historical date queries. Rate-GPT shows only observations actually returned by the live source.",
+      410,
+    );
+  }
+
   const parsed = pricesQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     return sendError(
@@ -195,11 +204,9 @@ router.get("/prices", async (req: Request, res: Response) => {
   }
 
   try {
-    const { date, ...filters } = parsed.data;
     const liveOptions = {
-      ...filters,
-      state: filters.state ? normalizeAgmarknetStateName(filters.state) : undefined,
-      arrivalDate: date,
+      ...parsed.data,
+      state: parsed.data.state ? normalizeAgmarknetStateName(parsed.data.state) : undefined,
     };
     // Price records come only from the key-authenticated OGD resource.
     // The public AGMARKNET 2.0 monthly report is CAPTCHA-gated and is not
@@ -260,55 +267,15 @@ const compareQuerySchema = z.object({
   date: z.string().trim().min(1).max(20),
 });
 
-router.get("/prices/compare", async (req: Request, res: Response) => {
-  const parsed = compareQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    return sendError(
-      res,
-      "VALIDATION_ERROR",
-      "Commodity is required for market comparison",
-      400,
-      parsed.error.format(),
-    );
-  }
-
-  try {
-    const records = await fetchLivePrices({
-      commodity: parsed.data.commodity,
-      arrivalDate: parsed.data.date,
-      limit: 100,
-      offset: 0,
-      sort: "modal_price_desc",
-    });
-    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300, max-age=0");
-    res.setHeader("Vercel-CDN-Cache-Control", "max-age=60, stale-while-revalidate=300");
-    return sendSuccess(
-      res,
-      records.records,
-      {
-        ...records.meta,
-        marketsReturned: new Set(records.records.map((record) => record.market)).size,
-        recordsReturned: records.records.length,
-        commodity: parsed.data.commodity,
-        arrivalDate:
-          records.records[0]?.arrival_date ??
-          normalizeArrivalDate(parsed.data.date) ??
-          parsed.data.date,
-        comparisonMayBePartial: records.meta.upstreamHasNext,
-        comparisonRule:
-          "Compare only records with the same commodity and source unit; matching variety is required before treating prices as like-for-like. This endpoint returns observations and does not recommend travelling to a mandi.",
-        scope: "One live government API page for the requested commodity and arrival date; use pagination for more records.",
-      },
-      "Latest government-reported market observations retrieved",
-    );
-  } catch (err: any) {
-    if (err instanceof GovernmentApiError) {
-      return sendError(res, "UPSTREAM_ERROR", err.message, err.httpStatus, {
-        upstreamStatus: err.upstreamStatus,
-      });
-    }
-    return sendError(res, "UPSTREAM_ERROR", "Failed to compare live markets", 502);
-  }
+router.get("/prices/compare", (_req: Request, res: Response) => {
+  // The selected OGD feed cannot reliably retrieve arbitrary historical dates.
+  // Do not compare a current response as if it belonged to a requested past date.
+  return sendError(
+    res,
+    "HISTORICAL_DATE_UNAVAILABLE",
+    "Date-specific market comparisons are unavailable because the government price feed does not provide a reliable historical date query.",
+    410,
+  );
 });
 
 /**
