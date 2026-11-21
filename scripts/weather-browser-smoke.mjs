@@ -138,6 +138,15 @@ try {
     assert.equal(weatherQueries.length, 0, viewport.name + ": location is not requested automatically");
     pass(viewport.name + ": weather page opens without silently requesting location");
 
+    // The welcome dialog is intentionally shown on every page load during onboarding development.
+    // Dismiss it in this weather-focused suite so it does not block the weather controls.
+    const welcomeDialog = page.locator(".onboarding-dialog");
+    if (await welcomeDialog.isVisible()) {
+      await page.locator(".onboarding-skip").click();
+      await welcomeDialog.waitFor({ state: "detached" });
+    }
+    pass(viewport.name + ": welcome dialog can be dismissed before weather interactions");
+
     await page.locator('[data-lang="hi"]').click();
     await page.waitForFunction(() =>
       document.documentElement.lang === "hi" &&
