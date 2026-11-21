@@ -17,18 +17,44 @@ function pass(label) {
 }
 
 async function dismissWelcomeDialog(page, label) {
+  // The onboarding dialog intentionally remains open after "Skip tutorial":
+  // that action advances to the farmer-benefits / thank-you screen. The
+  // weather smoke test does not need to exercise the full tour, but it must
+  // complete the real user flow rather than assuming the first click closes
+  // the native <dialog> element.
   const dialog = page.locator("dialog.onboarding-dialog");
+
+  // A dialog may not be present on pages where onboarding is not enabled.
+  // Avoid waiting for an element that the page is not expected to create.
   if (await dialog.count() && await dialog.isVisible()) {
     const skip = dialog.locator("button.onboarding-skip");
+
     if (await skip.isVisible()) {
+      // Step 1: Skip the interactive tour. This should reveal the thank-you
+      // screen, not detach the dialog from the document.
       await skip.click();
+
+      // Step 2: Confirm that the next screen has rendered and its Continue
+      // action is available. This catches regressions where Skip stops
+      // advancing the onboarding state machine.
+      const continueButton = dialog.locator("button.onboarding-continue");
+      await continueButton.waitFor({ state: "visible", timeout: 5000 });
+
+      // Step 3: Continue out of the thank-you screen. Only this action should
+      // close and remove the dialog from the page.
+      await continueButton.click();
     } else {
-      // Fallback for a changed welcome layout: close via its accessible button.
+      // Some onboarding variants (for example, a later tutorial step) do not
+      // expose Skip. Close those safely using the accessible close control.
       await dialog.getByRole("button", { name: /close|बंद करें/i }).click();
     }
-    await dialog.waitFor({ state: "detached" });
+
+    // Wait for the actual close lifecycle to finish. Checking "detached"
+    // ensures the modal no longer intercepts clicks on weather controls.
+    await dialog.waitFor({ state: "detached", timeout: 5000 });
   }
-  pass(label + ": welcome dialog dismissed before page interactions");
+
+  pass(label + ": onboarding and thank-you dialogs dismissed before page interactions");
 }
 
 // Wait (from Node) until the intercepted weather API was last called with the
