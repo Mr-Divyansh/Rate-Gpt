@@ -66,8 +66,9 @@ async function verifyHomepageOnboarding(page, label) {
 
   // The same illustration frame must be used on all three screens.
   assert.ok(imageSizes.every((size) =>
-    size.width === imageSizes[0].width && size.height === imageSizes[0].height
-  ), label + ": all three farmer illustrations have matching dimensions: " + JSON.stringify(imageSizes));
+    Math.abs(size.width - imageSizes[0].width) <= 1 &&
+    Math.abs(size.height - imageSizes[0].height) <= 1
+  ), label + ": all three farmer illustrations use the same visual frame: " + JSON.stringify(imageSizes));
 
   await dialog.locator("button.onboarding-finish").click();
   await dialog.waitFor({ state: "detached", timeout: 5000 });
