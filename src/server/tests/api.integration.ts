@@ -1,7 +1,6 @@
 import http from "http";
 import type { AddressInfo } from "net";
 import { createApiApp } from "../../../server.ts";
-import { normalizeArrivalDate } from "../services/mandiDataService.js";
 
 const apiKey = "integration-only-upstream-key";
 const sourceRecords = [
@@ -178,7 +177,6 @@ const upstream = http.createServer((req, res) => {
     ["filters[district]", "District"],
     ["filters[market]", "Market"],
     ["filters[commodity]", "Commodity"],
-    ["filters[arrival_date]", "Arrival_Date"],
   ] as const;
   let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
