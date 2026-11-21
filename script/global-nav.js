@@ -183,7 +183,13 @@ let footer=document.querySelector("footer.site-footer");
 if(!footer){footer=document.createElement("footer");document.body.append(footer);}
 renderFooter(footer);
 applyI18n();
-showFirstVisitWelcome();
+
+// The onboarding experience is currently a homepage-only introduction.
+// Keep it out of Mandi Prices, Weather, About, Contact and policy pages so
+// visitors can use those pages directly without an unrelated modal appearing.
+if (currentPage === "index.html" && document.body.classList.contains("page-home")) {
+  showFirstVisitWelcome();
+}
 function applySharedTranslations() {
   const hi = getLang() === "hi";
   const labels = {
