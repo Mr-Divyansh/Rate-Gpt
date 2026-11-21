@@ -28,8 +28,13 @@ async function verifyHomepageOnboarding(page, label) {
     await image.waitFor({ state: "visible", timeout: 5000 });
     await image.evaluate((element) => element.decode());
     const size = await image.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return { width: Math.round(rect.width), height: Math.round(rect.height) };
+      // Read the CSS layout box rather than the transient pop-in transform
+      // applied while the first dialog animation is still settling.
+      const style = getComputedStyle(element);
+      return {
+        width: Math.round(Number.parseFloat(style.width)),
+        height: Math.round(Number.parseFloat(style.height)),
+      };
     });
     imageSizes.push({ screenName, ...size });
   };
