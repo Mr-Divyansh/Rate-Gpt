@@ -175,9 +175,9 @@ const upstream = http.createServer((req, res) => {
 
   const filters = [
     ["filters[state.keyword]", "State"],
-    ["filters[district.keyword]", "District"],
-    ["filters[market.keyword]", "Market"],
-    ["filters[commodity.keyword]", "Commodity"],
+    ["filters[district]", "District"],
+    ["filters[market]", "Market"],
+    ["filters[commodity]", "Commodity"],
     ["filters[arrival_date]", "Arrival_Date"],
   ] as const;
   let records = (sourceRecords as any[]).filter((record) =>
@@ -406,9 +406,9 @@ async function main() {
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredResponse.status === 200 && filtered.data[0]?.commodity === "Apple", "filtered live prices return government record");
     assert(filteredRequest.searchParams.get("filters[state.keyword]") === "Maharashtra", "prices pass state filter upstream");
-    assert(filteredRequest.searchParams.get("filters[district.keyword]") === "Pune", "prices pass district exact-match filter upstream");
-    assert(filteredRequest.searchParams.get("filters[market.keyword]") === "Pune Market", "prices pass market exact-match filter upstream");
-    assert(filteredRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "prices pass commodity exact-match filter upstream");
+    assert(filteredRequest.searchParams.get("filters[district]") === "Pune", "prices pass district published field ID upstream");
+    assert(filteredRequest.searchParams.get("filters[market]") === "Pune Market", "prices pass market published field ID upstream");
+    assert(filteredRequest.searchParams.get("filters[commodity]") === "Apple", "prices pass commodity published field ID upstream");
     assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
     assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
@@ -444,8 +444,8 @@ async function main() {
     assert(
       Boolean(nationalRequest &&
         !nationalRequest.searchParams.has("filters[state.keyword]") &&
-        !nationalRequest.searchParams.has("filters[district.keyword]") &&
-        !nationalRequest.searchParams.has("filters[market.keyword]")),
+        !nationalRequest.searchParams.has("filters[district]") &&
+        !nationalRequest.searchParams.has("filters[market]")),
       "unfiltered national pages do not apply location filters",
     );
     assert(firstPage.meta.nextOffset === 2 && firstPage.meta.hasNext, "first live page advertises next upstream offset");
@@ -482,9 +482,9 @@ async function main() {
       );
       assert(
         sourceRequest.searchParams.get("filters[state.keyword]") === "Andhra Pradesh" &&
-          sourceRequest.searchParams.get("filters[district.keyword]") === "Alluri Sitharama Raju" &&
-          sourceRequest.searchParams.get("filters[market.keyword]") === item.market &&
-          sourceRequest.searchParams.get("filters[commodity.keyword]") === item.commodity,
+          sourceRequest.searchParams.get("filters[district]") === "Alluri Sitharama Raju" &&
+          sourceRequest.searchParams.get("filters[market]") === item.market &&
+          sourceRequest.searchParams.get("filters[commodity]") === item.commodity,
         `${item.market} regression sends exact state, district, market and commodity filters upstream`,
       );
     }
@@ -502,7 +502,7 @@ async function main() {
     assert((comparisonResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
     const comparisonRequest = upstreamRequests.at(-1)!;
     assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
-    assert(comparisonRequest.searchParams.get("filters[commodity.keyword]") === "Apple", "live comparison forwards commodity exact-match filter");
+    assert(comparisonRequest.searchParams.get("filters[commodity]") === "Apple", "live comparison forwards commodity exact-match filter");
     assert(comparisonRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "live comparison forwards requested arrival date");
     assert(comparison.meta.source === "Government of India OGD / AGMARKNET", "live comparison identifies government source");
     assert(comparison.meta.arrivalDate === "2026-11-13" && comparison.meta.comparisonRule.includes("matching variety"), "comparison identifies observation date and matching requirements");
