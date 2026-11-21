@@ -54,11 +54,53 @@ export function showFirstVisitWelcome() {
       </div>
     `;
     // Both the Skip and View paths lead to this short benefits introduction.
-    // Continue closes this intro for now; the detailed step-by-step tour can
-    // be added later without changing the farmer-benefits content.
+    // Continue advances to the second and final onboarding screen.
     dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
-    dialog.querySelector(".onboarding-continue").addEventListener("click", closeDialog);
+    dialog.querySelector(".onboarding-continue").addEventListener("click", showSolution);
     dialog.querySelector(".onboarding-continue").focus();
+  };
+
+  // The second screen tells the farmer, in a simple first-person story,
+  // how Rate-GPT helps them compare available market information.
+  // Keep this as a single-screen experience: no internal scrolling.
+  const showSolution = () => {
+    thankYouShown = true;
+    dialog.innerHTML = `
+      <div class="onboarding-card onboarding-card--solution">
+        <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
+        <div class="onboarding-art-wrap">
+          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Tell.png" alt="${hi ? "किसान Rate-GPT के बारे में बता रहा है" : "Farmer explaining how Rate-GPT helps"}" width="320" height="320" fetchpriority="high" decoding="async">
+        </div>
+        <div class="onboarding-copy">
+          <div class="onboarding-progress" role="group" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}">
+            <div class="onboarding-progress-meta">
+              <span>${hi ? "आपकी Rate-GPT यात्रा" : "YOUR RATE-GPT JOURNEY"}</span>
+              <span>02 / 02</span>
+            </div>
+            <div class="onboarding-progress-track onboarding-progress-track--complete" role="progressbar" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}" aria-valuemin="0" aria-valuemax="2" aria-valuenow="2">
+              <span></span>
+            </div>
+          </div>
+          <p class="onboarding-eyebrow">${hi ? "अब मंडी की जानकारी हुई आसान" : "HERE'S HOW RATE-GPT HELPS"}</p>
+          <h2 id="onboardingTitle">${hi ? "Rate-GPT से मुझे सही जानकारी मिलने लगी" : "Rate-GPT helped me make sense of mandi prices"}</h2>
+          <p class="onboarding-message">${hi
+            ? "फिर मैंने Rate-GPT इस्तेमाल किया। अब मुझे अलग-अलग मंडियों के उपलब्ध भाव एक जगह देखने और उनकी तुलना करने में मदद मिलती है।"
+            : "Then I tried Rate-GPT. It helped me explore available prices across different mandis, compare my options and understand the market before deciding where to sell."}</p>
+          <ul class="onboarding-benefits onboarding-solution-points">
+            <li>${hi ? "अब मैं अपनी फसल के भाव कई मंडियों में देख सकता हूँ।" : "I can check how the price of my crop differs across available mandis."}</li>
+            <li>${hi ? "अब मुझे अपनी स्थानीय मंडी के अलावा दूसरी मंडियों के विकल्प भी पता चलते हैं।" : "I can look beyond my usual mandi and discover other reported market options."}</li>
+            <li>${hi ? "न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर मैं बेहतर जानकारी के साथ फैसला कर सकता हूँ।" : "I can use minimum, maximum, modal prices and arrivals to make a more informed selling decision."}</li>
+          </ul>
+          <p class="onboarding-note onboarding-assistant-note">${hi ? "Rate-GPT आपको जानकारी देता है — फैसला आप अपनी जरूरत और बाजार की स्थिति देखकर लें।" : "Rate-GPT gives you useful information. You stay in control of your selling decision."}</p>
+          <div class="onboarding-actions onboarding-actions--single">
+            <button class="btn btn-primary onboarding-finish" type="button">${hi ? "Rate-GPT इस्तेमाल करें" : "Start exploring Rate-GPT"} <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </div>
+    `;
+    dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
+    dialog.querySelector(".onboarding-finish").addEventListener("click", closeDialog);
+    dialog.querySelector(".onboarding-finish").focus();
   };
 
   dialog.innerHTML = `
