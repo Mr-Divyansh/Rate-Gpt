@@ -21,6 +21,14 @@ It provides the state, district, market and commodity directory. Rate-GPT caches
 
 A market appearing in the directory means it is registered in the directory. It does not mean that the market published a price observation on the requested date. The UI must distinguish registered markets from markets with returned price records.
 
+## Historical date availability
+
+The OGD resource includes an `arrival_date` value on returned observations, but that field is not exposed as a reliable query filter by the public resource API. A date parameter can therefore be ignored upstream; filtering only the first returned page would incorrectly make older observations appear missing.
+
+Rate-GPT does not store price history and does not crawl every page to simulate a historical archive. The Mandi Prices page consequently has no arbitrary date picker. It displays the exact arrival date attached to each observation returned by the live API. If the source returns an older arrival date because a market reported late, that real source date remains visible.
+
+The AGMARKNET 2.0 historical/report endpoints tested by this project require a CAPTCHA token and are not automated. No CAPTCHA is bypassed and no historical prices are generated.
+
 ## CAPTCHA-protected price reports
 
 The AGMARKNET 2.0 daily market-report and date-wise commodity-report endpoints were tested from the CI runner. The price-report endpoint returned HTTP 400 with:
