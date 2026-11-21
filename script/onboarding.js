@@ -54,7 +54,7 @@ export function showFirstVisitWelcome() {
 
   dialog.querySelector(".onboarding-skip").addEventListener("click", () => finish("skipped"));
   dialog.querySelector(".onboarding-close").addEventListener("click", () => finish("skipped"));
-  dialog.addEventListener("cancel", () => saveChoice("skipped"), { once: true });
+  dialog.addEventListener("cancel", event => { event.preventDefault(); finish("skipped"); }, { once: true });
 
   dialog.querySelector(".onboarding-view").addEventListener("click", () => {
     saveChoice("started");
