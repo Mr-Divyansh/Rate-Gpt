@@ -176,5 +176,10 @@ onLangChange(() => {
   hydrateIcons();
 });
 
-loadBoard();
+ // Let the main page render before starting the non-critical mandi preview request.
+if ("requestIdleCallback" in window) {
+  window.requestIdleCallback(() => loadBoard(), { timeout: 1200 });
+} else {
+  window.setTimeout(loadBoard, 250);
+}
 
