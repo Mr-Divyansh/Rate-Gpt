@@ -104,14 +104,6 @@
             }
           },
           {
-            "name": "date",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "search",
             "in": "query",
             "required": false,
@@ -167,6 +159,9 @@
           "400": {
             "description": "Invalid query"
           },
+          "410": {
+            "description": "Historical date filtering is not supported by the upstream government price feed"
+          },
           "502": {
             "description": "Upstream source error"
           },
@@ -178,32 +173,11 @@
     },
     "/prices/compare": {
       "get": {
-        "summary": "Fetch observations for a crop and arrival date across markets",
-        "parameters": [
-          {
-            "name": "commodity",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "date",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          }
-        ],
+        "summary": "Historical market comparison (currently unavailable)",
+        "parameters": [],
         "responses": {
-          "200": {
-            "description": "Live comparable market observations"
-          },
-          "400": {
-            "description": "Required parameters missing"
+          "410": {
+            "description": "The upstream government price feed does not provide reliable historical date queries"
           }
         }
       }
