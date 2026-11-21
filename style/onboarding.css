@@ -262,3 +262,57 @@
   .onboarding-benefits li::before { left: 10px; top: 8px; }
   .onboarding-actions--single { margin-top: 9px; }
 }
+
+
+/* Farmer-benefits introduction: make the three practical problems easy to scan. */
+.onboarding-card--benefits {
+  gap: 8px;
+}
+.onboarding-card--benefits .onboarding-art {
+  width: min(36%, 145px);
+  height: 108px;
+  max-width: 145px;
+}
+.onboarding-card--benefits .onboarding-copy {
+  max-width: 465px;
+}
+.onboarding-card--benefits .onboarding-copy h2 {
+  max-width: 430px;
+  margin-bottom: 7px;
+  font-size: clamp(1.3rem, 2.8vw, 1.65rem);
+}
+.onboarding-card--benefits .onboarding-message {
+  max-width: 455px;
+  font-size: .86rem;
+  line-height: 1.48;
+}
+.onboarding-card--benefits .onboarding-benefits {
+  gap: 7px;
+  margin-top: 10px;
+}
+.onboarding-card--benefits .onboarding-benefits li {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: .82rem;
+}
+.onboarding-card--benefits .onboarding-assistant-note {
+  margin-top: 7px;
+}
+.onboarding-card--benefits .onboarding-actions--single {
+  margin-top: 9px;
+}
+@media (max-width: 600px) {
+  .onboarding-card--benefits .onboarding-art {
+    width: min(34%, 125px);
+    height: 92px;
+  }
+  .onboarding-card--benefits .onboarding-copy h2 {
+    font-size: 1.35rem;
+  }
+  .onboarding-card--benefits .onboarding-message {
+    font-size: .82rem;
+  }
+  .onboarding-card--benefits .onboarding-benefits li {
+    font-size: .78rem;
+  }
+}
