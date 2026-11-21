@@ -1,5 +1,3 @@
-> **Archived historical snapshot — not current project guidance.** Refer to the root README and maintained documentation under `docs/` for current behavior.
-
 # Rate-GPT — Engineering & Release Readiness
 
 **Status date:** 19 November 2026  
