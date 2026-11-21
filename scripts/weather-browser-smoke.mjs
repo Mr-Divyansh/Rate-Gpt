@@ -34,15 +34,29 @@ async function dismissWelcomeDialog(page, label) {
       // screen, not detach the dialog from the document.
       await skip.click();
 
-      // Step 2: Confirm that the next screen has rendered and its Continue
-      // action is available. This catches regressions where Skip stops
-      // advancing the onboarding state machine.
+      // Step 2: Confirm that the farmer-benefits screen is visible and
+      // its Continue action is available.
       const continueButton = dialog.locator("button.onboarding-continue");
       await continueButton.waitFor({ state: "visible", timeout: 5000 });
 
-      // Step 3: Continue out of the thank-you screen. Only this action should
-      // close and remove the dialog from the page.
+      // Step 3: Continue to the Rate-GPT solution story. The Tell illustration
+      // must load, and this compact screen must fit without an inner scrollbar.
       await continueButton.click();
+      const solution = dialog.locator(".onboarding-card--solution");
+      await solution.waitFor({ state: "visible", timeout: 5000 });
+      const solutionImage = solution.locator('img[src*="Characte_For_RateGPT_Tell.png"]');
+      await solutionImage.waitFor({ state: "visible", timeout: 5000 });
+      await solutionImage.evaluate((image) => image.decode());
+      const fitsWithoutScrolling = await solution.evaluate((card) =>
+        card.scrollHeight <= card.clientHeight + 1
+      );
+      if (!fitsWithoutScrolling) {
+        throw new Error("Rate-GPT solution onboarding screen overflows and requires scrolling");
+      }
+
+      // Step 4: Finish the intro. This final action should close and remove
+      // the dialog before the weather page interaction checks begin.
+      await dialog.locator("button.onboarding-finish").click();
     } else {
       // Some onboarding variants (for example, a later tutorial step) do not
       // expose Skip. Close those safely using the accessible close control.
