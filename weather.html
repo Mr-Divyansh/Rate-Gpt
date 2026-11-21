@@ -6,93 +6,67 @@
   <link rel="apple-touch-icon" href="/Images/Logo.webp">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#F7F7F0">
-  <meta name="description" content="Get current weather conditions by location">
+  <meta name="description" content="Check current weather for your village, town or city with Rate-GPT.">
   <title>Weather | Rate-GPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/weather.css">
-    <link rel="canonical" href="https://rate-gpt.vercel.app/weather.html">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Rate-GPT">
-    <meta property="og:title" content="Weather | Rate-GPT">
-    <meta property="og:description" content="Get current weather conditions by location">
-    <meta property="og:url" content="https://rate-gpt.vercel.app/weather.html">
-    <meta property="og:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Weather | Rate-GPT">
-    <meta name="twitter:description" content="Get current weather conditions by location">
-    <meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
-  </head>
+  <link rel="canonical" href="https://rate-gpt.vercel.app/weather.html">
+  <meta property="og:type" content="website"><meta property="og:site_name" content="Rate-GPT">
+  <meta property="og:title" content="Weather | Rate-GPT"><meta property="og:description" content="Check current weather for your village, town or city with Rate-GPT.">
+  <meta property="og:url" content="https://rate-gpt.vercel.app/weather.html"><meta property="og:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Weather | Rate-GPT">
+  <meta name="twitter:description" content="Check current weather for your village, town or city with Rate-GPT."><meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+</head>
 <body>
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
-  
   <header class="site-header"></header>
-  
   <main id="main-content" tabindex="-1">
     <section class="weather-wrap wrap" aria-labelledby="weatherPageTitle">
       <div class="weather-intro">
-        <span class="weather-eyebrow" data-i18n="weather.eyebrow">Weather near you</span>
+        <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
         <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
-        <p data-i18n="weather.subtitle">Get current conditions for your location or search any city.</p>
+        <p data-i18n="weather.subtitle">Find current conditions for your village, town or city.</p>
       </div>
-
-      <section class="weather-search-card" aria-label="Choose your weather location">
-        <div class="weather-location-action">
-          <div class="weather-location-copy">
-            <span class="weather-location-icon" aria-hidden="true">⌖</span>
-            <span><strong data-i18n="weather.locationTitle">Weather at your location</strong><small data-i18n="weather.locationHint">Use your device location for local weather</small><small id="approxLocationHint" data-i18n="weather.approxLocationHint">Approximate city-level location uses your internet connection and may be inaccurate.</small></span>
-          </div>
-          <div class="weather-location-buttons">
-            <input type="search" id="locationInput" placeholder="Search city, district or PIN code" autocomplete="off">
-            <button class="btn btn-primary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Start live location</span></button>
-            <button class="btn btn-secondary" id="stopLocationTrackingBtn" type="button" data-i18n="weather.stopTracking" hidden>Stop tracking</button>
-            <button class="btn btn-secondary" id="useApproxLocationBtn" type="button" aria-describedby="approxLocationHint"><span data-i18n="weather.useApproxLocation">Use approximate location</span></button>
-            <p id="weatherLocationMeta" aria-live="polite" hidden></p>
-          </div>
-        </div>
-        <div class="weather-picker-heading">
+      <section class="weather-search-card" aria-label="Find a weather location">
+        <div class="weather-search-heading">
           <span class="weather-location-icon" aria-hidden="true">⌖</span>
-          <div><strong data-i18n="weather.picker.heading">Choose your location</strong><small data-i18n="weather.picker.sub">Select a larger area first, then narrow it down to your village.</small></div>
+          <div><h2 data-i18n="weather.locationTitle">Where do you want the weather?</h2>
+          <p data-i18n="weather.locationHint">Search a place and choose the exact match from the suggestions.</p></div>
         </div>
-        <form id="weatherSearchForm" class="weather-picker-form">
-          <div class="weather-picker-field">
-            <label for="stateSelect" data-i18n="weather.picker.stateLabel">1. State</label>
-            <select id="stateSelect"><option value="" data-i18n="weather.picker.loadingStates">Loading states…</option></select>
+        <form id="weatherSearchForm" class="weather-search-form" autocomplete="off">
+          <label class="visually-hidden" for="locationInput" data-i18n="weather.placeholder">Search village, city, district or PIN code</label>
+          <div class="weather-search-control">
+            <input type="search" id="locationInput" name="location" placeholder="Search village, city, district or PIN code" autocomplete="off" aria-autocomplete="list" aria-controls="weatherSuggestions" aria-expanded="false" required>
+            <button class="btn btn-primary" id="getWeatherBtn" type="submit" data-i18n="weather.fetch">Search weather</button>
+            <ul class="weather-suggestions" id="weatherSuggestions" role="listbox" aria-label="Matching places" hidden></ul>
           </div>
-          <div class="weather-picker-field" id="districtField" hidden>
-            <label for="districtSelect" data-i18n="weather.picker.districtLabel">2. District</label>
-            <select id="districtSelect" disabled><option value="" data-i18n="weather.picker.selectDistrict">Select district</option></select>
-          </div>
-          <div class="weather-picker-field" id="cityField" hidden>
-            <label for="cityInput" data-i18n="weather.picker.cityLabel">3. City / Town</label>
-            <input id="cityInput" type="text" autocomplete="address-level2" data-i18n-attr="placeholder:weather.picker.cityPh" placeholder="Enter city or town">
-          </div>
-          <div class="weather-picker-field" id="villageField" hidden>
-            <label for="villageInput" data-i18n="weather.picker.villageLabel">4. Village (optional)</label>
-            <input id="villageInput" type="text" autocomplete="address-level3" data-i18n-attr="placeholder:weather.picker.villagePh" placeholder="Enter village name, e.g. Deol Khas">
-          </div>
-          <p class="weather-picker-hint" id="weatherScopeHint" aria-live="polite" data-i18n="weather.picker.hintChooseState">Choose a state to see its overall weather.</p>
         </form>
+        <div class="weather-search-divider"><span data-i18n="weather.orUseDevice">OR USE YOUR DEVICE</span></div>
+        <div class="weather-location-actions">
+          <button class="btn btn-secondary" id="useMyLocationBtn" type="button"><span aria-hidden="true">◎</span><span data-i18n="weather.useLocation">Use my device location</span></button>
+          <button class="weather-text-button" id="useApproxLocationBtn" type="button" data-i18n="weather.useApproxLocation">Use approximate location instead</button>
+        </div>
+        <p class="weather-privacy" data-i18n="weather.privacy">Your device location is only used after you tap the button. It is not saved.</p>
         <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
       </section>
-
-      <section class="weather-result" id="weatherResult" aria-live="polite" hidden>
+      <section class="weather-result" id="weatherResult" aria-live="polite" aria-label="Current weather" hidden>
         <div class="weather-result-top">
-          <div><span class="weather-result-label" data-i18n="weather.current">Right now</span><h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
-          <img class="weather-condition-icon" id="weatherIcon" alt="" width="88" height="88" hidden>
+          <div class="weather-place-block"><span class="weather-result-label" id="weatherSourceLabel" data-i18n="weather.current">CURRENT CONDITIONS</span>
+            <h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
+          <img class="weather-condition-icon" id="weatherIcon" alt="" width="96" height="96" hidden>
         </div>
-        <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong><span class="weather-condition" id="weatherCondition"></span></div>
+        <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong>
+          <div><span class="weather-condition" id="weatherCondition"></span><span class="weather-feels-like" id="weatherFeelsLike"></span></div></div>
         <div class="weather-details" id="weatherDetails"></div>
-        <p class="weather-source" data-i18n="weather.source">Current conditions · WeatherAPI</p>
+        <p class="weather-source" data-i18n="weather.source">Current conditions provided by WeatherAPI.</p>
       </section>
     </section>
   </main>
-  
   <footer class="site-footer"></footer>
-
   <script type="module" src="/script/global-nav.js"></script>
   <script type="module" src="/script/weather.js"></script>
 </body>
