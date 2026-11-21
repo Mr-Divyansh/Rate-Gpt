@@ -10,11 +10,13 @@
   background: #fbfcf8;
   color: #202b25;
   box-shadow: 0 32px 100px rgba(10, 35, 23, .24), 0 5px 18px rgba(10, 35, 23, .08);
-  animation: onboarding-pop-in .28s cubic-bezier(.2,.8,.2,1) both;
+  /* Render the welcome immediately; avoid delaying LCP with an entrance animation. */
+  animation: none;
 }
 .onboarding-dialog::backdrop {
   background: rgba(10, 26, 18, .58);
-  backdrop-filter: blur(7px);
+  /* A flat translucent backdrop avoids expensive full-screen blur on phones. */
+  backdrop-filter: none;
 }
 .onboarding-card {
   position: relative;
@@ -895,5 +897,16 @@
     max-width: min(58vw, 138px) !important;
     height: 112px !important;
     max-height: 112px !important;
+  }
+}
+
+
+/* Keep the onboarding overlay inexpensive on small and low-power devices. */
+@media (max-width: 600px) {
+  .onboarding-dialog::backdrop {
+    backdrop-filter: none;
+  }
+  .onboarding-dialog {
+    box-shadow: 0 12px 36px rgba(10, 35, 23, .18);
   }
 }
