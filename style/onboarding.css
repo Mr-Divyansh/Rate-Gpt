@@ -1,107 +1,174 @@
 .onboarding-dialog {
-  width: min(92vw, 760px);
-  max-width: 760px;
-  max-height: min(88vh, 680px);
+  width: min(92vw, 560px);
+  max-width: 560px;
+  aspect-ratio: 1 / 1;
+  max-height: min(92vw, 88vh, 560px);
   padding: 0;
-  overflow: auto;
-  border: 1px solid rgba(23, 77, 56, .12);
-  border-radius: 24px;
-  background: #fff;
+  overflow: hidden;
+  border: 1px solid rgba(42, 105, 73, .14);
+  border-radius: 30px;
+  background: #fbfcf8;
   color: #202b25;
-  box-shadow: 0 28px 90px rgba(11, 32, 21, .28);
+  box-shadow: 0 32px 100px rgba(10, 35, 23, .24), 0 5px 18px rgba(10, 35, 23, .08);
+  animation: onboarding-pop-in .28s cubic-bezier(.2,.8,.2,1) both;
 }
 .onboarding-dialog::backdrop {
-  background: rgba(11, 28, 19, .58);
-  backdrop-filter: blur(5px);
+  background: rgba(10, 26, 18, .58);
+  backdrop-filter: blur(7px);
 }
 .onboarding-card {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(190px, .82fr) minmax(0, 1.18fr);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(18px, 3vw, 34px);
-  padding: clamp(24px, 5vw, 42px);
-  min-height: 390px;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 34px 42px 30px;
+  overflow: auto;
+  text-align: center;
   background:
-    radial-gradient(circle at 15% 20%, rgba(155, 211, 174, .25), transparent 35%),
-    linear-gradient(135deg, #fff 0%, #f7f7f0 100%);
+    radial-gradient(ellipse at 50% 4%, rgba(173, 218, 185, .32), transparent 43%),
+    linear-gradient(155deg, #fff 0%, #f8faf5 58%, #f1f6ee 100%);
 }
 .onboarding-close {
   position: absolute;
-  top: 14px;
+  z-index: 2;
+  top: 16px;
   right: 16px;
+  display: grid;
+  place-items: center;
   width: 38px;
   height: 38px;
-  border: 1px solid #e5e9e2;
-  border-radius: 50%;
-  background: rgba(255,255,255,.9);
-  color: #405149;
-  font-size: 25px;
-  line-height: 1;
+  padding: 0 0 2px;
+  border: 1px solid rgba(38, 91, 63, .12);
+  border-radius: 13px;
+  background: #edf4ec;
+  color: #315b43;
+  box-shadow: 0 3px 10px rgba(25, 69, 44, .08);
+  font: 500 24px/1 system-ui, sans-serif;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.onboarding-close:hover {
+  background: #dfece0;
+  color: #174d38;
+  box-shadow: 0 5px 14px rgba(25, 69, 44, .13);
+  transform: translateY(-1px);
+}
+.onboarding-close:focus-visible,
+.onboarding-actions .btn:focus-visible {
+  outline: 3px solid rgba(48, 132, 83, .35);
+  outline-offset: 3px;
 }
 .onboarding-art-wrap {
   display: grid;
   place-items: center;
-  align-self: stretch;
-  min-width: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 0;
+  margin-top: 2px;
 }
 .onboarding-art {
-  width: 100%;
-  max-width: 280px;
-  max-height: 310px;
+  display: block;
+  width: min(54%, 220px);
+  height: clamp(150px, 30vh, 215px);
+  max-width: 220px;
   object-fit: contain;
-  filter: drop-shadow(0 14px 18px rgba(23, 77, 56, .12));
+  object-position: center;
+  filter: drop-shadow(0 12px 16px rgba(23, 77, 56, .13));
 }
-.onboarding-copy { min-width: 0; padding-block: 10px; }
+.onboarding-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+  min-width: 0;
+  padding: 0;
+}
 .onboarding-eyebrow {
-  margin-bottom: 10px;
+  margin: 0 0 8px;
   color: #287a52;
-  font-size: .76rem;
+  font-size: .7rem;
   font-weight: 800;
-  letter-spacing: .11em;
+  letter-spacing: .13em;
 }
 .onboarding-copy h2 {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   color: #174d38;
-  font-size: clamp(1.65rem, 4vw, 2.25rem);
-  line-height: 1.18;
+  font-size: clamp(1.45rem, 3.5vw, 1.9rem);
+  line-height: 1.16;
+  letter-spacing: -.035em;
 }
 .onboarding-message {
-  color: #526158;
-  font-size: 1rem;
-  line-height: 1.7;
+  max-width: 420px;
+  margin: 0;
+  color: #58665d;
+  font-size: .92rem;
+  line-height: 1.58;
 }
 .onboarding-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  margin-top: 20px;
 }
-.onboarding-actions .btn { min-height: 46px; }
+.onboarding-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 13px;
+  font-weight: 700;
+  text-align: center;
+  white-space: normal;
+  text-decoration: none;
+}
 .onboarding-note {
-  margin-top: 14px;
-  color: #758078;
-  font-size: .82rem;
+  margin: 12px 0 0;
+  color: #7b877e;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+@keyframes onboarding-pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @media (max-width: 600px) {
   .onboarding-dialog {
-    width: min(94vw, 430px);
-    max-height: 90vh;
-    border-radius: 20px;
+    width: min(92vw, 430px);
+    aspect-ratio: auto;
+    max-height: 88vh;
+    border-radius: 24px;
   }
   .onboarding-card {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 25px 22px 24px;
-    text-align: center;
+    min-height: min(590px, 82vh);
+    height: auto;
+    gap: 9px;
+    padding: 48px 24px 26px;
   }
-  .onboarding-art-wrap { max-height: 190px; }
-  .onboarding-art { max-height: 185px; max-width: 190px; }
-  .onboarding-copy { padding: 0; }
-  .onboarding-actions { justify-content: center; }
-  .onboarding-actions .btn { flex: 1 1 145px; }
-  .onboarding-note { margin-bottom: 0; }
+  .onboarding-art { width: min(58%, 190px); height: 175px; }
+  .onboarding-copy h2 { font-size: 1.55rem; }
+  .onboarding-message { font-size: .9rem; }
+  .onboarding-actions { gap: 9px; margin-top: 17px; }
+  .onboarding-actions .btn { min-height: 44px; padding-inline: 10px; }
+}
+@media (max-height: 620px) and (min-width: 601px) {
+  .onboarding-dialog { max-height: 92vh; }
+  .onboarding-card { padding-block: 20px; gap: 6px; }
+  .onboarding-art { height: 145px; }
+  .onboarding-actions { margin-top: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .onboarding-dialog { animation: none; }
   .onboarding-dialog::backdrop { backdrop-filter: none; }
+  .onboarding-close { transition: none; }
 }
