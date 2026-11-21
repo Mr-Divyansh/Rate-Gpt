@@ -399,7 +399,7 @@ async function main() {
     );
 
     const filteredResponse = await fetch(
-      `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&date=2026-11-13&sort=modal_price_desc&limit=2`,
+      `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Apple&sort=modal_price_desc&limit=2`,
     );
     const filtered = await filteredResponse.json();
     const filteredRequest = upstreamRequests.at(-1)!;
@@ -409,7 +409,6 @@ async function main() {
     assert(filteredRequest.searchParams.get("filters[district]") === "Pune", "prices pass district published field ID upstream");
     assert(filteredRequest.searchParams.get("filters[market]") === "Pune Market", "prices pass market published field ID upstream");
     assert(filteredRequest.searchParams.get("filters[commodity]") === "Apple", "prices pass commodity published field ID upstream");
-    assert(filteredRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "date filter is normalized upstream");
     assert(!filteredRequest.searchParams.has("sort[Modal_Price]"), "unsupported OGD modal-price sorting is not requested upstream");
     assert(!filteredRequest.searchParams.has("sort[order]"), "price sort does not send invalid sort[order] parameter");
     assert(!filteredRequest.searchParams.has("sort[Arrival_Date]"), "date sort is omitted because AGMARKNET Arrival_Date is not sortable");
@@ -495,19 +494,25 @@ async function main() {
     assert(search.meta.sourceDerived === true, "commodity search identifies source-derived suggestions");
     assert((searchResponse.headers.get("cache-control") || "").includes("s-maxage=300"), "commodity autocomplete uses a five-minute shared cache");
 
+    const historicalDateQuery = await fetch(
+      `${base}/api/v1/prices?state=Maharashtra&date=2026-11-13`,
+    );
+    const historicalDatePayload = await historicalDateQuery.json();
+    assert(
+      historicalDateQuery.status === 410 &&
+        historicalDatePayload.error?.code === "HISTORICAL_DATE_UNAVAILABLE",
+      "unsupported historical date filters are rejected instead of returning unrelated current records",
+    );
+
     const comparisonResponse = await fetch(
       `${base}/api/v1/prices/compare?commodity=Apple&date=2026-11-13`,
     );
     const comparison = await comparisonResponse.json();
-    assert((comparisonResponse.headers.get("cache-control") || "").includes("s-maxage=60"), "market comparison uses a short 60-second shared cache");
-    const comparisonRequest = upstreamRequests.at(-1)!;
-    assert(comparison.success && comparison.data[0]?.commodity === "Apple", "market comparison reads live government prices");
-    assert(comparisonRequest.searchParams.get("filters[commodity]") === "Apple", "live comparison forwards commodity exact-match filter");
-    assert(comparisonRequest.searchParams.get("filters[arrival_date]") === "2026-11-13", "live comparison forwards requested arrival date");
-    assert(comparison.meta.source === "Government of India OGD / AGMARKNET", "live comparison identifies government source");
-    assert(comparison.meta.arrivalDate === "2026-11-13" && comparison.meta.comparisonRule.includes("matching variety"), "comparison identifies observation date and matching requirements");
-    const comparisonWithoutDate = await fetch(`${base}/api/v1/prices/compare?commodity=Apple`);
-    assert(comparisonWithoutDate.status === 400, "comparison rejects requests without an observation date");
+    assert(
+      comparisonResponse.status === 410 &&
+        comparison.error?.code === "HISTORICAL_DATE_UNAVAILABLE",
+      "date-specific market comparisons are disabled when the upstream source cannot query historical dates",
+    );
 
     const historicalTrend = await fetch(
       `${base}/api/v1/prices/trend?commodity=Apple&market=Pune%20Market`,
