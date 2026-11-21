@@ -515,7 +515,6 @@
   .page-home .board-row { grid-template-columns: minmax(0,1fr) minmax(35px,.48fr) auto; }
 }
 
-
 /* Interactive Watch demo */
 .demo-trigger .play-mark { font-size: .72rem; padding-left: 2px; }
 .demo-dialog {
@@ -535,16 +534,33 @@
 .demo-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
 .demo-dialog-head h2 { margin: 2px 0 6px; color: var(--forest); font-size: clamp(1.4rem, 2.5vw, 2rem); }
 .demo-dialog-head p:last-child { color: var(--muted); max-width: 65ch; }
-.demo-dialog .dialog-eyebrow { color: var(--green); font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.demo-dialog .dialog-eyebrow { color: var(--green); font-size: .82rem; font-weight: 800; letter-spacing: .02em; }
 .demo-dialog .dialog-close { flex: none; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: white; color: var(--forest); font-size: 1.6rem; line-height: 1; }
-.demo-video-placeholder { display: block; width: 100%; aspect-ratio: 16 / 9; min-height: 260px; max-height: min(58vh, 590px); border: 1px solid #26382e; border-radius: 14px; background: #101813; }
+.demo-video-frame { display: block; width: 100%; aspect-ratio: 16 / 9; min-height: 260px; max-height: min(58vh, 590px); border: 1px solid #26382e; border-radius: 14px; background: #101813; overflow: hidden; }
+.demo-video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 .demo-dialog-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 14px; color: var(--muted); font-size: .9rem; }
 @media (max-width: 620px) {
   .demo-dialog { width: calc(100vw - 18px); padding: 14px; border-radius: 16px; }
-  .demo-video-placeholder { min-height: 190px; max-height: 52vh; }
+  .demo-video-frame { min-height: 190px; max-height: 52vh; }
   .demo-dialog-foot { align-items: flex-start; flex-direction: column; }
 }
 
+/* One deliberate entrance moment on first load — nothing else on the home page moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-kicker, .hero-copy h1, .hero-copy .lede, .hero-actions, .hero-copy .fine, .board {
+    animation: hero-rise .62s cubic-bezier(.16, 1, .3, 1) both;
+  }
+  .hero-kicker { animation-delay: .02s; }
+  .hero-copy h1 { animation-delay: .08s; }
+  .hero-copy .lede { animation-delay: .16s; }
+  .hero-actions { animation-delay: .24s; }
+  .hero-copy .fine { animation-delay: .3s; }
+  .board { animation-delay: .18s; }
+  @keyframes hero-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
 
 /* ---------- Reference-led homepage polish: light market panel ---------- */
 .page-home {
@@ -720,3 +736,4 @@
   .page-home .board-row .crop-name small { font-size: .68rem; }
   .page-home .board-modal strong { font-size: 1.08rem; }
 }
+

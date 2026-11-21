@@ -360,23 +360,23 @@ import { fetchFilters } from "./api.js";
   async function loadWeatherStates() {
     if (!stateSelect) return;
     stateSelect.disabled = true;
-    fillLocationSelect(stateSelect, [], "Loading states…");
-    pickerMessage("Loading available states…");
+    fillLocationSelect(stateSelect, [], t("weather.picker.loadingStates"));
+    pickerMessage(t("weather.picker.hintLoadingStates"));
     try {
       const data = await fetchFilters();
       const states = [...new Set(data.states)].sort((a, b) => a.localeCompare(b));
       if (!states.length) throw new Error("No states returned");
-      fillLocationSelect(stateSelect, states, "Select state");
+      fillLocationSelect(stateSelect, states, t("weather.picker.selectState"));
       stateSelect.disabled = false;
-      pickerMessage("Choose a state to see its approximate weather.");
+      pickerMessage(t("weather.picker.hintChooseState"));
     } catch (error) {
       console.error("[Weather] State list failed:", error);
-      fillLocationSelect(stateSelect, [], "Could not load states");
+      fillLocationSelect(stateSelect, [], t("weather.picker.statesFailed"));
       stateSelect.disabled = true;
-      pickerMessage("States could not be loaded. Check your connection and retry.", true);
+      pickerMessage(t("weather.picker.hintStatesError"), true);
       const retry = document.createElement("button");
       retry.type = "button"; retry.className = "btn btn-secondary";
-      retry.textContent = "Retry loading states";
+      retry.textContent = t("weather.picker.retryStates");
       retry.addEventListener("click", loadWeatherStates);
       scopeHint.append(" ", retry);
     }
@@ -384,7 +384,7 @@ import { fetchFilters } from "./api.js";
   if (stateSelect && districtSelect && districtField) {
     stateSelect.addEventListener("change", async () => {
       const selectedState = stateSelect.value;
-      fillLocationSelect(districtSelect, [], "Loading districts…");
+      fillLocationSelect(districtSelect, [], t("weather.picker.loadingDistricts"));
       districtSelect.disabled = true;
       districtField.hidden = !selectedState;
       if (cityField) cityField.hidden = true;
@@ -392,20 +392,20 @@ import { fetchFilters } from "./api.js";
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
       if (!selectedState) {
-        pickerMessage("Choose a state to see its approximate weather.");
+        pickerMessage(t("weather.picker.hintChooseState"));
         return;
       }
-      pickerMessage("Loading districts…");
+      pickerMessage(t("weather.picker.loadingDistricts"));
       try {
         const data = await fetchFilters({ state: selectedState });
         const districts = [...new Set(data.districts)].sort((a, b) => a.localeCompare(b));
-        fillLocationSelect(districtSelect, districts, districts.length ? "Select district" : "No districts available");
+        fillLocationSelect(districtSelect, districts, districts.length ? t("weather.picker.selectDistrict") : t("weather.picker.noDistricts"));
         districtSelect.disabled = districts.length === 0;
-        pickerMessage("State selected. Weather is updating; choose a district to narrow it down.");
+        pickerMessage(t("weather.picker.hintStateSelected"));
       } catch (error) {
         console.error("[Weather] District list failed:", error);
-        fillLocationSelect(districtSelect, [], "Could not load districts");
-        pickerMessage("Districts could not be loaded. State-level weather is still available.", true);
+        fillLocationSelect(districtSelect, [], t("weather.picker.districtsFailed"));
+        pickerMessage(t("weather.picker.hintDistrictsError"), true);
       }
       fetchWeather(`${selectedState}, India`);
     });
@@ -417,7 +417,7 @@ import { fetchFilters } from "./api.js";
       if (cityInput) cityInput.value = "";
       if (villageInput) villageInput.value = "";
       if (!selectedDistrict) return;
-      pickerMessage("District selected. Weather is updating; enter a city or town for more detail.");
+      pickerMessage(t("weather.picker.hintDistrictSelected"));
       fetchWeather(`${selectedDistrict}, ${stateSelect.value}, India`);
     });
 
@@ -451,3 +451,4 @@ import { fetchFilters } from "./api.js";
   window.addEventListener("pagehide", () => stopTracking({ announce: false }), { once: true });
   window.addEventListener("beforeunload", () => stopTracking({ announce: false }), { once: true });
 })();
+
