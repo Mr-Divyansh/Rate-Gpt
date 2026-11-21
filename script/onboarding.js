@@ -17,7 +17,7 @@ export function showFirstVisitWelcome() {
       </div>
       <div class="onboarding-copy">
         <p class="onboarding-eyebrow">${hi ? "RATE-GPT में आपका स्वागत है" : "WELCOME TO RATE-GPT"}</p>
-        <h2 id="onboardingTitle">${hi ? "नमस्ते! Rate-GPT में आपका स्वागत है" : "Hello! Welcome to Rate-GPT"}</h2>
+        <h2 id="onboardingTitle">${hi ? "नमस्ते! पहली बार आए हैं?" : "Hello! First time here?"}</h2>
         <p class="onboarding-message">${hi
           ? "क्या आप Rate-GPT इस्तेमाल करना सीखना चाहेंगे? हमारा Farmer Assistant आपको मंडी भाव देखने और वेबसाइट की सुविधाएँ समझने में मदद करेगा।"
           : "Would you like a quick tour? Your Farmer Assistant can show you how to explore mandi prices and use Rate-GPT with ease."}</p>
