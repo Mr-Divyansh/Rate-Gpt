@@ -316,3 +316,140 @@
     font-size: .78rem;
   }
 }
+
+
+/* Benefits introduction: give the Thinking farmer the same visual presence
+   as the Namaste artwork on the welcome screen. */
+.onboarding-dialog:has(.onboarding-card--benefits) {
+  width: min(92vw, 560px);
+  height: auto;
+  max-height: min(92vh, 760px);
+  aspect-ratio: auto;
+}
+
+/* Let the content determine the dialog height instead of leaving an empty
+   square below the Continue button. Keep the card scrollable on short screens. */
+.onboarding-card--benefits {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: min(92vh, 760px);
+  gap: 9px;
+  padding: 28px 42px 30px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Match the original welcome illustration's scale: a clear, prominent
+   character rather than the tiny thumbnail shown in the previous version. */
+.onboarding-card--benefits .onboarding-art-wrap {
+  min-height: 0;
+  margin: 0 0 2px;
+}
+.onboarding-card--benefits .onboarding-art {
+  width: min(64%, 220px);
+  height: clamp(180px, 25vh, 220px);
+  max-width: 220px;
+}
+
+/* A compact two-stage progress indicator makes it clear this is the
+   introduction screen; the next stage will contain the Rate-GPT solution. */
+.onboarding-progress {
+  width: 100%;
+  margin: 0 0 7px;
+  text-align: left;
+}
+.onboarding-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  color: #47715a;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+.onboarding-progress-track {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e3ece4;
+}
+.onboarding-progress-track span {
+  display: block;
+  width: 50%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #287a52, #78b78a);
+  box-shadow: 0 1px 4px rgba(28, 105, 66, .18);
+}
+
+/* Improve readability and give each farmer-facing benefit a clear label. */
+.onboarding-card--benefits .onboarding-copy {
+  max-width: 465px;
+}
+.onboarding-card--benefits .onboarding-copy h2 {
+  max-width: 440px;
+  margin-bottom: 8px;
+  font-size: clamp(1.4rem, 3vw, 1.75rem);
+}
+.onboarding-card--benefits .onboarding-message {
+  max-width: 455px;
+  font-size: .88rem;
+  line-height: 1.52;
+}
+.onboarding-card--benefits .onboarding-benefits {
+  gap: 8px;
+  margin-top: 11px;
+}
+.onboarding-card--benefits .onboarding-benefits li {
+  padding: 10px 13px 10px 39px;
+  font-size: .84rem;
+  line-height: 1.45;
+}
+.onboarding-card--benefits .onboarding-benefits li::before {
+  top: 10px;
+}
+.onboarding-card--benefits .onboarding-assistant-note {
+  margin-top: 9px;
+  font-size: .8rem;
+}
+.onboarding-card--benefits .onboarding-actions--single {
+  margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  .onboarding-dialog:has(.onboarding-card--benefits) {
+    width: min(92vw, 430px);
+    max-height: 90vh;
+  }
+  .onboarding-card--benefits {
+    max-height: 90vh;
+    padding: 42px 22px 24px;
+    gap: 7px;
+  }
+  .onboarding-card--benefits .onboarding-art {
+    width: min(68%, 205px);
+    height: 190px;
+  }
+  .onboarding-card--benefits .onboarding-copy h2 {
+    font-size: 1.48rem;
+  }
+  .onboarding-card--benefits .onboarding-message {
+    font-size: .85rem;
+  }
+  .onboarding-card--benefits .onboarding-benefits li {
+    font-size: .81rem;
+  }
+}
+@media (max-height: 680px) and (min-width: 601px) {
+  .onboarding-card--benefits {
+    padding-block: 18px 22px;
+    gap: 6px;
+  }
+  .onboarding-card--benefits .onboarding-art {
+    height: 170px;
+  }
+}
