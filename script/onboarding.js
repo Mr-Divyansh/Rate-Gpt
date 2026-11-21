@@ -27,17 +27,26 @@ export function showFirstVisitWelcome() {
           <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Thinking.png" alt="${hi ? "सोचता हुआ किसान" : "Farmer thinking about crop prices"}" width="320" height="320" fetchpriority="high" decoding="async">
         </div>
         <div class="onboarding-copy">
-          <p class="onboarding-eyebrow">${hi ? "आपकी खेती के फैसलों में मदद" : "A SMARTER WAY TO CHECK MANDI PRICES"}</p>
-          <h2 id="onboardingTitle">${hi ? "क्या आपकी फसल का बेहतर भाव मिल सकता है?" : "Could your crop get a better mandi price?"}</h2>
+          <div class="onboarding-progress" role="group" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}">
+            <div class="onboarding-progress-meta">
+              <span>${hi ? "आपकी Rate-GPT यात्रा" : "YOUR RATE-GPT JOURNEY"}</span>
+              <span>${hi ? "01 / 02" : "01 / 02"}</span>
+            </div>
+            <div class="onboarding-progress-track" role="progressbar" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}" aria-valuemin="0" aria-valuemax="2" aria-valuenow="1">
+              <span></span>
+            </div>
+          </div>
+          <p class="onboarding-eyebrow">${hi ? "किसानों की रोज़मर्रा की चुनौतियाँ" : "REAL CHALLENGES. CLEARER MARKET INFORMATION."}</p>
+          <h2 id="onboardingTitle">${hi ? "फसल बेचने से पहले सही मंडी का भाव जानें" : "Know your mandi options before you sell"}</h2>
           <p class="onboarding-message">${hi
-            ? "कई बार किसान को पता नहीं होता कि दूसरी मंडियों में उसी फसल का क्या भाव चल रहा है। सही जानकारी न होने से बेहतर बिक्री का मौका छूट सकता है। Rate-GPT इस जानकारी को समझना आसान बनाता है।"
-            : "Farmers may not know what the same crop is selling for in other mandis. Without that information, it can be difficult to spot a better selling opportunity. Rate-GPT makes those market details easier to explore."}</p>
+            ? "किसानों के सामने अक्सर एक बड़ा सवाल होता है — मेरी फसल का सही भाव कहाँ मिल सकता है? हर मंडी का भाव पता करना और उनकी तुलना करना आसान नहीं होता। Rate-GPT यह जानकारी एक जगह समझने में मदद करता है।"
+            : "One big question for farmers is: where can I find a better price for my crop? Checking different mandis and comparing their rates is not always easy. Rate-GPT brings useful market information together so you can compare your options."}</p>
           <ul class="onboarding-benefits">
-            <li>${hi ? "अलग-अलग मंडियों में अपनी फसल के उपलब्ध भाव देखकर बेहतर विकल्प पहचानें।" : "Explore available prices for your crop across different mandis to spot other selling options."}</li>
-            <li>${hi ? "सिर्फ अपनी नजदीकी मंडी तक सीमित न रहें — दूसरी मंडियों के भाव भी जानें।" : "Look beyond your usual local mandi and discover prices reported by other markets."}</li>
-            <li>${hi ? "न्यूनतम, अधिकतम, मॉडल भाव और आवक की जानकारी से सोच-समझकर फैसला लें।" : "Use minimum, maximum and modal prices, along with arrivals, to make a more informed decision."}</li>
+            <li>${hi ? "मंडी की जानकारी: जानें कि आपकी फसल के भाव अलग-अलग मंडियों में क्या चल रहे हैं।" : "See market differences: Check how prices for your crop vary across available mandis."}</li>
+            <li>${hi ? "बेहतर विकल्प खोजें: सिर्फ एक मंडी पर निर्भर रहने के बजाय दूसरी मंडियों से तुलना करें।" : "Compare before deciding: Look beyond one mandi and explore other reported market options."}</li>
+            <li>${hi ? "भाव को समझें: न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर जानकारी के साथ फैसला लें।" : "Understand the rates: Use minimum, maximum, modal prices and arrivals to make a more informed choice."}</li>
           </ul>
-          <p class="onboarding-note onboarding-assistant-note">${hi ? "चिंता न करें — आपका Rate-GPT किसान सहायक आपकी मदद के लिए यहाँ है।" : "Don’t worry — your Rate-GPT Farmer Assistant is here to help."}</p>
+          <p class="onboarding-note onboarding-assistant-note">${hi ? "चिंता न करें — Rate-GPT किसान सहायक आपको मंडी की जानकारी समझने में मदद करेगा।" : "Don’t worry — your Rate-GPT Farmer Assistant will help you make sense of mandi information."}</p>
           <div class="onboarding-actions onboarding-actions--single">
             <button class="btn btn-primary onboarding-continue" type="button">${hi ? "जारी रखें" : "Continue"} <span aria-hidden="true">→</span></button>
           </div>
