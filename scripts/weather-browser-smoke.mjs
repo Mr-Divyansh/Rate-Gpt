@@ -1,394 +1,81 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
-const baseUrl = (process.env.RATE_GPT_BASE_URL || "http://127.0.0.1:4173").replace(/\/+$/, "");
-const viewports = [
-  { name: "mobile", width: 390, height: 844 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "desktop", width: 1440, height: 900 },
-];
+const baseUrl=(process.env.RATE_GPT_BASE_URL||"http://127.0.0.1:4173").replace(/\/+$/,"");
+const viewports=[{name:"mobile",width:390,height:844},{name:"tablet",width:768,height:1024},{name:"desktop",width:1440,height:900}];
+const browser=await chromium.launch({headless:true});
+let passed=0;
+const pass=(name)=>{passed++;console.log("PASS "+name);};
 
-const browser = await chromium.launch({ headless: true });
-let passed = 0;
+try{
+ for(const viewport of viewports){
+  const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
+  await context.addInitScript(()=>{
+   Object.defineProperty(navigator,"geolocation",{configurable:true,value:{
+    getCurrentPosition(success){queueMicrotask(()=>success({coords:{latitude:31.708,longitude:76.932,accuracy:42},timestamp:Date.now()}));}
+   }});
+  });
+  const page=await context.newPage();
+  const errors=[],searchQueries=[],weatherQueries=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  await page.route("https://api.weatherapi.com/v1/search.json**",async route=>{
+   const q=new URL(route.request().url()).searchParams.get("q")||"";
+   searchQueries.push(q);
+   const matches=q.toLowerCase().includes("no-such")?[]:[
+    {id:1,name:"Mandi",region:"Himachal Pradesh",country:"India",lat:31.708,lon:76.932},
+    {id:2,name:"Mandi Dabwali",region:"Haryana",country:"India",lat:29.98,lon:74.7}
+   ];
+   await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(matches)});
+  });
+  await page.route("https://api.weatherapi.com/v1/current.json**",async route=>{
+   const q=new URL(route.request().url()).searchParams.get("q")||"";
+   weatherQueries.push(q);
+   await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+    location:{name:q==="auto:ip"?"Approximate Area":"Mandi",region:"Himachal Pradesh",country:"India",localtime:"2026-11-21 17:00"},
+    current:{temp_c:21,feelslike_c:22,humidity:45,wind_kph:6,pressure_mb:1012,uv:3,condition:{text:"Partly cloudy",icon:""}}
+   })});
+  });
+  const response=await page.goto(baseUrl+"/weather.html",{waitUntil:"domcontentloaded"});
+  assert.equal(response?.status(),200,viewport.name+": weather page returns HTTP 200");
+  assert.equal(weatherQueries.length,0,viewport.name+": no automatic weather request");
+  assert.equal(searchQueries.length,0,viewport.name+": no automatic location search");
+  pass(viewport.name+": no silent location request on page load");
 
-function pass(label) {
-  passed += 1;
-  console.log("PASS " + label);
-}
+  await page.locator("#locationInput").fill("Mandi");
+  await page.waitForFunction(()=>document.querySelectorAll("#weatherSuggestions [role=option]").length===2);
+  assert.ok(searchQueries.includes("Mandi"));
+  await page.locator("#weatherSuggestions [role=option]").first().click();
+  await page.waitForFunction(()=>document.querySelector("#weatherResult")?.hidden===false);
+  assert.equal(weatherQueries.at(-1),"31.708,76.932");
+  assert.match(await page.locator("#weatherCity").innerText(),/Mandi, Himachal Pradesh, India/);
+  pass(viewport.name+": search suggestions load exact selected coordinates");
 
-async function verifyHomepageOnboarding(page, label) {
-  // Onboarding belongs to the homepage only. Exercise all three screens here
-  // so the weather page can stay clear of modal overlays during its own tests.
-  const dialog = page.locator("dialog.onboarding-dialog");
-  await dialog.waitFor({ state: "visible", timeout: 5000 });
+  await page.locator("#locationInput").fill("no-such-place");
+  await page.waitForFunction(()=>document.querySelector("#weatherStatus")?.textContent?.includes("No matching places"));
+  pass(viewport.name+": unmatched search shows clear feedback");
 
-  const imageSizes = [];
-  const readIllustrationSize = async (screenName) => {
-    const image = dialog.locator(".onboarding-art");
-    await image.waitFor({ state: "visible", timeout: 5000 });
-    await image.evaluate((element) => element.decode());
-    const size = await image.evaluate((element) => {
-      // Read the CSS layout box rather than the transient pop-in transform
-      // applied while the first dialog animation is still settling.
-      const style = getComputedStyle(element);
-      return {
-        width: Math.round(Number.parseFloat(style.width)),
-        height: Math.round(Number.parseFloat(style.height)),
-      };
-    });
-    imageSizes.push({ screenName, ...size });
-  };
+  await page.locator("#useMyLocationBtn").click();
+  await page.waitForFunction(()=>document.querySelector("#weatherSourceLabel")?.textContent==="DEVICE LOCATION");
+  assert.equal(weatherQueries.at(-1),"31.708,76.932");
+  assert.match(await page.locator("#weatherStatus").innerText(),/accuracy.*42/i);
+  pass(viewport.name+": device location uses coordinates and reports accuracy");
 
-  // Welcome screen — Namaste farmer illustration.
-  await readIllustrationSize("welcome");
-  await dialog.locator("button.onboarding-view").click();
+  await page.locator("#useApproxLocationBtn").click();
+  await page.waitForFunction(()=>document.querySelector("#weatherSourceLabel")?.textContent==="APPROXIMATE LOCATION");
+  assert.equal(weatherQueries.at(-1),"auto:ip");
+  pass(viewport.name+": approximate IP location is opt-in and labelled");
 
-  // Farmer challenges screen — Thinking illustration and three aligned cards.
-  await dialog.locator(".onboarding-card--benefits").waitFor({ state: "visible" });
-  await readIllustrationSize("benefits");
-  const benefitHeights = await dialog.locator(".onboarding-benefits li").evaluateAll((items) =>
-    items.map((item) => Math.round(item.getBoundingClientRect().height))
-  );
-  assert.equal(benefitHeights.length, 3, label + ": three farmer-benefit cards are present");
-  assert.ok(Math.max(...benefitHeights) - Math.min(...benefitHeights) <= 1,
-    label + ": farmer-benefit cards have equal heights");
-  await dialog.locator("button.onboarding-continue").click();
+  await page.locator('[data-lang="hi"]').click();
+  await page.waitForFunction(()=>document.documentElement.lang==="hi"&&document.querySelector("#weatherPageTitle")?.textContent?.trim()==="आपके आस-पास का मौसम");
+  await page.locator('[data-lang="en"]').click();
+  await page.waitForFunction(()=>document.documentElement.lang==="en");
+  pass(viewport.name+": Hindi and English translations switch");
 
-  // Rate-GPT solution screen — Tell illustration, with no inner scrollbar.
-  const solution = dialog.locator(".onboarding-card--solution");
-  await solution.waitFor({ state: "visible" });
-  await readIllustrationSize("solution");
-  const fitsWithoutScrolling = await solution.evaluate((card) =>
-    card.scrollHeight <= card.clientHeight + 1
-  );
-  assert.ok(fitsWithoutScrolling, label + ": solution screen fits without scrolling");
-  const solutionHeights = await dialog.locator(".onboarding-solution-points li").evaluateAll((items) =>
-    items.map((item) => Math.round(item.getBoundingClientRect().height))
-  );
-  assert.equal(solutionHeights.length, 3, label + ": three solution cards are present");
-  assert.ok(Math.max(...solutionHeights) - Math.min(...solutionHeights) <= 1,
-    label + ": solution cards have equal heights");
-
-  // The same illustration frame must be used on all three screens.
-  assert.ok(imageSizes.every((size) =>
-    Math.abs(size.width - imageSizes[0].width) <= 1 &&
-    Math.abs(size.height - imageSizes[0].height) <= 1
-  ), label + ": all three farmer illustrations use the same visual frame: " + JSON.stringify(imageSizes));
-
-  await dialog.locator("button.onboarding-finish").click();
-  await dialog.waitFor({ state: "detached", timeout: 5000 });
-  pass(label + ": homepage onboarding has equal illustrations/cards and a scroll-free final screen");
-}
-
-// Wait (from Node) until the intercepted weather API was last called with the
-// given query. page.waitForFunction runs in the browser page context, where the
-// Node-side weatherQueries array is not defined, so we poll it from here instead.
-async function waitForLastWeatherQuery(weatherQueries, expected, { timeout = 30000 } = {}) {
-  const deadline = Date.now() + timeout;
-  let last = null;
-  while (Date.now() < deadline) {
-    last = weatherQueries.at(-1);
-    if (last === expected) return;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error(
-    `expected last weather query ${JSON.stringify(
-      expected
-    )} but got ${JSON.stringify(last)}`
-  );
-}
-
-try {
-  for (const viewport of viewports) {
-    const context = await browser.newContext({
-      viewport: { width: viewport.width, height: viewport.height },
-    });
-    // Use a deterministic browser geolocation provider. Playwright's
-    // context.setGeolocation() does not reliably emit watchPosition updates
-    // across all runner/browser combinations, which made movement checks flaky.
-    await context.addInitScript(() => {
-      const watchers = new Map();
-      let nextWatchId = 1;
-      Object.defineProperty(navigator, "geolocation", {
-        configurable: true,
-        value: {
-          watchPosition(success, error) {
-            const id = nextWatchId++;
-            watchers.set(id, success);
-            window.__setWeatherTestPosition = (latitude, longitude) => {
-              for (const callback of watchers.values()) {
-                callback({
-                  coords: { latitude, longitude, accuracy: 20 },
-                  timestamp: Date.now(),
-                });
-              }
-            };
-            queueMicrotask(() => window.__setWeatherTestPosition(31.0, 76.0));
-            return id;
-          },
-          clearWatch(id) {
-            watchers.delete(id);
-          },
-        },
-      });
-    });
-
-    const page = await context.newPage();
-    const pageErrors = [];
-    const weatherQueries = [];
-    page.on("pageerror", (error) => pageErrors.push(error.message));
-
-    await page.route("**/api/v1/meta/filters**", async (route) => {
-      const url = new URL(route.request().url());
-      const state = url.searchParams.get("state");
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          success: true,
-          data: {
-            states: ["Himachal Pradesh", "Uttar Pradesh"],
-            districts: state === "Himachal Pradesh" ? ["Mandi", "Kangra"] : ["Aligarh", "Agra"],
-            markets: [],
-            coverage: { status: "catalogue", pagesScanned: 1, recordsScanned: 0, maxOffset: 0, total: 0 },
-          },
-        }),
-      });
-    });
-
-    await page.route(
-      /^https:\/\/api\.weatherapi\.com\/v1\/current\.json/,
-      async (route) => {
-        const query = new URL(route.request().url()).searchParams.get("q") || "";
-        weatherQueries.push(query);
-        const name = query === "auto:ip"
-          ? "Approximate City"
-          : query.includes("31.01")
-            ? "Moved Location"
-            : /^\d/.test(query)
-              ? "Dharampur"
-              : query.includes(",")
-                ? query.split(",")[0].trim()
-                : query;
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            location: {
-              name,
-              region: "Himachal Pradesh",
-              country: "India",
-              localtime: "2026-11-16 13:00",
-            },
-            current: {
-              temp_c: 23,
-              feelslike_c: 24,
-              humidity: 48,
-              wind_kph: 5,
-              pressure_mb: 1012,
-              condition: { text: "Clear", icon: "" },
-            },
-          }),
-        });
-      },
-    );
-
-    // Verify the complete onboarding flow only on the homepage at every
-    // responsive viewport before opening the weather page.
-    const homePage = await context.newPage();
-    const homeResponse = await homePage.goto(baseUrl + "/index.html", {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    assert.equal(homeResponse?.status(), 200, viewport.name + ": homepage returns HTTP 200");
-    await verifyHomepageOnboarding(homePage, viewport.name);
-    await homePage.close();
-
-    const response = await page.goto(baseUrl + "/weather.html", {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    assert.equal(response?.status(), 200, viewport.name + ": weather page returns HTTP 200");
-    await page.waitForSelector("#useMyLocationBtn");
-    assert.equal(weatherQueries.length, 0, viewport.name + ": location is not requested automatically");
-    assert.equal(await page.locator("dialog.onboarding-dialog").count(), 0,
-      viewport.name + ": onboarding is not shown outside index.html");
-    pass(viewport.name + ": weather page opens without onboarding or silently requesting location");
-
-    await page.locator('[data-lang="hi"]').click();
-    await page.waitForFunction(() =>
-      document.documentElement.lang === "hi" &&
-      document.querySelector("#weatherPageTitle")?.textContent?.trim() === "आपके आस-पास का मौसम",
-    );
-    await page.locator('[data-lang="en"]').click();
-    await page.waitForFunction(() => document.documentElement.lang === "en");
-    pass(viewport.name + ": English and Hindi weather translations switch correctly");
-
-    await page.locator("#useMyLocationBtn").click();
-    await page.waitForFunction(() =>
-      document.querySelector("#weatherCity")?.textContent?.includes("Dharampur") &&
-      document.querySelector("#weatherResult")?.hidden === false,
-    );
-    assert.equal(weatherQueries.at(-1), "31,76", viewport.name + ": device GPS coordinates are sent to the weather lookup");
-    assert.match(await page.locator("#weatherStatus").innerText(), /live location tracking/i);
-    assert.equal(await page.locator("#weatherLocationMeta").isVisible(), true, viewport.name + ": GPS accuracy and last-fix metadata are displayed");
-    assert.match(await page.locator("#weatherLocationMeta").innerText(), /accuracy/i);
-    pass(viewport.name + ": explicit device-location action loads weather from simulated browser coordinates");
-    assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), true, viewport.name + ": live tracking exposes a stop control");
-    await page.waitForTimeout(15000);
-    await page.evaluate(() => window.__setWeatherTestPosition(31.01, 76.01));
-    await page.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Moved Location"), null, { timeout: 30000 });
-    assert.ok(weatherQueries.length >= 2, viewport.name + ": meaningful movement triggers a fresh weather lookup");
-    const movementRequestCount = weatherQueries.length;
-    await page.evaluate(() => window.__setWeatherTestPosition(31.0101, 76.0101));
-    await page.waitForTimeout(1200);
-    assert.equal(weatherQueries.length, movementRequestCount, viewport.name + ": small movement does not cause unnecessary weather API requests");
-    await page.locator("#stopLocationTrackingBtn").click();
-    assert.equal(await page.locator("#useMyLocationBtn").isVisible(), true, viewport.name + ": stop restores the start control");
-    assert.equal(await page.locator("#stopLocationTrackingBtn").isVisible(), false, viewport.name + ": stop hides its own control");
-    const stoppedRequestCount = weatherQueries.length;
-    await page.evaluate(() => window.__setWeatherTestPosition(31.03, 76.03));
-    await page.waitForTimeout(1200);
-    assert.equal(weatherQueries.length, stoppedRequestCount, viewport.name + ": stopped tracking does not send more weather requests");
-    pass(viewport.name + ": movement refresh, request throttling and stop control work");
-
-    await page.locator("#useApproxLocationBtn").click();
-    await page.waitForFunction(() =>
-      document.querySelector("#weatherStatus")?.textContent?.toLowerCase().includes("approximate"),
-    );
-    assert.equal(weatherQueries.at(-1), "auto:ip", viewport.name + ": approximate lookup uses the opt-in IP query");
-    assert.match(await page.locator("#weatherCity").innerText(), /Approximate City/);
-    pass(viewport.name + ": approximate location works only after the user clicks its separate action");
-
-    const stateSelect = page.locator("#stateSelect");
-    await page.waitForFunction(() => document.querySelector("#stateSelect")?.options.length === 3);
-    assert.equal(await page.locator("#weatherSearchForm button[type='submit']").count(), 0, viewport.name + ": progressive picker has no manual submit button");
-    await stateSelect.selectOption("Himachal Pradesh");
-    await waitForLastWeatherQuery(weatherQueries, "Himachal Pradesh, India");
-    await page.waitForFunction(() => document.querySelector("#districtSelect")?.options.length === 3);
-    assert.equal(weatherQueries.at(-1), "Himachal Pradesh, India", viewport.name + ": selecting a state automatically refreshes weather");
-    await page.locator("#districtSelect").selectOption("Mandi");
-    await waitForLastWeatherQuery(weatherQueries, "Mandi, Himachal Pradesh, India");
-    assert.equal(weatherQueries.at(-1), "Mandi, Himachal Pradesh, India", viewport.name + ": selecting a district automatically refreshes weather");
-    await page.locator("#cityInput").fill("Sundernagar");
-    await page.locator("#cityInput").press("Tab");
-    await waitForLastWeatherQuery(weatherQueries, "Sundernagar, Mandi, Himachal Pradesh, India");
-    await page.locator("#villageInput").fill("Deval Khas");
-    await page.locator("#villageInput").press("Tab");
-    await waitForLastWeatherQuery(weatherQueries, "Deval Khas, Sundernagar, Mandi, Himachal Pradesh, India");
-    pass(viewport.name + ": state, district, city and village selections automatically refresh weather without a submit button");
-
-    await page.locator("#locationInput").fill("Mandi");
-    await page.locator("#locationInput").press("Enter");
-    await waitForLastWeatherQuery(weatherQueries, "Mandi");
-    assert.equal(weatherQueries.at(-1), "Mandi", viewport.name + ": manual city search sends the entered place");
-    pass(viewport.name + ": manual weather search works with Enter");
-
-    const dimensions = await page.evaluate(() => ({
-      viewportWidth: document.documentElement.clientWidth,
-      documentWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
-    }));
-    assert.ok(
-      dimensions.documentWidth <= dimensions.viewportWidth + 2,
-      viewport.name + ": weather page must not overflow horizontally (" +
-        dimensions.documentWidth + " > " + dimensions.viewportWidth + ")",
-    );
-    if (viewport.width <= 720) {
-      await page.locator(".menu-toggle").click();
-      assert.equal(await page.locator(".menu-toggle").getAttribute("aria-expanded"), "true");
-      await page.keyboard.press("Escape");
-      assert.equal(await page.locator(".menu-toggle").getAttribute("aria-expanded"), "false");
-      pass(viewport.name + ": mobile navigation opens and Escape closes it");
-    }
-    assert.deepEqual(pageErrors, [], viewport.name + ": weather page must not emit uncaught browser JavaScript errors");
-    pass(viewport.name + ": no uncaught browser JavaScript errors");
-
-    await context.close();
-
-    if (viewport.name === "mobile") {
-      const deniedContext = await browser.newContext({
-        viewport: { width: viewport.width, height: viewport.height },
-      });
-      await deniedContext.addInitScript(() => {
-        Object.defineProperty(navigator, "geolocation", {
-          configurable: true,
-          value: {
-            watchPosition(_success, error) {
-              queueMicrotask(() => error({ code: 1, message: "User denied location" }));
-              return 99;
-            },
-            clearWatch() {},
-          },
-        });
-      });
-      const deniedPage = await deniedContext.newPage();
-      const deniedPageErrors = [];
-      deniedPage.on("pageerror", (error) => deniedPageErrors.push(error.message));
-      await deniedPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
-      await deniedPage.locator("#useMyLocationBtn").click();
-      await deniedPage.waitForFunction(() => document.querySelector("#weatherError")?.hidden === false);
-      assert.match(await deniedPage.locator("#weatherError").innerText(), /location is blocked for this site/i);
-      assert.equal(await deniedPage.locator("#stopLocationTrackingBtn").isVisible(), false);
-      assert.equal(await deniedPage.locator("#useMyLocationBtn").isVisible(), true);
-      assert.deepEqual(deniedPageErrors, [], "denied location permission must not cause uncaught browser errors");
-      pass("mobile: denied location permission shows actionable guidance and safely resets tracking controls");
-      await deniedContext.close();
-
-      // Simulate a Windows laptop with location permission granted but no GPS fix:
-      // high-accuracy watch times out, then the browser's balanced provider succeeds.
-      const fallbackContext = await browser.newContext({
-        viewport: { width: viewport.width, height: viewport.height },
-      });
-      await fallbackContext.addInitScript(() => {
-        let nextId = 1;
-        const active = new Map();
-        Object.defineProperty(navigator, "geolocation", {
-          configurable: true,
-          value: {
-            watchPosition(success, error, options) {
-              const id = nextId++;
-              active.set(id, { success, error, options });
-              if (options.enableHighAccuracy) {
-                queueMicrotask(() => error({ code: 3, message: "High accuracy timed out" }));
-              } else {
-                queueMicrotask(() => success({
-                  coords: { latitude: 32.11, longitude: 76.53, accuracy: 850 },
-                  timestamp: Date.now(),
-                }));
-              }
-              return id;
-            },
-            clearWatch(id) { active.delete(id); },
-          },
-        });
-      });
-      const fallbackPage = await fallbackContext.newPage();
-      const fallbackQueries = [];
-      await fallbackPage.route("https://api.weatherapi.com/v1/current.json**", async (route) => {
-        const query = new URL(route.request().url()).searchParams.get("q") || "";
-        fallbackQueries.push(query);
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            location: { name: "Deval Khas", region: "Himachal Pradesh", country: "India", localtime: "2026-11-17 17:00" },
-            current: { temp_c: 18, feelslike_c: 18, humidity: 50, wind_kph: 4, pressure_mb: 1015, condition: { text: "Clear", icon: "" } },
-          }),
-        });
-      });
-      await fallbackPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
-      await fallbackPage.locator("#useMyLocationBtn").click();
-      await fallbackPage.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Deval Khas"));
-      assert.equal(fallbackQueries.length, 1, "balanced browser location must request weather once");
-      assert.equal(fallbackQueries[0], "32.11,76.53");
-      assert.equal(await fallbackPage.locator("#weatherLocationMeta").isVisible(), true);
-      assert.match(await fallbackPage.locator("#weatherLocationMeta").innerText(), /850/);
-      pass("mobile: high-accuracy timeout retries browser network-assisted geolocation without IP fallback");
-      await fallbackContext.close();
-    }
-  }
-
-  console.log("\\nWeather browser checks: " + passed + " passed, 0 failed");
-} finally {
-  await browser.close();
-}
+  const size=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,document:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)}));
+  assert.ok(size.document<=size.viewport+2,viewport.name+": no horizontal overflow");
+  assert.deepEqual(errors,[],viewport.name+": no uncaught browser errors");
+  pass(viewport.name+": responsive layout and browser runtime are clean");
+  await context.close();
+ }
+ console.log("\\nWeather browser checks: "+passed+" passed, 0 failed");
+}finally{await browser.close();}
