@@ -172,3 +172,93 @@
   .onboarding-dialog::backdrop { backdrop-filter: none; }
   .onboarding-close { transition: none; }
 }
+
+/* Thank-you step: compact, readable farmer-benefit summary. */
+.onboarding-dialog:has(.onboarding-card--thanks) {
+  aspect-ratio: auto;
+  height: auto;
+  max-height: min(90vh, 720px);
+}
+.onboarding-card--thanks {
+  height: auto;
+  min-height: 0;
+  gap: 7px;
+  padding: 28px 38px 26px;
+}
+.onboarding-card--thanks .onboarding-art {
+  width: min(38%, 150px);
+  height: 112px;
+  max-width: 150px;
+}
+.onboarding-card--thanks .onboarding-copy h2 {
+  margin-bottom: 6px;
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+}
+.onboarding-card--thanks .onboarding-message {
+  font-size: .88rem;
+  line-height: 1.45;
+}
+.onboarding-benefits {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 12px 0 2px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.onboarding-benefits li {
+  position: relative;
+  padding: 9px 12px 9px 38px;
+  border: 1px solid rgba(40, 122, 82, .10);
+  border-radius: 12px;
+  background: rgba(234, 242, 236, .72);
+  color: #40564a;
+  font-size: .84rem;
+  line-height: 1.42;
+}
+.onboarding-benefits li::before {
+  content: "✓";
+  position: absolute;
+  left: 13px;
+  top: 9px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #d8eadb;
+  color: #1d7048;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.onboarding-assistant-note {
+  margin-top: 9px;
+  color: #287a52;
+  font-weight: 700;
+}
+.onboarding-actions--single {
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+}
+.onboarding-actions--single .btn {
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .onboarding-dialog:has(.onboarding-card--thanks) {
+    max-height: 90vh;
+  }
+  .onboarding-card--thanks {
+    min-height: 0;
+    padding: 42px 20px 22px;
+    gap: 6px;
+  }
+  .onboarding-card--thanks .onboarding-art {
+    width: min(38%, 130px);
+    height: 94px;
+  }
+  .onboarding-benefits { gap: 7px; margin-top: 9px; }
+  .onboarding-benefits li { padding: 8px 10px 8px 34px; font-size: .81rem; }
+  .onboarding-benefits li::before { left: 10px; top: 8px; }
+  .onboarding-actions--single { margin-top: 9px; }
+}
