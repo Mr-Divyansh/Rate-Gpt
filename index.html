@@ -8,12 +8,16 @@
   <meta name="theme-color" content="#F7F7F0">
   <meta name="description" content="Explore government-reported mandi prices by crop and location. Compare minimum, maximum and modal rates with arrival dates and clear data context.">
   <title>Rate-GPT</title>
+  <!-- Keep the main desktop hero image discoverable before CSS and scripts finish. -->
+  <link rel="preload" as="image" href="/Images/farmer.webp" fetchpriority="high" media="(min-width: 761px)">
+  <!-- Load optional brand fonts without blocking the first text paint on slow mobile networks. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/style.css">
-    <link rel="canonical" href="https://rate-gpt.vercel.app/">
+    <link rel="canonical" href="https://rate-gpt.vercel.app/index.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Rate-GPT">
     <meta property="og:title" content="Rate-GPT | Government Mandi Prices">
