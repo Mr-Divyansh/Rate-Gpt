@@ -181,11 +181,7 @@ const upstream = http.createServer((req, res) => {
   let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
       const filter = url.searchParams.get(parameter);
-      const sourceValue = field === "Arrival_Date"
-        ? normalizeArrivalDate(String(record[field])) ?? String(record[field])
-        : String(record[field]);
-      const normalizedFilter = field === "Arrival_Date" ? normalizeArrivalDate(filter) ?? filter : filter;
-      return !filter || sourceValue === normalizedFilter;
+      return !filter || String(record[field]) === filter;
     }),
   );
   const query = url.searchParams.get("q")?.toLocaleLowerCase();
