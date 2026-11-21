@@ -16,6 +16,21 @@ function pass(label) {
   console.log("PASS " + label);
 }
 
+async function dismissWelcomeDialog(page, label) {
+  const dialog = page.locator("dialog.onboarding-dialog");
+  if (await dialog.count() && await dialog.isVisible()) {
+    const skip = dialog.locator("button.onboarding-skip");
+    if (await skip.isVisible()) {
+      await skip.click();
+    } else {
+      // Fallback for a changed welcome layout: close via its accessible button.
+      await dialog.getByRole("button", { name: /close|बंद करें/i }).click();
+    }
+    await dialog.waitFor({ state: "detached" });
+  }
+  pass(label + ": welcome dialog dismissed before page interactions");
+}
+
 // Wait (from Node) until the intercepted weather API was last called with the
 // given query. page.waitForFunction runs in the browser page context, where the
 // Node-side weatherQueries array is not defined, so we poll it from here instead.
@@ -138,14 +153,8 @@ try {
     assert.equal(weatherQueries.length, 0, viewport.name + ": location is not requested automatically");
     pass(viewport.name + ": weather page opens without silently requesting location");
 
-    // The welcome dialog is intentionally shown on every page load during onboarding development.
-    // Dismiss it in this weather-focused suite so it does not block the weather controls.
-    const welcomeDialog = page.locator(".onboarding-dialog");
-    if (await welcomeDialog.isVisible()) {
-      await page.locator(".onboarding-skip").click();
-      await welcomeDialog.waitFor({ state: "detached" });
-    }
-    pass(viewport.name + ": welcome dialog can be dismissed before weather interactions");
+    // The welcome dialog appears on every page load during onboarding development.
+    await dismissWelcomeDialog(page, viewport.name);
 
     await page.locator('[data-lang="hi"]').click();
     await page.waitForFunction(() =>
@@ -257,6 +266,7 @@ try {
       const deniedPageErrors = [];
       deniedPage.on("pageerror", (error) => deniedPageErrors.push(error.message));
       await deniedPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
+      await dismissWelcomeDialog(deniedPage, "mobile denied-location scenario");
       await deniedPage.locator("#useMyLocationBtn").click();
       await deniedPage.waitForFunction(() => document.querySelector("#weatherError")?.hidden === false);
       assert.match(await deniedPage.locator("#weatherError").innerText(), /location is blocked for this site/i);
@@ -309,6 +319,7 @@ try {
         });
       });
       await fallbackPage.goto(baseUrl + "/weather.html", { waitUntil: "domcontentloaded" });
+      await dismissWelcomeDialog(fallbackPage, "mobile fallback-location scenario");
       await fallbackPage.locator("#useMyLocationBtn").click();
       await fallbackPage.waitForFunction(() => document.querySelector("#weatherCity")?.textContent?.includes("Deval Khas"));
       assert.equal(fallbackQueries.length, 1, "balanced browser location must request weather once");
