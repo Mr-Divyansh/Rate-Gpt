@@ -318,11 +318,14 @@ function buildUrl(options: LiveQueryOptions, apiKey: string): URL {
   url.searchParams.set("format", "json");
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
-  // Text filters use exact-match keyword subfields in the OGD index.
+  // Match the data.gov.in resource's published exposed field IDs.
+  // Only State is exposed as state.keyword; District, Market and Commodity
+  // are exposed under their plain field IDs. Using non-existent *.keyword
+  // fields silently returns empty result sets for otherwise valid selections.
   if (options.state) url.searchParams.set("filters[state.keyword]", options.state);
-  if (options.district) url.searchParams.set("filters[district.keyword]", options.district);
-  if (options.market) url.searchParams.set("filters[market.keyword]", options.market);
-  if (options.commodity) url.searchParams.set("filters[commodity.keyword]", options.commodity);
+  if (options.district) url.searchParams.set("filters[district]", options.district);
+  if (options.market) url.searchParams.set("filters[market]", options.market);
+  if (options.commodity) url.searchParams.set("filters[commodity]", options.commodity);
   if (options.arrivalDate) {
     const isoDate = normalizeArrivalDate(options.arrivalDate);
     if (!isoDate) throw new GovernmentApiError("Arrival date is invalid.", 400);
