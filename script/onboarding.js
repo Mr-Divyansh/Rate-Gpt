@@ -9,12 +9,14 @@ export function showFirstVisitWelcome() {
   dialog.className = "onboarding-dialog";
   dialog.setAttribute("aria-labelledby", "onboardingTitle");
 
+  let thankYouShown = false;
   const closeDialog = () => {
     if (dialog.open) dialog.close();
     dialog.remove();
   };
 
   const showThankYou = () => {
+    thankYouShown = true;
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--thanks">
         <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
@@ -68,7 +70,8 @@ export function showFirstVisitWelcome() {
   dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
   dialog.addEventListener("cancel", event => {
     event.preventDefault();
-    showThankYou();
+    if (thankYouShown) closeDialog();
+    else showThankYou();
   });
 
   dialog.querySelector(".onboarding-view").addEventListener("click", () => {
