@@ -44,7 +44,6 @@ const state = {
   location: { state: "", district: "" },
   market: "",
   allIndia: false,
-  arrivalDate: "",
   records: [],
   meta: {
     limit: PAGE_SIZE, offset: 0, nextOffset: 0, total: 0,
@@ -258,8 +257,6 @@ function toggleIndiaBrowse() {
   state.finderError = "";
   if (state.allIndia) {
     $("cropSearch").value = "";
-    $("arrivalDate").value = "";
-    state.arrivalDate = "";
     $("sortFilter").value = "date_desc";
     state.sort = "date_desc";
   }
@@ -298,7 +295,6 @@ function updateControls() {
   $("stateSelect").disabled = state.exporting || state.states.length === 0;
   $("districtSelect").disabled = state.exporting || !state.location.state || state.districts.length === 0;
   $("cropSearch").disabled = !(state.market || state.allIndia) || state.exporting;
-  $("arrivalDate").disabled = !(state.market || state.allIndia) || state.exporting;
   $("sortFilter").disabled = !on;
   $("clearFilters").disabled = !on;
   $("indiaBrowse").disabled = locked;
@@ -700,12 +696,12 @@ function renderResults() {
     $("resultCount").textContent = "";
     announcement = message;
   } else if (state.records.length === 0) {
-    const hasNarrowFilters = Boolean($("cropSearch").value.trim() || state.arrivalDate);
+    const hasNarrowFilters = Boolean($("cropSearch").value.trim());
     const message = hasNarrowFilters
       ? t("results.noMatches")
       : t("results.none");
     const action = hasNarrowFilters
-      ? { actionLabel: t("results.clearSearchFilters"), onAction: clearSearchAndDateFilters }
+      ? { actionLabel: t("results.clearSearchFilters"), onAction: clearSearchFilter }
       : !state.allIndia
         ? { actionLabel: t("results.browseIndia"), onAction: toggleIndiaBrowse }
         : {};
@@ -761,10 +757,8 @@ function renderResults() {
 
 
 
-function clearSearchAndDateFilters() {
+function clearSearchFilter() {
   $("cropSearch").value = "";
-  $("arrivalDate").value = "";
-  state.arrivalDate = "";
   loadPrices();
 }
 
@@ -794,7 +788,6 @@ function priceQueryParams() {
   if (state.market) params.market = state.market;
   const search = $("cropSearch").value.trim();
   if (search) params.search = search;
-  if (state.arrivalDate) params.date = state.arrivalDate;
   return params;
 }
 
@@ -1042,18 +1035,6 @@ function bind() {
     state.pageOffsets.pop();
     const previousOffset = state.pageOffsets[state.pageOffsets.length - 1] ?? 0;
     loadPrices({ offset: previousOffset, preserveHistory: true });
-  });
-  $("arrivalDate").max = indiaTodayIsoDate();
-  $("arrivalDate").addEventListener("change", (event) => {
-    const selectedDate = event.currentTarget.value;
-    const today = indiaTodayIsoDate();
-    if (selectedDate && selectedDate > today) {
-      event.currentTarget.value = today;
-      state.arrivalDate = today;
-    } else {
-      state.arrivalDate = selectedDate;
-    }
-    loadPrices();
   });
   let timer;
   $("cropSearch").addEventListener("input", () => {
