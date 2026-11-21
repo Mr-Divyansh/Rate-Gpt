@@ -691,10 +691,6 @@ async function main(): Promise<void> {
     "ambiguous same-date observations do not produce a misleading comparison",
   );
 
-  let futureWasRequested = false;
-
-  check(!futureWasRequested, "future-date validation avoids unnecessary upstream traffic");
-
   const previousKey = process.env.DATA_GOV_API_KEY;
   delete process.env.DATA_GOV_API_KEY;
   try {
