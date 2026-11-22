@@ -1,6 +1,7 @@
 import { t, onLangChange } from "./i18n.js";
 import { hydrateIcons } from "./icons.js";
 import { fetchPrices } from "./api.js";
+import { startMandiNavGuide } from "./mandi-nav-guide.js";
 import {
   spreadAxis, cropNames, createRange, createSparkline, formatDate, formatPrice, priceNumber,
 } from "./rate-ui.js";
@@ -10,19 +11,17 @@ const BOARD_ROWS = 5;
 
 /* ---------------- interactive product demo ---------------- */
 const demoDialog = $("demoDialog");
-const demoVideoFrame = $("demoVideoFrame");
-const DEMO_VIDEO_SRC = "https://www.youtube-nocookie.com/embed/AsImBHSFDtI?autoplay=1&rel=0";
 $("watchDemo")?.addEventListener("click", () => {
-  if (demoVideoFrame) demoVideoFrame.src = DEMO_VIDEO_SRC;
   demoDialog?.showModal();
+});
+$("demoTutorialAgain")?.addEventListener("click", () => {
+  // Close the demo first so the homepage spotlight is never hidden behind it.
+  if (demoDialog?.open) demoDialog.close();
+  startMandiNavGuide();
 });
 $("demoClose")?.addEventListener("click", () => demoDialog?.close());
 demoDialog?.addEventListener("click", (event) => {
   if (event.target === demoDialog) demoDialog.close();
-});
-// Fires on every close path (button, Escape key, backdrop click) — stop playback either way.
-demoDialog?.addEventListener("close", () => {
-  if (demoVideoFrame) demoVideoFrame.src = "";
 });
 
 /* ---------------- rate board ---------------- */
