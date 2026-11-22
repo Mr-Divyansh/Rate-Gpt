@@ -38,6 +38,13 @@ async function main() {
     }
     check(/<meta\s+name="twitter:card"\s+content="summary_large_image"/.test(html), `${file}: Twitter card`);
     check(/<meta\s+name="twitter:image"\s+content="https:\/\//.test(html), `${file}: absolute Twitter image URL`);
+    if (file === "index.html") {
+      check(html.includes("https://rate-gpt.vercel.app/Images/link-image.png?v=20261122") &&
+        html.includes('property="og:image:type" content="image/png"') &&
+        html.includes('property="og:image:alt" content="Rate-GPT — Government Mandi Prices"') &&
+        html.includes('property="og:image:secure_url"'),
+        "homepage restores the existing Rate-GPT social image with explicit crawler metadata and cache refresh");
+    }
   }
 
   const vercelConfig = JSON.parse(await readFile("vercel.json", "utf8")) as { headers?: Array<{ headers?: Array<{ key?: string; value?: string }> }> };
