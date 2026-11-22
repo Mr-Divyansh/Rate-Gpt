@@ -133,7 +133,7 @@ async function main() {
     home.includes('data-i18n="demo.viewTutorialAgain"') &&
     home.includes('href="mandi-prices.html"') &&
     home.includes('data-src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
-    !home.includes('src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
+    !home.includes('        src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
     home.includes('title="Rate-GPT video demo"') &&
     home.includes('allowfullscreen') &&
     home.includes('loading="lazy"') &&
