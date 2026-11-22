@@ -515,6 +515,9 @@
   .page-home .board-row { grid-template-columns: minmax(0,1fr) minmax(35px,.48fr) auto; }
 }
 
+/* Slightly tighter corners on the homepage's transparent Watch Demo button. */
+.page-home #watchDemo.hero-secondary { border-radius: 10px; }
+
 /* Interactive Watch demo */
 .demo-trigger .play-mark { font-size: .72rem; padding-left: 2px; }
 .demo-dialog {
