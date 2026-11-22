@@ -8,9 +8,9 @@
 .page-home .mandi-nav-guide__backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(9, 22, 15, .66);
-  -webkit-mask-image: radial-gradient(ellipse 104px 43px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
-  mask-image: radial-gradient(ellipse 104px 43px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
+  background: rgba(9, 22, 15, .68);
+  -webkit-mask-image: radial-gradient(ellipse 86px 37px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
+  mask-image: radial-gradient(ellipse 86px 37px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
   pointer-events: none;
 }
 .page-home .site-nav a.is-guide-highlighted {
@@ -20,11 +20,11 @@
   align-items: center;
   justify-content: center;
   min-width: max-content;
-  border: 2px solid #e7bd19;
+  border: 2px solid #d7e2da;
   border-radius: 9px;
-  background: #ffe65c;
+  background: #fffdf6;
   color: #17251c;
-  box-shadow: 0 0 0 4px rgba(255, 229, 78, .24), 0 0 28px 9px rgba(255, 225, 50, .45);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .42), 0 0 20px 5px rgba(255, 255, 255, .34);
   font-weight: 850;
   opacity: 1;
   visibility: visible;
@@ -101,24 +101,6 @@
   background: #064d35;
   transform: translateY(-1px);
 }
-.page-home .mandi-nav-guide__close {
-  position: absolute;
-  top: 9px;
-  right: 10px;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  padding: 0 0 2px;
-  border: 1px solid #dce7df;
-  border-radius: 8px;
-  background: #f5f8f5;
-  color: #173e2d;
-  font-size: 21px;
-  line-height: 1;
-  cursor: pointer;
-}
-.page-home .mandi-nav-guide__close:hover { background: #e8f3e9; }
 .page-home .mandi-nav-guide__farmer {
   position: fixed;
   z-index: 83;
@@ -130,9 +112,8 @@
   filter: drop-shadow(0 12px 15px rgba(0, 0, 0, .2));
   pointer-events: none;
 }
-.page-home .mandi-nav-guide__copy :focus-visible,
-.page-home .mandi-nav-guide__close:focus-visible {
-  outline: 3px solid #e7bd19;
+.page-home .mandi-nav-guide__copy :focus-visible {
+  outline: 3px solid #b8d4c2;
   outline-offset: 3px;
 }
 @media (max-width: 899px) {
@@ -145,7 +126,7 @@
   }
   .page-home .mandi-nav-guide__message { font-size: .88rem; }
   .page-home .site-nav.is-open a.is-guide-highlighted {
-    outline: 2px solid rgba(255, 230, 92, .7);
+    outline: 2px solid rgba(255, 255, 255, .82);
     outline-offset: 2px;
   }
 }
