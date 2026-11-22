@@ -218,3 +218,31 @@
 @media (prefers-reduced-motion: reduce) {
   .page-home .site-nav a.is-guide-highlighted { animation: none; }
 }
+
+/* The close control exists only while the on-demand website tutorial is open. */
+.page-home .mandi-nav-guide__copy { position: relative; padding-top: 28px; }
+.page-home .mandi-nav-guide__close {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  padding: 0 0 2px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 7px;
+  background: #103a2a;
+  color: #fff;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+.page-home .mandi-nav-guide__close:hover { background: #075e3d; }
+.page-home .mandi-nav-guide__close:focus-visible {
+  outline: 3px solid #82c99d;
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .page-home .mandi-nav-guide__copy { padding-top: 27px; }
+}
