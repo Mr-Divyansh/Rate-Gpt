@@ -49,6 +49,68 @@ function languageToggle() {
   const sync = () => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === getLang())));
   sync(); onLangChange(sync); return group;
 }
+function demoMenu() {
+  const menu = document.createElement("div");
+  menu.className = "demo-menu";
+
+  const trigger = document.createElement("button");
+  trigger.className = "demo-menu-trigger";
+  trigger.type = "button";
+  trigger.setAttribute("aria-haspopup", "true");
+  trigger.setAttribute("aria-expanded", "false");
+
+  const panel = document.createElement("div");
+  panel.className = "demo-menu-panel";
+  panel.hidden = true;
+
+  const tutorial = document.createElement("button");
+  tutorial.className = "demo-menu-item";
+  tutorial.type = "button";
+  tutorial.setAttribute("role", "menuitem");
+
+  const syncLanguage = () => {
+    const hi = getLang() === "hi";
+    trigger.textContent = hi ? "डेमो" : "Demo";
+    trigger.setAttribute("aria-label", hi ? "डेमो मेनू" : "Demo menu");
+    tutorial.textContent = hi ? "वेबसाइट ट्यूटोरियल" : "Website tutorial";
+  };
+  syncLanguage();
+  onLangChange(syncLanguage);
+
+  const close = ({ restoreFocus = false } = {}) => {
+    panel.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (restoreFocus) trigger.focus();
+  };
+  const open = () => {
+    panel.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    tutorial.focus();
+  };
+
+  trigger.addEventListener("click", () => {
+    if (panel.hidden) open();
+    else close();
+  });
+  tutorial.addEventListener("click", () => {
+    close();
+    startMandiNavGuide();
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!menu.contains(event.target)) close();
+  });
+  menu.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !panel.hidden) {
+      event.preventDefault();
+      close({ restoreFocus: true });
+    }
+  });
+
+  panel.append(tutorial);
+  menu.append(trigger, panel);
+  return menu;
+}
+
 function renderHeader(header) {
   header.replaceChildren(); header.classList.add("has-mobile-drawer");
   const inner = document.createElement("div"); inner.className = "header-inner wrap";
@@ -59,7 +121,7 @@ function renderHeader(header) {
   const nav = document.createElement("nav"); nav.className = "site-nav"; nav.id = "primaryNavigation";
   nav.dataset.i18nAttr = "aria-label:nav.label"; LINKS.forEach(item => nav.append(navLink(item)));
   const actions = document.createElement("div"); actions.className = "header-actions";
-  actions.append(languageToggle(), toggle);
+  actions.append(demoMenu(), languageToggle(), toggle);
   inner.append(brand("brand"), nav, actions); header.append(inner);
   const backdrop = document.createElement("button"); backdrop.className = "nav-backdrop";
   backdrop.type = "button"; backdrop.tabIndex = -1; backdrop.setAttribute("aria-label", getLang()==="hi" ? "मेनू बंद करें" : "Close menu");
