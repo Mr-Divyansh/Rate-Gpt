@@ -1,7 +1,7 @@
 import { t, onLangChange } from "./i18n.js";
 import { hydrateIcons } from "./icons.js";
 import { fetchPrices } from "./api.js";
-import { startMandiNavGuide } from "./mandi-nav-guide.js";
+import { showFirstVisitWelcome } from "./onboarding.js";
 import {
   spreadAxis, cropNames, createRange, createSparkline, formatDate, formatPrice, priceNumber,
 } from "./rate-ui.js";
@@ -15,9 +15,9 @@ $("watchDemo")?.addEventListener("click", () => {
   demoDialog?.showModal();
 });
 $("demoTutorialAgain")?.addEventListener("click", () => {
-  // Close the demo first so the homepage spotlight is never hidden behind it.
+  // Restart the complete introduction from the Namaste welcome screen.
   if (demoDialog?.open) demoDialog.close();
-  startMandiNavGuide();
+  showFirstVisitWelcome();
 });
 $("demoClose")?.addEventListener("click", () => demoDialog?.close());
 demoDialog?.addEventListener("click", (event) => {
