@@ -107,6 +107,13 @@ async function main() {
     mandiNavGuideCss.includes("font-size: .82rem") &&
     mandiNavGuideCss.includes("@media (max-width: 380px)"),
     "mobile spotlight uses a centered compact bubble, smaller action text and scaled farmer");
+  check(mandiNavGuideCss.includes("ellipse 48vw 42px") &&
+    mandiNavGuideCss.includes("width: 100%") &&
+    mandiNavGuideCss.includes("background: #f1fff6") &&
+    mandiNavGuideCss.includes("box-shadow:") &&
+    mandiNavGuideCss.includes('content: "→"') &&
+    mandiNavGuideCss.includes("outline-offset: 5px"),
+    "mobile Mandi Prices target highlights the full drawer row with a strong border, glow and arrow");
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
