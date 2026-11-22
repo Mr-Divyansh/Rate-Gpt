@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, mandiNavGuideCss] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -29,6 +29,8 @@ async function main() {
     readFile("script/weather.js", "utf8"),
     readFile("script/onboarding.js", "utf8"),
     readFile("style/onboarding.css", "utf8"),
+    readFile("script/mandi-nav-guide.js", "utf8"),
+    readFile("style/mandi-nav-guide.css", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -60,21 +62,25 @@ async function main() {
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
 
-  check(onboardingScript.includes("Characte_For_RateGPT_Point.png") &&
-    onboardingScript.includes("hero-mandi-guide") &&
-    onboardingScript.includes("showMandiPricesGuide()"),
-    "homepage onboarding adds the pointing farmer guide after the final intro step");
-  check(onboardingScript.includes('href="mandi-prices.html"') &&
-    onboardingScript.includes("is-guide-highlighted") &&
-    onboardingScript.includes("menuToggle"),
-    "Mandi Prices guide links to the page and highlights desktop and mobile navigation");
-  check(onboardingCss.includes(".hero-mandi-guide") &&
-    onboardingCss.includes("@media (max-width: 760px)") &&
-    onboardingCss.includes("prefers-reduced-motion: no-preference") &&
-    onboardingCss.includes("CLICK HERE") &&
-    onboardingCss.includes("#26965e") &&
-    onboardingCss.includes("background: #effbf3"),
-    "Mandi Prices guide uses a clear Rate-GPT green spotlight, click label and responsive reduced-motion styling");
+  check(onboardingScript.includes("onboarding-finish") &&
+    onboardingScript.includes('addEventListener("click", closeDialog)') &&
+    !onboardingScript.includes("showMandiPricesGuide") &&
+    !onboardingScript.includes("hero-mandi-guide"),
+    "finishing onboarding does not create a second, overlapping Mandi Prices guide");
+  check(home.includes('/script/mandi-nav-guide.js') &&
+    mandiNavGuideScript.includes("Characte_For_RateGPT_Point.png") &&
+    mandiNavGuideScript.includes('pricesLink.classList.add("is-guide-highlighted")') &&
+    mandiNavGuideScript.includes('action.href = "mandi-prices.html"') &&
+    mandiNavGuideScript.includes("onLangChange(syncLanguage)"),
+    "homepage uses one standalone pointing-farmer guide with a working Mandi Prices link and language sync");
+  check(home.includes('href="style/mandi-nav-guide.css"') &&
+    mandiNavGuideCss.includes(".mandi-nav-guide") &&
+    mandiNavGuideCss.includes("@media (max-width: 760px)") &&
+    mandiNavGuideCss.includes("prefers-reduced-motion: reduce") &&
+    mandiNavGuideCss.includes('content: "CLICK HERE"') &&
+    mandiNavGuideCss.includes("color: #075e3d") &&
+    mandiNavGuideCss.includes("background: #e9f6ed"),
+    "Mandi Prices spotlight keeps its text readable, uses Rate-GPT green, and supports mobile and reduced motion");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
