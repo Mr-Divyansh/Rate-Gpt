@@ -132,12 +132,17 @@ async function main() {
   check(home.includes('id="demoTutorialAgain"') &&
     home.includes('data-i18n="demo.viewTutorialAgain"') &&
     home.includes('href="mandi-prices.html"') &&
-    home.includes('src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
+    home.includes('data-src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
+    !home.includes('src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
     home.includes('title="Rate-GPT video demo"') &&
     home.includes('allowfullscreen') &&
     home.includes('loading="lazy"') &&
     !home.includes("demo-video-placeholder"),
     "homepage demo dialog embeds the supplied YouTube walkthrough with accessible, lazy-loaded playback");
+  check(homePreviewScript.includes('demoVideo.setAttribute("src", demoVideo.dataset.src)') &&
+    homePreviewScript.includes('demoDialog?.addEventListener("close", stopDemoVideo)') &&
+    homePreviewScript.includes('demoVideo?.removeAttribute("src")'),
+    "closing the demo dialog unloads the YouTube iframe and reopening it restores playback");
   check(homePreviewScript.includes('import { showFirstVisitWelcome } from "./onboarding.js"') &&
     /\$\("demoTutorialAgain"\)\?\.addEventListener\("click",\s*\(\)\s*=>\s*\{[\s\S]*?demoDialog\.close\(\)[\s\S]*?showFirstVisitWelcome\(\)/.test(homePreviewScript) &&
     !homePreviewScript.includes("DEMO_VIDEO_SRC"),
