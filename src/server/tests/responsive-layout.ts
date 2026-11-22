@@ -96,6 +96,16 @@ async function main() {
     mandiNavGuideCss.includes("background: #fff") &&
     mandiNavGuideCss.includes("color: #17251c"),
     "Continue launches a dimmed spotlight with a white instruction bubble and pointing farmer; Skip does not");
+  check(mandiNavGuideScript.includes("const mobile = window.innerWidth <= 720") &&
+    mandiNavGuideScript.includes("Math.min(380, window.innerWidth - 32)") &&
+    mandiNavGuideScript.includes("(window.innerWidth - bubbleWidth) / 2") &&
+    mandiNavGuideScript.includes("window.visualViewport?.height || window.innerHeight") &&
+    mandiNavGuideCss.includes("@media (max-width: 720px)") &&
+    mandiNavGuideCss.includes("width: 138px") &&
+    mandiNavGuideCss.includes("font-size: .82rem") &&
+    mandiNavGuideCss.includes("@media (max-width: 380px)"),
+    "mobile spotlight uses a centered compact bubble, smaller action text and scaled farmer");
+
   check(globalNav.includes("function demoMenu()") &&
     globalNav.includes("Website tutorial") &&
     globalNav.includes("startMandiNavGuide()") &&
