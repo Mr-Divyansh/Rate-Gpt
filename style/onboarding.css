@@ -1112,3 +1112,162 @@
 @media (prefers-reduced-motion: reduce) {
   .onboarding-card--solution .onboarding-farmer-cta { transition: none; }
 }
+
+
+/* Final step: centered farmer artwork, no speech bubble, and a single
+   Continue action beneath all explanatory copy. Keep the whole dialog
+   visible without an internal scrollbar. */
+.onboarding-dialog:has(.onboarding-card--solution) {
+  width: min(94vw, 650px);
+  height: auto;
+  max-height: min(94dvh, 820px);
+  aspect-ratio: auto;
+}
+.onboarding-card--solution {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: min(94dvh, 820px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 28px 46px 30px;
+  overflow: hidden;
+  text-align: center;
+}
+.onboarding-card--solution .onboarding-art-wrap {
+  display: grid;
+  place-items: center;
+  flex: 0 0 205px;
+  width: 100%;
+  height: 205px;
+  min-height: 205px;
+  margin: 0;
+}
+.onboarding-card--solution .onboarding-art {
+  display: block;
+  width: min(100%, 250px);
+  max-width: 250px;
+  height: 205px;
+  max-height: 205px;
+  object-fit: contain;
+  object-position: center;
+}
+/* The old speech-bubble CTA is intentionally removed from this step. */
+.onboarding-card--solution .onboarding-farmer-cta {
+  display: none !important;
+}
+.onboarding-card--solution .onboarding-copy {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 540px;
+}
+.onboarding-card--solution .onboarding-progress {
+  width: 100%;
+  text-align: left;
+}
+.onboarding-card--solution .onboarding-copy h2 {
+  max-width: 520px;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+}
+.onboarding-card--solution .onboarding-message {
+  max-width: 510px;
+  font-size: .9rem;
+  line-height: 1.45;
+}
+.onboarding-card--solution .onboarding-solution-points {
+  width: 100%;
+  text-align: left;
+}
+.onboarding-card--solution .onboarding-assistant-note {
+  text-align: center;
+}
+.onboarding-card--solution .onboarding-actions--single {
+  width: 100%;
+  max-width: 330px;
+  margin: 14px auto 0;
+}
+.onboarding-card--solution .onboarding-actions .btn {
+  width: 100%;
+  min-height: 48px;
+}
+@media (max-width: 600px) {
+  .onboarding-dialog:has(.onboarding-card--solution) {
+    width: min(94vw, 470px);
+    max-height: 94dvh;
+  }
+  .onboarding-card--solution {
+    max-height: 94dvh;
+    padding: 18px 18px 20px;
+    gap: 5px;
+  }
+  .onboarding-card--solution .onboarding-art-wrap {
+    flex-basis: 150px;
+    height: 150px;
+    min-height: 150px;
+  }
+  .onboarding-card--solution .onboarding-art {
+    width: min(100%, 190px);
+    max-width: 190px;
+    height: 150px;
+    max-height: 150px;
+  }
+  .onboarding-card--solution .onboarding-copy h2 {
+    font-size: clamp(1.25rem, 5vw, 1.55rem);
+  }
+  .onboarding-card--solution .onboarding-message {
+    font-size: .78rem;
+    line-height: 1.35;
+  }
+  .onboarding-card--solution .onboarding-solution-points {
+    gap: 5px;
+    margin-top: 6px;
+    grid-template-rows: repeat(3, minmax(48px, auto));
+  }
+  .onboarding-card--solution .onboarding-solution-points li {
+    min-height: 48px;
+    padding: 6px 8px 6px 31px;
+    font-size: .72rem;
+    line-height: 1.28;
+  }
+  .onboarding-card--solution .onboarding-solution-points li::before {
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .onboarding-card--solution .onboarding-assistant-note {
+    margin-top: 5px;
+    font-size: .68rem;
+  }
+  .onboarding-card--solution .onboarding-actions--single {
+    margin-top: 8px;
+  }
+  .onboarding-card--solution .onboarding-actions .btn {
+    min-height: 43px;
+  }
+}
+@media (max-height: 700px) {
+  .onboarding-card--solution {
+    padding-top: 12px;
+    padding-bottom: 14px;
+    gap: 4px;
+  }
+  .onboarding-card--solution .onboarding-art-wrap {
+    flex-basis: 125px;
+    height: 125px;
+    min-height: 125px;
+  }
+  .onboarding-card--solution .onboarding-art {
+    height: 125px;
+    max-height: 125px;
+  }
+  .onboarding-card--solution .onboarding-actions--single {
+    margin-top: 6px;
+  }
+}
