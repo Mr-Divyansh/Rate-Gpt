@@ -167,7 +167,10 @@ export function showFirstVisitWelcome() {
       </div>
     `;
     dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
-    dialog.querySelector(".onboarding-finish").addEventListener("click", () => {\n      closeDialog();\n      showMandiPricesGuide();\n    });
+    dialog.querySelector(".onboarding-finish").addEventListener("click", () => {
+      closeDialog();
+      showMandiPricesGuide();
+    });
     dialog.querySelector(".onboarding-finish").focus();
   };
 
