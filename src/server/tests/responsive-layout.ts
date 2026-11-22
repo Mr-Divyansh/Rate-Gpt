@@ -83,12 +83,14 @@ async function main() {
     mandiNavGuideScript.includes("Characte_For_RateGPT_Point.png") &&
     mandiNavGuideScript.includes('pricesLink.classList.add("is-guide-highlighted")') &&
     mandiNavGuideScript.includes('action.href = "mandi-prices.html"') &&
-    mandiNavGuideScript.includes('close.addEventListener("click"') &&
     mandiNavGuideScript.includes("--spot-x") &&
     mandiNavGuideScript.includes("Click the highlighted Mandi prices tab") &&
     mandiNavGuideScript.includes("onLangChange(syncLanguage)") &&
     mandiNavGuideCss.includes("rgba(9, 22, 15, .66)") &&
-    mandiNavGuideCss.includes("background: #ffe65c") &&
+    mandiNavGuideCss.includes("ellipse 86px 37px") &&
+    !mandiNavGuideScript.includes("mandi-nav-guide__close") &&
+    !mandiNavGuideCss.includes("mandi-nav-guide__close") &&
+    mandiNavGuideCss.includes("background: #fffdf6") &&
     mandiNavGuideCss.includes("background: #fff") &&
     mandiNavGuideCss.includes("color: #17251c"),
     "Continue launches a dimmed spotlight with a white instruction bubble and pointing farmer; Skip does not");
@@ -99,14 +101,13 @@ async function main() {
     "shared header places a Demo menu before language controls and launches Website tutorial");
   check(home.includes('href="style/mandi-nav-guide.css"') &&
     mandiNavGuideCss.includes(".mandi-nav-guide") &&
-    mandiNavGuideCss.includes(".mandi-nav-guide__close") &&
     onboardingCss.includes(".onboarding-farmer-cta") &&
     onboardingCss.includes("background: #0d7048") &&
     onboardingCss.includes("@media (max-width: 700px)") &&
     onboardingCss.includes("prefers-reduced-motion: reduce") &&
-    mandiNavGuideCss.includes('content: "CLICK HERE"') &&
-    mandiNavGuideCss.includes("color: #075e3d") &&
-    mandiNavGuideCss.includes("background: #e9f6ed"),
+    mandiNavGuideCss.includes(".mandi-nav-guide__action") &&
+    mandiNavGuideCss.includes("color: #17251c") &&
+    mandiNavGuideCss.includes("background: #fff"),
     "farmer speech bubble and on-demand navigation guide use Rate-GPT green with mobile and reduced-motion support");
   check(baseCss.includes(".demo-menu-trigger") &&
     baseCss.includes(".demo-menu-panel") &&
