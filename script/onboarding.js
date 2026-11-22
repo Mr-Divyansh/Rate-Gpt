@@ -9,7 +9,7 @@ export function showFirstVisitWelcome() {
   const hi = document.documentElement.lang.toLowerCase().startsWith("hi");
   let shouldStartWebsiteGuide = false;
   const markWelcomeSeen = () => {
-    try { window.localStorage.setItem("rateGptWelcomeSeen", "1"); } catch { /* Storage may be unavailable. */ }
+    try { window.localStorage.setItem("rateGptWelcomeSeen", "1"); window.localStorage.setItem("rateGptDeviceVisited", "1"); } catch { /* Storage may be unavailable. */ }
   };
   const dialog = document.createElement("dialog");
   dialog.className = "onboarding-dialog";
