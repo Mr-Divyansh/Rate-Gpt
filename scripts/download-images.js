@@ -25,7 +25,7 @@ const workerCount = 3;
 const maxWidth = 700;
 const webpQuality = 82;
 const genericWords = new Set([
-  "a", "an", "and", "as", "fresh", "fruit", "fruits", "grain", "grains",
+  "a", "an", "and", "as", "fresh", "fruit", "fruits", "grain", "grains/'",
   "green", "raw", "red", "root", "seed", "seeds", "spice", "spices",
   "vegetable", "vegetables", "white", "yellow", "orange", "brown",
 ]);
