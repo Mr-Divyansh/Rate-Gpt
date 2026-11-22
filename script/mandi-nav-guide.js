@@ -95,18 +95,31 @@ export function startMandiNavGuide() {
     pricesLink.setAttribute("aria-describedby", "mandiNavGuideText");
 
     const compact = window.innerWidth < 900;
+    const mobile = window.innerWidth <= 720;
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
     guide.classList.toggle("is-compact", compact);
-    const bubbleWidth = Math.min(compact ? window.innerWidth - 32 : 370, 370);
-    const bubbleLeft = Math.max(16, Math.min(rect.left - 8, window.innerWidth - bubbleWidth - 16));
-    const belowNav = rect.bottom + 22;
-    const bubbleTop = Math.min(belowNav, Math.max(90, window.innerHeight - (compact ? 300 : 280)));
+    guide.classList.toggle("is-mobile", mobile);
+
+    // Keep the mobile speech bubble compact instead of stretching it across
+    // large phone screens; center it beneath the highlighted drawer item.
+    const bubbleWidth = mobile
+      ? Math.min(380, window.innerWidth - 32)
+      : Math.min(compact ? window.innerWidth - 32 : 370, 370);
+    const bubbleLeft = mobile
+      ? Math.max(16, (window.innerWidth - bubbleWidth) / 2)
+      : Math.max(16, Math.min(rect.left - 8, window.innerWidth - bubbleWidth - 16));
+    const belowNav = rect.bottom + (mobile ? 16 : 22);
+    const bubbleTop = Math.min(belowNav, Math.max(76, viewportHeight - (mobile ? 300 : compact ? 300 : 280)));
     copy.style.left = bubbleLeft + "px";
     copy.style.top = bubbleTop + "px";
     copy.style.width = bubbleWidth + "px";
 
-    if (compact) {
+    if (mobile) {
+      farmer.style.left = Math.max(12, Math.min(bubbleLeft + bubbleWidth - 126, window.innerWidth - 144)) + "px";
+      farmer.style.top = Math.min(bubbleTop + copy.offsetHeight + 6, viewportHeight - 148) + "px";
+    } else if (compact) {
       farmer.style.left = Math.max(16, Math.min(bubbleLeft + bubbleWidth - 150, window.innerWidth - 166)) + "px";
-      farmer.style.top = Math.min(bubbleTop + copy.offsetHeight + 4, window.innerHeight - 190) + "px";
+      farmer.style.top = Math.min(bubbleTop + copy.offsetHeight + 4, viewportHeight - 190) + "px";
     } else {
       farmer.style.left = Math.min(bubbleLeft + bubbleWidth - 6, window.innerWidth - 250) + "px";
       farmer.style.top = Math.max(78, bubbleTop - 38) + "px";
