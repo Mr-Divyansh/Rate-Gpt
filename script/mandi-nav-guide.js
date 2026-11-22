@@ -91,6 +91,14 @@ export function startMandiNavGuide() {
     const centerY = rect.top + rect.height / 2;
     guide.style.setProperty("--spot-x", centerX + "px");
     guide.style.setProperty("--spot-y", centerY + "px");
+    // Match the spotlight width to the actual target row and keep its glow
+    // inside the visible phone viewport (including narrow side gutters).
+    const spotlightRadiusX = Math.max(54, Math.min(
+      rect.width / 2 + 12,
+      centerX - 10,
+      window.innerWidth - centerX - 10
+    ));
+    guide.style.setProperty("--spot-rx", spotlightRadiusX + "px");
     pricesLink.classList.add("is-guide-highlighted");
     pricesLink.setAttribute("aria-describedby", "mandiNavGuideText");
 
