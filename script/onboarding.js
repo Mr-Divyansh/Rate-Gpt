@@ -9,11 +9,6 @@ export function showFirstVisitWelcome() {
   dialog.className = "onboarding-dialog";
   dialog.setAttribute("aria-labelledby", "onboardingTitle");
 
-  const closeDialog = () => {
-    if (dialog.open) dialog.close();
-    dialog.remove();
-  };
-
   // This is the farmer-benefits introduction shown before any detailed tour.
   // Keep the copy focused on real farmer decisions Rate-GPT can support:
   // comparing available mandi prices, finding alternatives, and reading price data.
@@ -87,19 +82,14 @@ export function showFirstVisitWelcome() {
             <li>${hi ? "न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर मैं बेहतर जानकारी के साथ फैसला कर सकता हूँ।" : "I can use minimum, maximum, modal prices and arrivals to make a more informed selling decision."}</li>
           </ul>
           <p class="onboarding-note onboarding-assistant-note">${hi ? "Rate-GPT आपको जानकारी देता है — फैसला आप अपनी जरूरत और बाजार की स्थिति देखकर लें।" : "Rate-GPT gives you useful information. You stay in control of your selling decision."}</p>
-          <div class="onboarding-actions onboarding-actions--single">
-            <button class="btn btn-primary onboarding-finish" type="button">${hi ? "Rate-GPT इस्तेमाल करें" : "Start exploring Rate-GPT"} <span aria-hidden="true">→</span></button>
-          </div>
         </div>
       </div>
     `;
-    dialog.querySelector(".onboarding-finish").addEventListener("click", closeDialog);
-    dialog.querySelector(".onboarding-finish").focus();
+    dialog.querySelector(".onboarding-farmer-cta").focus();
   };
 
   dialog.innerHTML = `
     <div class="onboarding-card">
-      <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
       <div class="onboarding-art-wrap">
         <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Namaste.png" alt="" width="320" height="320" loading="lazy" fetchpriority="low" decoding="async">
       </div>
