@@ -62,25 +62,41 @@ async function main() {
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
 
-  check(onboardingScript.includes("onboarding-finish") &&
-    onboardingScript.includes('addEventListener("click", closeDialog)') &&
+  check(onboardingScript.includes("onboarding-farmer-cta") &&
+    onboardingScript.includes('href="mandi-prices.html"') &&
+    !onboardingScript.includes("onboarding-finish") &&
+    !onboardingScript.includes("onboarding-close") &&
     !onboardingScript.includes("showMandiPricesGuide") &&
     !onboardingScript.includes("hero-mandi-guide"),
-    "finishing onboarding does not create a second, overlapping Mandi Prices guide");
+    "final intro step uses the farmer speech bubble as its only action and has no close or footer button");
   check(home.includes('/script/mandi-nav-guide.js') &&
+    mandiNavGuideScript.includes("export function startMandiNavGuide()") &&
     mandiNavGuideScript.includes("Characte_For_RateGPT_Point.png") &&
     mandiNavGuideScript.includes('pricesLink.classList.add("is-guide-highlighted")') &&
     mandiNavGuideScript.includes('action.href = "mandi-prices.html"') &&
+    mandiNavGuideScript.includes('close.addEventListener("click", stopGuide)') &&
     mandiNavGuideScript.includes("onLangChange(syncLanguage)"),
-    "homepage uses one standalone pointing-farmer guide with a working Mandi Prices link and language sync");
+    "website tutorial is started on demand, highlights Mandi Prices and exposes close only while active");
+  check(globalNav.includes("function demoMenu()") &&
+    globalNav.includes("Website tutorial") &&
+    globalNav.includes("startMandiNavGuide()") &&
+    globalNav.includes("actions.append(demoMenu(), languageToggle(), toggle)"),
+    "shared header places a Demo menu before language controls and launches Website tutorial");
   check(home.includes('href="style/mandi-nav-guide.css"') &&
     mandiNavGuideCss.includes(".mandi-nav-guide") &&
-    mandiNavGuideCss.includes("@media (max-width: 760px)") &&
-    mandiNavGuideCss.includes("prefers-reduced-motion: reduce") &&
+    mandiNavGuideCss.includes(".mandi-nav-guide__close") &&
+    onboardingCss.includes(".onboarding-farmer-cta") &&
+    onboardingCss.includes("background: #0d7048") &&
+    onboardingCss.includes("@media (max-width: 700px)") &&
+    onboardingCss.includes("prefers-reduced-motion: reduce") &&
     mandiNavGuideCss.includes('content: "CLICK HERE"') &&
     mandiNavGuideCss.includes("color: #075e3d") &&
     mandiNavGuideCss.includes("background: #e9f6ed"),
-    "Mandi Prices spotlight keeps its text readable, uses Rate-GPT green, and supports mobile and reduced motion");
+    "farmer speech bubble and on-demand navigation guide use Rate-GPT green with mobile and reduced-motion support");
+  check(baseCss.includes(".demo-menu-trigger") &&
+    baseCss.includes(".demo-menu-panel") &&
+    baseCss.includes("@media (max-width: 720px)"),
+    "Demo dropdown remains usable beside language controls on narrow screens");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
