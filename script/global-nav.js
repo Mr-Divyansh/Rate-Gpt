@@ -189,14 +189,11 @@ applyI18n();
 // Keep it out of Mandi Prices, Weather, About, Contact and policy pages so
 // visitors can use those pages directly without an unrelated modal appearing.
 if (currentPage === "index.html" && document.body.classList.contains("page-home")) {
-  const shouldStartWebsiteTutorial = new URLSearchParams(window.location.search).get("startWebsiteTutorial") === "1";
-  if (shouldStartWebsiteTutorial) {
-    startMandiNavGuide();
-  } else {
-    // Testing mode: show the welcome introduction on every homepage visit.
-    // Do not persist a "seen" flag; a fresh visit/reload should show it again.
-    showFirstVisitWelcome();
-  }
+  // Show the welcome flow automatically only once. Visitors can replay it
+  // whenever they want from the Watch demo dialog's "View tutorial again" action.
+  let welcomeSeen = false;
+  try { welcomeSeen = window.localStorage.getItem("rateGptWelcomeSeen") === "1"; } catch { /* Storage may be unavailable. */ }
+  if (!welcomeSeen) showFirstVisitWelcome();
 }
 function applySharedTranslations() {
   const hi = getLang() === "hi";
