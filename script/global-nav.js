@@ -193,9 +193,9 @@ if (currentPage === "index.html" && document.body.classList.contains("page-home"
   if (shouldStartWebsiteTutorial) {
     startMandiNavGuide();
   } else {
-    let introSeen = false;
-    try { introSeen = window.localStorage.getItem("rateGptIntroSeen") === "1"; } catch { /* Storage may be disabled. */ }
-    if (!introSeen) showFirstVisitWelcome();
+    // Testing mode: show the welcome introduction on every homepage visit.
+    // Do not persist a "seen" flag; a fresh visit/reload should show it again.
+    showFirstVisitWelcome();
   }
 }
 function applySharedTranslations() {
