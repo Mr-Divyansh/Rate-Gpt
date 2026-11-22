@@ -250,7 +250,9 @@ if (currentPage === "index.html" && document.body.classList.contains("page-home"
   if (shouldStartWebsiteTutorial) {
     startMandiNavGuide();
   } else {
-    showFirstVisitWelcome();
+    let introSeen = false;
+    try { introSeen = window.localStorage.getItem("rateGptIntroSeen") === "1"; } catch { /* Storage may be disabled. */ }
+    if (!introSeen) showFirstVisitWelcome();
   }
 }
 function applySharedTranslations() {
