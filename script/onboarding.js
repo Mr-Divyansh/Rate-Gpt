@@ -85,12 +85,17 @@ export function showFirstVisitWelcome() {
           </ul>
           <p class="onboarding-note onboarding-assistant-note">${hi ? "Rate-GPT आपको जानकारी देता है — फैसला आप अपनी जरूरत और बाजार की स्थिति देखकर लें।" : "Rate-GPT gives you useful information. You stay in control of your selling decision."}</p>
           <div class="onboarding-actions onboarding-actions--single">
-            <a class="btn btn-primary onboarding-continue" href="mandi-prices.html">${hi ? "जारी रखें" : "Continue"} <span aria-hidden="true">→</span></a>
+            <button class="btn btn-primary onboarding-continue" type="button">${hi ? "जारी रखें" : "Continue"} <span aria-hidden="true">→</span></button>
           </div>
         </div>
       </div>
     `;
-    dialog.querySelector(".onboarding-continue")?.focus();
+    const continueButton = dialog.querySelector(".onboarding-continue");
+    if (continueButton) {
+      // The introduction ends here. Do not navigate or open another step.
+      continueButton.addEventListener("click", () => dialog.close());
+      continueButton.focus();
+    }
   };
 
   dialog.innerHTML = `
