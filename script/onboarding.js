@@ -1,3 +1,71 @@
+function showMandiPricesGuide() {
+  const hero = document.querySelector(".page-home .hero");
+  const mandiLink = document.querySelector('.page-home .site-nav a[href="mandi-prices.html"]');
+  const menuToggle = document.querySelector(".page-home .menu-toggle");
+
+  // The guide belongs only to the homepage and only appears after the intro.
+  if (!hero || !mandiLink || hero.querySelector(".hero-mandi-guide")) return;
+
+  const guide = document.createElement("aside");
+  guide.className = "hero-mandi-guide";
+  guide.setAttribute("aria-label", "Explore Mandi Prices");
+  guide.innerHTML = `
+    <img
+      class="hero-mandi-guide__farmer"
+      src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Point.png"
+      alt="Farmer pointing towards Mandi Prices"
+      width="320"
+      height="320"
+      loading="lazy"
+      decoding="async"
+    >
+    <div class="hero-mandi-guide__bubble">
+      <p>Want to compare mandi rates?</p>
+      <a class="hero-mandi-guide__link" href="mandi-prices.html">
+        Click here to explore Mandi Prices <span aria-hidden="true">→</span>
+      </a>
+    </div>
+    <button class="hero-mandi-guide__close" type="button" aria-label="Dismiss Mandi Prices guide">×</button>
+  `;
+
+  const clearHighlight = () => {
+    mandiLink.classList.remove("is-guide-highlighted");
+    menuToggle?.classList.remove("is-guide-highlighted");
+  };
+  const dismiss = () => {
+    clearHighlight();
+    guide.remove();
+    menuToggle?.removeEventListener("click", syncMobileGuide);
+    mandiLink.removeEventListener("click", dismiss);
+  };
+  const syncMobileGuide = () => {
+    const menuOpen = menuToggle?.getAttribute("aria-expanded") === "true";
+    if (window.matchMedia("(max-width: 720px)").matches) {
+      menuToggle?.classList.toggle("is-guide-highlighted", !menuOpen);
+      mandiLink.classList.toggle("is-guide-highlighted", menuOpen);
+      const link = guide.querySelector(".hero-mandi-guide__link");
+      if (link) {
+        link.textContent = menuOpen
+          ? "Tap Mandi Prices in the menu"
+          : "Open the menu, then choose Mandi Prices";
+        link.setAttribute("aria-label", menuOpen
+          ? "Mandi Prices is highlighted in the open menu"
+          : "Open the menu, then choose Mandi Prices");
+      }
+    } else {
+      menuToggle?.classList.remove("is-guide-highlighted");
+      mandiLink.classList.add("is-guide-highlighted");
+    }
+  };
+
+  guide.querySelector(".hero-mandi-guide__close").addEventListener("click", dismiss);
+  guide.querySelector(".hero-mandi-guide__link").addEventListener("click", dismiss);
+  mandiLink.addEventListener("click", dismiss);
+  menuToggle?.addEventListener("click", syncMobileGuide);
+  hero.append(guide);
+  syncMobileGuide();
+}
+
 export function showFirstVisitWelcome() {
   const link = document.createElement("link");
   link.rel = "stylesheet";
@@ -99,7 +167,7 @@ export function showFirstVisitWelcome() {
       </div>
     `;
     dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
-    dialog.querySelector(".onboarding-finish").addEventListener("click", closeDialog);
+    dialog.querySelector(".onboarding-finish").addEventListener("click", () => {\n      closeDialog();\n      showMandiPricesGuide();\n    });
     dialog.querySelector(".onboarding-finish").focus();
   };
 

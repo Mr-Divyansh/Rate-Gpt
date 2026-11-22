@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -26,7 +26,7 @@ async function main() {
     readFile("style/weather.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
-    readFile("script/weather.js", "utf8"),
+    readFile("script/weather.js", "utf8"),\n    readFile("script/onboarding.js", "utf8"),\n    readFile("style/onboarding.css", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -57,6 +57,19 @@ async function main() {
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
+
+  check(/Characte_For_RateGPT_Point\\.png/.test(onboardingScript) &&
+    /hero-mandi-guide/.test(onboardingScript) &&
+    /showMandiPricesGuide\\(\\)/.test(onboardingScript),
+    "homepage onboarding adds the pointing farmer guide after the final intro step");
+  check(/href="mandi-prices\\.html"/.test(onboardingScript) &&
+    /is-guide-highlighted/.test(onboardingScript) &&
+    /menuToggle/.test(onboardingScript),
+    "Mandi Prices guide links to the page and highlights desktop and mobile navigation");
+  check(/\\.hero-mandi-guide/.test(onboardingCss) &&
+    /@media \\(max-width: 760px\\)/.test(onboardingCss) &&
+    /prefers-reduced-motion: no-preference/.test(onboardingCss),
+    "Mandi Prices guide is responsive and respects reduced-motion preferences");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),

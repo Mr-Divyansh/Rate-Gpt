@@ -910,3 +910,125 @@
     box-shadow: 0 12px 36px rgba(10, 35, 23, .18);
   }
 }
+
+
+/* Homepage hand-off: the farmer points visitors directly to the real Mandi Prices nav item. */
+.hero-mandi-guide {
+  position: absolute;
+  z-index: 5;
+  top: clamp(6px, 1.8vh, 20px);
+  left: 31%;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: min(264px, 27vw);
+  min-width: 230px;
+  padding: 8px 10px 8px 4px;
+  border: 1px solid rgba(40, 122, 82, .18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 12px 28px rgba(23, 77, 56, .12);
+}
+.hero-mandi-guide__farmer {
+  width: 104px;
+  height: 126px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 5px 8px rgba(23, 77, 56, .12));
+}
+.hero-mandi-guide__bubble {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  min-width: 0;
+}
+.hero-mandi-guide__bubble p {
+  color: #526159;
+  font-size: .76rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.hero-mandi-guide__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #075e3d;
+  font-size: .82rem;
+  font-weight: 800;
+  line-height: 1.3;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.hero-mandi-guide__link:hover { color: #0a8051; }
+.hero-mandi-guide__close {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 1px solid #dce9df;
+  border-radius: 8px;
+  background: #f4f8f3;
+  color: #315b43;
+  font-size: 17px;
+  line-height: 1;
+}
+.site-nav a.is-guide-highlighted,
+.menu-toggle.is-guide-highlighted {
+  position: relative;
+  z-index: 150;
+  transform: scale(1.08);
+  border: 2px solid #e9a23b !important;
+  border-radius: 12px !important;
+  background: #fff8e8 !important;
+  color: #174d38 !important;
+  box-shadow: 0 0 0 4px rgba(233, 162, 59, .22), 0 8px 22px rgba(23, 77, 56, .2);
+  font-weight: 800 !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .site-nav a.is-guide-highlighted,
+  .menu-toggle.is-guide-highlighted {
+    animation: mandi-guide-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes mandi-guide-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(233, 162, 59, .18), 0 8px 22px rgba(23, 77, 56, .16); }
+    50% { box-shadow: 0 0 0 7px rgba(233, 162, 59, .30), 0 10px 26px rgba(23, 77, 56, .22); }
+  }
+}
+@media (max-width: 1000px) and (min-width: 761px) {
+  .hero-mandi-guide { left: 29%; width: 246px; min-width: 0; grid-template-columns: 92px minmax(0, 1fr); }
+  .hero-mandi-guide__farmer { width: 92px; height: 116px; }
+}
+@media (max-width: 760px) {
+  .hero-mandi-guide {
+    position: fixed;
+    z-index: 120;
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    grid-template-columns: 76px minmax(0, 1fr);
+    width: auto;
+    min-width: 0;
+    max-width: 420px;
+    margin-inline: auto;
+    padding: 7px 34px 7px 5px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(23, 77, 56, .2);
+  }
+  .hero-mandi-guide__farmer { width: 76px; height: 88px; }
+  .hero-mandi-guide__bubble p { font-size: .72rem; }
+  .hero-mandi-guide__link { font-size: .78rem; }
+  .hero-mandi-guide__close { top: 5px; right: 5px; }
+  .site-nav a.is-guide-highlighted { transform: none; }
+  .menu-toggle.is-guide-highlighted { transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-nav a.is-guide-highlighted,
+  .menu-toggle.is-guide-highlighted { animation: none; }
+}
