@@ -70,8 +70,11 @@ async function main() {
     "Mandi Prices guide links to the page and highlights desktop and mobile navigation");
   check(onboardingCss.includes(".hero-mandi-guide") &&
     onboardingCss.includes("@media (max-width: 760px)") &&
-    onboardingCss.includes("prefers-reduced-motion: no-preference"),
-    "Mandi Prices guide is responsive and respects reduced-motion preferences");
+    onboardingCss.includes("prefers-reduced-motion: no-preference") &&
+    onboardingCss.includes("CLICK HERE") &&
+    onboardingCss.includes("#26965e") &&
+    onboardingCss.includes("background: #effbf3"),
+    "Mandi Prices guide uses a clear Rate-GPT green spotlight, click label and responsive reduced-motion styling");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
