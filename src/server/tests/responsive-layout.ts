@@ -88,7 +88,7 @@ async function main() {
     mandiNavGuideScript.includes("--spot-x") &&
     mandiNavGuideScript.includes("Click the highlighted Mandi prices tab") &&
     mandiNavGuideScript.includes("onLangChange(syncLanguage)") &&
-    mandiNavGuideCss.includes("rgba(9, 22, 15, .66)") &&
+    mandiNavGuideCss.includes("rgba(9, 22, 15, .68)") &&
     mandiNavGuideCss.includes("ellipse 86px 37px") &&
     !mandiNavGuideScript.includes("mandi-nav-guide__close") &&
     !mandiNavGuideCss.includes("mandi-nav-guide__close") &&
