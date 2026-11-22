@@ -49,12 +49,14 @@ async function main() {
   check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control input\s*\{[^}]*padding:0 13px/s.test(weatherCss) &&
     /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control>\.btn\s*\{\s*position:static;\s*width:100%/s.test(weatherCss),
     "weather search input and action use a single-column mobile layout");
-  check(/locationButton\.addEventListener\("click",useDeviceLocation\)/.test(weatherScript) &&
+  check(/locationButton\.addEventListener\("click",\s*useDeviceLocation\)/.test(weatherScript) &&
     /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
-    /enableHighAccuracy:false/.test(weatherScript) &&
+    /enableHighAccuracy\s*:\s*false/.test(weatherScript) &&
+    /timeout\s*:\s*6000/.test(weatherScript) &&
+    /maximumAge\s*:\s*300000/.test(weatherScript) &&
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
-    "one-shot device location retries with balanced accuracy and approximate lookup remains opt-in");
+    "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
