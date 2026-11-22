@@ -40,6 +40,14 @@ async function main() {
     check(/<meta\s+name="twitter:image"\s+content="https:\/\//.test(html), `${file}: absolute Twitter image URL`);
   }
 
+  const vercelConfig = JSON.parse(await readFile("vercel.json", "utf8")) as { headers?: Array<{ headers?: Array<{ key?: string; value?: string }> }> };
+  const siteCsp = vercelConfig.headers?.flatMap((entry) => entry.headers ?? [])
+    .find((header) => header.key?.toLowerCase() === "content-security-policy")?.value ?? "";
+  check(siteCsp.includes("frame-src https://www.youtube-nocookie.com https://www.youtube.com") &&
+    siteCsp.includes("frame-ancestors 'none'") &&
+    siteCsp.includes("default-src 'self'"),
+    "CSP explicitly permits the trusted YouTube embed while keeping the site frame-protected");
+
   const sitemap = await readFile("sitemap.xml", "utf8");
   const robots = await readFile("robots.txt", "utf8");
   for (const [, canonical] of pages) {
