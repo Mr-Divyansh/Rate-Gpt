@@ -1,0 +1,148 @@
+/* Homepage pointer guide: directs visitors to the real Mandi Prices page. */
+.page-home .mandi-nav-guide {
+  position: absolute;
+  z-index: 5;
+  top: 2px;
+  left: 32%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(360px, 35vw);
+  min-height: 116px;
+  pointer-events: none;
+}
+
+.page-home .mandi-nav-guide__farmer {
+  display: block;
+  flex: 0 0 116px;
+  width: 116px;
+  height: 124px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 7px 10px rgba(24, 58, 38, .12));
+}
+
+.page-home .mandi-nav-guide__copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(23, 77, 56, .13);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 8px 24px rgba(23, 77, 56, .10);
+  pointer-events: auto;
+}
+
+.page-home .mandi-nav-guide__eyebrow {
+  color: #287a52;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.page-home .mandi-nav-guide__message {
+  margin: 0;
+  color: #34483b;
+  font-size: .82rem;
+  line-height: 1.35;
+}
+
+.page-home .mandi-nav-guide__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(8, 99, 68, .2);
+  border-radius: 8px;
+  background: #086344;
+  color: #fff;
+  font-size: .76rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.page-home .mandi-nav-guide__action:hover {
+  background: #064d35;
+  box-shadow: 0 5px 13px rgba(8, 99, 68, .2);
+  transform: translateY(-1px);
+}
+
+.page-home .site-nav a.is-guide-highlighted {
+  position: relative;
+  border-radius: 9px;
+  background: #e8f3e9;
+  color: #075e3d;
+  box-shadow: 0 0 0 2px rgba(40, 122, 82, .2), 0 0 0 5px rgba(40, 122, 82, .08);
+  font-weight: 800;
+}
+
+.page-home .site-nav a.is-guide-highlighted::after {
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(40, 122, 82, .36);
+  border-radius: 12px;
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 1000px) and (min-width: 761px) {
+  .page-home .mandi-nav-guide {
+    left: 29%;
+    width: min(330px, 37vw);
+  }
+  .page-home .mandi-nav-guide__farmer {
+    flex-basis: 98px;
+    width: 98px;
+    height: 112px;
+  }
+  .page-home .mandi-nav-guide__copy { padding: 9px 10px; }
+}
+
+@media (max-width: 760px) {
+  .page-home .mandi-nav-guide {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    min-height: 0;
+    margin: 0 0 2px;
+    padding: 9px 10px;
+    gap: 8px;
+    border: 1px solid rgba(23, 77, 56, .12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .88);
+    box-shadow: 0 5px 16px rgba(23, 77, 56, .07);
+  }
+  .page-home .mandi-nav-guide__farmer {
+    flex: 0 0 82px;
+    width: 82px;
+    height: 92px;
+  }
+  .page-home .mandi-nav-guide__copy {
+    flex: 1;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .page-home .mandi-nav-guide__message { font-size: .78rem; }
+  .page-home .mandi-nav-guide__action {
+    min-height: 36px;
+    justify-content: flex-start;
+    width: 100%;
+    font-size: .75rem;
+  }
+  .page-home .site-nav.is-open a.is-guide-highlighted {
+    outline: 3px solid rgba(40, 122, 82, .2);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-home .mandi-nav-guide__action { transition: none; }
+}
