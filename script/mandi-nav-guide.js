@@ -1,37 +1,46 @@
 import { getLang, onLangChange } from "./i18n.js";
 
-// This is the actual, user-requested website tutorial. It is deliberately
-// started from the Demo menu instead of appearing automatically on every visit.
+// The spotlight tour is launched after the visitor completes the introduction,
+// and can also be opened intentionally from the Demo menu.
 export function startMandiNavGuide() {
   if (!document.body.classList.contains("page-home")) {
     window.location.href = "index.html?startWebsiteTutorial=1";
     return;
   }
 
-  const hero = document.querySelector(".page-home .hero");
   const pricesLink = document.querySelector('.site-nav a[href="mandi-prices.html"]');
-  if (!hero || !pricesLink) return;
+  if (!pricesLink) return;
 
-  // Avoid stacking duplicate guide cards when the visitor opens Demo repeatedly.
   document.querySelector(".mandi-nav-guide")?.remove();
-  pricesLink.classList.add("is-guide-highlighted");
-  pricesLink.setAttribute("aria-describedby", "mandiNavGuideText");
+  const previousFocus = document.activeElement;
+  const mobileToggle = document.querySelector(".menu-toggle");
+  if (window.matchMedia("(max-width: 720px)").matches &&
+      !document.querySelector(".site-nav")?.classList.contains("is-open")) {
+    mobileToggle?.click();
+  }
 
-  const guide = document.createElement("aside");
+  const guide = document.createElement("div");
   guide.className = "mandi-nav-guide";
-  guide.setAttribute("aria-label", "Mandi Prices website tutorial");
+  guide.setAttribute("role", "presentation");
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "mandi-nav-guide__backdrop";
+  backdrop.setAttribute("aria-hidden", "true");
 
   const farmer = document.createElement("img");
   farmer.className = "mandi-nav-guide__farmer";
   farmer.src = new URL("../Images/Characte_For_RateGPT/Characte_For_RateGPT_Point.png", import.meta.url).href;
   farmer.alt = "";
-  farmer.width = 240;
-  farmer.height = 260;
+  farmer.width = 300;
+  farmer.height = 320;
   farmer.loading = "eager";
   farmer.decoding = "async";
 
-  const copy = document.createElement("div");
+  const copy = document.createElement("section");
   copy.className = "mandi-nav-guide__copy";
+  copy.setAttribute("role", "dialog");
+  copy.setAttribute("aria-modal", "false");
+  copy.setAttribute("aria-labelledby", "mandiNavGuideTitle");
 
   const close = document.createElement("button");
   close.className = "mandi-nav-guide__close";
@@ -42,6 +51,10 @@ export function startMandiNavGuide() {
   const eyebrow = document.createElement("span");
   eyebrow.className = "mandi-nav-guide__eyebrow";
 
+  const title = document.createElement("h2");
+  title.id = "mandiNavGuideTitle";
+  title.className = "mandi-nav-guide__title";
+
   const message = document.createElement("p");
   message.id = "mandiNavGuideText";
   message.className = "mandi-nav-guide__message";
@@ -50,38 +63,75 @@ export function startMandiNavGuide() {
   action.className = "mandi-nav-guide__action";
   action.href = "mandi-prices.html";
 
-  const stopGuide = () => {
+  const stopGuide = ({ restoreFocus = false } = {}) => {
     guide.remove();
     pricesLink.classList.remove("is-guide-highlighted");
     pricesLink.removeAttribute("aria-describedby");
     document.removeEventListener("keydown", onEscape);
+    window.removeEventListener("resize", positionGuide);
+    window.removeEventListener("scroll", positionGuide, true);
+    if (restoreFocus && previousFocus instanceof HTMLElement) previousFocus.focus();
   };
+
   const onEscape = event => {
     if (event.key === "Escape") {
-      stopGuide();
-      close.focus();
+      event.preventDefault();
+      stopGuide({ restoreFocus: true });
     }
   };
 
   const syncLanguage = () => {
     const hi = getLang() === "hi";
-    guide.setAttribute("aria-label", hi ? "मंडी भाव देखने का वेबसाइट ट्यूटोरियल" : "Mandi Prices website tutorial");
+    guide.setAttribute("aria-label", hi ? "मंडी भाव देखने का ट्यूटोरियल" : "Mandi Prices website tutorial");
     close.setAttribute("aria-label", hi ? "ट्यूटोरियल बंद करें" : "Close tutorial");
-    eyebrow.textContent = hi ? "वेबसाइट ट्यूटोरियल" : "WEBSITE TUTORIAL";
+    eyebrow.textContent = hi ? "आपका Rate-GPT गाइड" : "YOUR RATE-GPT GUIDE";
+    title.textContent = hi ? "मंडी के भाव यहाँ देखें" : "Explore Mandi Prices here";
     message.textContent = hi
-      ? "अपनी फसल के मंडी भाव देखने के लिए ऊपर हाइलाइट किए गए Mandi prices पर क्लिक करें।"
-      : "Click the highlighted Mandi prices tab above to explore crop prices.";
-    action.textContent = hi ? "यहाँ क्लिक करें · मंडी भाव देखें →" : "Click here · Explore Mandi Prices →";
+      ? "अपनी फसल के सरकारी मंडी भाव, अलग-अलग मंडियों की कीमतें और उनकी तुलना देखने के लिए ऊपर हाइलाइट किए गए Mandi prices पर क्लिक करें।"
+      : "Click the highlighted Mandi prices tab to check government-reported crop prices and compare rates across mandis.";
+    action.textContent = hi ? "मंडी के भाव देखें · यहाँ क्लिक करें →" : "Click here · Explore Mandi Prices →";
   };
 
-  close.addEventListener("click", stopGuide);
-  action.addEventListener("click", stopGuide);
-  pricesLink.addEventListener("click", stopGuide, { once: true });
+  function positionGuide() {
+    const rect = pricesLink.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    guide.style.setProperty("--spot-x", centerX + "px");
+    guide.style.setProperty("--spot-y", centerY + "px");
+    pricesLink.classList.add("is-guide-highlighted");
+    pricesLink.setAttribute("aria-describedby", "mandiNavGuideText");
+
+    const compact = window.innerWidth < 900;
+    guide.classList.toggle("is-compact", compact);
+    const bubbleWidth = Math.min(compact ? window.innerWidth - 32 : 370, 370);
+    const bubbleLeft = Math.max(16, Math.min(rect.left - 8, window.innerWidth - bubbleWidth - 16));
+    const belowNav = rect.bottom + 22;
+    const bubbleTop = Math.min(belowNav, Math.max(90, window.innerHeight - (compact ? 300 : 280)));
+    copy.style.left = bubbleLeft + "px";
+    copy.style.top = bubbleTop + "px";
+    copy.style.width = bubbleWidth + "px";
+
+    if (compact) {
+      farmer.style.left = Math.max(16, Math.min(bubbleLeft + bubbleWidth - 150, window.innerWidth - 166)) + "px";
+      farmer.style.top = Math.min(bubbleTop + copy.offsetHeight + 4, window.innerHeight - 190) + "px";
+    } else {
+      farmer.style.left = Math.min(bubbleLeft + bubbleWidth - 6, window.innerWidth - 250) + "px";
+      farmer.style.top = Math.max(78, bubbleTop - 38) + "px";
+    }
+  }
+
+  close.addEventListener("click", () => stopGuide({ restoreFocus: true }));
+  action.addEventListener("click", () => stopGuide());
+  pricesLink.addEventListener("click", () => stopGuide(), { once: true });
   document.addEventListener("keydown", onEscape);
-  copy.append(close, eyebrow, message, action);
-  guide.append(farmer, copy);
-  hero.prepend(guide);
+  copy.append(close, eyebrow, title, message, action);
+  guide.append(backdrop, copy, farmer);
+  document.body.append(guide);
   syncLanguage();
+  positionGuide();
+  window.addEventListener("resize", positionGuide);
+  window.addEventListener("scroll", positionGuide, true);
   onLangChange(syncLanguage);
-  action.focus();
+  close.focus();
 }
