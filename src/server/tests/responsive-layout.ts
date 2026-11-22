@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, mandiNavGuideCss] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -31,6 +31,8 @@ async function main() {
     readFile("style/onboarding.css", "utf8"),
     readFile("script/mandi-nav-guide.js", "utf8"),
     readFile("style/mandi-nav-guide.css", "utf8"),
+    readFile("script/home-market-preview.js", "utf8"),
+    readFile("script/i18n.js", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -109,6 +111,29 @@ async function main() {
     mandiNavGuideCss.includes("color: #17251c") &&
     mandiNavGuideCss.includes("background: #fff"),
     "farmer speech bubble and on-demand navigation guide use Rate-GPT green with mobile and reduced-motion support");
+  check(home.includes('id="demoTutorialAgain"') &&
+    home.includes('data-i18n="demo.viewTutorialAgain"') &&
+    home.includes('href="mandi-prices.html"') &&
+    home.includes('class="demo-video-placeholder"') &&
+    !home.includes("demoVideoFrame") &&
+    !home.includes("<iframe id="),
+    "homepage demo dialog shows both live-prices and tutorial-again actions without embedding a video");
+  check(homePreviewScript.includes('import { startMandiNavGuide } from "./mandi-nav-guide.js"') &&
+    /\$\("demoTutorialAgain"\)\?\.addEventListener\("click",\s*\(\)\s*=>\s*\{[\s\S]*?demoDialog\.close\(\)[\s\S]*?startMandiNavGuide\(\)/.test(homePreviewScript) &&
+    !homePreviewScript.includes("DEMO_VIDEO_SRC") &&
+    !homePreviewScript.includes("youtube-nocookie"),
+    "View tutorial again closes the demo dialog and starts the homepage spotlight without playing video");
+  check(i18n.includes('"demo.viewTutorialAgain": "View tutorial again"') &&
+    i18n.includes('"demo.viewTutorialAgain": "ट्यूटोरियल फिर से देखें"') &&
+    i18n.includes('"demo.exploreLivePrices": "Explore live prices"') &&
+    i18n.includes('"demo.exploreLivePrices": "लाइव मंडी भाव देखें"'),
+    "demo dialog actions have English and Hindi translations");
+  check(homeCss.includes(".demo-video-placeholder") &&
+    homeCss.includes(".demo-tutorial-again") &&
+    homeCss.includes("background: transparent") &&
+    homeCss.includes("@media (max-width: 620px)"),
+    "demo placeholder and transparent tutorial action have responsive styling");
+
   check(baseCss.includes(".demo-menu-trigger") &&
     baseCss.includes(".demo-menu-panel") &&
     baseCss.includes("@media (max-width: 720px)"),
