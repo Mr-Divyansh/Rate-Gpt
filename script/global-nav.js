@@ -1,6 +1,7 @@
 import { applyI18n, getLang, setLang, onLangChange, t } from "./i18n.js";
 import { hydrateIcons, icon } from "./icons.js";
 import { showFirstVisitWelcome } from "./onboarding.js";
+import { startMandiNavGuide } from "./mandi-nav-guide.js";
 
 const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
 
@@ -48,6 +49,63 @@ function languageToggle() {
   const sync = () => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === getLang())));
   sync(); onLangChange(sync); return group;
 }
+function demoMenu() {
+  const wrap = document.createElement("div");
+  wrap.className = "demo-menu";
+
+  const trigger = document.createElement("button");
+  trigger.className = "demo-menu-trigger";
+  trigger.type = "button";
+  trigger.setAttribute("aria-haspopup", "true");
+  trigger.setAttribute("aria-expanded", "false");
+
+  const panel = document.createElement("div");
+  panel.className = "demo-menu-panel";
+  panel.hidden = true;
+  panel.setAttribute("role", "menu");
+
+  const tutorial = document.createElement("button");
+  tutorial.className = "demo-menu-item";
+  tutorial.type = "button";
+  tutorial.setAttribute("role", "menuitem");
+
+  const syncLanguage = () => {
+    const hi = getLang() === "hi";
+    trigger.textContent = hi ? "डेमो ▾" : "Demo ▾";
+    trigger.setAttribute("aria-label", hi ? "डेमो विकल्प खोलें" : "Open demo options");
+    tutorial.textContent = hi ? "वेबसाइट ट्यूटोरियल" : "Website tutorial";
+  };
+
+  const close = () => {
+    panel.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  };
+  const open = () => {
+    panel.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+  };
+
+  trigger.addEventListener("click", () => panel.hidden ? open() : close());
+  tutorial.addEventListener("click", () => {
+    close();
+    startMandiNavGuide();
+  });
+  document.addEventListener("click", event => {
+    if (!wrap.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !panel.hidden) {
+      close();
+      trigger.focus();
+    }
+  });
+
+  panel.append(tutorial);
+  wrap.append(trigger, panel);
+  syncLanguage();
+  onLangChange(syncLanguage);
+  return wrap;
+}
 function renderHeader(header) {
   header.replaceChildren(); header.classList.add("has-mobile-drawer");
   const inner = document.createElement("div"); inner.className = "header-inner wrap";
@@ -58,7 +116,7 @@ function renderHeader(header) {
   const nav = document.createElement("nav"); nav.className = "site-nav"; nav.id = "primaryNavigation";
   nav.dataset.i18nAttr = "aria-label:nav.label"; LINKS.forEach(item => nav.append(navLink(item)));
   const actions = document.createElement("div"); actions.className = "header-actions";
-  actions.append(languageToggle(), toggle);
+  actions.append(demoMenu(), languageToggle(), toggle);
   inner.append(brand("brand"), nav, actions); header.append(inner);
   const backdrop = document.createElement("button"); backdrop.className = "nav-backdrop";
   backdrop.type = "button"; backdrop.tabIndex = -1; backdrop.setAttribute("aria-label", getLang()==="hi" ? "मेनू बंद करें" : "Close menu");
@@ -188,7 +246,12 @@ applyI18n();
 // Keep it out of Mandi Prices, Weather, About, Contact and policy pages so
 // visitors can use those pages directly without an unrelated modal appearing.
 if (currentPage === "index.html" && document.body.classList.contains("page-home")) {
-  showFirstVisitWelcome();
+  const shouldStartWebsiteTutorial = new URLSearchParams(window.location.search).get("startWebsiteTutorial") === "1";
+  if (shouldStartWebsiteTutorial) {
+    startMandiNavGuide();
+  } else {
+    showFirstVisitWelcome();
+  }
 }
 function applySharedTranslations() {
   const hi = getLang() === "hi";
