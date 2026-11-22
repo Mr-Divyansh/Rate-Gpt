@@ -66,7 +66,7 @@ async function main() {
 
   check(onboardingScript.includes("onboarding-continue") &&
     /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
-    /dialog\.querySelector\("\.onboarding-skip"\)\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*shouldStartWebsiteGuide = false;\s*dialog\.close\(\);\s*dialog\.remove\(\);\s*\}\)/.test(onboardingScript) &&
+    /dialog\.querySelector\("\.onboarding-skip"\)\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*shouldStartWebsiteGuide = false;\s*markWelcomeSeen\(\);\s*dialog\.close\(\);\s*dialog\.remove\(\);\s*\}\)/.test(onboardingScript) &&
     /markWelcomeSeen\(\);[\s\S]*?dialog\.close\(\);[\s\S]*?if \(shouldStartWebsiteGuide\) startMandiNavGuide\(\)/.test(onboardingScript) &&
     onboardingScript.includes('window.localStorage.setItem("rateGptWelcomeSeen", "1")') &&
     !onboardingScript.includes('href="mandi-prices.html"') &&
