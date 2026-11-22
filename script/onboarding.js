@@ -60,12 +60,8 @@ export function showFirstVisitWelcome() {
   const showSolution = () => {
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--solution">
-        <div class="onboarding-art-wrap onboarding-art-wrap--click">
+        <div class="onboarding-art-wrap">
           <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Tell.png" alt="${hi ? "मंडी भाव के बारे में बताते हुए किसान" : "Farmer explaining how to explore mandi prices"}" width="320" height="320" fetchpriority="high" decoding="async">
-          <a class="onboarding-farmer-cta" href="mandi-prices.html">
-            <span>${hi ? "मंडी भाव देखने के लिए" : "Want to explore mandi prices?"}</span>
-            <strong>${hi ? "यहाँ क्लिक करें" : "CLICK HERE"} <span aria-hidden="true">→</span></strong>
-          </a>
         </div>
         <div class="onboarding-copy">
           <div class="onboarding-progress" role="group" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}">
@@ -88,13 +84,13 @@ export function showFirstVisitWelcome() {
             <li>${hi ? "न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर मैं बेहतर जानकारी के साथ फैसला कर सकता हूँ।" : "I can use minimum, maximum, modal prices and arrivals to make a more informed selling decision."}</li>
           </ul>
           <p class="onboarding-note onboarding-assistant-note">${hi ? "Rate-GPT आपको जानकारी देता है — फैसला आप अपनी जरूरत और बाजार की स्थिति देखकर लें।" : "Rate-GPT gives you useful information. You stay in control of your selling decision."}</p>
+          <div class="onboarding-actions onboarding-actions--single">
+            <a class="btn btn-primary onboarding-continue" href="mandi-prices.html">${hi ? "जारी रखें" : "Continue"} <span aria-hidden="true">→</span></a>
+          </div>
         </div>
       </div>
     `;
-    // Keep the speech-bubble action focused; the welcome appears again
-    // on the next homepage visit while testing is enabled.
-    const farmerCta = dialog.querySelector(".onboarding-farmer-cta");
-    farmerCta.focus();
+    dialog.querySelector(".onboarding-continue")?.focus();
   };
 
   dialog.innerHTML = `
