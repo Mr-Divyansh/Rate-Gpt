@@ -75,13 +75,23 @@ async function main() {
     onboardingCss.includes("Final step: centered farmer artwork"),
     "final intro step centers the farmer, removes the speech bubble and closes the dialog on Continue");
   check(home.includes('/script/mandi-nav-guide.js') &&
+    onboardingScript.includes('import { startMandiNavGuide } from "./mandi-nav-guide.js"') &&
+    onboardingScript.includes("shouldStartWebsiteGuide = true") &&
+    onboardingScript.includes("if (shouldStartWebsiteGuide) startMandiNavGuide()") &&
+    onboardingScript.includes("shouldStartWebsiteGuide = false") &&
     mandiNavGuideScript.includes("export function startMandiNavGuide()") &&
     mandiNavGuideScript.includes("Characte_For_RateGPT_Point.png") &&
     mandiNavGuideScript.includes('pricesLink.classList.add("is-guide-highlighted")') &&
     mandiNavGuideScript.includes('action.href = "mandi-prices.html"') &&
-    mandiNavGuideScript.includes('close.addEventListener("click", stopGuide)') &&
-    mandiNavGuideScript.includes("onLangChange(syncLanguage)"),
-    "website tutorial is started on demand, highlights Mandi Prices and exposes close only while active");
+    mandiNavGuideScript.includes('close.addEventListener("click"') &&
+    mandiNavGuideScript.includes("--spot-x") &&
+    mandiNavGuideScript.includes("Click the highlighted Mandi prices tab") &&
+    mandiNavGuideScript.includes("onLangChange(syncLanguage)") &&
+    mandiNavGuideCss.includes("rgba(9, 22, 15, .66)") &&
+    mandiNavGuideCss.includes("background: #ffe65c") &&
+    mandiNavGuideCss.includes("background: #fff") &&
+    mandiNavGuideCss.includes("color: #17251c"),
+    "Continue launches a dimmed spotlight with a white instruction bubble and pointing farmer; Skip does not");
   check(globalNav.includes("function demoMenu()") &&
     globalNav.includes("Website tutorial") &&
     globalNav.includes("startMandiNavGuide()") &&
