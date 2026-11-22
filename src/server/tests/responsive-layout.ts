@@ -60,17 +60,17 @@ async function main() {
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
 
-  check(/Characte_For_RateGPT_Point\\.png/.test(onboardingScript) &&
-    /hero-mandi-guide/.test(onboardingScript) &&
-    /showMandiPricesGuide\\(\\)/.test(onboardingScript),
+  check(onboardingScript.includes("Characte_For_RateGPT_Point.png") &&
+    onboardingScript.includes("hero-mandi-guide") &&
+    onboardingScript.includes("showMandiPricesGuide()"),
     "homepage onboarding adds the pointing farmer guide after the final intro step");
-  check(/href="mandi-prices\\.html"/.test(onboardingScript) &&
-    /is-guide-highlighted/.test(onboardingScript) &&
-    /menuToggle/.test(onboardingScript),
+  check(onboardingScript.includes('href="mandi-prices.html"') &&
+    onboardingScript.includes("is-guide-highlighted") &&
+    onboardingScript.includes("menuToggle"),
     "Mandi Prices guide links to the page and highlights desktop and mobile navigation");
-  check(/\\.hero-mandi-guide/.test(onboardingCss) &&
-    /@media \\(max-width: 760px\\)/.test(onboardingCss) &&
-    /prefers-reduced-motion: no-preference/.test(onboardingCss),
+  check(onboardingCss.includes(".hero-mandi-guide") &&
+    onboardingCss.includes("@media (max-width: 760px)") &&
+    onboardingCss.includes("prefers-reduced-motion: no-preference"),
     "Mandi Prices guide is responsive and respects reduced-motion preferences");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
