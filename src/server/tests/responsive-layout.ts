@@ -66,7 +66,7 @@ async function main() {
 
   check(onboardingScript.includes("onboarding-continue") &&
     /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
-    /continueButton\.addEventListener\("click",\s*\(\)\s*=>\s*dialog\.close\(\)\)/.test(onboardingScript) &&
+    /continueButton\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*dialog\.close\(\);\s*if \(shouldStartWebsiteGuide\) startMandiNavGuide\(\);\s*\}\)/.test(onboardingScript) &&
     !onboardingScript.includes('href="mandi-prices.html"') &&
     !onboardingScript.includes("onboarding-farmer-cta") &&
     !onboardingScript.includes("onboarding-finish") &&
