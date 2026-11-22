@@ -39,13 +39,19 @@ export function showFirstVisitWelcome() {
             <li>${hi ? "भाव को समझें: न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर जानकारी के साथ फैसला लें।" : "Understand the rates: Use minimum, maximum, modal prices and arrivals to make a more informed choice."}</li>
           </ul>
           <p class="onboarding-note onboarding-assistant-note">${hi ? "चिंता न करें — Rate-GPT किसान सहायक आपको मंडी की जानकारी समझने में मदद करेगा।" : "Don’t worry — your Rate-GPT Farmer Assistant will help you make sense of mandi information."}</p>
+          <div class="onboarding-actions onboarding-actions--single">
+            <button class="btn btn-primary onboarding-continue" type="button">${hi ? "आगे बढ़ें" : "Continue"} <span aria-hidden="true">→</span></button>
+          </div>
         </div>
       </div>
     `;
-    // Both the Skip and View paths lead to this short benefits introduction.
-    // Continue advances to the second and final onboarding screen.
-    dialog.querySelector(".onboarding-continue").addEventListener("click", showSolution);
-    dialog.querySelector(".onboarding-continue").focus();
+    // Keep this explicit null-safe lookup: the Continue action is part of
+    // the benefits screen and advances to the final farmer-led price action.
+    const continueButton = dialog.querySelector(".onboarding-continue");
+    if (continueButton) {
+      continueButton.addEventListener("click", showSolution);
+      continueButton.focus();
+    }
   };
 
   // The second screen tells the farmer, in a simple first-person story,
