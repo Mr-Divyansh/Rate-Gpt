@@ -1003,3 +1003,112 @@
 @media (prefers-reduced-motion: reduce) {
   .onboarding-farmer-cta { transition: none; }
 }
+
+
+/* Final farmer CTA layout: show the Tell illustration and its action side by side.
+   This keeps the speech panel clear of the farmer's face on desktop and phones. */
+.onboarding-card--solution .onboarding-art-wrap--click {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: clamp(8px, 2vw, 18px);
+  width: 100%;
+  min-height: 184px;
+  margin: 0;
+  overflow: visible;
+}
+.onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+  justify-self: center;
+  width: min(100%, 210px) !important;
+  max-width: 210px !important;
+  height: 184px !important;
+  max-height: 184px !important;
+  object-fit: contain;
+}
+.onboarding-card--solution .onboarding-farmer-cta {
+  position: relative;
+  inset: auto;
+  display: grid;
+  align-content: center;
+  justify-self: stretch;
+  width: 100%;
+  min-height: 104px;
+  padding: 16px clamp(12px, 2vw, 20px);
+  border: 1.5px solid rgba(255, 255, 255, .72);
+  border-radius: 18px 18px 18px 6px;
+  background: linear-gradient(135deg, rgba(13, 112, 72, .94), rgba(7, 94, 61, .84));
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(8, 72, 47, .20), inset 0 1px 0 rgba(255,255,255,.18), 0 0 0 4px rgba(33, 134, 83, .09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: .82rem;
+  line-height: 1.35;
+  text-align: left;
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.onboarding-card--solution .onboarding-farmer-cta::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  bottom: 18px;
+  width: 12px;
+  height: 12px;
+  border-left: 1.5px solid rgba(255,255,255,.72);
+  border-bottom: 1.5px solid rgba(255,255,255,.72);
+  background: #0b6845;
+  transform: rotate(45deg);
+}
+.onboarding-card--solution .onboarding-farmer-cta strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: clamp(.92rem, 2vw, 1.08rem);
+  letter-spacing: .035em;
+}
+.onboarding-card--solution .onboarding-farmer-cta:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(7, 94, 61, .98), rgba(5, 77, 49, .94));
+  box-shadow: 0 15px 32px rgba(8, 72, 47, .25), inset 0 1px 0 rgba(255,255,255,.2), 0 0 0 5px rgba(33, 134, 83, .13);
+}
+@media (max-width: 700px) {
+  .onboarding-card--solution .onboarding-art-wrap--click {
+    min-height: 146px;
+    gap: 8px;
+  }
+  .onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+    width: 100% !important;
+    max-width: 168px !important;
+    height: 146px !important;
+    max-height: 146px !important;
+  }
+  .onboarding-card--solution .onboarding-farmer-cta {
+    min-height: 88px;
+    padding: 12px 10px;
+    border-radius: 15px 15px 15px 5px;
+    font-size: .72rem;
+  }
+  .onboarding-card--solution .onboarding-farmer-cta strong {
+    font-size: .88rem;
+  }
+}
+@media (max-width: 700px) and (max-height: 720px) {
+  .onboarding-card--solution .onboarding-art-wrap--click { min-height: 112px; }
+  .onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+    max-width: 138px !important;
+    height: 112px !important;
+    max-height: 112px !important;
+  }
+  .onboarding-card--solution .onboarding-farmer-cta {
+    min-height: 76px;
+    padding: 9px 8px;
+    font-size: .68rem;
+  }
+  .onboarding-card--solution .onboarding-farmer-cta strong { font-size: .82rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-card--solution .onboarding-farmer-cta { transition: none; }
+}
