@@ -185,15 +185,27 @@ if(!footer){footer=document.createElement("footer");document.body.append(footer)
 renderFooter(footer);
 applyI18n();
 
-// The onboarding experience is currently a homepage-only introduction.
-// Keep it out of Mandi Prices, Weather, About, Contact and policy pages so
-// visitors can use those pages directly without an unrelated modal appearing.
-if (currentPage === "index.html" && document.body.classList.contains("page-home")) {
-  // Show the welcome flow automatically only once. Visitors can replay it
-  // whenever they want from the Watch demo dialog's "View tutorial again" action.
-  let welcomeSeen = false;
-  try { welcomeSeen = window.localStorage.getItem("rateGptWelcomeSeen") === "1"; } catch { /* Storage may be unavailable. */ }
-  if (!welcomeSeen) showFirstVisitWelcome();
+// Track a visit in this browser profile, not just completion of the welcome
+// dialog. localStorage is scoped to this site and browser profile, so a new
+// device/profile gets its own first-visit experience.
+const DEVICE_VISIT_KEY = "rateGptDeviceVisited";
+let hasVisitedSite = false;
+try {
+  hasVisitedSite =
+    window.localStorage.getItem(DEVICE_VISIT_KEY) === "1" ||
+    window.localStorage.getItem("rateGptWelcomeSeen") === "1" ||
+    // Older visitors may already have a saved language preference from before
+    // device-visit tracking was introduced.
+    window.localStorage.getItem("rategpt.lang") !== null;
+  if (!hasVisitedSite) window.localStorage.setItem(DEVICE_VISIT_KEY, "1");
+} catch {
+  // If browser storage is blocked, the welcome can still be shown this visit.
+}
+
+// The welcome is homepage-only. A device that has already visited any
+// Rate-GPT page will not see it later; manual replay remains available.
+if (!hasVisitedSite && currentPage === "index.html" && document.body.classList.contains("page-home")) {
+  showFirstVisitWelcome();
 }
 function applySharedTranslations() {
   const hi = getLang() === "hi";
