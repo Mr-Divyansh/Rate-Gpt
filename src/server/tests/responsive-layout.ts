@@ -63,7 +63,9 @@ async function main() {
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
 
   check(onboardingScript.includes("onboarding-continue") &&
-    onboardingScript.includes('href="mandi-prices.html"') &&
+    /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
+    /continueButton\.addEventListener\("click",\s*\(\)\s*=>\s*dialog\.close\(\)\)/.test(onboardingScript) &&
+    !onboardingScript.includes('href="mandi-prices.html"') &&
     !onboardingScript.includes("onboarding-farmer-cta") &&
     !onboardingScript.includes("onboarding-finish") &&
     !onboardingScript.includes("onboarding-close") &&
@@ -71,7 +73,7 @@ async function main() {
     !onboardingScript.includes("hero-mandi-guide") &&
     onboardingCss.includes("display: none !important") &&
     onboardingCss.includes("Final step: centered farmer artwork"),
-    "final intro step centers the farmer, removes the speech bubble and uses Continue as its only action");
+    "final intro step centers the farmer, removes the speech bubble and closes the dialog on Continue");
   check(home.includes('/script/mandi-nav-guide.js') &&
     mandiNavGuideScript.includes("export function startMandiNavGuide()") &&
     mandiNavGuideScript.includes("Characte_For_RateGPT_Point.png") &&
