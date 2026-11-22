@@ -127,8 +127,10 @@ export function showFirstVisitWelcome() {
 
   document.body.append(dialog);
   dialog.querySelector(".onboarding-skip").addEventListener("click", () => {
+    // Skip means skip the entire introduction and every follow-up spotlight.
     shouldStartWebsiteGuide = false;
-    showThankYou();
+    dialog.close();
+    dialog.remove();
   });
   // The welcome/benefits introduction is not the interactive website tutorial.
   // Keep it free of a close control; Escape must not dismiss it unexpectedly.
