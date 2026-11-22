@@ -67,7 +67,8 @@ async function main() {
   check(onboardingScript.includes("onboarding-continue") &&
     /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
     /dialog\.querySelector\("\.onboarding-skip"\)\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*shouldStartWebsiteGuide = false;\s*dialog\.close\(\);\s*dialog\.remove\(\);\s*\}\)/.test(onboardingScript) &&
-    /continueButton\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*dialog\.close\(\);\s*if \(shouldStartWebsiteGuide\) startMandiNavGuide\(\);\s*\}\)/.test(onboardingScript) &&
+    /markWelcomeSeen\(\);[\s\S]*?dialog\.close\(\);[\s\S]*?if \(shouldStartWebsiteGuide\) startMandiNavGuide\(\)/.test(onboardingScript) &&
+    onboardingScript.includes('window.localStorage.setItem("rateGptWelcomeSeen", "1")') &&
     !onboardingScript.includes('href="mandi-prices.html"') &&
     !onboardingScript.includes("onboarding-farmer-cta") &&
     !onboardingScript.includes("onboarding-finish") &&
@@ -109,8 +110,10 @@ async function main() {
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
-    globalNav.includes("actions.append(languageToggle(), toggle)"),
-    "shared header removes the Demo button and keeps language and mobile navigation controls");
+    globalNav.includes("actions.append(languageToggle(), toggle)") &&
+    globalNav.includes('window.localStorage.getItem("rateGptWelcomeSeen") === "1"') &&
+    globalNav.includes("if (!welcomeSeen) showFirstVisitWelcome()"),
+    "shared header removes Demo and welcome onboarding appears only until completed or skipped");
   check(home.includes('href="style/mandi-nav-guide.css"') &&
     mandiNavGuideCss.includes(".mandi-nav-guide") &&
     onboardingCss.includes(".onboarding-farmer-cta") &&
