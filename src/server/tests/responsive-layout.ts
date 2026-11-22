@@ -66,6 +66,7 @@ async function main() {
 
   check(onboardingScript.includes("onboarding-continue") &&
     /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
+    /dialog\.querySelector\("\.onboarding-skip"\)\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*shouldStartWebsiteGuide = false;\s*dialog\.close\(\);\s*dialog\.remove\(\);\s*\}\)/.test(onboardingScript) &&
     /continueButton\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*dialog\.close\(\);\s*if \(shouldStartWebsiteGuide\) startMandiNavGuide\(\);\s*\}\)/.test(onboardingScript) &&
     !onboardingScript.includes('href="mandi-prices.html"') &&
     !onboardingScript.includes("onboarding-farmer-cta") &&
@@ -106,11 +107,10 @@ async function main() {
     mandiNavGuideCss.includes("@media (max-width: 380px)"),
     "mobile spotlight uses a centered compact bubble, smaller action text and scaled farmer");
 
-  check(globalNav.includes("function demoMenu()") &&
-    globalNav.includes("Website tutorial") &&
-    globalNav.includes("startMandiNavGuide()") &&
-    globalNav.includes("actions.append(demoMenu(), languageToggle(), toggle)"),
-    "shared header places a Demo menu before language controls and launches Website tutorial");
+  check(!globalNav.includes("function demoMenu()") &&
+    !globalNav.includes("demo-menu-trigger") &&
+    globalNav.includes("actions.append(languageToggle(), toggle)"),
+    "shared header removes the Demo button and keeps language and mobile navigation controls");
   check(home.includes('href="style/mandi-nav-guide.css"') &&
     mandiNavGuideCss.includes(".mandi-nav-guide") &&
     onboardingCss.includes(".onboarding-farmer-cta") &&
@@ -128,11 +128,11 @@ async function main() {
     !home.includes("demoVideoFrame") &&
     !home.includes("<iframe id="),
     "homepage demo dialog shows both live-prices and tutorial-again actions without embedding a video");
-  check(homePreviewScript.includes('import { startMandiNavGuide } from "./mandi-nav-guide.js"') &&
-    /\$\("demoTutorialAgain"\)\?\.addEventListener\("click",\s*\(\)\s*=>\s*\{[\s\S]*?demoDialog\.close\(\)[\s\S]*?startMandiNavGuide\(\)/.test(homePreviewScript) &&
+  check(homePreviewScript.includes('import { showFirstVisitWelcome } from "./onboarding.js"') &&
+    /\$\("demoTutorialAgain"\)\?\.addEventListener\("click",\s*\(\)\s*=>\s*\{[\s\S]*?demoDialog\.close\(\)[\s\S]*?showFirstVisitWelcome\(\)/.test(homePreviewScript) &&
     !homePreviewScript.includes("DEMO_VIDEO_SRC") &&
     !homePreviewScript.includes("youtube-nocookie"),
-    "View tutorial again closes the demo dialog and starts the homepage spotlight without playing video");
+    "View tutorial again closes the demo dialog and restarts the complete Namaste welcome flow");
   check(i18n.includes('"demo.viewTutorialAgain": "View tutorial again"') &&
     i18n.includes('"demo.viewTutorialAgain": "ट्यूटोरियल फिर से देखें"') &&
     i18n.includes('"demo.exploreLivePrices": "Explore live prices"') &&
@@ -144,10 +144,9 @@ async function main() {
     homeCss.includes("@media (max-width: 620px)"),
     "demo placeholder and transparent tutorial action have responsive styling");
 
-  check(baseCss.includes(".demo-menu-trigger") &&
-    baseCss.includes(".demo-menu-panel") &&
-    baseCss.includes("@media (max-width: 720px)"),
-    "Demo dropdown remains usable beside language controls on narrow screens");
+  check(!baseCss.includes(".demo-menu-trigger") &&
+    !baseCss.includes(".demo-menu-panel"),
+    "unused Demo dropdown styles are removed from the shared header stylesheet");
 
   check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
