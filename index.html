@@ -102,12 +102,18 @@
       </div>
       <button class="dialog-close" type="button" id="demoClose" aria-label="Close demo">×</button>
     </div>
-    <div class="demo-video-frame">
-      <iframe id="demoVideoFrame" title="Rate-GPT video demo" src="" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="demo-video-frame" aria-label="Video walkthrough placeholder">
+      <div class="demo-video-placeholder" role="status">
+        <span class="demo-video-placeholder__mark" aria-hidden="true">▶</span>
+        <p data-i18n="demo.videoComingSoon">Video walkthrough coming soon.</p>
+      </div>
     </div>
     <div class="demo-dialog-foot">
-      <span>Prices shown in the video may be older than what’s live now.</span>
-      <a class="btn btn-primary" href="mandi-prices.html">Explore live prices <span data-icon="arrow"></span></a>
+      <span data-i18n="demo.videoNote">The video walkthrough will be available here soon.</span>
+      <div class="demo-dialog-actions">
+        <a class="btn btn-primary" href="mandi-prices.html"><span data-i18n="demo.exploreLivePrices">Explore live prices</span> <span data-icon="arrow"></span></a>
+        <button class="btn demo-tutorial-again" id="demoTutorialAgain" type="button" data-i18n="demo.viewTutorialAgain">View tutorial again</button>
+      </div>
     </div>
   </dialog>
 
