@@ -132,14 +132,15 @@ async function main() {
   check(home.includes('id="demoTutorialAgain"') &&
     home.includes('data-i18n="demo.viewTutorialAgain"') &&
     home.includes('href="mandi-prices.html"') &&
-    home.includes('class="demo-video-placeholder"') &&
-    !home.includes("demoVideoFrame") &&
-    !home.includes("<iframe id="),
-    "homepage demo dialog shows both live-prices and tutorial-again actions without embedding a video");
+    home.includes('src="https://www.youtube-nocookie.com/embed/AsImBHSFDtI?rel=0"') &&
+    home.includes('title="Rate-GPT video demo"') &&
+    home.includes('allowfullscreen') &&
+    home.includes('loading="lazy"') &&
+    !home.includes("demo-video-placeholder"),
+    "homepage demo dialog embeds the supplied YouTube walkthrough with accessible, lazy-loaded playback");
   check(homePreviewScript.includes('import { showFirstVisitWelcome } from "./onboarding.js"') &&
     /\$\("demoTutorialAgain"\)\?\.addEventListener\("click",\s*\(\)\s*=>\s*\{[\s\S]*?demoDialog\.close\(\)[\s\S]*?showFirstVisitWelcome\(\)/.test(homePreviewScript) &&
-    !homePreviewScript.includes("DEMO_VIDEO_SRC") &&
-    !homePreviewScript.includes("youtube-nocookie"),
+    !homePreviewScript.includes("DEMO_VIDEO_SRC"),
     "View tutorial again closes the demo dialog and restarts the complete Namaste welcome flow");
   check(i18n.includes('"demo.viewTutorialAgain": "View tutorial again"') &&
     i18n.includes('"demo.viewTutorialAgain": "ट्यूटोरियल फिर से देखें"') &&
