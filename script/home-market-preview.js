@@ -11,9 +11,21 @@ const BOARD_ROWS = 5;
 
 /* ---------------- interactive product demo ---------------- */
 const demoDialog = $("demoDialog");
+const demoVideo = demoDialog?.querySelector(".demo-video-frame iframe");
+const openDemoVideo = () => {
+  if (demoVideo && !demoVideo.hasAttribute("src")) {
+    demoVideo.setAttribute("src", demoVideo.dataset.src);
+  }
+};
+const stopDemoVideo = () => {
+  // Removing the iframe source unloads the YouTube player and stops both video and audio.
+  demoVideo?.removeAttribute("src");
+};
 $("watchDemo")?.addEventListener("click", () => {
+  openDemoVideo();
   demoDialog?.showModal();
 });
+demoDialog?.addEventListener("close", stopDemoVideo);
 $("demoTutorialAgain")?.addEventListener("click", () => {
   // Restart the complete introduction from the Namaste welcome screen.
   if (demoDialog?.open) demoDialog.close();
