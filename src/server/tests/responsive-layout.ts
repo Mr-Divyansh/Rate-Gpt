@@ -26,7 +26,9 @@ async function main() {
     readFile("style/weather.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
-    readFile("script/weather.js", "utf8"),\n    readFile("script/onboarding.js", "utf8"),\n    readFile("style/onboarding.css", "utf8"),
+    readFile("script/weather.js", "utf8"),
+    readFile("script/onboarding.js", "utf8"),
+    readFile("style/onboarding.css", "utf8"),
   ]);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
