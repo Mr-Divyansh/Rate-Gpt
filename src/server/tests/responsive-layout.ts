@@ -107,13 +107,16 @@ async function main() {
     mandiNavGuideCss.includes("font-size: .82rem") &&
     mandiNavGuideCss.includes("@media (max-width: 380px)"),
     "mobile spotlight uses a centered compact bubble, smaller action text and scaled farmer");
-  check(mandiNavGuideCss.includes("ellipse 48vw 42px") &&
+  check(mandiNavGuideScript.includes('guide.style.setProperty("--spot-rx", spotlightRadiusX + "px")') &&
+    mandiNavGuideScript.includes("centerX - 10") &&
+    mandiNavGuideScript.includes("window.innerWidth - centerX - 10") &&
+    mandiNavGuideCss.includes("ellipse var(--spot-rx, 150px) 38px") &&
     mandiNavGuideCss.includes("width: 100%") &&
     mandiNavGuideCss.includes("background: #f1fff6") &&
-    mandiNavGuideCss.includes("box-shadow:") &&
-    mandiNavGuideCss.includes('content: "→"') &&
-    mandiNavGuideCss.includes("outline-offset: 5px"),
-    "mobile Mandi Prices target highlights the full drawer row with a strong border, glow and arrow");
+    mandiNavGuideCss.includes("0 0 0 4px rgba(8, 117, 79, .22)") &&
+    mandiNavGuideCss.includes("transform: none") &&
+    mandiNavGuideCss.includes('content: "→"'),
+    "mobile Mandi Prices spotlight glow is target-sized, centered and constrained within the viewport");
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
