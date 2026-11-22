@@ -85,7 +85,13 @@ export function showFirstVisitWelcome() {
         </div>
       </div>
     `;
-    dialog.querySelector(".onboarding-farmer-cta").focus();
+    // Remember that the first-visit introduction has been completed so the
+    // Demo > Website tutorial menu remains available on future visits.
+    const farmerCta = dialog.querySelector(".onboarding-farmer-cta");
+    farmerCta.addEventListener("click", () => {
+      try { window.localStorage.setItem("rateGptIntroSeen", "1"); } catch { /* Storage may be disabled. */ }
+    }, { once: true });
+    farmerCta.focus();
   };
 
   dialog.innerHTML = `
