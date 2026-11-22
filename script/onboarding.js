@@ -61,7 +61,7 @@ export function showFirstVisitWelcome() {
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--solution">
         <div class="onboarding-art-wrap onboarding-art-wrap--click">
-          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Point.png" alt="${hi ? "मंडी भाव देखने का रास्ता दिखाता किसान" : "Farmer pointing visitors towards mandi prices"}" width="320" height="320" fetchpriority="high" decoding="async">
+          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Tell.png" alt="${hi ? "मंडी भाव के बारे में बताते हुए किसान" : "Farmer explaining how to explore mandi prices"}" width="320" height="320" fetchpriority="high" decoding="async">
           <a class="onboarding-farmer-cta" href="mandi-prices.html">
             <span>${hi ? "मंडी भाव देखने के लिए" : "Want to explore mandi prices?"}</span>
             <strong>${hi ? "यहाँ क्लिक करें" : "CLICK HERE"} <span aria-hidden="true">→</span></strong>
