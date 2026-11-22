@@ -41,12 +41,6 @@ export function startMandiNavGuide() {
   copy.setAttribute("aria-modal", "false");
   copy.setAttribute("aria-labelledby", "mandiNavGuideTitle");
 
-  const close = document.createElement("button");
-  close.className = "mandi-nav-guide__close";
-  close.type = "button";
-  close.setAttribute("aria-label", getLang() === "hi" ? "ट्यूटोरियल बंद करें" : "Close tutorial");
-  close.textContent = "×";
-
   const eyebrow = document.createElement("span");
   eyebrow.className = "mandi-nav-guide__eyebrow";
 
@@ -82,7 +76,6 @@ export function startMandiNavGuide() {
   const syncLanguage = () => {
     const hi = getLang() === "hi";
     guide.setAttribute("aria-label", hi ? "मंडी भाव देखने का ट्यूटोरियल" : "Mandi Prices website tutorial");
-    close.setAttribute("aria-label", hi ? "ट्यूटोरियल बंद करें" : "Close tutorial");
     eyebrow.textContent = hi ? "आपका Rate-GPT गाइड" : "YOUR RATE-GPT GUIDE";
     title.textContent = hi ? "मंडी के भाव यहाँ देखें" : "Explore Mandi Prices here";
     message.textContent = hi
@@ -120,11 +113,10 @@ export function startMandiNavGuide() {
     }
   }
 
-  close.addEventListener("click", () => stopGuide({ restoreFocus: true }));
   action.addEventListener("click", () => stopGuide());
   pricesLink.addEventListener("click", () => stopGuide(), { once: true });
   document.addEventListener("keydown", onEscape);
-  copy.append(close, eyebrow, title, message, action);
+  copy.append(eyebrow, title, message, action);
   guide.append(backdrop, copy, farmer);
   document.body.append(guide);
   syncLanguage();
@@ -132,5 +124,5 @@ export function startMandiNavGuide() {
   window.addEventListener("resize", positionGuide);
   window.addEventListener("scroll", positionGuide, true);
   onLangChange(syncLanguage);
-  close.focus();
+  action.focus();
 }
