@@ -12,7 +12,6 @@ export function startMandiNavGuide() {
   if (!pricesLink) return;
 
   document.querySelector(".mandi-nav-guide")?.remove();
-  const previousFocus = document.activeElement;
   const mobileToggle = document.querySelector(".menu-toggle");
   if (window.matchMedia("(max-width: 720px)").matches &&
       !document.querySelector(".site-nav")?.classList.contains("is-open")) {
@@ -70,7 +69,7 @@ export function startMandiNavGuide() {
     document.removeEventListener("keydown", onEscape);
     window.removeEventListener("resize", positionGuide);
     window.removeEventListener("scroll", positionGuide, true);
-    if (restoreFocus && previousFocus instanceof HTMLElement) previousFocus.focus();
+    if (restoreFocus) pricesLink.focus();
   };
 
   const onEscape = event => {
