@@ -8,6 +8,9 @@ export function showFirstVisitWelcome() {
 
   const hi = document.documentElement.lang.toLowerCase().startsWith("hi");
   let shouldStartWebsiteGuide = false;
+  const markWelcomeSeen = () => {
+    try { window.localStorage.setItem("rateGptWelcomeSeen", "1"); } catch { /* Storage may be unavailable. */ }
+  };
   const dialog = document.createElement("dialog");
   dialog.className = "onboarding-dialog";
   dialog.setAttribute("aria-labelledby", "onboardingTitle");
@@ -98,6 +101,7 @@ export function showFirstVisitWelcome() {
       // Only visitors who chose View tutorial get the guided Mandi Prices spotlight.
       // Skipping the tutorial still closes the introduction without launching it.
       continueButton.addEventListener("click", () => {
+        markWelcomeSeen();
         dialog.close();
         if (shouldStartWebsiteGuide) startMandiNavGuide();
       });
@@ -129,6 +133,7 @@ export function showFirstVisitWelcome() {
   dialog.querySelector(".onboarding-skip").addEventListener("click", () => {
     // Skip means skip the entire introduction and every follow-up spotlight.
     shouldStartWebsiteGuide = false;
+    markWelcomeSeen();
     dialog.close();
     dialog.remove();
   });
