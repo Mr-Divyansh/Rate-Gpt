@@ -1,7 +1,7 @@
 /* Full-page guided spotlight for the Mandi Prices navigation item. */
 .page-home .mandi-nav-guide {
   position: fixed;
-  z-index: 80;
+  z-index: 110;
   inset: 0;
   pointer-events: none;
 }
@@ -11,7 +11,7 @@
   background: rgba(9, 22, 15, .66);
   -webkit-mask-image: radial-gradient(ellipse 104px 43px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
   mask-image: radial-gradient(ellipse 104px 43px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 94%, #000 118%);
-  pointer-events: auto;
+  pointer-events: none;
 }
 .page-home .site-nav a.is-guide-highlighted {
   position: relative;
