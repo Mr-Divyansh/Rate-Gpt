@@ -185,7 +185,7 @@
    the highlight glow symmetrical and safely inside the viewport. */
 @media (max-width: 720px) {
   .page-home .mandi-nav-guide__backdrop {
-    -webkit-mask-image: radial-gradient(ellipse var(--spot-rx, 150px) 38px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 91%, #000 116%);
+    -webkit-mask-image: radial-gradient(ellipse var(--spot-rx, 150px) var(--spot-ry, 38px) at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 91%, #000 116%);
     mask-image: radial-gradient(ellipse var(--spot-rx, 150px) 38px at var(--spot-x, 50%) var(--spot-y, 12%), transparent 0 91%, #000 116%);
   }
   .page-home .site-nav.is-open a.is-guide-highlighted {
@@ -226,4 +226,12 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .page-home .mandi-nav-guide__action { transition: none; }
+}
+
+/* Short landscape phones need a compact farmer beside the instruction card. */
+@media (max-width: 720px) and (orientation: landscape) and (max-height: 500px) {
+  .page-home .mandi-nav-guide.is-landscape .mandi-nav-guide__farmer {
+    width: 96px;
+    height: 104px;
+  }
 }

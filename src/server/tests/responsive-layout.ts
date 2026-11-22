@@ -35,6 +35,8 @@ async function main() {
     readFile("script/i18n.js", "utf8"),
   ]);
 
+  const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
+
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
     check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(html),
       `${file}: responsive viewport metadata`);
@@ -98,25 +100,46 @@ async function main() {
     mandiNavGuideCss.includes("background: #fff") &&
     mandiNavGuideCss.includes("color: #17251c"),
     "Continue launches a dimmed spotlight with a white instruction bubble and pointing farmer; Skip does not");
-  check(mandiNavGuideScript.includes("const mobile = window.innerWidth <= 720") &&
-    mandiNavGuideScript.includes("Math.min(380, window.innerWidth - 32)") &&
-    mandiNavGuideScript.includes("(window.innerWidth - bubbleWidth) / 2") &&
+  check(mandiNavGuideScript.includes("const mobile = viewportWidth <= 720") &&
+    mandiNavGuideScript.includes("Math.min(380, viewportWidth - 32)") &&
+    mandiNavGuideScript.includes("(viewportWidth - bubbleWidth) / 2") &&
     mandiNavGuideScript.includes("window.visualViewport?.height || window.innerHeight") &&
     mandiNavGuideCss.includes("@media (max-width: 720px)") &&
     mandiNavGuideCss.includes("width: 138px") &&
     mandiNavGuideCss.includes("font-size: .82rem") &&
     mandiNavGuideCss.includes("@media (max-width: 380px)"),
     "mobile spotlight uses a centered compact bubble, smaller action text and scaled farmer");
-  check(mandiNavGuideScript.includes('guide.style.setProperty("--spot-rx", spotlightRadiusX + "px")') &&
-    mandiNavGuideScript.includes("centerX - 10") &&
-    mandiNavGuideScript.includes("window.innerWidth - centerX - 10") &&
-    mandiNavGuideCss.includes("ellipse var(--spot-rx, 150px) 38px") &&
+  check(mandiNavGuideScript.indexOf('pricesLink.classList.add("is-guide-highlighted")') <
+      mandiNavGuideScript.indexOf("const rect = pricesLink.getBoundingClientRect()") &&
+    mandiNavGuideScript.includes('siteNav?.addEventListener("transitionend", onDrawerTransitionEnd)') &&
+    mandiNavGuideScript.includes('event.propertyName === "transform"') &&
+    mandiNavGuideScript.includes("drawerFallbackTimer = window.setTimeout(schedulePositionGuide, 400)") &&
+    mandiNavGuideScript.includes('guide.style.setProperty("--spot-rx", geometry.radiusX + "px")') &&
+    mandiNavGuideCss.includes("ellipse var(--spot-rx, 150px) var(--spot-ry, 38px)") &&
     mandiNavGuideCss.includes("width: 100%") &&
     mandiNavGuideCss.includes("background: #f1fff6") &&
     mandiNavGuideCss.includes("0 0 0 4px rgba(8, 117, 79, .22)") &&
     mandiNavGuideCss.includes("transform: none") &&
-    mandiNavGuideCss.includes('content: "→"'),
-    "mobile Mandi Prices spotlight glow is target-sized, centered and constrained within the viewport");
+    mandiNavGuideCss.includes('content: "→"') &&
+    mandiNavGuideCss.includes(".mandi-nav-guide.is-landscape .mandi-nav-guide__farmer") &&
+    mandiNavGuideScript.includes("bubbleViewportHeight - copy.offsetHeight - 104 - 24"),
+    "spotlight waits for drawer animation, measures the final row and avoids short-landscape overlap");
+
+  for (const width of [320, 360, 375, 390, 412, 430]) {
+    const drawerWidth = Math.min(width * 0.86, 340);
+    const rowWidth = drawerWidth - 40;
+    const rect = { left: width - drawerWidth + 20, top: 112, width: rowWidth, height: 56 };
+    const geometry = calculateSpotlightGeometry(rect, width, 800);
+    const left = geometry.centerX - geometry.radiusX;
+    const right = geometry.centerX + geometry.radiusX;
+    check(Math.abs(geometry.centerX - (rect.left + rect.width / 2)) < 0.001 &&
+      Math.abs(geometry.centerY - (rect.top + rect.height / 2)) < 0.001,
+      `${width}px: spotlight center matches the measured Mandi Prices row`);
+    check(left >= 10 - 0.001 && right <= width - 10 + 0.001,
+      `${width}px: spotlight radius stays within viewport gutters`);
+    check(geometry.radiusX >= 0 && Math.abs((geometry.centerX - left) - (right - geometry.centerX)) < 0.001,
+      `${width}px: mobile spotlight glow is symmetrical`);
+  }
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
