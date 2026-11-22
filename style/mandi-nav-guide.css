@@ -146,3 +146,75 @@
 @media (prefers-reduced-motion: reduce) {
   .page-home .mandi-nav-guide__action { transition: none; }
 }
+
+
+/* Keep the navigation target readable: the label sits above the link and
+   never covers the actual "Mandi prices" text. */
+.page-home .site-nav a.is-guide-highlighted {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max-content;
+  overflow: visible;
+  border: 2px solid #218653;
+  border-radius: 10px;
+  background: #e9f6ed;
+  color: #075e3d;
+  box-shadow: 0 0 0 3px rgba(33, 134, 83, .12), 0 5px 16px rgba(23, 77, 56, .12);
+  font-weight: 800;
+  text-decoration: none;
+  opacity: 1;
+  visibility: visible;
+}
+.page-home .site-nav a.is-guide-highlighted::before {
+  content: "CLICK HERE";
+  position: absolute;
+  z-index: 3;
+  top: -13px;
+  right: -9px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 6px;
+  background: #0d7048;
+  color: #fff;
+  box-shadow: 0 3px 9px rgba(13, 112, 72, .2);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.page-home .site-nav a.is-guide-highlighted::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  z-index: 1;
+  border: 1px solid rgba(40, 122, 82, .3);
+  border-radius: 13px;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .page-home .site-nav a.is-guide-highlighted {
+    animation: mandi-nav-guide-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes mandi-nav-guide-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(33, 134, 83, .10), 0 5px 16px rgba(23, 77, 56, .11); }
+    50% { box-shadow: 0 0 0 6px rgba(33, 134, 83, .20), 0 7px 20px rgba(23, 77, 56, .15); }
+  }
+}
+@media (max-width: 720px) {
+  .page-home .site-nav a.is-guide-highlighted {
+    min-width: 0;
+    transform: none;
+  }
+  .page-home .site-nav a.is-guide-highlighted::before {
+    top: -11px;
+    right: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-home .site-nav a.is-guide-highlighted { animation: none; }
+}
