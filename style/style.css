@@ -782,3 +782,54 @@
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Premium transparent demo action: visibly secondary to See prices, while
+   remaining easy to notice against the light homepage hero. */
+.page-home .hero-actions .hero-secondary {
+  min-width: 214px;
+  min-height: 56px;
+  gap: 11px;
+  padding-inline: 22px;
+  border: 1.5px solid rgba(7, 94, 61, .42);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .28);
+  color: #075e3d;
+  box-shadow: 0 8px 22px rgba(7, 94, 61, .09), inset 0 1px 0 rgba(255,255,255,.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-weight: 750;
+  letter-spacing: .005em;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.page-home .hero-actions .hero-secondary:hover {
+  border-color: rgba(7, 94, 61, .72);
+  background: rgba(232, 244, 224, .56);
+  box-shadow: 0 12px 26px rgba(7, 94, 61, .14), inset 0 1px 0 rgba(255,255,255,.72);
+  transform: translateY(-2px);
+}
+.page-home .hero-actions .hero-secondary .play-mark {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  padding-left: 2px;
+  border: 1px solid rgba(255,255,255,.72);
+  background: linear-gradient(145deg, #0b7650, #075e3d);
+  color: #fff;
+  font-size: .78rem;
+  box-shadow: 0 3px 9px rgba(7, 94, 61, .18);
+}
+.page-home .hero-actions .hero-secondary:focus-visible {
+  outline: 3px solid rgba(7, 94, 61, .34);
+  outline-offset: 4px;
+}
+@media (max-width: 600px) {
+  .page-home .hero-actions .hero-secondary {
+    min-width: 0;
+    min-height: 52px;
+    padding-inline: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-home .hero-actions .hero-secondary { transition: none; }
+}
