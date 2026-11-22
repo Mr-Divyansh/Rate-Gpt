@@ -91,12 +91,9 @@ export function showFirstVisitWelcome() {
         </div>
       </div>
     `;
-    // Remember that the first-visit introduction has been completed so the
-    // Demo > Website tutorial menu remains available on future visits.
+    // Keep the speech-bubble action focused; the welcome appears again
+    // on the next homepage visit while testing is enabled.
     const farmerCta = dialog.querySelector(".onboarding-farmer-cta");
-    farmerCta.addEventListener("click", () => {
-      try { window.localStorage.setItem("rateGptIntroSeenV2", "1"); } catch { /* Storage may be disabled. */ }
-    }, { once: true });
     farmerCta.focus();
   };
 
