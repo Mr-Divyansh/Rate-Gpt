@@ -1,3 +1,5 @@
+import { startMandiNavGuide } from "./mandi-nav-guide.js";
+
 export function showFirstVisitWelcome() {
   const link = document.createElement("link");
   link.rel = "stylesheet";
@@ -5,6 +7,7 @@ export function showFirstVisitWelcome() {
   document.head.append(link);
 
   const hi = document.documentElement.lang.toLowerCase().startsWith("hi");
+  let shouldStartWebsiteGuide = false;
   const dialog = document.createElement("dialog");
   dialog.className = "onboarding-dialog";
   dialog.setAttribute("aria-labelledby", "onboardingTitle");
@@ -92,8 +95,12 @@ export function showFirstVisitWelcome() {
     `;
     const continueButton = dialog.querySelector(".onboarding-continue");
     if (continueButton) {
-      // The introduction ends here. Do not navigate or open another step.
-      continueButton.addEventListener("click", () => dialog.close());
+      // Only visitors who chose View tutorial get the guided Mandi Prices spotlight.
+      // Skipping the tutorial still closes the introduction without launching it.
+      continueButton.addEventListener("click", () => {
+        dialog.close();
+        if (shouldStartWebsiteGuide) startMandiNavGuide();
+      });
       continueButton.focus();
     }
   };
@@ -119,7 +126,10 @@ export function showFirstVisitWelcome() {
   `;
 
   document.body.append(dialog);
-  dialog.querySelector(".onboarding-skip").addEventListener("click", showThankYou);
+  dialog.querySelector(".onboarding-skip").addEventListener("click", () => {
+    shouldStartWebsiteGuide = false;
+    showThankYou();
+  });
   // The welcome/benefits introduction is not the interactive website tutorial.
   // Keep it free of a close control; Escape must not dismiss it unexpectedly.
   dialog.addEventListener("cancel", event => event.preventDefault());
@@ -127,7 +137,10 @@ export function showFirstVisitWelcome() {
   // The old "Let's explore mandi prices" Step 1 screen is intentionally
   // removed from the active flow for now. The detailed navigation tutorial
   // can be brought back as a later step after this benefits introduction.
-  dialog.querySelector(".onboarding-view").addEventListener("click", showThankYou);
+  dialog.querySelector(".onboarding-view").addEventListener("click", () => {
+    shouldStartWebsiteGuide = true;
+    showThankYou();
+  });
 
   dialog.showModal();
   dialog.querySelector(".onboarding-view").focus();
