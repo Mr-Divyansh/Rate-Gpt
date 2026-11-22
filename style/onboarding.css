@@ -910,3 +910,96 @@
     box-shadow: 0 12px 36px rgba(10, 35, 23, .18);
   }
 }
+
+/* Final intro step: the farmer's speech bubble is the sole navigation action. */
+.onboarding-card--solution .onboarding-art-wrap--click {
+  position: relative;
+  min-height: 184px;
+  overflow: visible;
+}
+.onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+  width: 210px !important;
+  max-width: min(48vw, 210px) !important;
+  height: 184px !important;
+  max-height: 184px !important;
+}
+.onboarding-farmer-cta {
+  position: absolute;
+  top: 16%;
+  right: max(2%, calc(50% - 205px));
+  display: grid;
+  gap: 4px;
+  width: min(190px, 42%);
+  padding: 10px 12px;
+  border: 2px solid #0b6845;
+  border-radius: 13px 13px 13px 4px;
+  background: #0d7048;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(8, 72, 47, .24), 0 0 0 4px rgba(33, 134, 83, .12);
+  font-size: .73rem;
+  line-height: 1.25;
+  text-align: left;
+  text-decoration: none;
+  transition: transform .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+.onboarding-farmer-cta::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  bottom: 12px;
+  width: 12px;
+  height: 12px;
+  border-left: 2px solid #0b6845;
+  border-bottom: 2px solid #0b6845;
+  background: #0d7048;
+  transform: rotate(45deg);
+}
+.onboarding-farmer-cta strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: .9rem;
+  letter-spacing: .035em;
+}
+.onboarding-farmer-cta:hover {
+  transform: translateY(-2px);
+  background: #075e3d;
+  box-shadow: 0 11px 24px rgba(8, 72, 47, .28), 0 0 0 5px rgba(33, 134, 83, .16);
+}
+.onboarding-farmer-cta:focus-visible {
+  outline: 3px solid #e5b24c;
+  outline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .onboarding-card--solution .onboarding-art-wrap--click {
+    min-height: 146px;
+  }
+  .onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+    width: 168px !important;
+    max-width: min(48vw, 168px) !important;
+    height: 146px !important;
+    max-height: 146px !important;
+  }
+  .onboarding-farmer-cta {
+    top: 10%;
+    right: 1%;
+    width: min(164px, 45%);
+    padding: 8px 9px;
+    font-size: .68rem;
+  }
+  .onboarding-farmer-cta strong { font-size: .82rem; }
+}
+@media (max-width: 700px) and (max-height: 720px) {
+  .onboarding-card--solution .onboarding-art-wrap--click { min-height: 112px; }
+  .onboarding-card--solution .onboarding-art-wrap--click .onboarding-art {
+    width: 138px !important;
+    max-width: min(48vw, 138px) !important;
+    height: 112px !important;
+    max-height: 112px !important;
+  }
+  .onboarding-farmer-cta { top: 4%; padding: 7px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-farmer-cta { transition: none; }
+}
