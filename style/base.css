@@ -488,11 +488,9 @@ input:focus, select:focus, textarea:focus {
 .header-actions { gap: 9px; }
 @media (max-width: 720px) {
   .header-actions { gap: 6px; }
-  .demo-menu-trigger { min-height: 36px; padding-inline: 8px; font-size: .75rem; }
   .lang-toggle button { min-width: 32px; padding-inline: 5px; }
 }
 @media (max-width: 380px) {
-  .demo-menu-trigger { min-height: 34px; padding-inline: 6px; font-size: .7rem; }
   .lang-toggle { padding: 2px; }
   .lang-toggle button { min-width: 29px; min-height: 31px; font-size: .76rem; }
 }
