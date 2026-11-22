@@ -9,7 +9,6 @@ export function showFirstVisitWelcome() {
   dialog.className = "onboarding-dialog";
   dialog.setAttribute("aria-labelledby", "onboardingTitle");
 
-  let thankYouShown = false;
   const closeDialog = () => {
     if (dialog.open) dialog.close();
     dialog.remove();
@@ -19,10 +18,8 @@ export function showFirstVisitWelcome() {
   // Keep the copy focused on real farmer decisions Rate-GPT can support:
   // comparing available mandi prices, finding alternatives, and reading price data.
   const showThankYou = () => {
-    thankYouShown = true;
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--thanks onboarding-card--benefits">
-        <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
         <div class="onboarding-art-wrap">
           <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Thinking.png" alt="${hi ? "सोचता हुआ किसान" : "Farmer thinking about crop prices"}" width="320" height="320" loading="lazy" fetchpriority="high" decoding="async">
         </div>
@@ -47,15 +44,11 @@ export function showFirstVisitWelcome() {
             <li>${hi ? "भाव को समझें: न्यूनतम, अधिकतम, मॉडल भाव और आवक देखकर जानकारी के साथ फैसला लें।" : "Understand the rates: Use minimum, maximum, modal prices and arrivals to make a more informed choice."}</li>
           </ul>
           <p class="onboarding-note onboarding-assistant-note">${hi ? "चिंता न करें — Rate-GPT किसान सहायक आपको मंडी की जानकारी समझने में मदद करेगा।" : "Don’t worry — your Rate-GPT Farmer Assistant will help you make sense of mandi information."}</p>
-          <div class="onboarding-actions onboarding-actions--single">
-            <button class="btn btn-primary onboarding-continue" type="button">${hi ? "जारी रखें" : "Continue"} <span aria-hidden="true">→</span></button>
-          </div>
         </div>
       </div>
     `;
     // Both the Skip and View paths lead to this short benefits introduction.
     // Continue advances to the second and final onboarding screen.
-    dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
     dialog.querySelector(".onboarding-continue").addEventListener("click", showSolution);
     dialog.querySelector(".onboarding-continue").focus();
   };
@@ -64,12 +57,14 @@ export function showFirstVisitWelcome() {
   // how Rate-GPT helps them compare available market information.
   // Keep this as a single-screen experience: no internal scrolling.
   const showSolution = () => {
-    thankYouShown = true;
     dialog.innerHTML = `
       <div class="onboarding-card onboarding-card--solution">
-        <button class="onboarding-close" type="button" aria-label="${hi ? "बंद करें" : "Close"}">×</button>
-        <div class="onboarding-art-wrap">
-          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Tell.png" alt="${hi ? "किसान Rate-GPT के बारे में बता रहा है" : "Farmer explaining how Rate-GPT helps"}" width="320" height="320" fetchpriority="high" decoding="async">
+        <div class="onboarding-art-wrap onboarding-art-wrap--click">
+          <img class="onboarding-art" src="/Images/Characte_For_RateGPT/Characte_For_RateGPT_Point.png" alt="${hi ? "मंडी भाव देखने का रास्ता दिखाता किसान" : "Farmer pointing visitors towards mandi prices"}" width="320" height="320" fetchpriority="high" decoding="async">
+          <a class="onboarding-farmer-cta" href="mandi-prices.html">
+            <span>${hi ? "मंडी भाव देखने के लिए" : "Want to explore mandi prices?"}</span>
+            <strong>${hi ? "यहाँ क्लिक करें" : "CLICK HERE"} <span aria-hidden="true">→</span></strong>
+          </a>
         </div>
         <div class="onboarding-copy">
           <div class="onboarding-progress" role="group" aria-label="${hi ? "परिचय की प्रगति" : "Introduction progress"}">
@@ -98,7 +93,6 @@ export function showFirstVisitWelcome() {
         </div>
       </div>
     `;
-    dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
     dialog.querySelector(".onboarding-finish").addEventListener("click", closeDialog);
     dialog.querySelector(".onboarding-finish").focus();
   };
@@ -126,21 +120,14 @@ export function showFirstVisitWelcome() {
 
   document.body.append(dialog);
   dialog.querySelector(".onboarding-skip").addEventListener("click", showThankYou);
-  dialog.querySelector(".onboarding-close").addEventListener("click", closeDialog);
-  dialog.addEventListener("cancel", event => {
-    event.preventDefault();
-    if (thankYouShown) closeDialog();
-    else showThankYou();
-  });
+  // The welcome/benefits introduction is not the interactive website tutorial.
+  // Keep it free of a close control; Escape must not dismiss it unexpectedly.
+  dialog.addEventListener("cancel", event => event.preventDefault());
 
   // The old "Let's explore mandi prices" Step 1 screen is intentionally
   // removed from the active flow for now. The detailed navigation tutorial
   // can be brought back as a later step after this benefits introduction.
   dialog.querySelector(".onboarding-view").addEventListener("click", showThankYou);
-
-  dialog.addEventListener("click", event => {
-    if (event.target === dialog) closeDialog();
-  });
 
   dialog.showModal();
   dialog.querySelector(".onboarding-view").focus();
