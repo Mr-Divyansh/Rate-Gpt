@@ -235,3 +235,13 @@ function applySharedTranslations() {
 applySharedTranslations();
 onLangChange(applySharedTranslations);
 hydrateIcons();
+
+// Progressive web app support. The service worker caches only static shell
+// assets and never intercepts /api responses or user data.
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").catch(() => {
+      // The website remains fully usable when service workers are unavailable.
+    });
+  }, { once: true });
+}
