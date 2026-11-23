@@ -11,9 +11,12 @@ const noteNode = document.querySelector("#decisionNote");
 const sourceSummary = document.querySelector("#sourceSummary");
 const quantityInput = document.querySelector("#quantityInput");
 const priceInput = document.querySelector("#priceInput");
+const transportCostInput = document.querySelector("#transportCostInput");
+const handlingCostInput = document.querySelector("#handlingCostInput");
 const costInput = document.querySelector("#costInput");
 const netResult = document.querySelector("#netResult");
 const grossResult = document.querySelector("#grossResult");
+const breakEvenResult = document.querySelector("#breakEvenResult");
 let comparedMarkets = [];
 
 const money = (value) => new Intl.NumberFormat("en-IN", {
@@ -36,8 +39,12 @@ function isRupeesPerQuintal(unit) {
 function updateCalculator() {
   const quantity = Number(quantityInput.value);
   const price = Number(priceInput.value);
-  const costs = Number(costInput.value);
-  if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(price) || price < 0 || !validNumber(costs)) {
+  const transport = Number(transportCostInput.value);
+  const handling = Number(handlingCostInput.value);
+  const other = Number(costInput.value);
+  const costs = transport + handling + other;
+  if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(price) || price < 0 ||
+      !validNumber(transport) || !validNumber(handling) || !validNumber(other)) {
     netResult.textContent = "—";
     grossResult.textContent = "Enter a valid quantity, price and cost.";
     return;
@@ -45,8 +52,10 @@ function updateCalculator() {
   const gross = quantity * price;
   const net = gross - costs;
   netResult.textContent = money(net);
-  grossResult.textContent = "Gross amount " + money(gross) + " − entered costs " + money(costs) +
-    (net < 0 ? " · Costs exceed gross revenue." : "");
+  grossResult.textContent = "Gross " + money(gross) + " − transport " + money(transport) +
+    " − loading/unloading " + money(handling) + " − other costs " + money(other);
+  breakEvenResult.textContent = "Break-even modal price: " + money(costs / quantity) +
+    " per quintal (based only on the costs entered)." + (net < 0 ? " Entered costs exceed gross revenue." : "");
 }
 
 function selectRecord(record) {
@@ -56,6 +65,8 @@ function selectRecord(record) {
     return;
   }
   priceInput.value = String(record.modal_price);
+  transportCostInput.value = "0";
+  handlingCostInput.value = "0";
   costInput.value = "0";
   updateCalculator();
   document.querySelector("#calculatorTitle").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -207,7 +218,7 @@ async function search() {
 }
 
 form.addEventListener("submit", (event) => { event.preventDefault(); void search(); });
-for (const input of [quantityInput, priceInput, costInput]) {
+for (const input of [quantityInput, priceInput, transportCostInput, handlingCostInput, costInput]) {
   input.addEventListener("input", updateCalculator);
 }
 quantityInput.addEventListener("input", updateMarketEstimates);
