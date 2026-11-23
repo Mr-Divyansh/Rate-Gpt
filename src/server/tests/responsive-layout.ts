@@ -108,6 +108,9 @@ async function main() {
     mandiNavGuideScript.includes('sessionStorage.setItem("rateGptStartFinderTutorial", "1")') &&
     finderTourScript.includes('sessionStorage.getItem("rateGptStartFinderTutorial") === "1"') &&
     finderTourScript.includes('params.get(TOUR_PARAM) !== "1"') &&
+    finderTourScript.includes('function centerTarget(target)') &&
+    finderTourScript.includes('target.scrollIntoView({ behavior, block: "center", inline: "nearest" })') &&
+    finderTourScript.includes('centerTarget(activeTarget)') &&
     finderTourScript.includes('Choose your state') &&
     finderTourScript.includes('Select your district') &&
     finderTourScript.includes('Pick a mandi') &&
