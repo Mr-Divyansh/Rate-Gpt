@@ -88,12 +88,15 @@
       <div class="calculator-grid">
         <div class="field"><label for="quantityInput">Quantity (quintals)</label><input id="quantityInput" type="number" min="0.01" step="0.01" value="10"></div>
         <div class="field"><label for="priceInput">Modal price (₹ / quintal)</label><input id="priceInput" type="number" min="0" step="0.01" placeholder="Select a mandi record"></div>
-        <div class="field"><label for="costInput">Total transport &amp; other costs (₹)</label><input id="costInput" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label for="transportCostInput">Transport cost (₹)</label><input id="transportCostInput" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label for="handlingCostInput">Loading / unloading (₹)</label><input id="handlingCostInput" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label for="costInput">Other costs (₹)</label><input id="costInput" type="number" min="0" step="0.01" value="0"></div>
       </div>
       <div class="estimate" aria-live="polite">
         <span>Estimated net proceeds</span>
         <strong id="netResult">—</strong>
         <small id="grossResult">Select a comparable ₹/quintal record to calculate.</small>
+        <small id="breakEvenResult"></small>
       </div>
     </section>
   </main>
