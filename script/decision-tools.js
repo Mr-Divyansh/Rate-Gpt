@@ -206,3 +206,56 @@ for (const input of [quantityInput, priceInput, costInput]) {
   input.addEventListener("input", updateCalculator);
 }
 quantityInput.addEventListener("input", updateMarketEstimates);
+
+
+const assistantForm = document.querySelector("#assistantForm");
+const assistantQuestion = document.querySelector("#assistantQuestion");
+const assistantAnswer = document.querySelector("#assistantAnswer");
+
+function answerFromCurrentEvidence(question) {
+  if (!comparedMarkets.length) {
+    return "Search for a crop first. I can only answer from mandi records currently loaded on this page.";
+  }
+  const quantity = Number(quantityInput.value);
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return "Enter a valid quantity in quintals before comparing estimated net proceeds.";
+  }
+  const comparable = comparedMarkets
+    .map((record, index) => {
+      const costInputForMarket = rowsNode.querySelector('.market-cost[data-index="' + index + '"]');
+      const costs = Number(costInputForMarket?.value ?? 0);
+      if (!isRupeesPerQuintal(record.source_unit) || !validNumber(costs)) return null;
+      return {
+        record,
+        costs,
+        gross: quantity * record.modal_price,
+        net: quantity * record.modal_price - costs,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.net - a.net);
+
+  if (!comparable.length) {
+    return "No loaded record has a verified ₹ per quintal unit and valid cost input. I cannot compare these units safely.";
+  }
+  const q = question.toLowerCase();
+  if (!/(best|highest|top|which|net|profit|compare|why|कौन|सबसे|बेहतर|ज़्यादा|ज्यादा|मुनाफ़ा|लाभ)/i.test(q)) {
+    return "I can answer which comparable mandi has the highest estimated net proceeds and explain the inputs. I cannot answer forecasts, guaranteed sale prices or unsupported crop advice.";
+  }
+  const best = comparable[0];
+  const tied = comparable.filter((item) => item.net === best.net);
+  const record = best.record;
+  const title = tied.length > 1 ? "The highest estimated net proceeds are tied across " + tied.length + " mandis." :
+    "Among the loaded comparable records, " + record.market + " has the highest estimated net proceeds.";
+  return title + " Calculation: " + quantity + " quintal × " + money(record.modal_price) +
+    " per quintal = " + money(best.gross) + " gross; entered market costs = " + money(best.costs) +
+    "; estimated net = " + money(best.net) + ". Source arrival date: " + record.arrival_date +
+    ". This is based on a government-reported observation, not a live offer. It covers only the records loaded here and excludes costs or quality deductions you have not entered.";
+}
+
+if (assistantForm) {
+  assistantForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    assistantAnswer.textContent = answerFromCurrentEvidence(assistantQuestion.value.trim());
+  });
+}
