@@ -123,3 +123,18 @@ Evolve Rate-GPT from a government-reported mandi-price discovery website into a 
 ## Progress tracking
 
 This document is the implementation checklist, not evidence that a feature is already shipped. Check an item only after its acceptance criteria and tests pass.
+
+## Implementation log — 23 November 2026
+
+### Implemented on the feature branch (verification still pending)
+- Added the Farmer Decision Tools page and navigation/build entry.
+- Corrected the page to consume the API's documented snake_case MandiRecord fields (arrival_date, modal_price, source_unit, etc.).
+- Added bounded sequential pagination (up to five 100-record pages), explicit partial-result messaging, and source fetch metadata.
+- Added a deterministic, evidence-grounded mandi assistant. It only compares loaded records with an explicit rupee-per-quintal unit and the user's entered costs; it does not call an LLM or make price predictions.
+- Added responsive styling for the comparison, calculator, and assistant panels.
+
+### Not yet accepted as complete
+- No local build/test run has been performed in this work session.
+- Vercel preview deployment for commit b2559ac866cc12cb8f37bbde9c277ae34b0f7286 was created but remained QUEUED at the last check.
+- Browser interaction, mobile layout, keyboard accessibility, and production smoke checks remain pending.
+- No hosted LLM, persistent historical store, alert delivery, PWA/offline support, voice flow, or farmer profile storage has been implemented.
