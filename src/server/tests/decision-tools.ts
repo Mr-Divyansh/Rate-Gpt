@@ -102,7 +102,10 @@ const translationKeys = new Set([
   "dashboard.alertsTitle", "dashboard.alertsEmpty", "dashboard.alertState", "dashboard.alertCrop",
   "dashboard.alertDistrict", "dashboard.alertMarket", "dashboard.alertTarget", "dashboard.alertDirection",
   "dashboard.alertAbove", "dashboard.alertBelow", "dashboard.alertCreate", "dashboard.alertNote",
-  "dashboard.alertSaved", "dashboard.alertInvalid", "decision.alertMatched", "decision.alertNoMatch",
+  "dashboard.alertSaved", "dashboard.alertInvalid", "dashboard.alertsTitle", "dashboard.alertsEmpty",
+  "dashboard.alertState", "dashboard.alertCrop", "dashboard.alertDistrict", "dashboard.alertMarket",
+  "dashboard.alertTarget", "dashboard.alertDirection", "dashboard.alertAbove", "dashboard.alertBelow",
+  "dashboard.alertCreate", "dashboard.alertNote", "decision.alertMatched", "decision.alertNoMatch",
 ]);
 for (const key of translationKeys) {
   assert.ok(translations.split('"' + key + '":').length - 1 >= 2, "English and Hindi translation exist for " + key);
