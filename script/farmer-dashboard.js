@@ -1,7 +1,6 @@
 import { createFarmerDashboardStore } from "./farmer-dashboard-store.js";
 import { getLocale, onLangChange, t } from "./i18n.js";
 
-const store = createFarmerDashboardStore(window.localStorage);
 const favoritesList = document.querySelector("#dashboardFavorites");
 const scenariosList = document.querySelector("#dashboardScenarios");
 const favoritesEmpty = document.querySelector("#favoritesEmpty");
@@ -9,6 +8,18 @@ const scenariosEmpty = document.querySelector("#scenariosEmpty");
 const status = document.querySelector("#dashboardStatus");
 const exportButton = document.querySelector("#exportDashboardButton");
 const clearButton = document.querySelector("#clearDashboardButton");
+let store = null;
+try {
+  store = createFarmerDashboardStore(window.localStorage);
+} catch {
+  status.textContent = t("dashboard.storageUnavailable");
+  exportButton.disabled = true;
+  clearButton.disabled = true;
+}
+if (!store) {
+  exportButton.disabled = true;
+  clearButton.disabled = true;
+}
 
 const money = (value) => new Intl.NumberFormat(getLocale(), {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
