@@ -220,10 +220,10 @@ function startFinderTour() {
     if (step === 5) {
       activeTarget = null;
       progressCount.textContent = "";
-      title.textContent = isHindi() ? "अब आप Rate-GPT इस्तेमाल कर सकते हैं!" : "You're ready to explore Rate-GPT!";
+      title.textContent = isHindi() ? "अब मंडी भाव देखना शुरू करें!" : "You’re all set!";
       message.textContent = isHindi()
-        ? "ट्यूटोरियल पूरा करने के लिए धन्यवाद! अब अपनी फसल खोजें, अलग-अलग मंडियों के भाव की तुलना करें और सोच-समझकर फैसला लें। आपका Rate-GPT Farmer Assistant हमेशा मदद के लिए यहाँ है।"
-        : "Thank you for completing the tutorial! You can now search for crops, compare reported mandi prices and explore your options. Your Rate-GPT Farmer Assistant is here whenever you need a hand.";
+        ? "ट्यूटोरियल पूरा करने के लिए धन्यवाद! अब फसल खोजें, मंडी के भाव की तुलना करें और सही जानकारी के साथ फैसला लें। मदद चाहिए? आपका Farmer Assistant यहीं है।"
+        : "Thanks for completing the tour! Search crops, compare mandi prices and make informed decisions. Need a hand? Your Farmer Assistant is right here.";
       hint.textContent = "";
       action.hidden = true;
       progress.hidden = true;
@@ -269,17 +269,30 @@ function startFinderTour() {
   function position() {
     if (destroyed) return;
     if (step === 5) {
+      const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const farmerSize = viewportWidth <= 600 ? 132 : 164;
+      const farmerHeight = farmerSize;
+      const gap = viewportWidth <= 600 ? 10 : 14;
       root.style.setProperty("--tour-x", "50%");
       root.style.setProperty("--tour-y", "50%");
       root.style.setProperty("--tour-rx", "0px");
       root.style.setProperty("--tour-ry", "0px");
-      panel.style.left = "50%";
-      panel.style.top = "50%";
-      panel.style.transform = "translate(-50%, -50%)";
+      farmer.style.width = farmerSize + "px";
+      farmer.style.height = farmerHeight + "px";
       farmer.style.left = "50%";
-      farmer.style.top = Math.max(8, (window.visualViewport?.height || window.innerHeight) / 2 - 300) + "px";
+      farmer.style.top = "0px";
       farmer.style.bottom = "auto";
       farmer.style.transform = "translateX(-50%)";
+      panel.style.width = Math.min(430, viewportWidth - 28) + "px";
+      panel.style.left = "50%";
+      panel.style.transform = "translateX(-50%)";
+      panel.style.maxHeight = Math.max(150, viewportHeight - farmerHeight - gap - 24) + "px";
+      const panelHeight = panel.offsetHeight;
+      const stackHeight = farmerHeight + gap + panelHeight;
+      const stackTop = Math.max(8, (viewportHeight - stackHeight) / 2);
+      farmer.style.top = stackTop + "px";
+      panel.style.top = (stackTop + farmerHeight + gap) + "px";
       return;
     }
 
@@ -350,10 +363,10 @@ function startFinderTour() {
   langUnsubscribe = onLangChange(() => {
     if (step < 5) renderPanel();
     else {
-      title.textContent = isHindi() ? "अब आप Rate-GPT इस्तेमाल कर सकते हैं!" : "You're ready to explore Rate-GPT!";
+      title.textContent = isHindi() ? "अब मंडी भाव देखना शुरू करें!" : "You’re all set!";
       message.textContent = isHindi()
-        ? "ट्यूटोरियल पूरा करने के लिए धन्यवाद! अब अपनी फसल खोजें, अलग-अलग मंडियों के भाव की तुलना करें और सोच-समझकर फैसला लें।"
-        : "Thank you for completing the tutorial! You can now search for crops, compare reported mandi prices and explore your options.";
+        ? "ट्यूटोरियल पूरा करने के लिए धन्यवाद! अब फसल खोजें, मंडी के भाव की तुलना करें और सही जानकारी के साथ फैसला लें। मदद चाहिए? आपका Farmer Assistant यहीं है।"
+        : "Thanks for completing the tour! Search crops, compare mandi prices and make informed decisions. Need a hand? Your Farmer Assistant is right here.";
     }
   });
 

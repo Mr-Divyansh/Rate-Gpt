@@ -122,8 +122,14 @@ async function main() {
     finderTourScript.includes('Close tutorial') &&
     finderTourCss.includes('mandi-tour-water') &&
     finderTourCss.includes('pointer-events: auto') &&
-    finderTourCss.includes('prefers-reduced-motion: reduce'),
-    "guided finder tour carries from the homepage, locks unrelated controls, walks through state, district, mandi and prices, and ends with the Namaste thank-you screen");
+    finderTourCss.includes('prefers-reduced-motion: reduce') &&
+    finderTourScript.includes('You’re all set!') &&
+    finderTourScript.includes('अब मंडी भाव देखना शुरू करें!') &&
+    finderTourScript.includes('const stackHeight = farmerHeight + gap + panelHeight;') &&
+    finderTourScript.includes('panel.style.maxHeight = Math.max(150, viewportHeight - farmerHeight - gap - 24) + "px";') &&
+    finderTourCss.includes('overflow-y: auto;') &&
+    finderTourCss.includes('@media (max-height: 620px)'),
+    "guided finder tour ends with concise bilingual thank-you copy and a vertically stacked, scroll-safe mobile layout");
 
   check(mandiNavGuideScript.includes("const mobile = viewportWidth <= 720") &&
     mandiNavGuideScript.includes("Math.min(380, viewportWidth - 32)") &&
