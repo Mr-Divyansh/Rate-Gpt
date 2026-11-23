@@ -1,7 +1,7 @@
 export const FARMER_DASHBOARD_KEY = "rateGptFarmerDashboard.v1";
 
 function emptyData() {
-  return { version: 1, favorites: [], scenarios: [] };
+  return { version: 1, favorites: [], scenarios: [], alerts: [] };
 }
 
 export function createFarmerDashboardStore(storage) {
@@ -13,7 +13,7 @@ export function createFarmerDashboardStore(storage) {
     try {
       const parsed = JSON.parse(storage.getItem(FARMER_DASHBOARD_KEY) || "null");
       if (parsed?.version === 1 && Array.isArray(parsed.favorites) && Array.isArray(parsed.scenarios)) {
-        return { version: 1, favorites: parsed.favorites, scenarios: parsed.scenarios };
+        return { version: 1, favorites: parsed.favorites, scenarios: parsed.scenarios, alerts: Array.isArray(parsed.alerts) ? parsed.alerts : [] };
       }
     } catch {
       // Recover safely from malformed or unavailable local data.
@@ -78,6 +78,29 @@ export function createFarmerDashboardStore(storage) {
     removeScenario(id) {
       const data = read();
       data.scenarios = data.scenarios.filter((item) => item.id !== id);
+      write(data);
+    },
+    saveAlert(alert) {
+      const state = String(alert?.state || "").trim();
+      const commodity = String(alert?.commodity || "").trim();
+      const targetPrice = Number(alert?.targetPrice);
+      const direction = alert?.direction === "below" ? "below" : alert?.direction === "above" ? "above" : "";
+      if (!state || !commodity || !Number.isFinite(targetPrice) || targetPrice < 0 || !direction) return false;
+      const district = String(alert.district || "").trim();
+      const market = String(alert.market || "").trim();
+      const id = [state, commodity, district, market, direction, targetPrice].join("::").toLowerCase();
+      const data = read();
+      const saved = { id, state, commodity, district, market, direction, targetPrice, createdAt: new Date().toISOString() };
+      const index = data.alerts.findIndex((item) => item.id === id);
+      if (index >= 0) data.alerts[index] = saved;
+      else data.alerts.unshift(saved);
+      data.alerts = data.alerts.slice(0, 20);
+      write(data);
+      return saved;
+    },
+    removeAlert(id) {
+      const data = read();
+      data.alerts = data.alerts.filter((item) => item.id !== id);
       write(data);
     },
     clear() {
