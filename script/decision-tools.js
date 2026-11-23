@@ -58,7 +58,7 @@ function updateCalculator() {
   grossResult.textContent = copy("Gross ", "कुल रकम ") + money(estimate.gross) + copy(" − transport ", " − ढुलाई ") + money(transport) +
     copy(" − loading/unloading ", " − लोडिंग/अनलोडिंग ") + money(handling) + copy(" − other costs ", " − अन्य खर्च ") + money(other);
   breakEvenResult.textContent = t("decision.breakEven", { price: money(estimate.breakEvenPrice) }) +
-    (estimate.net < 0 ? " " + (getLocale() === "hi-IN" ? "दर्ज खर्च सकल रकम से अधिक है।" : copy("Entered costs exceed gross revenue.", "दर्ज खर्च कुल रकम से अधिक है।")) : "");
+    (estimate.net < 0 ? " " + (getLocale() === "hi-IN" ? "दर्ज खर्च सकल रकम से अधिक है।" : copy(copy("Entered costs exceed gross revenue.", "दर्ज खर्च कुल रकम से अधिक है।"), "दर्ज खर्च कुल रकम से अधिक है।")) : "");
 }
 
 function selectRecord(record) {
@@ -118,7 +118,7 @@ function updateMarketEstimates() {
     const costs = Number(input.value);
     if (!record || !isRupeesPerQuintal(record.source_unit) ||
         !Number.isFinite(quantity) || quantity <= 0 || !validNumber(costs)) {
-      target.textContent = copy("Not comparable", "तुलना संभव नहीं");
+      target.textContent = copy(copy("Not comparable", "तुलना संभव नहीं"), "तुलना संभव नहीं");
       return;
     }
     const estimate = calculateNetProceeds({ quantity, modalPrice: record.modal_price, otherCosts: costs });
@@ -160,7 +160,7 @@ function renderComparison(records, meta, commodity, isPartial) {
       '" type="number" min="0" step="0.01" value="0" data-index="' + index +
       '" aria-label="Transport and handling cost for ' + market + ' in rupees"></td>' +
       '<td><strong id="market-net-' + index + '">—</strong><button class="use-record" type="button" data-index="' +
-      index + '"' + (calculatorAllowed ? "" : " disabled") + ">Use in calculator</button></td>";
+      index + '"' + (calculatorAllowed ? "" : " disabled") + ">' + copy("Use in calculator", "कैलकुलेटर में इस्तेमाल करें") + '</button></td>";
     rowsNode.append(tr);
   }
 
@@ -183,7 +183,7 @@ function renderComparison(records, meta, commodity, isPartial) {
       : (getLocale() === "hi-IN" ? commodity + " के लिए हर मंडी का मिला हुआ सबसे नया रिकॉर्ड दिख रहा है। कैलकुलेटर में वही रिकॉर्ड चुनें जिसकी इकाई स्पष्ट रूप से ₹ प्रति क्विंटल है।" : "Showing the latest returned observation per mandi for " + commodity + ". Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.");
   }
   if (isPartial) {
-    noteNode.textContent += " The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.";
+    noteNode.textContent += copy(" The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.", " स्रोत की पेज सीमा पूरी हो गई; यह आंशिक तुलना है, पूरे राज्य की पूरी रैंकिंग नहीं।");
   }
   updateMarketEstimates();
   checkLocalPriceAlerts(comparedMarkets);
