@@ -99,7 +99,7 @@ function renderHeader(header) {
       first.focus();
     }
   });
-  const mq = window.matchMedia("(min-width: 721px)");
+  const mq = window.matchMedia("(min-width: 901px)");
   mq.addEventListener?.("change", e => { if (e.matches) close(); });
 }
 function renderFooter(footer) {

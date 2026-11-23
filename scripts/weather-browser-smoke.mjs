@@ -90,8 +90,12 @@ try{
   assert.match(await page.locator("#weatherForecast").innerText(),/Rain chance/);
   pass(viewport.name+": Hindi and English translations switch");
 
-  const size=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,document:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)}));
-  assert.ok(size.document<=size.viewport+2,viewport.name+": no horizontal overflow");
+  const size=await page.evaluate(()=>({
+   viewport:document.documentElement.clientWidth,
+   document:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth),
+   offenders:[...document.querySelectorAll("body *")].map(el=>({tag:el.tagName.toLowerCase(),id:el.id,className:typeof el.className==="string"?el.className:"",left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).filter(el=>el.width>0&&(el.left < -2 || el.right > document.documentElement.clientWidth+2)).slice(0,12)
+  }));
+  assert.ok(size.document<=size.viewport+2,viewport.name+": no horizontal overflow; offenders: "+JSON.stringify(size.offenders));
   assert.deepEqual(errors,[],viewport.name+": no uncaught browser errors");
   pass(viewport.name+": responsive layout and browser runtime are clean");
   await context.close();
