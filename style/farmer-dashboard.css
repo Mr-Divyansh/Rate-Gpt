@@ -26,3 +26,12 @@
   .dashboard-actions { flex-direction: column; }
   .dashboard-actions .btn { width: 100%; }
 }
+
+.btn-danger {
+  border-color: var(--error);
+  color: var(--error);
+}
+.btn-danger:hover {
+  border-color: var(--error);
+  background: #fff1ef;
+}
