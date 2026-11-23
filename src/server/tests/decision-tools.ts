@@ -44,10 +44,16 @@ const translations = await readFile("script/i18n.js", "utf8");
 const translationKeys = new Set([
   ...[...decisionPage.matchAll(/data-i18n="([^"]+)"/g)].map((match) => match[1]),
   ...[...decisionPage.matchAll(/data-i18n-attr="[^"]*:([^"]+)"/g)].map((match) => match[1]),
+  "decision.fetching", "decision.enterBoth", "decision.loaded", "decision.partialSuffix",
+  "decision.noRecords", "decision.failed", "decision.invalidCalc", "decision.unitRequired",
+  "decision.noComparable", "decision.assistantNeedSearch", "decision.assistantNeedQuantity",
+  "decision.assistantUnsupported", "decision.assistantHighest", "decision.assistantTied",
+  "decision.breakEven", "decision.assistantCalculation",
 ]);
 for (const key of translationKeys) {
   assert.ok(translations.split('"' + key + '":').length - 1 >= 2, "English and Hindi translation exist for " + key);
 }
+await readFile("Images/Logo.webp");
 const offlinePage = await readFile("public/offline.html", "utf8");
 assert.doesNotMatch(offlinePage, /\sstyle="/);
 
