@@ -117,7 +117,7 @@ function startFinderTour() {
       if (step === 5) stop();
     }
     if (event.key === "Tab") {
-      const targetControl = step === 3 ? mandiGrid.querySelector(".chip") : activeTarget;
+      const targetControl = activeTarget;
       const focusable = [targetControl, ...panel.querySelectorAll("button:not(:disabled)")]
         .filter((element) => element && element.tabIndex >= 0 && !element.hidden);
       if (!focusable.length) {
@@ -167,14 +167,18 @@ function startFinderTour() {
     } else if (step === 2) {
       const help = document.getElementById("mandiHelp")?.textContent || "";
       const loading = /loading|लोड/i.test(help);
-      action.disabled = !districtSelect.value || loading;
+      const lookupFailed = districtSelect.disabled && Boolean(help) && !loading;
+      action.disabled = loading || (!districtSelect.value && !lookupFailed);
     } else if (step === 3) {
       const selected = mandiGrid.querySelector(".chip[aria-pressed='true']");
-      action.disabled = !selected;
-      if (selected && activeTarget !== selected) {
+      const hasOptions = Boolean(mandiGrid.querySelector(".chip"));
+      action.disabled = hasOptions && !selected;
+      const nextTarget = selected || mandiGrid.querySelector(".chip") || document.getElementById("mandiHelp");
+      if (nextTarget && activeTarget !== nextTarget) {
         activeTarget?.classList.remove(TARGET_CLASS);
-        activeTarget = selected;
+        activeTarget = nextTarget;
         activeTarget.classList.add(TARGET_CLASS);
+        if (selected) activeTarget.focus({ preventScroll: true });
         schedulePosition();
       }
     } else {
