@@ -1,4 +1,5 @@
 import { getLocale, t } from "./i18n.js";
+import { createFarmerDashboardStore } from "./farmer-dashboard-store.js";
 import { calculateNetProceeds, isRupeesPerQuintal } from "./decision-tools-core.js";
 const API_BASE = document.querySelector('meta[name="api-base"]')?.content || "/api/v1";
 const form = document.querySelector("#decisionSearch");
@@ -22,6 +23,9 @@ const netResult = document.querySelector("#netResult");
 const grossResult = document.querySelector("#grossResult");
 const breakEvenResult = document.querySelector("#breakEvenResult");
 let comparedMarkets = [];
+let selectedRecord = null;
+let dashboardStore = null;
+try { dashboardStore = createFarmerDashboardStore(window.localStorage); } catch { /* saving stays optional */ }
 
 const money = (value) => new Intl.NumberFormat(getLocale(), {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
@@ -58,6 +62,7 @@ function selectRecord(record) {
     statusNode.textContent = t("decision.unitRequired", { unit: record.source_unit || (getLocale() === "hi-IN" ? "अज्ञात इकाई" : "an unspecified unit") });
     return;
   }
+  selectedRecord = record;
   priceInput.value = String(record.modal_price);
   transportCostInput.value = "0";
   handlingCostInput.value = "0";
@@ -186,6 +191,7 @@ async function fetchAllPages(state, commodity, district, market) {
 async function search() {
   const state = stateInput.value.trim();
   const commodity = cropInput.value.trim();
+  selectedRecord = null;
   const district = districtInput.value.trim();
   const market = marketInput.value.trim();
   errorNode.hidden = true;
@@ -314,6 +320,70 @@ if (voiceCropButton) {
     } catch {
       voiceCropButton.disabled = false;
       statusNode.textContent = t("decision.voiceError");
+    }
+  });
+}
+
+
+const saveFavoriteButton = document.querySelector("#saveFavoriteButton");
+if (saveFavoriteButton) {
+  saveFavoriteButton.addEventListener("click", () => {
+    if (!dashboardStore) {
+      statusNode.textContent = t("decision.storageUnavailable");
+      return;
+    }
+    try {
+      const saved = dashboardStore.saveFavorite({
+        state: stateInput.value,
+        commodity: cropInput.value,
+        district: districtInput.value,
+        market: marketInput.value,
+      });
+      statusNode.textContent = saved ? t("decision.favoriteSaved") : t("decision.favoriteInvalid");
+    } catch {
+      statusNode.textContent = t("decision.storageUnavailable");
+    }
+  });
+}
+
+const saveScenarioButton = document.querySelector("#saveScenarioButton");
+if (saveScenarioButton) {
+  saveScenarioButton.addEventListener("click", () => {
+    if (!dashboardStore) {
+      statusNode.textContent = t("decision.storageUnavailable");
+      return;
+    }
+    const transport = Number(transportCostInput.value);
+    const handling = Number(handlingCostInput.value);
+    const other = Number(costInput.value);
+    const estimate = calculateNetProceeds({
+      quantity: Number(quantityInput.value),
+      modalPrice: Number(priceInput.value),
+      transportCost: transport,
+      handlingCost: handling,
+      otherCosts: other,
+    });
+    if (!estimate) {
+      statusNode.textContent = t("decision.scenarioInvalid");
+      return;
+    }
+    const sourceStillSelected = selectedRecord &&
+      Number(priceInput.value) === Number(selectedRecord.modal_price);
+    try {
+      dashboardStore.saveScenario({
+        state: stateInput.value,
+        commodity: cropInput.value,
+        market: sourceStillSelected ? selectedRecord.market : "",
+        sourceDate: sourceStillSelected ? selectedRecord.arrival_date : "",
+        quantity: Number(quantityInput.value),
+        modalPrice: Number(priceInput.value),
+        transportCost: transport,
+        handlingCost: handling,
+        otherCosts: other,
+      });
+      statusNode.textContent = t("decision.scenarioSaved");
+    } catch {
+      statusNode.textContent = t("decision.storageUnavailable");
     }
   });
 }
