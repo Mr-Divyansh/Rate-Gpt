@@ -146,6 +146,7 @@ async function fetchAllPages(state, commodity) {
   let meta = {};
   let offset = 0;
   let partial = false;
+  let pagesFetched = 0;
 
   for (let page = 0; page < maxPages; page += 1) {
     const params = new URLSearchParams({
@@ -159,8 +160,12 @@ async function fetchAllPages(state, commodity) {
       throw new Error(payload.error?.message || "The government price service could not return records.");
     }
     allRecords.push(...payload.data);
+    pagesFetched += 1;
     meta = payload.meta || {};
-    if (!meta.hasNext) return { records: allRecords, meta, partial: false };
+    if (!meta.hasNext) {
+      partial = Boolean(meta.truncated || meta.upstreamHasNext);
+      return { records: allRecords, meta, partial, pagesFetched };
+    }
     if (!Number.isInteger(meta.nextOffset) || meta.nextOffset <= offset) {
       partial = true;
       break;
@@ -168,7 +173,7 @@ async function fetchAllPages(state, commodity) {
     offset = meta.nextOffset;
     if (page === maxPages - 1) partial = true;
   }
-  return { records: allRecords, meta, partial };
+  return { records: allRecords, meta, partial, pagesFetched };
 }
 
 async function search() {
