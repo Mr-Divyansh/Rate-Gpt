@@ -247,13 +247,16 @@ async function search() {
   try {
     const result = await fetchAllPages(state, commodity, district, market);
     renderComparison(result.records, result.meta, commodity, result.partial);
+    lastSearchState = { type: result.records.length ? "loaded" : "empty", result };
     statusNode.textContent = result.records.length
-      ? "Loaded " + result.records.length + " records from " +
-        result.pagesFetched + " source page(s)." +
-        (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : "")
-      : "The government source returned no records for this selection.";
+      ? copy("Loaded " + result.records.length + " records from " + result.pagesFetched + " source page(s)." +
+        (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : ""),
+        result.records.length + " रिकॉर्ड " + result.pagesFetched + " स्रोत पेज से मिले।" +
+        (result.partial ? " और रिकॉर्ड हो सकते हैं; यह तुलना पहले 500 रिकॉर्ड तक सीमित है।" : ""))
+      : copy("The government source returned no records for this selection.", "सरकारी स्रोत से इस चयन के लिए कोई रिकॉर्ड नहीं मिला।");
   } catch (error) {
-    errorNode.textContent = error instanceof Error ? error.message : "Unexpected error while loading records.";
+    errorNode.textContent = copy("Could not load mandi records. Please try again.", "मंडी रिकॉर्ड लोड नहीं हो सके। कृपया फिर कोशिश करें।");
+    lastSearchState = { type: "failed" };
     errorNode.hidden = false;
     statusNode.textContent = t("decision.failed");
   } finally {
