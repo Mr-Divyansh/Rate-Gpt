@@ -138,7 +138,7 @@ function startFinderTour() {
     if (step === 1) return stateSelect;
     if (step === 2) return districtSelect;
     if (step === 3) return mandiGrid.querySelector(".chip") || document.getElementById("mandiHelp");
-    if (step === 4) return pricesHeading;
+    if (step === 4) return results;
     return null;
   }
 
