@@ -138,3 +138,28 @@ This document is the implementation checklist, not evidence that a feature is al
 - Vercel preview deployment for commit b2559ac866cc12cb8f37bbde9c277ae34b0f7286 was created but remained QUEUED at the last check.
 - Browser interaction, mobile layout, keyboard accessibility, and production smoke checks remain pending.
 - No hosted LLM, persistent historical store, alert delivery, PWA/offline support, voice flow, or farmer profile storage has been implemented.
+
+## Implementation log — continued work, 23 November 2026
+
+### Additional implementation on this feature branch
+- Mandi comparison now supports optional district and mandi filters and separates same-named markets by state/district/unit.
+- Calculator now supports separate transport, loading/unloading and other costs, net proceeds and break-even modal price.
+- Added a deterministic assistant that answers only supported questions from the loaded government observations and entered costs. This is not a hosted LLM.
+- Added English/Hindi labels and dynamic messages to Decision Tools.
+- Added explicit-click browser speech-to-text for crop-name entry, with typed fallback and a browser-privacy note.
+- Added an installable PWA manifest, static-shell caching, and offline fallback. The service worker bypasses all /api responses; live prices and weather are not cached.
+- Added a three-day WeatherAPI forecast using the documented forecast endpoint, with rain probability and daily high/low. WeatherAPI's official documentation lists a three-day forecast in its Free plan.
+- Added a local-only Farmer Dashboard for saved crop searches and calculator scenarios, with per-item removal, export, clear-all, and storage caps (20 searches / 50 scenarios). Data stays in browser local storage and is not uploaded.
+- Updated the privacy policy to disclose local dashboard storage, weather location requests, browser speech processing and static-only offline caching.
+- Added tests for calculation helpers, units, pagination/filter hooks, bilingual keys, PWA boundaries, voice entry and dashboard storage limits; included the new checks in npm test.
+
+### Remaining work and verification gates
+- Historical mandi price analytics and price alerts remain blocked on an approved persistent data store / ingestion strategy. The current government endpoint does not provide the historical date-range service required by the roadmap; no historical values or alerts are fabricated.
+- A real hosted AI assistant remains unimplemented. It requires approved server-side model configuration, rate limits, privacy handling, prompt-injection defenses and grounded fallback.
+- The dashboard is local to one browser/device; it is not an account-backed cross-device profile.
+- Voice input is speech-to-text for the crop field, not a full spoken conversational assistant.
+- Offline mode caches the static shell only; live API responses are deliberately not cached.
+- The Vercel preview build at commit 737c18f exposed a missing comma in the voice translation dictionary. The comma was fixed in commit 124b6977c700d7657b8aee21a09e9fc1cc08adf0.
+- Vercel then enforced its free daily deployment quota (more than 100 deployments in 24 hours). A fresh preview for the corrected and later commits could not be created during this session.
+- The repository could not be cloned into the local execution environment because outbound GitHub DNS/network access is unavailable. The newly added tests have therefore not been run in this session.
+- Draft pull request #147 is open for review. Production has not been changed.
