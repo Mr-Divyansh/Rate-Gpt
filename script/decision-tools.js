@@ -24,9 +24,13 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => 
 }[char]));
 const validNumber = (value) => Number.isFinite(value) && value >= 0;
 
+// API contract: MandiRecord uses snake_case fields. Accept only explicit
+// rupee-per-quintal units; never infer a unit from the price value.
 function isRupeesPerQuintal(unit) {
   const normalized = String(unit || "").toLowerCase().replace(/\s+/g, "");
-  return /₹|rs\.?|inr|rupee/.test(normalized) && /quintal|qtl|\bqt\b/.test(normalized);
+  const rupees = /₹|rs\.?|inr|rupee/.test(normalized);
+  const quintal = /quintal|qtl|(^|[^a-z])qt([^a-z]|$)/.test(normalized);
+  return rupees && quintal;
 }
 
 function updateCalculator() {
@@ -39,13 +43,16 @@ function updateCalculator() {
     return;
   }
   const gross = quantity * price;
-  netResult.textContent = money(gross - costs);
-  grossResult.textContent = `Gross amount ${money(gross)} − entered costs ${money(costs)}`;
+  const net = gross - costs;
+  netResult.textContent = money(net);
+  grossResult.textContent = "Gross amount " + money(gross) + " − entered costs " + money(costs) +
+    (net < 0 ? " · Costs exceed gross revenue." : "");
 }
 
 function selectRecord(record) {
   if (!isRupeesPerQuintal(record.source_unit)) {
-    statusNode.textContent = `Selected record unit is “${record.source_unit}”. The quintal calculator needs a source unit explicitly reported as ₹ per quintal.`;
+    statusNode.textContent = "This record uses “" + (record.source_unit || "an unspecified unit") +
+      "”. The calculator requires a source unit explicitly reported as ₹ per quintal.";
     return;
   }
   priceInput.value = String(record.modal_price);
@@ -54,59 +61,114 @@ function selectRecord(record) {
   document.querySelector("#calculatorTitle").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function renderComparison(records, meta, commodity) {
-  const latestByMarket = new Map();
-  for (const record of records) {
-    if (record.modal_price === null || record.modal_price === undefined) continue;
-    const key = [record.market, record.source_unit].join("|");
-    const previous = latestByMarket.get(key);
-    if (!previous || record.arrival_date > previous.arrival_date) latestByMarket.set(key, record);
-  }
-  comparedMarkets = [...latestByMarket.values()].sort((a, b) => {
-    if (a.source_unit !== b.source_unit) return a.source_unit.localeCompare(b.source_unit);
-    return b.modal_price - a.modal_price;
-  });
-  rowsNode.replaceChildren();
-  for (const [index, record] of comparedMarkets.entries()) {
-    const tr = document.createElement("tr");
-    const calculatorAllowed = isRupeesPerQuintal(record.source_unit);
-    tr.innerHTML = `
-      <td><strong>${escapeHtml(record.market)}</strong><small>${escapeHtml(record.district)}, ${escapeHtml(record.state)}</small></td>
-      <td>${escapeHtml(record.arrival_date)}</td>
-      <td><strong>${money(record.modal_price)}</strong><small>${escapeHtml(record.source_unit)}</small></td>
-      <td><label class="sr-only" for="market-cost-${index}">Costs for ${escapeHtml(record.market)}</label><input class="market-cost" id="market-cost-${index}" type="number" min="0" step="0.01" value="0" data-index="${index}" aria-label="Transport and handling cost for ${escapeHtml(record.market)} in rupees"></td>
-      <td><strong id="market-net-${index}">—</strong><button class="use-record" type="button" data-index="${index}" ${calculatorAllowed ? "" : "disabled"}>Use in calculator</button></td>`;
-    rowsNode.append(tr);
-  }
-  rowsNode.querySelectorAll(".market-cost").forEach((input) => input.addEventListener("input", updateMarketEstimates));
-  rowsNode.querySelectorAll(".use-record").forEach((button) => button.addEventListener("click", () => selectRecord(comparedMarkets[Number(button.dataset.index)])));
-  resultsPanel.hidden = false;
-  const fetchedAt = meta?.fetchedAt ? new Date(meta.fetchedAt).toLocaleString() : "not supplied";
-  sourceSummary.textContent = `Source: ${meta?.source || "Government of India OGD / AGMARKNET"} · fetched: ${fetchedAt} · records returned: ${records.length}`;
-  if (!comparedMarkets.length) {
-    noteNode.textContent = `No records with a reported modal price were returned for ${commodity}. Try another crop or state.`;
-  } else {
-    const distinctUnits = new Set(comparedMarkets.map((record) => record.source_unit));
-    noteNode.textContent = distinctUnits.size > 1
-      ? "Records contain different source-reported units. They are shown separately; do not compare their price values directly."
-      : `Showing the latest returned observation per mandi for ${commodity}. Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.`;
-  }
-  updateMarketEstimates();
-}
-
 function updateMarketEstimates() {
   const quantity = Number(quantityInput.value);
   rowsNode.querySelectorAll(".market-cost").forEach((input) => {
     const index = Number(input.dataset.index);
     const record = comparedMarkets[index];
-    const target = document.querySelector(`#market-net-${index}`);
+    const target = document.querySelector("#market-net-" + index);
     const costs = Number(input.value);
-    if (!record || !isRupeesPerQuintal(record.source_unit) || !Number.isFinite(quantity) || quantity <= 0 || !validNumber(costs)) {
+    if (!record || !isRupeesPerQuintal(record.source_unit) ||
+        !Number.isFinite(quantity) || quantity <= 0 || !validNumber(costs)) {
       target.textContent = "Not comparable";
       return;
     }
     target.textContent = money(quantity * record.modal_price - costs);
   });
+}
+
+function renderComparison(records, meta, commodity, isPartial) {
+  const latestByMarket = new Map();
+  for (const record of records) {
+    if (record.modal_price === null || record.modal_price === undefined) continue;
+    const key = [record.market, record.source_unit].join("|");
+    const previous = latestByMarket.get(key);
+    if (!previous || String(record.arrival_date) > String(previous.arrival_date)) {
+      latestByMarket.set(key, record);
+    }
+  }
+  comparedMarkets = [...latestByMarket.values()].sort((a, b) => {
+    if (a.source_unit !== b.source_unit) return String(a.source_unit).localeCompare(String(b.source_unit));
+    return b.modal_price - a.modal_price;
+  });
+  rowsNode.replaceChildren();
+
+  for (const [index, record] of comparedMarkets.entries()) {
+    const tr = document.createElement("tr");
+    const calculatorAllowed = isRupeesPerQuintal(record.source_unit);
+    const market = escapeHtml(record.market);
+    const district = escapeHtml(record.district);
+    const state = escapeHtml(record.state);
+    const date = escapeHtml(record.arrival_date);
+    const unit = escapeHtml(record.source_unit || "Not provided by source");
+    tr.innerHTML =
+      "<td><strong>" + market + "</strong><small>" + district + ", " + state + "</small></td>" +
+      "<td>" + date + "</td>" +
+      "<td><strong>" + money(record.modal_price) + "</strong><small>" + unit + "</small></td>" +
+      '<td><label class="sr-only" for="market-cost-' + index + '">Costs for ' + market +
+      '</label><input class="market-cost" id="market-cost-' + index +
+      '" type="number" min="0" step="0.01" value="0" data-index="' + index +
+      '" aria-label="Transport and handling cost for ' + market + ' in rupees"></td>' +
+      '<td><strong id="market-net-' + index + '">—</strong><button class="use-record" type="button" data-index="' +
+      index + '"' + (calculatorAllowed ? "" : " disabled") + ">Use in calculator</button></td>";
+    rowsNode.append(tr);
+  }
+
+  rowsNode.querySelectorAll(".market-cost").forEach((input) => input.addEventListener("input", updateMarketEstimates));
+  rowsNode.querySelectorAll(".use-record").forEach((button) => button.addEventListener("click", () => {
+    selectRecord(comparedMarkets[Number(button.dataset.index)]);
+  }));
+  resultsPanel.hidden = false;
+
+  const fetchedAt = meta?.fetchedAt ? new Date(meta.fetchedAt).toLocaleString() : "not supplied";
+  sourceSummary.textContent = "Source: " + (meta?.source || "Government of India OGD / AGMARKNET") +
+    " · fetched: " + fetchedAt + " · records scanned: " + records.length;
+
+  if (!comparedMarkets.length) {
+    noteNode.textContent = "No records with a reported modal price were returned for " + commodity + ". Try another crop or state.";
+  } else {
+    const distinctUnits = new Set(comparedMarkets.map((record) => record.source_unit));
+    noteNode.textContent = distinctUnits.size > 1
+      ? "Records contain different source-reported units. They are shown separately; do not compare their price values directly."
+      : "Showing the latest returned observation per mandi for " + commodity +
+        ". Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.";
+  }
+  if (isPartial) {
+    noteNode.textContent += " The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.";
+  }
+  updateMarketEstimates();
+}
+
+async function fetchAllPages(state, commodity) {
+  const pageSize = 100;
+  const maxPages = 5;
+  const allRecords = [];
+  let meta = {};
+  let offset = 0;
+  let partial = false;
+
+  for (let page = 0; page < maxPages; page += 1) {
+    const params = new URLSearchParams({
+      state, commodity, limit: String(pageSize), offset: String(offset), sort: "date_desc",
+    });
+    const response = await fetch(API_BASE + "/prices?" + params, {
+      headers: { Accept: "application/json" },
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
+      throw new Error(payload.error?.message || "The government price service could not return records.");
+    }
+    allRecords.push(...payload.data);
+    meta = payload.meta || {};
+    if (!meta.hasNext) return { records: allRecords, meta, partial: false };
+    if (!Number.isInteger(meta.nextOffset) || meta.nextOffset <= offset) {
+      partial = true;
+      break;
+    }
+    offset = meta.nextOffset;
+    if (page === maxPages - 1) partial = true;
+  }
+  return { records: allRecords, meta, partial };
 }
 
 async function search() {
@@ -119,19 +181,16 @@ async function search() {
     errorNode.hidden = false;
     return;
   }
+
   searchButton.disabled = true;
   statusNode.textContent = "Fetching government-reported records…";
   try {
-    const params = new URLSearchParams({ state, commodity, limit: "100", offset: "0", sort: "date_desc" });
-    const response = await fetch(`${API_BASE}/prices?${params}`, { headers: { Accept: "application/json" } });
-    const payload = await response.json();
-    if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
-      throw new Error(payload.error?.message || "The government price service could not return records.");
-    }
-    const records = payload.data;
-    renderComparison(records, payload.meta || {}, commodity);
-    statusNode.textContent = records.length
-      ? `Loaded ${records.length} records from the first source page. ${payload.meta?.hasNext ? "More source pages exist; this comparison is limited to the returned page." : "No additional source page was reported."}`
+    const result = await fetchAllPages(state, commodity);
+    renderComparison(result.records, result.meta, commodity, result.partial);
+    statusNode.textContent = result.records.length
+      ? "Loaded " + result.records.length + " records from " +
+        (Math.ceil(result.records.length / 100) || 1) + " source page(s)." +
+        (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : "")
       : "The government source returned no records for this selection.";
   } catch (error) {
     errorNode.textContent = error instanceof Error ? error.message : "Unexpected error while loading records.";
@@ -143,5 +202,7 @@ async function search() {
 }
 
 form.addEventListener("submit", (event) => { event.preventDefault(); void search(); });
-for (const input of [quantityInput, priceInput, costInput]) input.addEventListener("input", updateCalculator);
+for (const input of [quantityInput, priceInput, costInput]) {
+  input.addEventListener("input", updateCalculator);
+}
 quantityInput.addEventListener("input", updateMarketEstimates);
