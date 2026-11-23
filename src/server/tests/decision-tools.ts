@@ -39,4 +39,16 @@ assert.match(serviceWorker, /url\.pathname\.startsWith\("\/api\/"\)\) return/);
 assert.match(serviceWorker, /caches\.match\(OFFLINE_URL\)/);
 assert.match(serviceWorker, /"\/style\/offline\.css"/);
 
-console.log("Decision-tools and PWA checks: 18 passed, 0 failed");
+const decisionPage = await readFile("decision-tools.html", "utf8");
+const translations = await readFile("script/i18n.js", "utf8");
+const translationKeys = new Set([
+  ...[...decisionPage.matchAll(/data-i18n="([^"]+)"/g)].map((match) => match[1]),
+  ...[...decisionPage.matchAll(/data-i18n-attr="[^"]*:([^"]+)"/g)].map((match) => match[1]),
+]);
+for (const key of translationKeys) {
+  assert.ok(translations.split('"' + key + '":').length - 1 >= 2, "English and Hindi translation exist for " + key);
+}
+const offlinePage = await readFile("public/offline.html", "utf8");
+assert.doesNotMatch(offlinePage, /\sstyle="/);
+
+console.log("Decision-tools and PWA checks: " + (19 + translationKeys.size) + " passed, 0 failed");
