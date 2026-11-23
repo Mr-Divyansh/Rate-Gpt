@@ -118,7 +118,8 @@ async function main() {
     finderTourScript.includes('if (step === 4) return results;') &&
     !finderTourScript.includes('if (step === 4) return pricesHeading;') &&
     finderTourScript.includes('Characte_For_RateGPT_Namaste.png') &&
-    finderTourScript.includes('Thank you for completing the tutorial!') &&
+    finderTourScript.includes('Thanks for completing the tour!') &&
+    finderTourScript.includes('Need a hand? Your Farmer Assistant is right here.') &&
     finderTourScript.includes('Close tutorial') &&
     finderTourCss.includes('mandi-tour-water') &&
     finderTourCss.includes('pointer-events: auto') &&
