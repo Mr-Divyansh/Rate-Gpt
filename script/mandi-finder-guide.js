@@ -363,10 +363,20 @@ function startFinderTour() {
 
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get(TOUR_PARAM) !== "1") return;
+  let sessionHandoff = false;
+  try {
+    sessionHandoff = window.sessionStorage.getItem("rateGptStartFinderTutorial") === "1";
+    if (sessionHandoff) window.sessionStorage.removeItem("rateGptStartFinderTutorial");
+  } catch {
+    // Continue with the explicit URL parameter when session storage is unavailable.
+  }
+
+  if (params.get(TOUR_PARAM) !== "1" && !sessionHandoff) return;
+
   params.delete(TOUR_PARAM);
   const cleanUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "") + window.location.hash;
   window.history.replaceState(window.history.state, "", cleanUrl);
+
   await waitForFinder();
   startFinderTour();
 }
