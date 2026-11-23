@@ -51,17 +51,16 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (/\.(?:css|js|mjs|webp|png|jpg|jpeg|svg|woff2?|webmanifest)$/i.test(url.pathname)) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        const network = fetch(request).then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        });
-        return cached || network;
-      })
-    );
+    const cachedResponse = caches.match(request);
+    const networkResponse = fetch(request).then(async (response) => {
+      if (response.ok) {
+        const copy = response.clone();
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, copy);
+      }
+      return response;
+    });
+    event.waitUntil(networkResponse.then(() => undefined).catch(() => undefined));
+    event.respondWith(cachedResponse.then((cached) => cached || networkResponse));
   }
 });
