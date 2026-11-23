@@ -19,6 +19,12 @@ try {
 if (!store) {
   exportButton.disabled = true;
   clearButton.disabled = true;
+  store = {
+    list: () => ({ version: 1, favorites: [], scenarios: [] }),
+    removeFavorite: () => {},
+    removeScenario: () => {},
+    clear: () => {},
+  };
 }
 
 const money = (value) => new Intl.NumberFormat(getLocale(), {
