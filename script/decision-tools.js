@@ -141,6 +141,7 @@ function renderComparison(records, meta, commodity, isPartial) {
     if (a.source_unit !== b.source_unit) return String(a.source_unit).localeCompare(String(b.source_unit));
     return b.modal_price - a.modal_price;
   });
+  const savedCosts = [...rowsNode.querySelectorAll(".market-cost")].map((input) => input.value);
   rowsNode.replaceChildren();
 
   for (const [index, record] of comparedMarkets.entries()) {
@@ -164,7 +165,10 @@ function renderComparison(records, meta, commodity, isPartial) {
     rowsNode.append(tr);
   }
 
-  rowsNode.querySelectorAll(".market-cost").forEach((input) => input.addEventListener("input", updateMarketEstimates));
+  rowsNode.querySelectorAll(".market-cost").forEach((input) => {
+    input.value = savedCosts[Number(input.dataset.index)] ?? "0";
+    input.addEventListener("input", updateMarketEstimates);
+  });
   rowsNode.querySelectorAll(".use-record").forEach((button) => button.addEventListener("click", () => {
     selectRecord(comparedMarkets[Number(button.dataset.index)]);
   }));
