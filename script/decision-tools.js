@@ -4,6 +4,8 @@ const API_BASE = document.querySelector('meta[name="api-base"]')?.content || "/a
 const form = document.querySelector("#decisionSearch");
 const stateInput = document.querySelector("#stateInput");
 const cropInput = document.querySelector("#cropInput");
+const districtInput = document.querySelector("#districtInput");
+const marketInput = document.querySelector("#marketInput");
 const searchButton = document.querySelector("#searchButton");
 const statusNode = document.querySelector("#searchStatus");
 const errorNode = document.querySelector("#searchError");
@@ -85,7 +87,7 @@ function renderComparison(records, meta, commodity, isPartial) {
   const latestByMarket = new Map();
   for (const record of records) {
     if (record.modal_price === null || record.modal_price === undefined) continue;
-    const key = [record.market, record.source_unit].join("|");
+    const key = [record.state, record.district, record.market, record.source_unit].join("|");
     const previous = latestByMarket.get(key);
     if (!previous || String(record.arrival_date) > String(previous.arrival_date)) {
       latestByMarket.set(key, record);
@@ -142,7 +144,7 @@ function renderComparison(records, meta, commodity, isPartial) {
   updateMarketEstimates();
 }
 
-async function fetchAllPages(state, commodity) {
+async function fetchAllPages(state, commodity, district, market) {
   const pageSize = 100;
   const maxPages = 5;
   const allRecords = [];
@@ -155,6 +157,8 @@ async function fetchAllPages(state, commodity) {
     const params = new URLSearchParams({
       state, commodity, limit: String(pageSize), offset: String(offset), sort: "date_desc",
     });
+    if (district) params.set("district", district);
+    if (market) params.set("market", market);
     const response = await fetch(API_BASE + "/prices?" + params, {
       headers: { Accept: "application/json" },
     });
@@ -182,6 +186,8 @@ async function fetchAllPages(state, commodity) {
 async function search() {
   const state = stateInput.value.trim();
   const commodity = cropInput.value.trim();
+  const district = districtInput.value.trim();
+  const market = marketInput.value.trim();
   errorNode.hidden = true;
   resultsPanel.hidden = true;
   if (!state || !commodity) {
@@ -193,7 +199,7 @@ async function search() {
   searchButton.disabled = true;
   statusNode.textContent = t("decision.fetching");
   try {
-    const result = await fetchAllPages(state, commodity);
+    const result = await fetchAllPages(state, commodity, district, market);
     renderComparison(result.records, result.meta, commodity, result.partial);
     statusNode.textContent = result.records.length
       ? "Loaded " + result.records.length + " records from " +
