@@ -68,3 +68,18 @@
   .assistant-form { grid-template-columns: 1fr; }
   .assistant-form .btn { width: 100%; }
 }
+
+.voice-crop-button {
+  justify-self: start;
+  padding: 7px 11px;
+  border: 1px solid var(--control);
+  border-radius: var(--r-s);
+  color: var(--forest);
+  background: var(--surface);
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.voice-crop-button:disabled { opacity: .55; cursor: wait; }
+.voice-note { color: var(--muted); font-size: .78rem; line-height: 1.45; }
