@@ -344,6 +344,7 @@ const STRINGS = {
     "dashboard.remove": "Remove",
     "dashboard.exported": "Dashboard data export prepared.",
     "dashboard.exportFailed": "Could not export dashboard data from this browser.",
+    "dashboard.storageUnavailable": "Local browser storage is unavailable. Dashboard features cannot be used in this browser.",
     "dashboard.kicker": "आपका किसान वर्कस्पेस",
     "dashboard.title": "किसान डैशबोर्ड",
     "dashboard.lede": "काम की फसल खोज और बिक्री के अनुमान इसी डिवाइस पर सेव रखें।",
@@ -365,6 +366,7 @@ const STRINGS = {
     "dashboard.remove": "हटाएँ",
     "dashboard.exported": "डैशबोर्ड डेटा एक्सपोर्ट तैयार है।",
     "dashboard.exportFailed": "इस ब्राउज़र से डैशबोर्ड डेटा एक्सपोर्ट नहीं हो सका।",
+    "dashboard.storageUnavailable": "इस ब्राउज़र में लोकल स्टोरेज उपलब्ध नहीं है। डैशबोर्ड इस्तेमाल नहीं किया जा सकता।",
 "decision.assistantCalculation": "Calculation: {quantity} quintal × {price} per quintal = {gross} gross; entered market costs = {costs}; estimated net = {net}. Source arrival date: {date}. This uses a government-reported observation, not a live offer, and excludes costs or quality deductions you have not entered.",
     "decision.breakEven": "Break-even modal price: {price} per quintal (based only on the costs entered).",
     "about.member2.focus": "Collaborative development · Implementation · Improvements"
