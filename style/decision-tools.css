@@ -33,3 +33,38 @@
   .calculator-grid { grid-template-columns: 1fr; }
   .comparison-table { min-width: 760px; }
 }
+
+.assistant-panel {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--decision-border);
+  border-radius: var(--r-m);
+  background: var(--surface);
+}
+.assistant-panel h3 { margin: 4px 0 8px; font-size: 1.25rem; }
+.assistant-panel > p:not(.eyebrow) { max-width: 70ch; color: var(--muted); }
+.assistant-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-top: 14px;
+}
+.assistant-form input {
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 13px;
+  border: 1.5px solid var(--control);
+  border-radius: var(--r-s);
+  background: white;
+}
+.assistant-answer {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-left: 4px solid var(--green);
+  background: var(--soft);
+  line-height: 1.6;
+}
+@media (max-width: 560px) {
+  .assistant-form { grid-template-columns: 1fr; }
+  .assistant-form .btn { width: 100%; }
+}
