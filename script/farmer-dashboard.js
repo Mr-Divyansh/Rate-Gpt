@@ -24,7 +24,7 @@ if (!store) {
   clearButton.disabled = true;
   alertForm?.querySelectorAll("input,select,button").forEach((control) => { control.disabled = true; });
   store = {
-    list: () => ({ version: 1, favorites: [], scenarios: [] }),
+    list: () => ({ version: 1, favorites: [], scenarios: [], alerts: [] }),
     removeFavorite: () => {},
     removeScenario: () => {},
     removeAlert: () => {},
