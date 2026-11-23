@@ -1,3 +1,4 @@
+import { getLocale, t } from "./i18n.js";
 import { calculateNetProceeds, isRupeesPerQuintal } from "./decision-tools-core.js";
 const API_BASE = document.querySelector('meta[name="api-base"]')?.content || "/api/v1";
 const form = document.querySelector("#decisionSearch");
@@ -20,7 +21,7 @@ const grossResult = document.querySelector("#grossResult");
 const breakEvenResult = document.querySelector("#breakEvenResult");
 let comparedMarkets = [];
 
-const money = (value) => new Intl.NumberFormat("en-IN", {
+const money = (value) => new Intl.NumberFormat(getLocale(), {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
 }).format(value);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -39,21 +40,20 @@ function updateCalculator() {
   });
   if (!estimate) {
     netResult.textContent = "—";
-    grossResult.textContent = "Enter a valid quantity, price and non-negative costs.";
+    grossResult.textContent = t("decision.invalidCalc");
     breakEvenResult.textContent = "";
     return;
   }
   netResult.textContent = money(estimate.net);
   grossResult.textContent = "Gross " + money(estimate.gross) + " − transport " + money(transport) +
     " − loading/unloading " + money(handling) + " − other costs " + money(other);
-  breakEvenResult.textContent = "Break-even modal price: " + money(estimate.breakEvenPrice) +
-    " per quintal (based only on the costs entered)." + (estimate.net < 0 ? " Entered costs exceed gross revenue." : "");
+  breakEvenResult.textContent = t("decision.breakEven", { price: money(estimate.breakEvenPrice) }) +
+    (estimate.net < 0 ? " " + (getLocale() === "hi-IN" ? "दर्ज खर्च सकल रकम से अधिक है।" : "Entered costs exceed gross revenue.") : "");
 }
 
 function selectRecord(record) {
   if (!isRupeesPerQuintal(record.source_unit)) {
-    statusNode.textContent = "This record uses “" + (record.source_unit || "an unspecified unit") +
-      "”. The calculator requires a source unit explicitly reported as ₹ per quintal.";
+    statusNode.textContent = t("decision.unitRequired", { unit: record.source_unit || (getLocale() === "hi-IN" ? "अज्ञात इकाई" : "an unspecified unit") });
     return;
   }
   priceInput.value = String(record.modal_price);
@@ -129,13 +129,12 @@ function renderComparison(records, meta, commodity, isPartial) {
     " · fetched: " + fetchedAt + " · records scanned: " + records.length;
 
   if (!comparedMarkets.length) {
-    noteNode.textContent = "No records with a reported modal price were returned for " + commodity + ". Try another crop or state.";
+    noteNode.textContent = t("decision.noRecords");
   } else {
     const distinctUnits = new Set(comparedMarkets.map((record) => record.source_unit));
     noteNode.textContent = distinctUnits.size > 1
-      ? "Records contain different source-reported units. They are shown separately; do not compare their price values directly."
-      : "Showing the latest returned observation per mandi for " + commodity +
-        ". Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.";
+      ? (getLocale() === "hi-IN" ? "रिकॉर्ड में स्रोत की अलग-अलग इकाइयाँ हैं। इन्हें अलग दिखाया गया है; इनके भावों की सीधी तुलना न करें।" : "Records contain different source-reported units. They are shown separately; do not compare their price values directly.")
+      : (getLocale() === "hi-IN" ? commodity + " के लिए हर मंडी का मिला हुआ सबसे नया रिकॉर्ड दिख रहा है। कैलकुलेटर में वही रिकॉर्ड चुनें जिसकी इकाई स्पष्ट रूप से ₹ प्रति क्विंटल है।" : "Showing the latest returned observation per mandi for " + commodity + ". Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.");
   }
   if (isPartial) {
     noteNode.textContent += " The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.";
@@ -186,13 +185,13 @@ async function search() {
   errorNode.hidden = true;
   resultsPanel.hidden = true;
   if (!state || !commodity) {
-    errorNode.textContent = "Enter both a state and crop name.";
+    errorNode.textContent = t("decision.enterBoth");
     errorNode.hidden = false;
     return;
   }
 
   searchButton.disabled = true;
-  statusNode.textContent = "Fetching government-reported records…";
+  statusNode.textContent = t("decision.fetching");
   try {
     const result = await fetchAllPages(state, commodity);
     renderComparison(result.records, result.meta, commodity, result.partial);
@@ -204,7 +203,7 @@ async function search() {
   } catch (error) {
     errorNode.textContent = error instanceof Error ? error.message : "Unexpected error while loading records.";
     errorNode.hidden = false;
-    statusNode.textContent = "Comparison could not be loaded.";
+    statusNode.textContent = t("decision.failed");
   } finally {
     searchButton.disabled = false;
   }
@@ -223,11 +222,11 @@ const assistantAnswer = document.querySelector("#assistantAnswer");
 
 function answerFromCurrentEvidence(question) {
   if (!comparedMarkets.length) {
-    return "Search for a crop first. I can only answer from mandi records currently loaded on this page.";
+    return t("decision.assistantNeedSearch");
   }
   const quantity = Number(quantityInput.value);
   if (!Number.isFinite(quantity) || quantity <= 0) {
-    return "Enter a valid quantity in quintals before comparing estimated net proceeds.";
+    return t("decision.assistantNeedQuantity");
   }
   const comparable = comparedMarkets
     .map((record, index) => {
@@ -244,17 +243,17 @@ function answerFromCurrentEvidence(question) {
     .sort((a, b) => b.net - a.net);
 
   if (!comparable.length) {
-    return "No loaded record has a verified ₹ per quintal unit and valid cost input. I cannot compare these units safely.";
+    return t("decision.noComparable");
   }
   const q = question.toLowerCase();
   if (!/(best|highest|top|which|net|profit|compare|why|कौन|सबसे|बेहतर|ज़्यादा|ज्यादा|मुनाफ़ा|लाभ)/i.test(q)) {
-    return "I can answer which comparable mandi has the highest estimated net proceeds and explain the inputs. I cannot answer forecasts, guaranteed sale prices or unsupported crop advice.";
+    return t("decision.assistantUnsupported");
   }
   const best = comparable[0];
   const tied = comparable.filter((item) => item.net === best.net);
   const record = best.record;
-  const title = tied.length > 1 ? "The highest estimated net proceeds are tied across " + tied.length + " mandis." :
-    "Among the loaded comparable records, " + record.market + " has the highest estimated net proceeds.";
+  const title = tied.length > 1 ? t("decision.assistantTied", { count: tied.length }) :
+    t("decision.assistantHighest", { market: record.market });
   return title + " Calculation: " + quantity + " quintal × " + money(record.modal_price) +
     " per quintal = " + money(best.gross) + " gross; entered market costs = " + money(best.costs) +
     "; estimated net = " + money(best.net) + ". Source arrival date: " + record.arrival_date +
