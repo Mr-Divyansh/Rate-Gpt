@@ -71,6 +71,9 @@ export function startMandiNavGuide() {
   const action = document.createElement("a");
   action.className = "mandi-nav-guide__action";
   action.href = "mandi-prices.html";
+  // Carry the guided-tour intent into the finder page; direct navigation remains unchanged.
+  action.href += "?startFinderTutorial=1";
+  pricesLink.href = new URL("mandi-prices.html?startFinderTutorial=1", window.location.href).href;
 
   const stopGuide = ({ restoreFocus = false } = {}) => {
     guide.remove();

@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -30,6 +30,8 @@ async function main() {
     readFile("script/onboarding.js", "utf8"),
     readFile("style/onboarding.css", "utf8"),
     readFile("script/mandi-nav-guide.js", "utf8"),
+    readFile("script/mandi-finder-guide.js", "utf8"),
+    readFile("style/mandi-finder-guide.css", "utf8"),
     readFile("style/mandi-nav-guide.css", "utf8"),
     readFile("script/home-market-preview.js", "utf8"),
     readFile("script/i18n.js", "utf8"),
@@ -100,6 +102,22 @@ async function main() {
     mandiNavGuideCss.includes("background: #fff") &&
     mandiNavGuideCss.includes("color: #17251c"),
     "Continue launches a dimmed spotlight with a white instruction bubble and pointing farmer; Skip does not");
+  check(prices.includes('/style/mandi-finder-guide.css') &&
+    prices.includes('/script/mandi-finder-guide.js') &&
+    mandiNavGuideScript.includes('mandi-prices.html?startFinderTutorial=1') &&
+    finderTourScript.includes('params.get(TOUR_PARAM) !== "1"') &&
+    finderTourScript.includes('Choose your state') &&
+    finderTourScript.includes('Select your district') &&
+    finderTourScript.includes('Pick a mandi') &&
+    finderTourScript.includes('Your mandi prices are here') &&
+    finderTourScript.includes('Characte_For_RateGPT_Namaste.png') &&
+    finderTourScript.includes('Thank you for completing the tutorial!') &&
+    finderTourScript.includes('Close tutorial') &&
+    finderTourCss.includes('mandi-tour-water') &&
+    finderTourCss.includes('pointer-events: auto') &&
+    finderTourCss.includes('prefers-reduced-motion: reduce'),
+    "guided finder tour carries from the homepage, locks unrelated controls, walks through state, district, mandi and prices, and ends with the Namaste thank-you screen");
+
   check(mandiNavGuideScript.includes("const mobile = viewportWidth <= 720") &&
     mandiNavGuideScript.includes("Math.min(380, viewportWidth - 32)") &&
     mandiNavGuideScript.includes("(viewportWidth - bubbleWidth) / 2") &&
