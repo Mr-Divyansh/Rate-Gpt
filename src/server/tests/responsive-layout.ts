@@ -115,6 +115,8 @@ async function main() {
     finderTourScript.includes('Select your district') &&
     finderTourScript.includes('Pick a mandi') &&
     finderTourScript.includes('Your mandi prices are here') &&
+    finderTourScript.includes('if (step === 4) return results;') &&
+    !finderTourScript.includes('if (step === 4) return pricesHeading;') &&
     finderTourScript.includes('Characte_For_RateGPT_Namaste.png') &&
     finderTourScript.includes('Thank you for completing the tutorial!') &&
     finderTourScript.includes('Close tutorial') &&
