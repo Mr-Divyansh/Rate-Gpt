@@ -276,3 +276,44 @@ if (assistantForm) {
     assistantAnswer.textContent = answerFromCurrentEvidence(assistantQuestion.value.trim());
   });
 }
+
+
+const voiceCropButton = document.querySelector("#voiceCropButton");
+if (voiceCropButton) {
+  voiceCropButton.addEventListener("click", () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      statusNode.textContent = t("decision.voiceUnsupported");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = getLocale();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    voiceCropButton.disabled = true;
+    statusNode.textContent = t("decision.voiceListening");
+    recognition.onresult = (event) => {
+      const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+      if (transcript) {
+        cropInput.value = transcript;
+        statusNode.textContent = t("decision.voiceConfirm", { crop: transcript });
+      } else {
+        statusNode.textContent = t("decision.voiceError");
+      }
+    };
+    recognition.onerror = () => {
+      statusNode.textContent = t("decision.voiceError");
+    };
+    recognition.onend = () => {
+      voiceCropButton.disabled = false;
+    };
+    try {
+      // The browser asks for microphone permission only after this explicit click.
+      recognition.start();
+    } catch {
+      voiceCropButton.disabled = false;
+      statusNode.textContent = t("decision.voiceError");
+    }
+  });
+}
