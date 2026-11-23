@@ -268,7 +268,7 @@ const STRINGS = {
     "decision.voiceListening": "Listening… speak the crop name now.",
     "decision.voiceConfirm": "Recognized “{crop}”. Check the crop name, then compare records.",
     "decision.voiceError": "Voice input was not completed. Check microphone permission or type the crop name.",
-    "decision.voiceNote": "Microphone access starts only after you tap the voice button. Rate-GPT does not record or store audio."
+    "decision.voiceNote": "Microphone access starts only after you tap the voice button. Rate-GPT does not record or store audio; your browser may process speech under its own privacy settings."
     "decision.cropPlaceholder": "e.g. Apple, Wheat, Tomato",
     "decision.searchButton": "Compare mandi records",
     "decision.initialStatus": "Enter a crop to begin.",
@@ -582,7 +582,7 @@ const STRINGS = {
     "decision.voiceListening": "सुन रहे हैं… अब फसल का नाम बोलें।",
     "decision.voiceConfirm": "“{crop}” पहचाना गया। रिकॉर्ड की तुलना करने से पहले नाम जाँच लें।",
     "decision.voiceError": "आवाज़ से इनपुट पूरा नहीं हुआ। माइक्रोफ़ोन की अनुमति जाँचें या फसल का नाम टाइप करें।",
-    "decision.voiceNote": "माइक्रोफ़ोन की अनुमति केवल आवाज़ वाले बटन को दबाने पर माँगी जाती है। Rate-GPT ऑडियो रिकॉर्ड या सेव नहीं करता।"
+    "decision.voiceNote": "माइक्रोफ़ोन की अनुमति केवल आवाज़ वाले बटन को दबाने पर माँगी जाती है। Rate-GPT ऑडियो रिकॉर्ड या सेव नहीं करता; ब्राउज़र अपनी गोपनीयता सेटिंग के अनुसार आवाज़ प्रोसेस कर सकता है।"
     "decision.cropPlaceholder": "जैसे सेब, गेहूँ, टमाटर",
     "decision.searchButton": "मंडी रिकॉर्ड की तुलना करें",
     "decision.initialStatus": "शुरू करने के लिए फसल का नाम डालें।",
