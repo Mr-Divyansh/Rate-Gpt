@@ -1,0 +1,18 @@
+{
+  "name": "Rate-GPT — Mandi Price Discovery",
+  "short_name": "Rate-GPT",
+  "description": "Government-reported mandi price discovery and farmer decision tools.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f0",
+  "theme_color": "#174d38",
+  "icons": [
+    {
+      "src": "/Images/Logo.webp",
+      "sizes": "any",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}
