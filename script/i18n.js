@@ -300,6 +300,7 @@ const STRINGS = {
     "decision.assistantUnsupported": "I can answer which comparable mandi has the highest estimated net proceeds and explain the inputs. I cannot answer forecasts, guaranteed sale prices or unsupported crop advice.",
     "decision.assistantHighest": "Among the loaded comparable records, {market} has the highest estimated net proceeds.",
     "decision.assistantTied": "The highest estimated net proceeds are tied across {count} mandis.",
+    "decision.assistantCalculation": "Calculation: {quantity} quintal × {price} per quintal = {gross} gross; entered market costs = {costs}; estimated net = {net}. Source arrival date: {date}. This uses a government-reported observation, not a live offer, and excludes costs or quality deductions you have not entered.",
     "decision.breakEven": "Break-even modal price: {price} per quintal (based only on the costs entered).",
     "about.member2.focus": "Collaborative development · Implementation · Improvements"
   },
@@ -603,6 +604,7 @@ const STRINGS = {
     "decision.assistantUnsupported": "मैं बता सकता हूँ कि तुलनीय रिकॉर्ड में किस मंडी की अनुमानित शुद्ध रकम सबसे अधिक है और गणना समझा सकता हूँ। मैं भविष्य के भाव, पक्के बिक्री भाव या बिना आधार की खेती सलाह नहीं दे सकता।",
     "decision.assistantHighest": "लोड किए गए तुलनीय रिकॉर्ड में {market} की अनुमानित शुद्ध रकम सबसे अधिक है।",
     "decision.assistantTied": "{count} मंडियों में अनुमानित शुद्ध रकम बराबर सबसे अधिक है।",
+    "decision.assistantCalculation": "गणना: {quantity} क्विंटल × {price} प्रति क्विंटल = {gross} कुल रकम; दर्ज मंडी खर्च = {costs}; अनुमानित शुद्ध रकम = {net}। स्रोत में आवक की तारीख: {date}। यह सरकारी रिकॉर्ड पर आधारित है, लाइव ऑफर नहीं। इसमें वे खर्च या गुणवत्ता कटौती शामिल नहीं हैं जिन्हें आपने दर्ज नहीं किया।",
     "decision.breakEven": "ब्रेक-ईवन मॉडल भाव: {price} प्रति क्विंटल (केवल आपके दर्ज खर्च के आधार पर)।",
     "about.member2.focus": "टीम के साथ विकास · इम्प्लीमेंटेशन · सुधार"
   }
