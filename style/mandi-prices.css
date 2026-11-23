@@ -1007,3 +1007,507 @@
   .page-prices .price-card .range-labels { font-size: .68rem; gap: 3px; }
   .page-prices .price-card .range-modal-label { padding: 3px 4px; font-size: .64rem; }
 }
+
+/* ---------- complete responsive mandi dashboard refinement ---------- */
+.page-prices {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(224, 238, 219, .75), transparent 260px),
+    #f4f6ef;
+}
+
+.page-prices .mandi-intro {
+  background:
+    linear-gradient(110deg, rgba(247, 249, 243, .98) 0%, rgba(247, 249, 243, .9) 58%, rgba(231, 239, 224, .35) 100%);
+}
+
+.page-prices .finder-panel {
+  border-radius: 18px;
+  border-color: #dbe6da;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 12px 34px rgba(25, 69, 43, .065);
+}
+
+.page-prices .results {
+  position: relative;
+}
+
+.page-prices .results-head {
+  padding: 0 0 14px;
+  border-bottom: 1px solid #dde7dc;
+}
+
+.page-prices .toolbar {
+  padding: 10px;
+  border: 1px solid #e1e8df;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 8px 24px rgba(28, 68, 44, .045);
+}
+
+.page-prices .toolbar input,
+.page-prices .toolbar select,
+.page-prices .toolbar .search-wrap input {
+  border-radius: 11px;
+  border-color: #dde5dd;
+  box-shadow: none;
+}
+
+.page-prices .toolbar .btn {
+  border-color: #cbdacb;
+  border-radius: 11px;
+}
+
+.page-prices .price-card {
+  border-radius: 16px;
+  border-color: #dde7de;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(23, 66, 42, .06);
+}
+
+.page-prices .crop-art {
+  border: 1px solid #edf1ea;
+  background: linear-gradient(145deg, #f7f9f4, #edf3e9);
+}
+
+.page-prices .price-card-meta {
+  border-top-color: #edf2ed;
+}
+
+@media (min-width: 761px) {
+  .page-prices .mobile-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .page-prices .price-card {
+    min-height: 335px;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-prices .mandi-intro {
+    min-height: 148px;
+    grid-template-columns: minmax(0, 1fr) 38%;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 0 18px var(--gutter);
+  }
+
+  .page-prices .mandi-intro .page-head-copy {
+    position: relative;
+    z-index: 2;
+    align-self: center;
+    gap: 7px;
+  }
+
+  .page-prices .mandi-intro h1 {
+    max-width: 13ch;
+    font-size: clamp(1.7rem, 7.5vw, 2.25rem);
+    line-height: 1.02;
+  }
+
+  .page-prices .mandi-intro .lede {
+    display: none;
+  }
+
+  .page-prices .mandi-intro .sync {
+    max-width: 190px;
+    width: fit-content;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: .68rem;
+    line-height: 1.25;
+  }
+
+  .page-prices .mandi-intro-visual {
+    min-height: 148px;
+    max-height: 148px;
+    margin: 0;
+    clip-path: none;
+  }
+
+  .page-prices .mandi-intro-visual img {
+    width: 100%;
+    height: 148px;
+    object-fit: cover;
+    object-position: 62% 50%;
+  }
+
+  .page-prices .finder-panel {
+    width: calc(100% - 24px);
+    gap: 14px;
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .page-prices .recent {
+    padding-bottom: 10px;
+  }
+
+  .page-prices .recent-label {
+    font-size: .82rem;
+  }
+
+  .page-prices .recent .chip {
+    min-height: 34px;
+    padding-inline: 10px;
+    font-size: .76rem;
+  }
+
+  .page-prices .finder-selects {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .page-prices .finder-selects label {
+    font-size: .78rem;
+  }
+
+  .page-prices .finder-selects select {
+    min-height: 42px;
+    padding-inline: 10px;
+    font-size: .82rem;
+  }
+
+  .page-prices .finder-side {
+    padding-top: 12px;
+  }
+
+  .page-prices .india-browse {
+    min-height: 44px;
+    font-size: .82rem;
+  }
+
+  .page-prices .results {
+    padding-top: 24px;
+  }
+
+  .page-prices .results-head {
+    flex-direction: row;
+    align-items: end;
+  }
+
+  .page-prices .results-head h2 {
+    max-width: 18ch;
+    font-size: 1.42rem;
+  }
+
+  .page-prices .results-head .unit-field {
+    min-width: 118px;
+  }
+
+  .page-prices .results-head .unit-field label {
+    font-size: .72rem;
+  }
+
+  .page-prices .results-head select {
+    min-height: 42px;
+    font-size: .78rem;
+  }
+
+  .page-prices .toolbar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .page-prices .toolbar input,
+  .page-prices .toolbar select,
+  .page-prices .toolbar .search-wrap input {
+    min-height: 44px;
+  }
+
+  .page-prices .toolbar .btn {
+    min-height: 42px;
+  }
+
+  .page-prices .mobile-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .page-prices .price-card {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    min-height: 0;
+    gap: 8px 12px;
+    padding: 10px;
+  }
+
+  .page-prices .crop-art {
+    grid-row: 1 / span 2;
+    min-height: 104px;
+    height: 104px;
+    border-radius: 12px;
+  }
+
+  .page-prices .crop-art .crop-photo {
+    min-height: 104px;
+    height: 104px;
+    padding: 4px;
+  }
+
+  .page-prices .price-card-top {
+    grid-column: 2;
+    grid-row: 1;
+    align-content: start;
+    align-items: start;
+    justify-items: start;
+    gap: 4px;
+  }
+
+  .page-prices .price-card .crop-name {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .page-prices .price-card .crop-name strong,
+  .page-prices .price-card .crop-name small {
+    width: auto;
+    text-align: left;
+  }
+
+  .page-prices .price-card .crop-name strong {
+    font-size: .96rem;
+  }
+
+  .page-prices .price-card .crop-name small {
+    max-width: 20ch;
+    font-size: .68rem;
+  }
+
+  .page-prices .price-card .modal-price {
+    justify-content: flex-start;
+  }
+
+  .page-prices .price-card .modal-price strong {
+    min-height: 28px;
+    font-size: 1.28rem;
+  }
+
+  .page-prices .price-card .range {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .page-prices .price-card .range-track {
+    height: 10px;
+  }
+
+  .page-prices .price-card .range-labels {
+    gap: 3px;
+    font-size: .62rem;
+  }
+
+  .page-prices .price-card-meta {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    min-height: 25px;
+    margin-top: 2px;
+    padding-top: 7px;
+  }
+
+  .page-prices .results-foot {
+    align-items: stretch;
+  }
+
+  .page-prices .results-actions {
+    width: 100%;
+  }
+
+  .page-prices .results-actions .btn {
+    flex: 1 1 45%;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-prices .mandi-intro {
+    grid-template-columns: minmax(0, 1.25fr) minmax(112px, .75fr);
+  }
+
+  .page-prices .price-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .page-prices .crop-art,
+  .page-prices .crop-art .crop-photo {
+    min-height: 96px;
+    height: 96px;
+  }
+}
+
+/* Final card polish: larger visual, quieter metadata, and stable proportions. */
+.page-prices .mobile-list {
+  gap: 16px;
+}
+
+.page-prices .price-card {
+  min-height: 328px;
+  gap: 11px;
+  border-color: #dfe8df;
+  background: #fff;
+  border-radius: 16px;
+}
+
+.page-prices .crop-art,
+.page-prices .crop-art .crop-photo {
+  min-height: 128px;
+  height: 128px;
+}
+
+.page-prices .crop-art {
+  border: 1px solid #edf1ea;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(238, 244, 235, .9), transparent 58%);
+}
+
+.page-prices .crop-art .crop-photo {
+  padding: 6px;
+  object-fit: contain;
+  filter: saturate(.92) contrast(1.02);
+}
+
+.page-prices .price-card .crop-name strong {
+  font-size: 1.02rem;
+  letter-spacing: -.012em;
+}
+
+.page-prices .price-card .crop-name small {
+  max-width: 24ch;
+  color: #748079;
+  font-size: .76rem;
+}
+
+.page-prices .price-card .modal-price strong {
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #176b49;
+  font-size: 1.28rem;
+  font-weight: 850;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+
+.page-prices .price-card-meta {
+  min-height: 30px;
+  margin-top: auto;
+  padding-top: 9px;
+  border-top-color: #edf1ed;
+  color: #69766e;
+  font-size: .74rem;
+}
+
+.page-prices .price-card-meta > span:first-child::before {
+  content: "";
+}
+
+.page-prices .price-card-meta .delta.is-none {
+  color: #88958e;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .page-prices .mobile-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page-prices .mobile-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-prices .price-card {
+    min-height: 318px;
+  }
+
+  .page-prices .crop-art,
+  .page-prices .crop-art .crop-photo {
+    min-height: 122px;
+    height: 122px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-prices .mobile-list {
+    grid-template-columns: 1fr;
+  }
+
+  .page-prices .price-card {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .page-prices .crop-art,
+  .page-prices .crop-art .crop-photo {
+    min-height: 138px;
+    height: 138px;
+  }
+}
+
+/* Final mobile dashboard override: a single, easier-to-scan card per row. */
+@media (max-width: 760px) {
+  .page-prices .mobile-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-prices .price-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    min-height: 0;
+    gap: 8px 12px;
+    padding: 10px;
+  }
+
+  .page-prices .crop-art,
+  .page-prices .crop-art .crop-photo {
+    min-height: 112px;
+    height: 112px;
+  }
+
+  .page-prices .crop-art {
+    grid-row: 1 / span 2;
+  }
+
+  .page-prices .price-card-top {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: start;
+    justify-items: start;
+  }
+
+  .page-prices .price-card .crop-name,
+  .page-prices .price-card .crop-name strong,
+  .page-prices .price-card .crop-name small {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .page-prices .price-card .crop-name strong {
+    font-size: 1rem;
+  }
+
+  .page-prices .price-card .crop-name small {
+    max-width: 24ch;
+  }
+
+  .page-prices .price-card .modal-price {
+    justify-content: flex-start;
+  }
+
+  .page-prices .price-card .range {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .page-prices .price-card-meta {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
