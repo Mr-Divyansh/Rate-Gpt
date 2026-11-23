@@ -8,6 +8,7 @@ const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
 const LINKS = [
   ["nav.home", "index.html"],
   ["nav.prices", "mandi-prices.html"],
+  ["nav.decisionTools", "decision-tools.html"],
   ["nav.weather", "weather.html"],
   ["nav.about", "about.html"],
   ["nav.contact", "contact.html"],

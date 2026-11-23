@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F7F7F0">
+  <meta name="description" content="Compare government-reported mandi observations and estimate net proceeds after your own selling costs with Rate-GPT.">
+  <meta name="application-name" content="Rate-GPT Decision Tools">
+  <title>Farmer Decision Tools | Rate-GPT</title>
+  <link rel="canonical" href="https://rate-gpt.vercel.app/decision-tools.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Rate-GPT">
+  <meta property="og:title" content="Farmer Decision Tools | Rate-GPT">
+  <meta property="og:description" content="Compare government-reported mandi observations and estimate net proceeds after your own selling costs.">
+  <meta property="og:url" content="https://rate-gpt.vercel.app/decision-tools.html">
+  <meta property="og:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Farmer Decision Tools | Rate-GPT">
+  <meta name="twitter:description" content="Compare government-reported mandi observations and estimate net proceeds after your own selling costs.">
+  <meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style/base.css">
+  <link rel="stylesheet" href="/style/decision-tools.css">
+</head>
+<body class="page-decision-tools">
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  <header class="site-header"></header>
+  <main id="main-content" tabindex="-1">
+    <section class="decision-hero wrap">
+      <p class="eyebrow">FARMER DECISION SUPPORT</p>
+      <h1>Compare mandi records. Estimate what remains.</h1>
+      <p class="lede">Use government-reported arrival observations with your own transport and handling costs to compare selling scenarios.</p>
+    </section>
+
+    <section class="decision-panel wrap" aria-labelledby="searchTitle">
+      <div class="section-heading">
+        <div><p class="eyebrow">STEP 1</p><h2 id="searchTitle">Find your crop's mandi records</h2></div>
+        <p>Search one crop across markets in a state. Results are limited to records returned by the government source.</p>
+      </div>
+      <form id="decisionSearch" class="decision-form">
+        <div class="field">
+          <label for="stateInput">State</label>
+          <input id="stateInput" name="state" value="Himachal Pradesh" maxlength="100" required>
+        </div>
+        <div class="field">
+          <label for="cropInput">Crop / commodity</label>
+          <input id="cropInput" name="commodity" placeholder="e.g. Apple, Wheat, Tomato" maxlength="100" required>
+        </div>
+        <button class="btn btn-primary" id="searchButton" type="submit">Compare mandi records</button>
+      </form>
+      <p class="status" id="searchStatus" role="status" aria-live="polite">Enter a crop to begin.</p>
+      <div class="error" id="searchError" role="alert" hidden></div>
+    </section>
+
+    <section class="results-panel wrap" id="resultsPanel" aria-labelledby="resultsTitle" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">STEP 2</p><h2 id="resultsTitle">Mandi comparison</h2></div>
+        <p id="sourceSummary"></p>
+      </div>
+      <div class="table-scroll">
+        <table class="comparison-table">
+          <thead><tr><th scope="col">Mandi</th><th scope="col">Latest arrival</th><th scope="col">Modal price</th><th scope="col">Your transport &amp; handling cost (₹)</th><th scope="col">Estimated net proceeds</th></tr></thead>
+          <tbody id="comparisonRows"></tbody>
+        </table>
+      </div>
+      <div class="decision-note" id="decisionNote" role="status" aria-live="polite"></div>
+      <p class="disclaimer">These are government-reported arrival observations, not live offers or guaranteed sale prices. Estimates use the latest returned record per mandi and the costs you enter. They do not include costs you leave out, quality deductions, negotiation or market availability.</p>
+    </section>
+
+    <section class="calculator-panel wrap" aria-labelledby="calculatorTitle">
+      <div class="section-heading">
+        <div><p class="eyebrow">ESTIMATE YOUR SCENARIO</p><h2 id="calculatorTitle">Net proceeds calculator</h2></div>
+        <p>Use the same unit shown in the selected record. Calculator results are estimates, not a promise of sale.</p>
+      </div>
+      <div class="calculator-grid">
+        <div class="field"><label for="quantityInput">Quantity (quintals)</label><input id="quantityInput" type="number" min="0.01" step="0.01" value="10"></div>
+        <div class="field"><label for="priceInput">Modal price (₹ / quintal)</label><input id="priceInput" type="number" min="0" step="0.01" placeholder="Select a mandi record"></div>
+        <div class="field"><label for="costInput">Total transport &amp; other costs (₹)</label><input id="costInput" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="estimate" aria-live="polite">
+        <span>Estimated net proceeds</span>
+        <strong id="netResult">—</strong>
+        <small id="grossResult">Select a comparable ₹/quintal record to calculate.</small>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"></footer>
+  <script type="module" src="/script/global-nav.js"></script>
+  <script type="module" src="/script/decision-tools.js"></script>
+</body>
+</html>
