@@ -52,6 +52,14 @@ assert.equal(dashboardStore.list().favorites.length + dashboardStore.list().scen
 dashboardStore.saveFavorite({ state: "Punjab", commodity: "Wheat" });
 dashboardStore.clear();
 assert.equal(mockStorage.getItem(FARMER_DASHBOARD_KEY), null);
+for (let index = 0; index < 25; index += 1) {
+  dashboardStore.saveFavorite({ state: "State " + index, commodity: "Crop " + index });
+}
+assert.equal(dashboardStore.list().favorites.length, 20);
+for (let index = 0; index < 55; index += 1) {
+  dashboardStore.saveScenario({ id: "limit-" + index, quantity: 1, modalPrice: 100 });
+}
+assert.equal(dashboardStore.list().scenarios.length, 50);
 
 const manifest = JSON.parse(await readFile("public/manifest.webmanifest", "utf8"));
 assert.equal(manifest.display, "standalone");
@@ -85,7 +93,7 @@ const translationKeys = new Set([
   "dashboard.favoritesTitle", "dashboard.favoritesEmpty", "dashboard.scenariosTitle", "dashboard.scenariosEmpty",
   "dashboard.export", "dashboard.clear", "dashboard.confirmClear", "dashboard.deleted",
   "dashboard.market", "dashboard.crop", "dashboard.quantity", "dashboard.price", "dashboard.net",
-  "dashboard.sourceDate", "dashboard.remove", "dashboard.exported", "dashboard.exportFailed", "nav.dashboard",
+  "dashboard.sourceDate", "dashboard.remove", "dashboard.exported", "dashboard.exportFailed", "dashboard.storageUnavailable", "nav.dashboard",
 ]);
 for (const key of translationKeys) {
   assert.ok(translations.split('"' + key + '":').length - 1 >= 2, "English and Hindi translation exist for " + key);
@@ -106,4 +114,4 @@ assert.match(decisionPage, /id="voiceCropButton"/);
 assert.match(decisionScript, /voiceCropButton\.addEventListener\("click"/);
 assert.match(decisionScript, /recognition\.start\(\)/);
 
-console.log("Decision-tools and PWA checks: " + (49 + translationKeys.size) + " passed, 0 failed");
+console.log("Decision-tools and PWA checks: " + (42 + translationKeys.size) + " passed, 0 failed");
