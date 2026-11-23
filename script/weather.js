@@ -1,4 +1,4 @@
-import { t } from "./i18n.js";
+import { getLocale, t } from "./i18n.js";
 
 (() => {
   // Weather is a standalone page; do not run this module elsewhere.
@@ -19,11 +19,12 @@ import { t } from "./i18n.js";
   const condition = document.getElementById("weatherCondition");
   const feelsLike = document.getElementById("weatherFeelsLike");
   const details = document.getElementById("weatherDetails");
+  const forecast = document.getElementById("weatherForecast");
   const updated = document.getElementById("weatherUpdated");
   const sourceLabel = document.getElementById("weatherSourceLabel");
   const weatherIcon = document.getElementById("weatherIcon");
 
-  if (![form,input,searchButton,locationButton,approximateButton,suggestions,result,errorBox,status,city,temperature,condition,feelsLike,details,updated,sourceLabel,weatherIcon].every(Boolean)) return;
+  if (![form,input,searchButton,locationButton,approximateButton,suggestions,result,errorBox,status,city,temperature,condition,feelsLike,details,forecast,updated,sourceLabel,weatherIcon].every(Boolean)) return;
 
   const API = "https://api.weatherapi.com/v1";
   let searchController = null;
@@ -98,7 +99,12 @@ import { t } from "./i18n.js";
     const url = new URL(`${API}/${endpoint}`);
     url.searchParams.set("key",API_KEY);
     url.searchParams.set("q",query);
-    if (endpoint === "current.json") url.searchParams.set("aqi","no");
+    if (endpoint === "forecast.json") {
+      url.searchParams.set("days","3");
+      url.searchParams.set("aqi","no");
+      url.searchParams.set("alerts","no");
+      url.searchParams.set("lang",getLocale() === "hi-IN" ? "hi" : "en");
+    }
     const response = await fetch(url,{signal,headers:{Accept:"application/json"}});
     const data = await response.json().catch(() => null);
     const code = data?.error?.code;
@@ -145,6 +151,32 @@ import { t } from "./i18n.js";
       detail(t("weather.uv"),String(current.uv ?? "—"))
     );
     updated.textContent = place.localtime ? `${t("weather.localTime")}: ${place.localtime}` : "";
+    forecast.replaceChildren();
+    const forecastDays = data.forecast?.forecastday;
+    if (Array.isArray(forecastDays) && forecastDays.length) {
+      forecastDays.slice(0,3).forEach((forecastDay) => {
+        const card = document.createElement("article");
+        card.className = "weather-forecast-day";
+        const date = document.createElement("strong");
+        const parsedDate = new Date(String(forecastDay.date) + "T12:00:00");
+        date.textContent = Number.isNaN(parsedDate.getTime()) ? forecastDay.date
+          : new Intl.DateTimeFormat(getLocale(), { weekday: "short", day: "numeric", month: "short" }).format(parsedDate);
+        const description = document.createElement("p");
+        description.textContent = forecastDay.day?.condition?.text || t("weather.conditionUnavailable");
+        const range = document.createElement("p");
+        range.className = "weather-forecast-range";
+        range.textContent = t("weather.highLow") + ": " + (forecastDay.day?.maxtemp_c ?? "—") +
+          "° / " + (forecastDay.day?.mintemp_c ?? "—") + "°C";
+        const rain = document.createElement("span");
+        rain.textContent = t("weather.rainChance") + ": " + (forecastDay.day?.daily_chance_of_rain ?? "—") + "%";
+        card.append(date, description, range, rain);
+        forecast.append(card);
+      });
+      forecast.hidden = false;
+    } else {
+      forecast.textContent = t("weather.forecastUnavailable");
+      forecast.hidden = false;
+    }
     sourceLabel.textContent = source === "device" ? t("weather.deviceLocation")
       : source === "approximate" ? t("weather.approximateLabel") : t("weather.searchResult");
     result.hidden = false;
@@ -163,7 +195,7 @@ import { t } from "./i18n.js";
     errorBox.hidden = true;
     setStatus(t("weather.loading"));
     try {
-      const data = await request("current.json",query,controller.signal);
+      const data = await request("forecast.json",query,controller.signal);
       if (currentSequence !== sequence) return false;
       if (!data?.location || !data?.current) throw new Error("request-failed");
       renderWeather(data,source,accuracy);
