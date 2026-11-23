@@ -265,6 +265,19 @@ async function main() {
   check(priceTableColumns === 5 && /td\.colSpan = 5;/.test(mandiScript),
     "empty, loading and error table messages span the exact five visible price columns");
 
+  check(weather.includes('id="weatherForecast"') &&
+    weatherScript.includes('request("forecast.json"') &&
+    weatherScript.includes('url.searchParams.set("days","3")') &&
+    weatherScript.includes("daily_chance_of_rain"),
+    "weather page requests and renders a source-provided three-day outlook");
+  check(/\.weather-forecast\s*\{[^}]*grid-template-columns:\s*repeat\(3/s.test(weatherCss) &&
+    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-forecast\s*\{\s*grid-template-columns:\s*1fr;/s.test(weatherCss),
+    "three-day forecast cards collapse to a single column on mobile");
+  check(i18n.includes('"weather.forecastTitle": "3-day outlook"') &&
+    i18n.includes('"weather.forecastTitle": "अगले 3 दिनों का मौसम"') &&
+    weatherScript.includes('onLangChange(() =>'),
+    "forecast labels and data refresh when the language changes");
+
   console.log(`\nResponsive layout checks: ${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
 }
