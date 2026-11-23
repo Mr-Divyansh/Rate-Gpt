@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { calculateNetProceeds, isRupeesPerQuintal } from "../../../script/decision-tools-core.js";
 
 assert.equal(isRupeesPerQuintal("Rs/Quintal"), true);
@@ -27,4 +28,15 @@ assert.equal(calculateNetProceeds({ quantity: 10, modalPrice: -1 }), null);
 assert.equal(calculateNetProceeds({ quantity: 10, modalPrice: 2100, otherCosts: -1 }), null);
 assert.equal(calculateNetProceeds({ quantity: Number.NaN, modalPrice: 2100 }), null);
 
-console.log("Decision-tools checks: 11 passed, 0 failed");
+const manifest = JSON.parse(await readFile("public/manifest.webmanifest", "utf8"));
+assert.equal(manifest.display, "standalone");
+assert.equal(manifest.scope, "/");
+assert.equal(manifest.start_url, "/index.html");
+assert.equal(manifest.icons[0].src, "/Images/Logo.webp");
+
+const serviceWorker = await readFile("public/service-worker.js", "utf8");
+assert.match(serviceWorker, /url\.pathname\.startsWith\("\/api\/"\)\) return/);
+assert.match(serviceWorker, /caches\.match\(OFFLINE_URL\)/);
+assert.match(serviceWorker, /"\/style\/offline\.css"/);
+
+console.log("Decision-tools and PWA checks: 18 passed, 0 failed");
