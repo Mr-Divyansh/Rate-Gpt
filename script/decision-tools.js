@@ -254,10 +254,14 @@ function answerFromCurrentEvidence(question) {
   const record = best.record;
   const title = tied.length > 1 ? t("decision.assistantTied", { count: tied.length }) :
     t("decision.assistantHighest", { market: record.market });
-  return title + " Calculation: " + quantity + " quintal × " + money(record.modal_price) +
-    " per quintal = " + money(best.gross) + " gross; entered market costs = " + money(best.costs) +
-    "; estimated net = " + money(best.net) + ". Source arrival date: " + record.arrival_date +
-    ". This is based on a government-reported observation, not a live offer. It covers only the records loaded here and excludes costs or quality deductions you have not entered.";
+  return title + " " + t("decision.assistantCalculation", {
+    quantity,
+    price: money(record.modal_price),
+    gross: money(best.gross),
+    costs: money(best.costs),
+    net: money(best.net),
+    date: record.arrival_date,
+  });
 }
 
 if (assistantForm) {
