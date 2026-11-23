@@ -60,6 +60,7 @@
           <input id="marketInput" name="market" placeholder="Any mandi" maxlength="100" data-i18n-attr="placeholder:decision.marketPlaceholder">
         </div>
         <button class="btn btn-primary" id="searchButton" type="submit" data-i18n="decision.searchButton">Compare mandi records</button>
+        <button class="btn btn-secondary" id="saveFavoriteButton" type="button" data-i18n="decision.saveFavorite">Save search to dashboard</button>
       </form>
       <p class="status" id="searchStatus" role="status" aria-live="polite" data-i18n="decision.initialStatus">Enter a crop to begin.</p>
       <div class="error" id="searchError" role="alert" hidden></div>
@@ -108,6 +109,7 @@
         <strong id="netResult">—</strong>
         <small id="grossResult" data-i18n="decision.calcInitial">Select a comparable ₹/quintal record to calculate.</small>
         <small id="breakEvenResult"></small>
+        <button class="btn btn-secondary" id="saveScenarioButton" type="button" data-i18n="decision.saveScenario">Save this scenario</button>
       </div>
     </section>
   </main>
