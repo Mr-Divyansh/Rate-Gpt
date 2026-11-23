@@ -494,3 +494,36 @@ input:focus, select:focus, textarea:focus {
   .lang-toggle { padding: 2px; }
   .lang-toggle button { min-width: 29px; min-height: 31px; font-size: .76rem; }
 }
+
+
+/* The full seven-link navigation does not fit beside the brand at tablet widths. */
+@media (min-width: 721px) and (max-width: 900px) {
+  .site-header.menu-open { z-index: 100; }
+  .header-inner { grid-template-columns: 1fr auto; align-items: center; padding-block: 8px; }
+  .header-actions { grid-column: 2; grid-row: 1; position: relative; z-index: 120; }
+  .menu-toggle { display: block; position: relative; z-index: 121; }
+  .site-nav {
+    position: fixed; z-index: 110; top: 0; right: 0; bottom: 0; left: auto;
+    grid-column: auto; grid-row: auto; order: initial;
+    width: min(86vw, 340px); max-width: 100%; margin: 0;
+    padding: 88px 20px 24px; display: flex; flex-direction: column;
+    align-items: stretch; justify-content: flex-start; gap: 6px;
+    background: #fff; box-shadow: -18px 0 48px rgba(16,48,32,.16);
+    transform: translateX(105%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s ease;
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  .site-nav.is-open { transform: translateX(0); visibility: visible; }
+  .site-nav a {
+    flex: 0 0 auto; width: 100%; min-height: 48px; justify-content: flex-start;
+    padding: 10px 14px; font-size: 1rem; line-height: 1.25;
+  }
+  .nav-backdrop {
+    display: block; position: fixed; z-index: 70; inset: 0; border: 0;
+    background: rgba(12,30,21,.42); opacity: 0; visibility: hidden;
+    pointer-events: none; transition: opacity .25s ease, visibility .25s ease;
+  }
+  .nav-backdrop.is-visible { opacity: 1; visibility: visible; pointer-events: auto; }
+  body:has(.site-header.menu-open) { overflow: hidden; }
+  .brand-text small { display: none; }
+}
