@@ -142,6 +142,12 @@ function startFinderTour() {
     return null;
   }
 
+  function centerTarget(target) {
+    if (!target || !target.isConnected) return;
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    target.scrollIntoView({ behavior, block: "center", inline: "nearest" });
+  }
+
   function textForStep() {
     const hi = isHindi();
     const copy = {
@@ -179,6 +185,7 @@ function startFinderTour() {
         activeTarget = nextTarget;
         activeTarget.classList.add(TARGET_CLASS);
         if (selected) activeTarget.focus({ preventScroll: true });
+        centerTarget(activeTarget);
         schedulePosition();
       }
     } else {
@@ -239,11 +246,7 @@ function startFinderTour() {
     activeTarget = targetForStep();
     activeTarget?.classList.add(TARGET_CLASS);
     renderPanel();
-    if (step === 4) {
-      pricesHeading.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-    } else if (activeTarget) {
-      activeTarget.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
-    }
+    centerTarget(activeTarget);
     schedulePosition();
     if (step === 1 || step === 2) activeTarget?.focus({ preventScroll: true });
     else if (step === 3) (activeTarget || mandiGrid.querySelector(".chip"))?.focus({ preventScroll: true });
@@ -357,6 +360,7 @@ function startFinderTour() {
   renderPanel();
   activeTarget = targetForStep();
   activeTarget?.classList.add(TARGET_CLASS);
+  centerTarget(activeTarget);
   schedulePosition();
   activeTarget?.focus?.({ preventScroll: true });
 }
