@@ -66,6 +66,17 @@
         </table>
       </div>
       <div class="decision-note" id="decisionNote" role="status" aria-live="polite"></div>
+      <section class="assistant-panel" aria-labelledby="assistantTitle">
+        <p class="eyebrow">EVIDENCE-BASED HELP</p>
+        <h3 id="assistantTitle">Mandi decision assistant</h3>
+        <p>Ask about the records shown above. Answers use only these returned observations and the costs you enter; this is not a hosted AI prediction.</p>
+        <form id="assistantForm" class="assistant-form">
+          <label class="sr-only" for="assistantQuestion">Your question about these mandi records</label>
+          <input id="assistantQuestion" name="question" maxlength="240" placeholder="e.g. Which mandi has the highest estimated net proceeds?" required>
+          <button class="btn btn-primary" type="submit">Ask</button>
+        </form>
+        <p id="assistantAnswer" class="assistant-answer" role="status" aria-live="polite">Search for a crop first, then ask a question about the returned records.</p>
+      </section>
       <p class="disclaimer">These are government-reported arrival observations, not live offers or guaranteed sale prices. Estimates use the latest returned record per mandi and the costs you enter. They do not include costs you leave out, quality deductions, negotiation or market availability.</p>
     </section>
 
