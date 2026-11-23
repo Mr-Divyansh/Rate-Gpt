@@ -84,8 +84,10 @@ try{
 
   await page.locator('[data-lang="hi"]').click();
   await page.waitForFunction(()=>document.documentElement.lang==="hi"&&document.querySelector("#weatherPageTitle")?.textContent?.trim()==="आपके आस-पास का मौसम");
+  assert.match(await page.locator("#weatherForecast").innerText(),/बारिश की संभावना/);
   await page.locator('[data-lang="en"]').click();
   await page.waitForFunction(()=>document.documentElement.lang==="en");
+  assert.match(await page.locator("#weatherForecast").innerText(),/Rain chance/);
   pass(viewport.name+": Hindi and English translations switch");
 
   const size=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,document:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)}));
