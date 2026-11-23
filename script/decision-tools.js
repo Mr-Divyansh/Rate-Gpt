@@ -14,6 +14,7 @@ const resultsPanel = document.querySelector("#resultsPanel");
 const rowsNode = document.querySelector("#comparisonRows");
 const noteNode = document.querySelector("#decisionNote");
 const sourceSummary = document.querySelector("#sourceSummary");
+const priceAlertStatus = document.querySelector("#priceAlertStatus");
 const quantityInput = document.querySelector("#quantityInput");
 const priceInput = document.querySelector("#priceInput");
 const transportCostInput = document.querySelector("#transportCostInput");
@@ -69,6 +70,40 @@ function selectRecord(record) {
   costInput.value = "0";
   updateCalculator();
   document.querySelector("#calculatorTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function checkLocalPriceAlerts(records) {
+  if (!priceAlertStatus || !dashboardStore) return;
+  const state = stateInput.value.trim().toLowerCase();
+  const commodity = cropInput.value.trim().toLowerCase();
+  const alerts = dashboardStore.list().alerts.filter((alert) =>
+    alert.state.toLowerCase() === state &&
+    alert.commodity.toLowerCase() === commodity &&
+    (!alert.district || alert.district.toLowerCase() === districtInput.value.trim().toLowerCase()) &&
+    (!alert.market || alert.market.toLowerCase() === marketInput.value.trim().toLowerCase())
+  );
+  const matches = [];
+  for (const alert of alerts) {
+    const record = records.find((item) =>
+      String(item.state || "").toLowerCase() === state &&
+      (!alert.district || String(item.district || "").toLowerCase() === alert.district.toLowerCase()) &&
+      (!alert.market || String(item.market || "").toLowerCase() === alert.market.toLowerCase()) &&
+      isRupeesPerQuintal(item.source_unit) &&
+      (alert.direction === "above" ? Number(item.modal_price) >= alert.targetPrice : Number(item.modal_price) <= alert.targetPrice)
+    );
+    if (record) {
+      matches.push(t("decision.alertMatched", {
+        market: record.market,
+        condition: alert.direction === "above"
+          ? (getLocale() === "hi-IN" ? "लक्ष्य के बराबर या ऊपर" : "at or above target")
+          : (getLocale() === "hi-IN" ? "लक्ष्य के बराबर या नीचे" : "at or below target"),
+        target: new Intl.NumberFormat(getLocale()).format(alert.targetPrice),
+        price: new Intl.NumberFormat(getLocale()).format(record.modal_price),
+      }));
+    }
+  }
+  priceAlertStatus.textContent = matches.length ? matches.join(" ") :
+    (alerts.length ? t("decision.alertNoMatch") : "");
 }
 
 function updateMarketEstimates() {
@@ -147,6 +182,7 @@ function renderComparison(records, meta, commodity, isPartial) {
     noteNode.textContent += " The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.";
   }
   updateMarketEstimates();
+  checkLocalPriceAlerts(comparedMarkets);
 }
 
 async function fetchAllPages(state, commodity, district, market) {
