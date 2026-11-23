@@ -52,6 +52,11 @@ assert.equal(dashboardStore.list().favorites.length + dashboardStore.list().scen
 dashboardStore.saveFavorite({ state: "Punjab", commodity: "Wheat" });
 dashboardStore.clear();
 assert.equal(mockStorage.getItem(FARMER_DASHBOARD_KEY), null);
+assert.ok(dashboardStore.saveAlert({ state: "Himachal Pradesh", commodity: "Apple", targetPrice: 2500, direction: "above" }));
+assert.equal(dashboardStore.list().alerts.length, 1);
+assert.equal(dashboardStore.saveAlert({ state: "Himachal Pradesh", commodity: "Apple", targetPrice: -1, direction: "above" }), false);
+dashboardStore.removeAlert(dashboardStore.list().alerts[0].id);
+assert.equal(dashboardStore.list().alerts.length, 0);
 for (let index = 0; index < 25; index += 1) {
   dashboardStore.saveFavorite({ state: "State " + index, commodity: "Crop " + index });
 }
@@ -94,6 +99,10 @@ const translationKeys = new Set([
   "dashboard.export", "dashboard.clear", "dashboard.confirmClear", "dashboard.deleted",
   "dashboard.market", "dashboard.crop", "dashboard.quantity", "dashboard.price", "dashboard.net",
   "dashboard.sourceDate", "dashboard.remove", "dashboard.exported", "dashboard.exportFailed", "dashboard.storageUnavailable", "nav.dashboard",
+  "dashboard.alertsTitle", "dashboard.alertsEmpty", "dashboard.alertState", "dashboard.alertCrop",
+  "dashboard.alertDistrict", "dashboard.alertMarket", "dashboard.alertTarget", "dashboard.alertDirection",
+  "dashboard.alertAbove", "dashboard.alertBelow", "dashboard.alertCreate", "dashboard.alertNote",
+  "dashboard.alertSaved", "dashboard.alertInvalid", "decision.alertMatched", "decision.alertNoMatch",
 ]);
 for (const key of translationKeys) {
   assert.ok(translations.split('"' + key + '":').length - 1 >= 2, "English and Hindi translation exist for " + key);
@@ -105,6 +114,11 @@ assert.match(decisionPage, /id="districtInput"/);
 assert.match(decisionPage, /id="saveFavoriteButton"/);
 assert.match(decisionPage, /id="saveScenarioButton"/);
 assert.match(dashboardPage, /id="dashboardFavorites"/);
+assert.match(dashboardPage, /id="priceWatchForm"/);
+assert.match(dashboardPage, /id="dashboardAlerts"/);
+assert.match(dashboardScript, /store\.saveAlert\(/);
+assert.match(decisionPage, /id="priceAlertStatus"/);
+assert.match(decisionScript, /checkLocalPriceAlerts\(comparedMarkets\)/);
 assert.match(dashboardScript, /store\.clear\(\)/);
 assert.match(dashboardScript, /URL\.createObjectURL/);
 assert.match(decisionPage, /id="marketInput"/);
@@ -114,4 +128,4 @@ assert.match(decisionPage, /id="voiceCropButton"/);
 assert.match(decisionScript, /voiceCropButton\.addEventListener\("click"/);
 assert.match(decisionScript, /recognition\.start\(\)/);
 
-console.log("Decision-tools and PWA checks: " + (42 + translationKeys.size) + " passed, 0 failed");
+console.log("Decision-tools and PWA checks: " + (51 + translationKeys.size) + " passed, 0 failed");
