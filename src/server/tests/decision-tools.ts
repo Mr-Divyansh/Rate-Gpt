@@ -46,6 +46,7 @@ const translationKeys = new Set([
   ...[...decisionPage.matchAll(/data-i18n="([^"]+)"/g)].map((match) => match[1]),
   ...[...decisionPage.matchAll(/data-i18n-attr="[^"]*:([^"]+)"/g)].map((match) => match[1]),
   "decision.district", "decision.districtPlaceholder", "decision.marketFilter", "decision.marketPlaceholder",
+  "decision.voiceButton", "decision.voiceUnsupported", "decision.voiceListening", "decision.voiceConfirm", "decision.voiceError", "decision.voiceNote",
   "decision.fetching", "decision.enterBoth", "decision.loaded", "decision.partialSuffix",
   "decision.noRecords", "decision.failed", "decision.invalidCalc", "decision.unitRequired",
   "decision.noComparable", "decision.assistantNeedSearch", "decision.assistantNeedQuantity",
@@ -62,5 +63,8 @@ assert.match(decisionPage, /id="districtInput"/);
 assert.match(decisionPage, /id="marketInput"/);
 assert.match(decisionScript, /params\.set\("district", district\)/);
 assert.match(decisionScript, /params\.set\("market", market\)/);
+assert.match(decisionPage, /id="voiceCropButton"/);
+assert.match(decisionScript, /voiceCropButton\.addEventListener\("click"/);
+assert.match(decisionScript, /recognition\.start\(\)/);
 
-console.log("Decision-tools and PWA checks: " + (23 + translationKeys.size) + " passed, 0 failed");
+console.log("Decision-tools and PWA checks: " + (26 + translationKeys.size) + " passed, 0 failed");
