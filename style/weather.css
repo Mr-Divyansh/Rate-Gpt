@@ -59,3 +59,43 @@
 .weather-condition-icon{width:76px;height:76px;flex-basis:76px}
 }
 @media(prefers-reduced-motion:reduce){.weather-search-card,.weather-result{animation:none!important}}
+.weather-forecast-section {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line, #dce5dc);
+}
+.weather-forecast-section h3 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+}
+.weather-forecast {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.weather-forecast-day {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line, #dce5dc);
+  border-radius: 14px;
+  background: var(--surface, #fff);
+}
+.weather-forecast-day > strong {
+  display: block;
+  color: var(--forest, #174d38);
+}
+.weather-forecast-day p {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.weather-forecast-range { font-weight: 700; }
+.weather-forecast-day > span,
+.weather-forecast-note {
+  color: var(--muted, #66736a);
+  font-size: .86rem;
+  line-height: 1.5;
+}
+.weather-forecast-note { margin: 12px 0 0; }
+@media (max-width: 650px) {
+  .weather-forecast { grid-template-columns: 1fr; }
+}
