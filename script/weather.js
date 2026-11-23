@@ -1,4 +1,4 @@
-import { getLocale, t } from "./i18n.js";
+import { getLocale, onLangChange, t } from "./i18n.js";
 
 (() => {
   // Weather is a standalone page; do not run this module elsewhere.
@@ -33,6 +33,7 @@ import { getLocale, t } from "./i18n.js";
   let matches = [];
   let activeIndex = -1;
   let sequence = 0;
+  let lastWeather = null;
 
   const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
   const clearMessages = () => { errorBox.textContent = ""; errorBox.hidden = true; setStatus(""); };
@@ -130,6 +131,7 @@ import { getLocale, t } from "./i18n.js";
   }
 
   function renderWeather(data,source,accuracy) {
+    lastWeather = { data, source, accuracy };
     const place = data.location;
     const current = data.current;
     city.textContent = label(place);
@@ -308,6 +310,9 @@ import { getLocale, t } from "./i18n.js";
   });
   document.addEventListener("click",event => {
     if (!event.target.closest(".weather-search-control")) closeSuggestions();
+  });
+  onLangChange(() => {
+    if (lastWeather) renderWeather(lastWeather.data,lastWeather.source,lastWeather.accuracy);
   });
   locationButton.addEventListener("click",useDeviceLocation);
   approximateButton.addEventListener("click",async () => {
