@@ -41,6 +41,23 @@
       <ul id="dashboardFavorites" class="dashboard-favorites"></ul>
       <p id="favoritesEmpty" class="empty-state" data-i18n="dashboard.favoritesEmpty">No saved searches yet. Save a search from Decision Tools.</p>
     </section>
+    <section class="dashboard-section" aria-labelledby="alertsTitle">
+      <div class="dashboard-section-heading">
+        <h2 id="alertsTitle" data-i18n="dashboard.alertsTitle">Local price watches</h2>
+      </div>
+      <form id="priceWatchForm" class="price-watch-form">
+        <div class="field"><label for="alertState" data-i18n="dashboard.alertState">State</label><input id="alertState" value="Himachal Pradesh" maxlength="100" required></div>
+        <div class="field"><label for="alertCrop" data-i18n="dashboard.alertCrop">Crop</label><input id="alertCrop" maxlength="100" required></div>
+        <div class="field"><label for="alertDistrict" data-i18n="dashboard.alertDistrict">District (optional)</label><input id="alertDistrict" maxlength="100"></div>
+        <div class="field"><label for="alertMarket" data-i18n="dashboard.alertMarket">Mandi (optional)</label><input id="alertMarket" maxlength="100"></div>
+        <div class="field"><label for="alertTarget" data-i18n="dashboard.alertTarget">Target price (₹ / quintal)</label><input id="alertTarget" type="number" min="0" step="0.01" required></div>
+        <div class="field"><label for="alertDirection" data-i18n="dashboard.alertDirection">Alert condition</label><select id="alertDirection"><option value="above" data-i18n="dashboard.alertAbove">At or above target</option><option value="below" data-i18n="dashboard.alertBelow">At or below target</option></select></div>
+        <button class="btn btn-primary" type="submit" data-i18n="dashboard.alertCreate">Save price watch</button>
+      </form>
+      <p class="price-watch-note" data-i18n="dashboard.alertNote">Price watches are checked only when you compare records. There are no background checks or guaranteed notifications.</p>
+      <ul id="dashboardAlerts" class="dashboard-favorites"></ul>
+      <p id="alertsEmpty" class="empty-state" data-i18n="dashboard.alertsEmpty">No price watches yet.</p>
+    </section>
     <section class="dashboard-section" aria-labelledby="scenariosTitle">
       <div class="dashboard-section-heading">
         <h2 id="scenariosTitle" data-i18n="dashboard.scenariosTitle">Saved selling scenarios</h2>
