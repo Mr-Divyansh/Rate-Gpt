@@ -71,6 +71,9 @@ export function startMandiNavGuide() {
   const action = document.createElement("a");
   action.className = "mandi-nav-guide__action";
   action.href = "mandi-prices.html";
+  // Carry the guided-tour intent into the finder page; direct navigation remains unchanged.
+  action.href += "?startFinderTutorial=1";
+  pricesLink.href = new URL("mandi-prices.html?startFinderTutorial=1", window.location.href).href;
 
   const stopGuide = ({ restoreFocus = false } = {}) => {
     guide.remove();
@@ -176,8 +179,22 @@ export function startMandiNavGuide() {
     }
   }
 
-  action.addEventListener("click", () => stopGuide());
-  pricesLink.addEventListener("click", () => stopGuide(), { once: true });
+  const markFinderTourPending = () => {
+    try {
+      window.sessionStorage.setItem("rateGptStartFinderTutorial", "1");
+    } catch {
+      // The URL parameter below remains the primary handoff when storage is unavailable.
+    }
+  };
+
+  action.addEventListener("click", () => {
+    markFinderTourPending();
+    stopGuide();
+  });
+  pricesLink.addEventListener("click", () => {
+    markFinderTourPending();
+    stopGuide();
+  }, { once: true });
   document.addEventListener("keydown", onEscape);
   copy.append(eyebrow, title, message, action);
   guide.append(backdrop, copy, farmer);
