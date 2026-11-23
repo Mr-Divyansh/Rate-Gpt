@@ -1,3 +1,4 @@
+import { calculateNetProceeds, isRupeesPerQuintal } from "./decision-tools-core.js";
 const API_BASE = document.querySelector('meta[name="api-base"]')?.content || "/api/v1";
 const form = document.querySelector("#decisionSearch");
 const stateInput = document.querySelector("#stateInput");
@@ -27,35 +28,26 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => 
 }[char]));
 const validNumber = (value) => Number.isFinite(value) && value >= 0;
 
-// API contract: MandiRecord uses snake_case fields. Accept only explicit
-// rupee-per-quintal units; never infer a unit from the price value.
-function isRupeesPerQuintal(unit) {
-  const normalized = String(unit || "").toLowerCase().replace(/\s+/g, "");
-  const rupees = /₹|rs\.?|inr|rupee/.test(normalized);
-  const quintal = /quintal|qtl|(^|[^a-z])qt([^a-z]|$)/.test(normalized);
-  return rupees && quintal;
-}
-
 function updateCalculator() {
   const quantity = Number(quantityInput.value);
   const price = Number(priceInput.value);
   const transport = Number(transportCostInput.value);
   const handling = Number(handlingCostInput.value);
   const other = Number(costInput.value);
-  const costs = transport + handling + other;
-  if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(price) || price < 0 ||
-      !validNumber(transport) || !validNumber(handling) || !validNumber(other)) {
+  const estimate = calculateNetProceeds({
+    quantity, modalPrice: price, transportCost: transport, handlingCost: handling, otherCosts: other,
+  });
+  if (!estimate) {
     netResult.textContent = "—";
-    grossResult.textContent = "Enter a valid quantity, price and cost.";
+    grossResult.textContent = "Enter a valid quantity, price and non-negative costs.";
+    breakEvenResult.textContent = "";
     return;
   }
-  const gross = quantity * price;
-  const net = gross - costs;
-  netResult.textContent = money(net);
-  grossResult.textContent = "Gross " + money(gross) + " − transport " + money(transport) +
+  netResult.textContent = money(estimate.net);
+  grossResult.textContent = "Gross " + money(estimate.gross) + " − transport " + money(transport) +
     " − loading/unloading " + money(handling) + " − other costs " + money(other);
-  breakEvenResult.textContent = "Break-even modal price: " + money(costs / quantity) +
-    " per quintal (based only on the costs entered)." + (net < 0 ? " Entered costs exceed gross revenue." : "");
+  breakEvenResult.textContent = "Break-even modal price: " + money(estimate.breakEvenPrice) +
+    " per quintal (based only on the costs entered)." + (estimate.net < 0 ? " Entered costs exceed gross revenue." : "");
 }
 
 function selectRecord(record) {
@@ -84,7 +76,8 @@ function updateMarketEstimates() {
       target.textContent = "Not comparable";
       return;
     }
-    target.textContent = money(quantity * record.modal_price - costs);
+    const estimate = calculateNetProceeds({ quantity, modalPrice: record.modal_price, otherCosts: costs });
+    target.textContent = estimate ? money(estimate.net) : "Not comparable";
   });
 }
 
@@ -205,7 +198,7 @@ async function search() {
     renderComparison(result.records, result.meta, commodity, result.partial);
     statusNode.textContent = result.records.length
       ? "Loaded " + result.records.length + " records from " +
-        (Math.ceil(result.records.length / 100) || 1) + " source page(s)." +
+        result.pagesFetched + " source page(s)." +
         (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : "")
       : "The government source returned no records for this selection.";
   } catch (error) {
@@ -244,8 +237,7 @@ function answerFromCurrentEvidence(question) {
       return {
         record,
         costs,
-        gross: quantity * record.modal_price,
-        net: quantity * record.modal_price - costs,
+        ...calculateNetProceeds({ quantity, modalPrice: record.modal_price, otherCosts: costs }),
       };
     })
     .filter(Boolean)
