@@ -58,7 +58,7 @@ function updateCalculator() {
   grossResult.textContent = copy("Gross ", "कुल रकम ") + money(estimate.gross) + copy(" − transport ", " − ढुलाई ") + money(transport) +
     copy(" − loading/unloading ", " − लोडिंग/अनलोडिंग ") + money(handling) + copy(" − other costs ", " − अन्य खर्च ") + money(other);
   breakEvenResult.textContent = t("decision.breakEven", { price: money(estimate.breakEvenPrice) }) +
-    (estimate.net < 0 ? " " + (getLocale() === "hi-IN" ? "दर्ज खर्च सकल रकम से अधिक है।" : copy(copy("Entered costs exceed gross revenue.", "दर्ज खर्च कुल रकम से अधिक है।"), "दर्ज खर्च कुल रकम से अधिक है।")) : "");
+    (estimate.net < 0 ? " " + copy("Entered costs exceed gross revenue.", "दर्ज खर्च कुल रकम से अधिक है।") : "");
 }
 
 function selectRecord(record) {
@@ -155,12 +155,12 @@ function renderComparison(records, meta, commodity, isPartial) {
       "<td><strong>" + market + "</strong><small>" + district + ", " + state + "</small></td>" +
       "<td>" + date + "</td>" +
       "<td><strong>" + money(record.modal_price) + "</strong><small>" + unit + "</small></td>" +
-      '<td><label class="sr-only" for="market-cost-' + index + '">Costs for ' + market +
+      '<td><label class="sr-only" for="market-cost-' + index + '">' + copy("Costs for ", "के खर्च: ") + market +
       '</label><input class="market-cost" id="market-cost-' + index +
       '" type="number" min="0" step="0.01" value="0" data-index="' + index +
-      '" aria-label="Transport and handling cost for ' + market + ' in rupees"></td>' +
+      '" aria-label="' + copy("Transport and handling cost for ", "ढुलाई और हैंडलिंग खर्च: ") + market + copy(" in rupees", " रुपये में") + '"></td>' +
       '<td><strong id="market-net-' + index + '">—</strong><button class="use-record" type="button" data-index="' +
-      index + '"' + (calculatorAllowed ? "" : " disabled") + ">' + copy("Use in calculator", "कैलकुलेटर में इस्तेमाल करें") + '</button></td>";
+      index + '"' + (calculatorAllowed ? "" : " disabled") + ">" + copy("Use in calculator", "कैलकुलेटर में इस्तेमाल करें") + "</button></td>";
     rowsNode.append(tr);
   }
 
