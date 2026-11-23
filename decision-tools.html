@@ -49,6 +49,14 @@
           <label for="cropInput" data-i18n="decision.crop">Crop / commodity</label>
           <input id="cropInput" name="commodity" placeholder="e.g. Apple, Wheat, Tomato" data-i18n-attr="placeholder:decision.cropPlaceholder" maxlength="100" required>
         </div>
+        <div class="field">
+          <label for="districtInput" data-i18n="decision.district">District (optional)</label>
+          <input id="districtInput" name="district" placeholder="Any district" maxlength="100" data-i18n-attr="placeholder:decision.districtPlaceholder">
+        </div>
+        <div class="field">
+          <label for="marketInput" data-i18n="decision.marketFilter">Mandi (optional)</label>
+          <input id="marketInput" name="market" placeholder="Any mandi" maxlength="100" data-i18n-attr="placeholder:decision.marketPlaceholder">
+        </div>
         <button class="btn btn-primary" id="searchButton" type="submit" data-i18n="decision.searchButton">Compare mandi records</button>
       </form>
       <p class="status" id="searchStatus" role="status" aria-live="polite" data-i18n="decision.initialStatus">Enter a crop to begin.</p>
