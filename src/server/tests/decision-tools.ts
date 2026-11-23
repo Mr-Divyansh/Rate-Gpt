@@ -27,4 +27,4 @@ assert.equal(calculateNetProceeds({ quantity: 10, modalPrice: -1 }), null);
 assert.equal(calculateNetProceeds({ quantity: 10, modalPrice: 2100, otherCosts: -1 }), null);
 assert.equal(calculateNetProceeds({ quantity: Number.NaN, modalPrice: 2100 }), null);
 
-console.log("Decision-tools checks: 10 passed, 0 failed");
+console.log("Decision-tools checks: 11 passed, 0 failed");
