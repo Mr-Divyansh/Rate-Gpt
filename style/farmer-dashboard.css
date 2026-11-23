@@ -35,3 +35,16 @@
   border-color: var(--error);
   background: #fff1ef;
 }
+
+.price-watch-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.price-watch-form .btn { justify-self: start; }
+.price-watch-note { margin: 12px 0; color: var(--muted); font-size: .88rem; }
+@media (max-width: 680px) {
+  .price-watch-form { grid-template-columns: 1fr; }
+  .price-watch-form .btn { width: 100%; }
+}
