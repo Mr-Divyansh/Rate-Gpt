@@ -8,7 +8,7 @@
     "start": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "tsx src/server/tests/verify.ts",
+    "test": "node --check script/i18n.js && node --check script/decision-tools.js && node --check script/weather.js && node --check script/farmer-dashboard.js && node --check script/farmer-dashboard-store.js && node --check script/decision-tools-core.js && node --check public/service-worker.js && node --check scripts/weather-browser-smoke.mjs && node --check scripts/farmer-dashboard-browser-smoke.mjs && tsx src/server/tests/verify.ts && tsx src/server/tests/decision-tools.ts",
     "test:integration": "tsx src/server/tests/api.integration.ts",
     "test:agmarknet2": "tsx src/server/tests/agmarknet2.ts",
     "test:agmarknet2:live": "tsx src/server/tests/agmarknet2-live.ts",

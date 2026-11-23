@@ -1,0 +1,10 @@
+.offline-shell {
+  max-width: 680px;
+  padding-block: 15vh;
+  text-align: center;
+}
+.offline-shell p {
+  max-width: 56ch;
+  margin-inline: auto;
+  line-height: 1.65;
+}

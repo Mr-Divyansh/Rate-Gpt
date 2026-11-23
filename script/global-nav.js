@@ -9,6 +9,7 @@ const LINKS = [
   ["nav.home", "index.html"],
   ["nav.prices", "mandi-prices.html"],
   ["nav.decisionTools", "decision-tools.html"],
+  ["nav.dashboard", "farmer-dashboard.html"],
   ["nav.weather", "weather.html"],
   ["nav.about", "about.html"],
   ["nav.contact", "contact.html"],
@@ -235,3 +236,13 @@ function applySharedTranslations() {
 applySharedTranslations();
 onLangChange(applySharedTranslations);
 hydrateIcons();
+
+// Progressive web app support. The service worker caches only static shell
+// assets and never intercepts /api responses or user data.
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").catch(() => {
+      // The website remains fully usable when service workers are unavailable.
+    });
+  }, { once: true });
+}

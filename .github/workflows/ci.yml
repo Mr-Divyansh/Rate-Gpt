@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, fix/ogd-sort-and-ci]
+    branches: [main, fix/ogd-sort-and-ci, feat/farmer-decision-intelligence-roadmap]
 
 permissions:
   contents: read
@@ -96,6 +96,12 @@ jobs:
         env:
           RATE_GPT_BASE_URL: http://127.0.0.1:4173
         run: node scripts/weather-browser-smoke.mjs
+
+      - name: Farmer dashboard browser interaction checks
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          RATE_GPT_BASE_URL: http://127.0.0.1:4173
+        run: node scripts/farmer-dashboard-browser-smoke.mjs
 
       - name: Select Vercel preview for pull-request browser checks
         id: preview
