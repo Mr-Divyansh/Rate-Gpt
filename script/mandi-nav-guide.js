@@ -179,8 +179,22 @@ export function startMandiNavGuide() {
     }
   }
 
-  action.addEventListener("click", () => stopGuide());
-  pricesLink.addEventListener("click", () => stopGuide(), { once: true });
+  const markFinderTourPending = () => {
+    try {
+      window.sessionStorage.setItem("rateGptStartFinderTutorial", "1");
+    } catch {
+      // The URL parameter below remains the primary handoff when storage is unavailable.
+    }
+  };
+
+  action.addEventListener("click", () => {
+    markFinderTourPending();
+    stopGuide();
+  });
+  pricesLink.addEventListener("click", () => {
+    markFinderTourPending();
+    stopGuide();
+  }, { once: true });
   document.addEventListener("keydown", onEscape);
   copy.append(eyebrow, title, message, action);
   guide.append(backdrop, copy, farmer);

@@ -105,6 +105,8 @@ async function main() {
   check(prices.includes('/style/mandi-finder-guide.css') &&
     prices.includes('/script/mandi-finder-guide.js') &&
     mandiNavGuideScript.includes('mandi-prices.html?startFinderTutorial=1') &&
+    mandiNavGuideScript.includes('sessionStorage.setItem("rateGptStartFinderTutorial", "1")') &&
+    finderTourScript.includes('sessionStorage.getItem("rateGptStartFinderTutorial") === "1"') &&
     finderTourScript.includes('params.get(TOUR_PARAM) !== "1"') &&
     finderTourScript.includes('Choose your state') &&
     finderTourScript.includes('Select your district') &&
