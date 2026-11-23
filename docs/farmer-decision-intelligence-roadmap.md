@@ -163,3 +163,6 @@ This document is the implementation checklist, not evidence that a feature is al
 - Vercel then enforced its free daily deployment quota (more than 100 deployments in 24 hours). A fresh preview for the corrected and later commits could not be created during this session.
 - The repository could not be cloned into the local execution environment because outbound GitHub DNS/network access is unavailable. The newly added tests have therefore not been run in this session.
 - Draft pull request #147 is open for review. Production has not been changed.
+
+- Added local price-watch thresholds to the Farmer Dashboard. They are checked only when the user runs a mandi comparison, only for explicit ₹/quintal records, and do not claim background or push notifications.
+- Added a Playwright browser smoke test for saving searches, saving calculations, price-watch matching, exporting data, removing entries and clearing local data. The CI workflow now includes this browser suite and runs on the feature branch.
