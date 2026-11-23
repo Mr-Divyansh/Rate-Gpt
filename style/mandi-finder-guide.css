@@ -111,12 +111,14 @@
   pointer-events: none;
 }
 .mandi-finder-tour__panel.is-thanks {
-  width: min(430px, calc(100vw - 32px));
-  min-height: 250px;
+  width: min(430px, calc(100vw - 28px));
+  min-height: 0;
   align-content: center;
   justify-items: center;
   gap: 12px;
-  padding: 28px 24px 24px;
+  padding: 26px 24px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   text-align: center;
 }
 .mandi-finder-tour__panel.is-thanks .mandi-finder-tour__title {
@@ -172,10 +174,17 @@
   .mandi-finder-tour__hint { padding: 8px 9px; font-size: .73rem; }
   .mandi-finder-tour__continue { min-height: 45px; }
   .mandi-finder-tour__farmer { width: 106px; height: 115px; }
-  .mandi-finder-tour__panel.is-thanks { min-height: 225px; padding: 26px 18px 20px; }
-  .mandi-finder-tour__farmer.is-thanks { width: 146px !important; height: 146px !important; }
+  .mandi-finder-tour__panel.is-thanks { gap: 9px; padding: 18px 16px 16px; border-radius: 18px; }
+  .mandi-finder-tour__panel.is-thanks .mandi-finder-tour__title { font-size: clamp(1.2rem, 5.2vw, 1.45rem); line-height: 1.18; }
+  .mandi-finder-tour__panel.is-thanks .mandi-finder-tour__message { font-size: .84rem; line-height: 1.42; }
+  .mandi-finder-tour__farmer.is-thanks { width: 132px !important; height: 132px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mandi-finder-tour__backdrop::after,
   .is-finder-tour-target { animation: none; }
+}
+
+@media (max-height: 620px) {
+  .mandi-finder-tour__panel.is-thanks { gap: 8px; padding-top: 14px; padding-bottom: 14px; }
+  .mandi-finder-tour__panel.is-thanks .mandi-finder-tour__message { font-size: .82rem; line-height: 1.35; }
 }
