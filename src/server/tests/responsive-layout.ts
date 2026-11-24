@@ -56,14 +56,14 @@ async function main() {
     "weather page announces loading and error states accessibly");
   check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-location-actions\s*\{[^}]*flex-direction:column/s.test(weatherCss),
     "weather location actions stack on narrow screens");
-  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control input\s*\{[^}]*padding:0 13px/s.test(weatherCss) &&
-    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control>\.btn\s*\{\s*position:static;\s*width:100%/s.test(weatherCss),
+  check(/@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control input\s*\{[^}]*padding:\s*0\s+13px/s.test(weatherCss) &&
+    /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-search-control\s*>\s*\.btn\s*\{[^}]*position:\s*static;[^}]*width:\s*100%/s.test(weatherCss),
     "weather search input and action use a single-column mobile layout");
   check(/locationButton\.addEventListener\("click",\s*useDeviceLocation\)/.test(weatherScript) &&
     /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
     /enableHighAccuracy\s*:\s*false/.test(weatherScript) &&
-    /timeout\s*:\s*6000/.test(weatherScript) &&
-    /maximumAge\s*:\s*300000/.test(weatherScript) &&
+    /timeout\s*:\s*3000/.test(weatherScript) &&
+    /maximumAge\s*:\s*600000/.test(weatherScript) &&
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");

@@ -286,25 +286,34 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     if (!isSecureContext) { showError(t("weather.insecureContext")); return; }
     if (!navigator.geolocation?.getCurrentPosition) { showError(t("weather.geolocationUnsupported")); return; }
 
+    try {
+      if (navigator.permissions?.query) {
+        const permission = await navigator.permissions.query({ name: "geolocation" });
+        if (permission.state === "denied") {
+          showError(t("weather.locationDenied"));
+          return;
+        }
+      }
+    } catch (_) {
+      // Some browsers expose permissions but do not support geolocation queries.
+    }
+
     setBusy(true);
     setStatus(t("weather.locatingWeather"));
     try {
-      // Weather only needs a useful nearby location, not turn-by-turn GPS precision.
-      // Ask the browser for its network-assisted/cached position first. High-accuracy
-      // GPS can take 10–20 seconds on desktop PCs that have no GPS hardware.
-      // A short timeout keeps the button responsive; users can retry or choose the
-      // clearly-labelled approximate-IP option if their browser cannot locate them.
+      // Network-assisted/cached positioning is enough for local weather.
+      // Desktop devices can spend much longer probing unavailable GPS hardware.
       const position = await getPosition({
         enableHighAccuracy: false,
-        timeout: 6000,
-        maximumAge: 300000,
+        timeout: 3000,
+        maximumAge: 600000,
       });
       const {latitude,longitude,accuracy} = position.coords;
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("invalid-position");
       await fetchWeather(`${latitude},${longitude}`,"device",accuracy);
     } catch (error) {
       if (error.code === 1) showError(t("weather.locationDenied"));
-      else if (error.code === 3) showError(t("weather.locationTimeout"));
+      else if (error.code === 3) await fetchWeather("auto:ip","approximate");
       else showError(t("weather.locationUnavailable"));
     } finally { setBusy(false); }
   }
