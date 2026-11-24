@@ -15,8 +15,9 @@
 .theme-toggle:hover { transform:translateY(-1px); background:var(--soft); }
 .theme-toggle > span:first-child { font-size:1.2rem; line-height:1; }
 @media(max-width:720px) {
-  .header-actions { gap:7px; }
-  .theme-toggle { min-height:40px; padding-inline:10px; }
+  .header-actions { gap:5px; }
+  .lang-toggle button { min-width:40px; padding-inline:8px; }
+  .theme-toggle { min-height:40px; min-width:40px; padding-inline:9px; }
   .theme-toggle-label { display:none; }
 }
 @media(prefers-reduced-motion:reduce) {
