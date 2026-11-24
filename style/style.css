@@ -1758,7 +1758,7 @@ html.page-home-root {
   .page-home .hero-farmer {
     --farmer-opacity: .26;
     top: 150px;
-    right: -9%;
+    right: -3%;
     bottom: auto;
     width: min(76vw, 390px);
     height: 280px;

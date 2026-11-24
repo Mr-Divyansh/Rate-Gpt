@@ -238,6 +238,8 @@ async function main() {
     "closed mobile drawer is clipped in place to prevent horizontal overflow");
   check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
     "mobile drawer has an explicit visible state without off-canvas transforms");
+  check(/@media\s*\(max-width:\s*760px\)[\s\S]*?\.page-home\s+\.hero-farmer\s*\{[^}]*top:\s*150px;[\s\S]*?right:\s*-3%;/s.test(homeCss),
+    "mobile farmer artwork stays within the viewport edge");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 
