@@ -178,7 +178,7 @@ async function main() {
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
-    globalNav.includes("actions.append(languageToggle(), toggle)") &&
+    globalNav.includes("actions.append(languageToggle(), themeToggle(), toggle)") &&
     globalNav.includes('const DEVICE_VISIT_KEY = "rateGptDeviceVisited"') &&
     globalNav.includes('window.localStorage.getItem(DEVICE_VISIT_KEY) === "1"') &&
     globalNav.includes('window.localStorage.getItem("rateGptWelcomeSeen") === "1"') &&
