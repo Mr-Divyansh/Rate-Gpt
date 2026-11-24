@@ -32,6 +32,7 @@ if (!store) {
   };
 }
 
+const copy = (en, hi) => getLocale() === "hi-IN" ? hi : en;
 const money = (value) => new Intl.NumberFormat(getLocale(), {
   style: "currency", currency: "INR", maximumFractionDigits: 2,
 }).format(value);
@@ -93,13 +94,13 @@ function render() {
     const card = document.createElement("article");
     card.className = "dashboard-scenario";
     const title = document.createElement("strong");
-    title.textContent = [scenario.commodity || "Manual scenario", scenario.market || "Manual estimate"].join(" · ");
+    title.textContent = [scenario.commodity || copy("Manual scenario", "मैन्युअल अनुमान"), scenario.market || copy("Manual estimate", "मैन्युअल गणना")].join(" · ");
     const meta = document.createElement("p");
     meta.textContent = t("dashboard.quantity") + ": " + scenario.quantity + " qtl · " +
       t("dashboard.price") + ": " + money(scenario.modalPrice) + "/qtl";
     const costs = document.createElement("p");
-    costs.textContent = "Transport " + money(scenario.transportCost) + " · Handling " +
-      money(scenario.handlingCost) + " · Other " + money(scenario.otherCosts);
+    costs.textContent = copy("Transport ", "ढुलाई ") + money(scenario.transportCost) + copy(" · Handling ", " · हैंडलिंग ") +
+      money(scenario.handlingCost) + copy(" · Other ", " · अन्य ") + money(scenario.otherCosts);
     const sourceDate = document.createElement("p");
     sourceDate.textContent = t("dashboard.sourceDate") + ": " + (scenario.sourceDate || "—");
     const net = document.createElement("p");

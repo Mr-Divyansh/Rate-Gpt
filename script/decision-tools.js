@@ -1,4 +1,4 @@
-import { getLocale, t } from "./i18n.js";
+import { getLocale, onLangChange, t } from "./i18n.js";
 import { createFarmerDashboardStore } from "./farmer-dashboard-store.js";
 import { calculateNetProceeds, isRupeesPerQuintal } from "./decision-tools-core.js";
 const API_BASE = document.querySelector('meta[name="api-base"]')?.content || "/api/v1";
@@ -25,6 +25,9 @@ const grossResult = document.querySelector("#grossResult");
 const breakEvenResult = document.querySelector("#breakEvenResult");
 let comparedMarkets = [];
 let selectedRecord = null;
+let lastRenderData = null;
+let lastSearchState = null;
+const copy = (en, hi) => getLocale() === "hi-IN" ? hi : en;
 let dashboardStore = null;
 try { dashboardStore = createFarmerDashboardStore(window.localStorage); } catch { /* saving stays optional */ }
 
@@ -52,10 +55,10 @@ function updateCalculator() {
     return;
   }
   netResult.textContent = money(estimate.net);
-  grossResult.textContent = "Gross " + money(estimate.gross) + " − transport " + money(transport) +
-    " − loading/unloading " + money(handling) + " − other costs " + money(other);
+  grossResult.textContent = copy("Gross ", "कुल रकम ") + money(estimate.gross) + copy(" − transport ", " − ढुलाई ") + money(transport) +
+    copy(" − loading/unloading ", " − लोडिंग/अनलोडिंग ") + money(handling) + copy(" − other costs ", " − अन्य खर्च ") + money(other);
   breakEvenResult.textContent = t("decision.breakEven", { price: money(estimate.breakEvenPrice) }) +
-    (estimate.net < 0 ? " " + (getLocale() === "hi-IN" ? "दर्ज खर्च सकल रकम से अधिक है।" : "Entered costs exceed gross revenue.") : "");
+    (estimate.net < 0 ? " " + copy("Entered costs exceed gross revenue.", "दर्ज खर्च कुल रकम से अधिक है।") : "");
 }
 
 function selectRecord(record) {
@@ -115,15 +118,16 @@ function updateMarketEstimates() {
     const costs = Number(input.value);
     if (!record || !isRupeesPerQuintal(record.source_unit) ||
         !Number.isFinite(quantity) || quantity <= 0 || !validNumber(costs)) {
-      target.textContent = "Not comparable";
+      target.textContent = copy(copy("Not comparable", "तुलना संभव नहीं"), "तुलना संभव नहीं");
       return;
     }
     const estimate = calculateNetProceeds({ quantity, modalPrice: record.modal_price, otherCosts: costs });
-    target.textContent = estimate ? money(estimate.net) : "Not comparable";
+    target.textContent = estimate ? money(estimate.net) : copy("Not comparable", "तुलना संभव नहीं");
   });
 }
 
 function renderComparison(records, meta, commodity, isPartial) {
+  lastRenderData = { records, meta, commodity, isPartial };
   const latestByMarket = new Map();
   for (const record of records) {
     if (record.modal_price === null || record.modal_price === undefined) continue;
@@ -137,6 +141,7 @@ function renderComparison(records, meta, commodity, isPartial) {
     if (a.source_unit !== b.source_unit) return String(a.source_unit).localeCompare(String(b.source_unit));
     return b.modal_price - a.modal_price;
   });
+  const savedCosts = [...rowsNode.querySelectorAll(".market-cost")].map((input) => input.value);
   rowsNode.replaceChildren();
 
   for (const [index, record] of comparedMarkets.entries()) {
@@ -146,29 +151,32 @@ function renderComparison(records, meta, commodity, isPartial) {
     const district = escapeHtml(record.district);
     const state = escapeHtml(record.state);
     const date = escapeHtml(record.arrival_date);
-    const unit = escapeHtml(record.source_unit || "Not provided by source");
+    const unit = escapeHtml(record.source_unit || copy("Not provided by source", "स्रोत ने इकाई नहीं बताई"));
     tr.innerHTML =
       "<td><strong>" + market + "</strong><small>" + district + ", " + state + "</small></td>" +
       "<td>" + date + "</td>" +
       "<td><strong>" + money(record.modal_price) + "</strong><small>" + unit + "</small></td>" +
-      '<td><label class="sr-only" for="market-cost-' + index + '">Costs for ' + market +
+      '<td><label class="sr-only" for="market-cost-' + index + '">' + copy("Costs for ", "के खर्च: ") + market +
       '</label><input class="market-cost" id="market-cost-' + index +
       '" type="number" min="0" step="0.01" value="0" data-index="' + index +
-      '" aria-label="Transport and handling cost for ' + market + ' in rupees"></td>' +
+      '" aria-label="' + copy("Transport and handling cost for ", "ढुलाई और हैंडलिंग खर्च: ") + market + copy(" in rupees", " रुपये में") + '"></td>' +
       '<td><strong id="market-net-' + index + '">—</strong><button class="use-record" type="button" data-index="' +
-      index + '"' + (calculatorAllowed ? "" : " disabled") + ">Use in calculator</button></td>";
+      index + '"' + (calculatorAllowed ? "" : " disabled") + ">" + copy("Use in calculator", "कैलकुलेटर में इस्तेमाल करें") + "</button></td>";
     rowsNode.append(tr);
   }
 
-  rowsNode.querySelectorAll(".market-cost").forEach((input) => input.addEventListener("input", updateMarketEstimates));
+  rowsNode.querySelectorAll(".market-cost").forEach((input) => {
+    input.value = savedCosts[Number(input.dataset.index)] ?? "0";
+    input.addEventListener("input", updateMarketEstimates);
+  });
   rowsNode.querySelectorAll(".use-record").forEach((button) => button.addEventListener("click", () => {
     selectRecord(comparedMarkets[Number(button.dataset.index)]);
   }));
   resultsPanel.hidden = false;
 
-  const fetchedAt = meta?.fetchedAt ? new Date(meta.fetchedAt).toLocaleString() : "not supplied";
-  sourceSummary.textContent = "Source: " + (meta?.source || "Government of India OGD / AGMARKNET") +
-    " · fetched: " + fetchedAt + " · records scanned: " + records.length;
+  const fetchedAt = meta?.fetchedAt ? new Date(meta.fetchedAt).toLocaleString(getLocale()) : copy("not supplied", "उपलब्ध नहीं");
+  sourceSummary.textContent = copy("Source: ", "स्रोत: ") + (meta?.source || "Government of India OGD / AGMARKNET") +
+    copy(" · fetched: ", " · प्राप्ति समय: ") + fetchedAt + copy(" · records scanned: ", " · जाँचे गए रिकॉर्ड: ") + records.length;
 
   if (!comparedMarkets.length) {
     noteNode.textContent = t("decision.noRecords");
@@ -179,7 +187,7 @@ function renderComparison(records, meta, commodity, isPartial) {
       : (getLocale() === "hi-IN" ? commodity + " के लिए हर मंडी का मिला हुआ सबसे नया रिकॉर्ड दिख रहा है। कैलकुलेटर में वही रिकॉर्ड चुनें जिसकी इकाई स्पष्ट रूप से ₹ प्रति क्विंटल है।" : "Showing the latest returned observation per mandi for " + commodity + ". Select “Use in calculator” only when the source unit is explicitly ₹ per quintal.");
   }
   if (isPartial) {
-    noteNode.textContent += " The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.";
+    noteNode.textContent += copy(" The source pagination boundary was reached; this is a partial comparison, not a complete state-wide ranking.", " स्रोत की पेज सीमा पूरी हो गई; यह आंशिक तुलना है, पूरे राज्य की पूरी रैंकिंग नहीं।");
   }
   updateMarketEstimates();
   checkLocalPriceAlerts(comparedMarkets);
@@ -243,13 +251,16 @@ async function search() {
   try {
     const result = await fetchAllPages(state, commodity, district, market);
     renderComparison(result.records, result.meta, commodity, result.partial);
+    lastSearchState = { type: result.records.length ? "loaded" : "empty", result };
     statusNode.textContent = result.records.length
-      ? "Loaded " + result.records.length + " records from " +
-        result.pagesFetched + " source page(s)." +
-        (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : "")
-      : "The government source returned no records for this selection.";
+      ? copy("Loaded " + result.records.length + " records from " + result.pagesFetched + " source page(s)." +
+        (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : ""),
+        result.records.length + " रिकॉर्ड " + result.pagesFetched + " स्रोत पेज से मिले।" +
+        (result.partial ? " और रिकॉर्ड हो सकते हैं; यह तुलना पहले 500 रिकॉर्ड तक सीमित है।" : ""))
+      : copy("The government source returned no records for this selection.", "सरकारी स्रोत से इस चयन के लिए कोई रिकॉर्ड नहीं मिला।");
   } catch (error) {
-    errorNode.textContent = error instanceof Error ? error.message : "Unexpected error while loading records.";
+    errorNode.textContent = copy("Could not load mandi records. Please try again.", "मंडी रिकॉर्ड लोड नहीं हो सके। कृपया फिर कोशिश करें।");
+    lastSearchState = { type: "failed" };
     errorNode.hidden = false;
     statusNode.textContent = t("decision.failed");
   } finally {
@@ -258,6 +269,17 @@ async function search() {
 }
 
 form.addEventListener("submit", (event) => { event.preventDefault(); void search(); });
+onLangChange(() => {
+  if (lastRenderData) renderComparison(lastRenderData.records, lastRenderData.meta, lastRenderData.commodity, lastRenderData.isPartial);
+  updateCalculator();
+  if (assistantQuestion?.value.trim()) assistantAnswer.textContent = answerFromCurrentEvidence(assistantQuestion.value.trim());
+  if (lastSearchState?.type === "loaded" || lastSearchState?.type === "empty") {
+    const result = lastSearchState.result;
+    statusNode.textContent = result.records.length
+      ? copy("Loaded " + result.records.length + " records from " + result.pagesFetched + " source page(s)." + (result.partial ? " More records may exist; this comparison is limited to the first 500 records." : ""), result.records.length + " रिकॉर्ड " + result.pagesFetched + " स्रोत पेज से मिले।" + (result.partial ? " और रिकॉर्ड हो सकते हैं; यह तुलना पहले 500 रिकॉर्ड तक सीमित है।" : ""))
+      : copy("The government source returned no records for this selection.", "सरकारी स्रोत से इस चयन के लिए कोई रिकॉर्ड नहीं मिला।");
+  }
+});
 for (const input of [quantityInput, priceInput, transportCostInput, handlingCostInput, costInput]) {
   input.addEventListener("input", updateCalculator);
 }
