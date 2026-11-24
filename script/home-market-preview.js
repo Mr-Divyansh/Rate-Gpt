@@ -8,6 +8,24 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const BOARD_ROWS = 5;
+const CROP_ARTWORK = [
+  ["bengal gram", "pulses/chana.webp"],
+  ["bottle gourd", "vegetables/bottle-gourd.webp"],
+  ["bitter gourd", "vegetables/bitter-gourd.webp"],
+  ["green chilli", "vegetables/green-chilli.webp"],
+  ["ash gourd", "vegetables/ash-gourd.webp"],
+  ["cauliflower", "vegetables/cauliflower.webp"],
+  ["brinjal", "vegetables/brinjal.webp"],
+  ["carrot", "vegetables/carrot.webp"],
+  ["onion", "vegetables/onion.webp"],
+  ["ginger", "vegetables/ginger.webp"],
+  ["tomato", "vegetables/tomato.webp"],
+  ["potato", "vegetables/potato.webp"],
+  ["maize", "grains/maize.webp"],
+  ["wheat", "grains/wheat.webp"],
+  ["paddy", "grains/paddy.webp"],
+  ["rice", "grains/rice.webp"],
+];
 
 /* ---------------- interactive product demo ---------------- */
 const demoDialog = $("demoDialog");
@@ -57,6 +75,41 @@ function pickRows(records) {
   return { latest, rows };
 }
 
+function cropArtwork(commodity) {
+  const name = String(commodity || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z]+/g, " ")
+    .trim();
+  const match = CROP_ARTWORK.find(([alias]) => name === alias || name.startsWith(`${alias} `));
+  const art = document.createElement("span");
+  art.className = "board-crop-art";
+  art.setAttribute("aria-hidden", "true");
+
+  if (match) {
+    const image = document.createElement("img");
+    image.src = `/Images/Vegetables/${match[1]}`;
+    image.alt = "";
+    image.loading = "lazy";
+    image.decoding = "async";
+    art.append(image);
+    return art;
+  }
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.8");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  stem.setAttribute("d", "M12 20v-8m0 3c-4.5 0-7-2.6-7-6 4.7 0 7 2.2 7 6Zm0-3c0-4.1 2.4-6.5 7-6.5 0 3.8-2.4 6.5-7 6.5Z");
+  svg.append(stem);
+  art.append(svg);
+  return art;
+}
+
 function boardRow(record, axis) {
   const li = document.createElement("li");
   li.className = "board-row";
@@ -80,6 +133,10 @@ function boardRow(record, axis) {
     crop.append(small);
   }
 
+  const cropCell = document.createElement("div");
+  cropCell.className = "board-crop";
+  cropCell.append(cropArtwork(record.commodity), crop);
+
   const modal = document.createElement("div");
   modal.className = "board-modal";
   const price = document.createElement("strong");
@@ -88,7 +145,7 @@ function boardRow(record, axis) {
   label.textContent = t("board.modal");
   modal.append(price, label);
 
-  li.append(crop, createRange(record, axis), modal);
+  li.append(cropCell, createRange(record, axis), modal);
   return li;
 }
 
