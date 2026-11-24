@@ -28,20 +28,27 @@ import { getLocale, onLangChange, t } from "./i18n.js";
 
   const API = "https://api.weatherapi.com/v1";
   let searchController = null;
+  let searchRequest = null;
   let weatherController = null;
   let suggestionTimer = null;
   let matches = [];
   let activeIndex = -1;
   let sequence = 0;
   let lastWeather = null;
+  let cachedSearch = null;
 
-  const setStatus = (message) => { status.textContent = message; status.hidden = !message; };
+  const setStatus = (message, loading = false) => {
+    status.textContent = message;
+    status.hidden = !message;
+    status.toggleAttribute("data-loading", Boolean(message) && loading);
+  };
   const clearMessages = () => { errorBox.textContent = ""; errorBox.hidden = true; setStatus(""); };
   const showError = (message) => { errorBox.textContent = message; errorBox.hidden = false; setStatus(""); };
   const setBusy = (busy) => {
     searchButton.disabled = busy;
     locationButton.disabled = busy;
     approximateButton.disabled = busy;
+    form.setAttribute("aria-busy", String(busy));
     searchButton.textContent = busy ? t("weather.loading") : t("weather.fetch");
   };
   const label = (place) => [place.name,place.region,place.country].filter(Boolean).join(", ");
@@ -195,7 +202,7 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     const timeout = setTimeout(() => controller.abort(),12000);
     setBusy(true);
     errorBox.hidden = true;
-    setStatus(t("weather.loading"));
+    setStatus(t("weather.loading"), true);
     try {
       const data = await request("forecast.json",query,controller.signal);
       if (currentSequence !== sequence) return false;
@@ -220,29 +227,46 @@ import { getLocale, onLangChange, t } from "./i18n.js";
   }
 
   async function searchPlaces(query) {
-    if (query.trim().length < 2) { closeSuggestions(); return []; }
+    const normalizedQuery = query.trim().replace(/\s+/g," ").toLocaleLowerCase();
+    if (normalizedQuery.length < 2) { closeSuggestions(); return []; }
     if (!API_KEY) { showError(t("weather.notConfigured")); return []; }
+    if (cachedSearch?.query === normalizedQuery && Date.now() - cachedSearch.time < 30000) {
+      renderSuggestions(cachedSearch.places);
+      setStatus(cachedSearch.places.length ? t("weather.chooseMatch") : t("weather.noPlacesFound"));
+      return cachedSearch.places;
+    }
+    if (searchRequest?.query === normalizedQuery) return searchRequest.promise;
+
     searchController?.abort();
     const controller = new AbortController();
     searchController = controller;
     const timeout = setTimeout(() => controller.abort(),12000);
-    setStatus(t("weather.searchingPlaces"));
+    setStatus(t("weather.searchingPlaces"), true);
     errorBox.hidden = true;
+    const promise = (async () => {
+      try {
+        const places = await request("search.json",query.trim(),controller.signal);
+        if (searchController !== controller) return [];
+        const found = Array.isArray(places) ? places.filter(p => Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon))) : [];
+        cachedSearch = { query: normalizedQuery, places: found, time: Date.now() };
+        renderSuggestions(found.slice(0,7));
+        setStatus(found.length ? t("weather.chooseMatch") : t("weather.noPlacesFound"));
+        return found;
+      } catch (error) {
+        if (searchController !== controller || error.name === "AbortError") return [];
+        closeSuggestions();
+        showError(error.message === "service-unavailable" ? t("weather.serviceUnavailable") : t("weather.searchFailed"));
+        return [];
+      } finally {
+        clearTimeout(timeout);
+        if (searchController === controller) searchController = null;
+      }
+    })();
+    searchRequest = { query: normalizedQuery, promise };
     try {
-      const places = await request("search.json",query.trim(),controller.signal);
-      if (searchController !== controller) return [];
-      const found = Array.isArray(places) ? places.filter(p => Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon))) : [];
-      renderSuggestions(found.slice(0,7));
-      setStatus(found.length ? t("weather.chooseMatch") : t("weather.noPlacesFound"));
-      return found;
-    } catch (error) {
-      if (searchController !== controller || error.name === "AbortError") return [];
-      closeSuggestions();
-      showError(error.message === "service-unavailable" ? t("weather.serviceUnavailable") : t("weather.searchFailed"));
-      return [];
+      return await promise;
     } finally {
-      clearTimeout(timeout);
-      if (searchController === controller) searchController = null;
+      if (searchRequest?.promise === promise) searchRequest = null;
     }
   }
 
@@ -287,6 +311,8 @@ import { getLocale, onLangChange, t } from "./i18n.js";
 
   form.addEventListener("submit",async event => {
     event.preventDefault();
+    clearTimeout(suggestionTimer);
+    suggestionTimer = null;
     const query = input.value.trim();
     if (!query) { showError(t("weather.enterPlace")); return; }
     const found = await searchPlaces(query);
@@ -296,8 +322,12 @@ import { getLocale, onLangChange, t } from "./i18n.js";
   input.addEventListener("input",() => {
     clearTimeout(suggestionTimer);
     const query = input.value.trim();
+    searchController?.abort();
+    searchController = null;
+    searchRequest = null;
     if (query.length < 2) { closeSuggestions(); clearMessages(); return; }
-    suggestionTimer = setTimeout(() => searchPlaces(query),280);
+    closeSuggestions();
+    suggestionTimer = setTimeout(() => searchPlaces(query),220);
   });
   input.addEventListener("keydown",async event => {
     if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); focusSuggestion(activeIndex + 1); }

@@ -25,6 +25,7 @@ try{
   await page.route("https://api.weatherapi.com/v1/search.json**",async route=>{
    const q=new URL(route.request().url()).searchParams.get("q")||"";
    searchQueries.push(q);
+   await new Promise(resolve=>setTimeout(resolve,100));
    const matches=q.toLowerCase().includes("no-such")?[]:[
     {id:1,name:"Mandi",region:"Himachal Pradesh",country:"India",lat:31.708,lon:76.932},
     {id:2,name:"Mandi Dabwali",region:"Haryana",country:"India",lat:29.98,lon:74.7}
@@ -53,8 +54,13 @@ try{
   pass(viewport.name+": no silent location request on page load");
 
   await page.locator("#locationInput").fill("Mandi");
+  await page.waitForTimeout(290);
+  await page.getByRole("button",{name:"Search weather"}).click();
   await page.waitForFunction(()=>document.querySelectorAll("#weatherSuggestions [role=option]").length===2);
-  assert.ok(searchQueries.includes("Mandi"));
+  await page.waitForTimeout(300);
+  assert.equal(searchQueries.filter(query=>query==="Mandi").length,1,
+    viewport.name+": debounced suggestions and form submit share one location request");
+  pass(viewport.name+": form submit reuses the active location search instead of duplicating it");
   await page.locator("#weatherSuggestions [role=option]").first().click();
   await page.waitForFunction(()=>document.querySelector("#weatherResult")?.hidden===false);
   assert.equal(weatherQueries.at(-1),"31.708,76.932");

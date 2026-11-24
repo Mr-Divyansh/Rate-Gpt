@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/base.css">
-  <link rel="stylesheet" href="style/weather.css">
+  <link rel="stylesheet" href="style/weather.css?v=weather-polish-20261124">
   <link rel="canonical" href="https://rate-gpt.vercel.app/weather.html">
   <meta property="og:type" content="website"><meta property="og:site_name" content="Rate-GPT">
   <meta property="og:title" content="Weather | Rate-GPT"><meta property="og:description" content="Check current weather for your village, town or city with Rate-GPT.">
@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Weather | Rate-GPT">
   <meta name="twitter:description" content="Check current weather for your village, town or city with Rate-GPT."><meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
 </head>
-<body>
+<body class="page-weather">
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
   <header class="site-header"></header>
   <main id="main-content" tabindex="-1">
@@ -30,6 +30,14 @@
         <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
         <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
         <p data-i18n="weather.subtitle">Find current conditions for your village, town or city.</p>
+      </div>
+      <div class="weather-art" aria-hidden="true">
+        <span class="weather-art-sun"></span>
+        <span class="weather-art-cloud weather-art-cloud-one"></span>
+        <span class="weather-art-cloud weather-art-cloud-two"></span>
+        <span class="weather-art-hill weather-art-hill-back"></span>
+        <span class="weather-art-hill weather-art-hill-front"></span>
+        <span class="weather-art-fields"></span>
       </div>
       <section class="weather-search-card" aria-label="Find a weather location">
         <div class="weather-search-heading">

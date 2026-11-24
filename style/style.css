@@ -754,6 +754,10 @@
 
 /* Performance guardrails for low-power phones and constrained mobile networks.
    The page remains fully styled; only decorative work is reduced. */
+html.page-home-root {
+  overflow-x: hidden;
+}
+
 @media (max-width: 760px) {
   .page-home {
     background: #f5f7f0;
@@ -845,4 +849,482 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .page-home .hero-actions .hero-secondary { transition: none; }
+}
+
+/* ---------- homepage refresh: editorial farmer-first market dashboard ---------- */
+.page-home {
+  --hero-ink: #173327;
+  --hero-green: #0b6745;
+  background:
+    radial-gradient(ellipse at 82% 18%, rgba(216, 234, 211, .68), transparent 34%),
+    linear-gradient(118deg, #f8f7ef 0%, #f3f6ed 62%, #e9f1e4 100%);
+}
+
+.page-home .hero.wrap {
+  width: min(calc(100% - clamp(40px, 7vw, 112px)), 1480px);
+  min-height: min(860px, calc(100svh - 68px));
+  grid-template-columns: minmax(0, .98fr) minmax(450px, 1.02fr);
+  gap: clamp(32px, 5vw, 76px);
+  padding-block: clamp(42px, 6vh, 76px);
+}
+
+.page-home .hero::before {
+  height: 28%;
+  background:
+    linear-gradient(0deg, rgba(247, 248, 241, .14), rgba(247, 248, 241, .86)),
+    url("../Images/Farmer Marketplace Sunrise Banner.webp") center bottom / cover no-repeat;
+  opacity: .42;
+}
+
+.page-home .hero-copy {
+  max-width: 650px;
+  gap: clamp(16px, 2.4vh, 25px);
+}
+
+.page-home .hero-kicker {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #dce8d9;
+  border-radius: 999px;
+  background: rgba(235, 244, 230, .92);
+  color: #17613f;
+  font-size: .88rem;
+  letter-spacing: .01em;
+}
+
+.page-home .hero-copy h1 {
+  max-width: 14ch;
+  color: #183629;
+  font-size: clamp(3.2rem, 5.2vw, 5.1rem);
+  line-height: .98;
+  letter-spacing: -.052em;
+  text-wrap: pretty;
+}
+
+.page-home .hero-copy .lede {
+  max-width: 46ch;
+  color: #52635a;
+  font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+  line-height: 1.62;
+}
+
+.page-home .hero-actions {
+  gap: 12px;
+}
+
+.page-home .hero-actions .btn {
+  min-height: 54px;
+  padding-inline: 23px;
+  border-radius: 12px;
+  font-size: .98rem;
+}
+
+.page-home .hero-actions .btn-primary {
+  background: #126744;
+  box-shadow: 0 8px 18px rgba(18, 103, 68, .18);
+}
+
+.page-home .hero-actions .hero-secondary {
+  min-width: 0;
+  border-color: #cfddd0;
+  background: rgba(255, 255, 255, .78);
+  box-shadow: 0 5px 16px rgba(28, 64, 43, .06);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.page-home .fine {
+  max-width: 50ch;
+  color: #52645a;
+  font-size: .88rem;
+  line-height: 1.45;
+}
+
+.page-home .hero-farmer {
+  right: 24%;
+  width: min(53vw, 760px);
+  height: 82%;
+  opacity: .94;
+  filter: saturate(.9) drop-shadow(0 15px 24px rgba(24, 58, 38, .11));
+}
+
+.page-home .board {
+  width: min(100%, 590px);
+  border: 1px solid rgba(20, 77, 53, .12);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(28, 64, 43, .15);
+  transform: none;
+}
+
+.page-home .board-head {
+  padding: 24px 24px 17px;
+}
+
+.page-home .board-head h2 {
+  font-size: clamp(1.32rem, 1.8vw, 1.6rem);
+  letter-spacing: -.03em;
+}
+
+.page-home .board-chart-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: #edf5e9;
+  color: #418052;
+  font-size: 1.15rem;
+}
+
+.page-home .board-meta {
+  margin-top: 6px;
+  color: #6a796f;
+  font-size: .85rem;
+}
+
+.page-home .board-rows {
+  gap: 7px;
+  padding: 0 17px 17px;
+}
+
+.page-home .board-row {
+  min-height: 66px;
+  grid-template-columns: minmax(0, 1.12fr) minmax(70px, .7fr) auto;
+  gap: 14px;
+  padding: 10px 13px;
+  border: 1px solid #e8eee8;
+  border-radius: 12px;
+  background: #fafbf8;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+.page-home .board-row:hover {
+  transform: translateY(-1px);
+  border-color: #cddfce;
+  background: #f5f9f3;
+}
+
+.page-home .board-row .crop-name strong {
+  color: #263b2f;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.page-home .board-row .crop-name small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #768178;
+  font-size: .76rem;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.page-home .board-row .range-track {
+  height: 4px;
+  background: #e4eee5;
+}
+
+.page-home .board-row .range-fill {
+  background: linear-gradient(90deg, #65ae77, #24774c);
+}
+
+.page-home .board-row .range-modal {
+  background: #bd8a2c;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 2px #bd8a2c;
+}
+
+.page-home .board-modal strong {
+  color: #0b6845;
+  font-size: clamp(1.3rem, 1.9vw, 1.65rem);
+  letter-spacing: -.035em;
+}
+
+.page-home .board-modal small {
+  color: #7a897f;
+  font-size: .72rem;
+}
+
+.page-home .board-trend {
+  min-height: 48px;
+  margin: 0 22px 14px;
+  padding-top: 11px;
+  border-top: 1px solid #edf1ec;
+  color: #758279;
+}
+
+.page-home .board-trend p {
+  color: #66776c;
+  font-size: .8rem;
+}
+
+.page-home .spark-line { stroke: #438d5d; }
+.page-home .spark-area { fill: rgba(67, 141, 93, .12); }
+.page-home .spark-dot { fill: #438d5d; stroke: #fff; }
+
+.page-home .board-foot {
+  padding: 13px 22px;
+  background: #12583c;
+}
+
+.page-home .board-foot a {
+  min-height: 39px;
+  font-size: .92rem;
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .page-home .hero.wrap {
+    width: min(calc(100% - 48px), 1020px);
+    min-height: min(820px, calc(100svh - 68px));
+    grid-template-columns: minmax(0, .92fr) minmax(390px, 1.08fr);
+    gap: 28px;
+  }
+
+  .page-home .hero-copy h1 {
+    font-size: clamp(2.8rem, 5vw, 3.8rem);
+  }
+
+  .page-home .hero-farmer {
+    right: 31%;
+    width: 47vw;
+    opacity: .64;
+  }
+
+  .page-home .board-row {
+    gap: 9px;
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-home {
+    background:
+      radial-gradient(ellipse at 95% 8%, rgba(212, 231, 205, .76), transparent 38%),
+      linear-gradient(180deg, #f7f8f1 0%, #f2f6ed 100%);
+  }
+
+  .page-home #main-content {
+    min-height: 0;
+  }
+
+  .page-home .hero.wrap {
+    width: min(calc(100% - 32px), 620px);
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 22px;
+    padding-block: 26px 8px;
+  }
+
+  .page-home .hero::before {
+    height: 19%;
+    opacity: .27;
+    background:
+      linear-gradient(0deg, rgba(247, 248, 241, .1), rgba(247, 248, 241, .92)),
+      url("../Images/Farmer Marketplace Sunrise Banner.webp") center bottom / cover no-repeat;
+  }
+
+  .page-home .hero-copy {
+    max-width: 540px;
+    gap: 12px;
+  }
+
+  .page-home .hero-kicker {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: .82rem;
+  }
+
+  .page-home .hero-copy h1 {
+    max-width: 14ch;
+    font-size: clamp(2.35rem, 8.6vw, 3.35rem);
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  .page-home .hero-copy .lede {
+    max-width: 52ch;
+    color: #58675e;
+    font-size: .98rem;
+    line-height: 1.5;
+  }
+
+  .page-home .hero-actions {
+    width: 100%;
+    gap: 9px;
+  }
+
+  .page-home .hero-actions .btn {
+    min-height: 48px;
+    padding-inline: 16px;
+    border-radius: 11px;
+    font-size: .9rem;
+  }
+
+  .page-home .hero-actions .hero-secondary {
+    min-height: 48px;
+    padding-inline: 14px;
+  }
+
+  .page-home .fine {
+    gap: 8px;
+    font-size: .78rem;
+  }
+
+  .page-home .hero-farmer {
+    display: block;
+    top: 0;
+    right: -9%;
+    bottom: auto;
+    width: min(66%, 360px);
+    height: 250px;
+    object-fit: contain;
+    object-position: right top;
+    opacity: .17;
+    filter: saturate(.72);
+  }
+
+  .page-home .board {
+    width: 100%;
+    max-height: none;
+    border-radius: 17px;
+    box-shadow: 0 12px 30px rgba(28, 64, 43, .09);
+  }
+
+  .page-home .board-head {
+    padding: 17px 16px 12px;
+  }
+
+  .page-home .board-head h2 {
+    gap: 9px;
+    font-size: 1.15rem;
+  }
+
+  .page-home .board-chart-mark {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+    border-radius: 9px;
+    font-size: 1rem;
+  }
+
+  .page-home .board-meta {
+    font-size: .77rem;
+  }
+
+  .page-home .board-rows {
+    gap: 6px;
+    padding: 0 10px 12px;
+  }
+
+  .page-home .board-row {
+    min-height: 59px;
+    grid-template-columns: minmax(0, 1.12fr) minmax(48px, .58fr) auto;
+    gap: 8px;
+    padding: 8px 9px;
+    border-radius: 10px;
+  }
+
+  .page-home .board-row .crop-name strong {
+    font-size: .9rem;
+  }
+
+  .page-home .board-row .crop-name small {
+    font-size: .68rem;
+  }
+
+  .page-home .board-modal strong {
+    font-size: 1.14rem;
+  }
+
+  .page-home .board-modal small {
+    font-size: .63rem;
+  }
+
+  .page-home .board-trend {
+    min-height: 42px;
+    margin: 0 14px 10px;
+    padding-top: 9px;
+  }
+
+  .page-home .board-trend p {
+    font-size: .73rem;
+  }
+
+  .page-home .board-foot {
+    display: block;
+    padding: 10px 16px;
+  }
+
+  .page-home .board-foot a {
+    min-height: 36px;
+    font-size: .84rem;
+  }
+}
+
+@media (max-width: 460px) {
+  .page-home .hero.wrap {
+    width: calc(100% - 28px);
+    padding-top: 22px;
+    gap: 17px;
+  }
+
+  .page-home .hero-copy h1 {
+    max-width: 13ch;
+    font-size: clamp(2.2rem, 9.5vw, 2.7rem);
+  }
+
+  .page-home .hero-actions {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .page-home .hero-actions .btn,
+  .page-home .hero-actions .hero-secondary {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 8px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+
+  .page-home .hero-actions .hero-secondary .play-mark {
+    width: 21px;
+    height: 21px;
+    flex-basis: 21px;
+  }
+
+  .page-home .board-row {
+    grid-template-columns: minmax(0, 1fr) minmax(36px, .48fr) auto;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .page-home .board-row .crop-name strong {
+    font-size: .84rem;
+  }
+
+  .page-home .board-row .crop-name small {
+    font-size: .64rem;
+  }
+
+  .page-home .board-modal strong {
+    font-size: 1.04rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-home .board-row {
+    transition: none;
+  }
+
+  .page-home .board-row:hover {
+    transform: none;
+  }
 }
