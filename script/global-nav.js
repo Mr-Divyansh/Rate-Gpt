@@ -17,7 +17,58 @@ const LINKS = [
   ["nav.about", "about.html"],
   ["nav.contact", "contact.html"],
 ];
+
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
+
+// Shared Light / Dark theme preference and animated Liquid Morph transition.
+const THEME_KEY = "rateGptTheme";
+function applyTheme(theme) {
+  const next = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  document.documentElement.style.colorScheme = next;
+  try { localStorage.setItem(THEME_KEY, next); } catch { /* storage may be blocked */ }
+  document.querySelectorAll("[data-theme-toggle]").forEach(button => {
+    const dark = next === "dark";
+    button.setAttribute("aria-pressed", String(dark));
+    button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    button.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    button.innerHTML = dark
+      ? '<span aria-hidden="true">☀</span><span class="theme-toggle-label">Light</span>'
+      : '<span aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span>';
+  });
+}
+function themeToggle() {
+  const button = document.createElement("button");
+  button.className = "theme-toggle";
+  button.type = "button";
+  button.dataset.themeToggle = "";
+  button.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    const rect = button.getBoundingClientRect();
+    const root = document.documentElement;
+    root.style.setProperty("--theme-origin-x", `${rect.left + rect.width / 2}px`);
+    root.style.setProperty("--theme-origin-y", `${rect.top + rect.height / 2}px`);
+    if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.startViewTransition(() => applyTheme(next));
+    } else {
+      applyTheme(next);
+    }
+  });
+  applyTheme(document.documentElement.dataset.theme || "light");
+  return button;
+}
+try {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  applyTheme(savedTheme === "dark" ? "dark" : "light");
+} catch { applyTheme("light"); }
+if (!document.querySelector('link[data-theme-styles]')) {
+  const themeStyles = document.createElement("link");
+  themeStyles.rel = "stylesheet";
+  themeStyles.href = "/style/theme.css?v=liquid-morph-20261124";
+  themeStyles.dataset.themeStyles = "";
+  document.head.append(themeStyles);
+}
+
 
 
 function navLink([key, href]) {
@@ -64,7 +115,7 @@ function renderHeader(header) {
   const nav = document.createElement("nav"); nav.className = "site-nav"; nav.id = "primaryNavigation";
   nav.dataset.i18nAttr = "aria-label:nav.label"; LINKS.forEach(item => nav.append(navLink(item)));
   const actions = document.createElement("div"); actions.className = "header-actions";
-  actions.append(languageToggle(), toggle);
+  actions.append(languageToggle(), themeToggle(), toggle);
   inner.append(brand("brand"), nav, actions); header.append(inner);
   const backdrop = document.createElement("button"); backdrop.className = "nav-backdrop";
   backdrop.type = "button"; backdrop.tabIndex = -1; backdrop.setAttribute("aria-label", getLang()==="hi" ? "मेनू बंद करें" : "Close menu");
