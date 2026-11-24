@@ -201,6 +201,7 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
 .menu-toggle span { display:block; height:2px; margin:4px 0; border-radius:2px; background:currentColor; }
 .nav-backdrop { display:none; }
 @media (max-width:720px) {
+  html { overflow-x: clip; }
   .site-header.menu-open { z-index:100; }
   .header-inner { grid-template-columns:1fr auto; align-items:center; padding-block:8px; }
   .header-actions { grid-column:2; grid-row:1; position:relative; z-index:120; }
@@ -556,6 +557,7 @@ body > main {
 
 /* The full seven-link navigation does not fit beside the brand at tablet widths. */
 @media (min-width: 721px) and (max-width: 900px) {
+  html { overflow-x: clip; }
   .site-header.menu-open { z-index: 100; }
   .header-inner { grid-template-columns: 1fr auto; align-items: center; padding-block: 8px; }
   .header-actions { grid-column: 2; grid-row: 1; position: relative; z-index: 120; }

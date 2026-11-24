@@ -1511,3 +1511,19 @@
     grid-row: 3;
   }
 }
+
+/* Give every crop photo a consistent, edge-to-edge gallery frame. */
+.page-prices .crop-art {
+  border-color: #e1e9df;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255,255,255,.98), transparent 68%),
+    linear-gradient(145deg, #eef4ea, #e7eee3);
+}
+.page-prices .crop-art .crop-photo {
+  padding: 0;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+  mix-blend-mode: multiply;
+  transform: none;
+}

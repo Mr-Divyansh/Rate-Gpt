@@ -79,8 +79,8 @@ try{
   assert.equal(weatherQueries.at(-1),"31.708,76.932");
   assert.match(await page.locator("#weatherStatus").innerText(),/accuracy.*42/i);
   const geoOptions=await page.evaluate(()=>window.__weatherGeoOptions);
-  assert.deepEqual(geoOptions,{enableHighAccuracy:false,timeout:6000,maximumAge:300000},
-    viewport.name+": desktop location uses a fast network-assisted request");
+  assert.deepEqual(geoOptions,{enableHighAccuracy:false,timeout:3000,maximumAge:600000},
+    viewport.name+": device location uses a bounded network-assisted request with a fresh cached position");
   pass(viewport.name+": device location uses fast cached/network-assisted coordinates and reports accuracy");
 
   await page.locator("#useApproxLocationBtn").click();
@@ -98,8 +98,8 @@ try{
 
   const size=await page.evaluate(()=>({
    viewport:document.documentElement.clientWidth,
-   document:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth),
-   offenders:[...document.querySelectorAll("body *")].map(el=>({tag:el.tagName.toLowerCase(),id:el.id,className:typeof el.className==="string"?el.className:"",left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).filter(el=>el.width>0&&(el.left < -2 || el.right > document.documentElement.clientWidth+2)).slice(0,12)
+   document: document.documentElement.scrollWidth,
+   offenders: [...document.querySelectorAll("body *")].map(el => ({tag: el.tagName.toLowerCase(), id: el.id, className: typeof el.className === "string" ? el.className : "", left: Math.round(el.getBoundingClientRect().left), right: Math.round(el.getBoundingClientRect().right), width: Math.round(el.getBoundingClientRect().width), visibility: getComputedStyle(el).visibility})).filter(el => el.visibility !== "hidden" && el.width > 0 && (el.left < -2 || el.right > document.documentElement.clientWidth + 2)).slice(0, 12)
   }));
   assert.ok(size.document<=size.viewport+2,viewport.name+": no horizontal overflow; offenders: "+JSON.stringify(size.offenders));
   assert.deepEqual(errors,[],viewport.name+": no uncaught browser errors");

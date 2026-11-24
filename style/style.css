@@ -1328,3 +1328,39 @@ html.page-home-root {
     transform: none;
   }
 }
+
+/* Clearer market snapshot heading and chart mark. */
+.page-home .board-head h2 {
+  gap: 11px;
+  color: #173c2c;
+  font-size: clamp(1.24rem, 1.7vw, 1.48rem);
+  letter-spacing: -.025em;
+}
+.page-home .board-chart-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border: 1px solid #dfe9da;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f1f7ed, #e8f1e4);
+  color: #347b50;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+.page-home .board-chart-mark svg {
+  width: 20px;
+  height: 20px;
+}
+@media (max-width: 760px) {
+  .page-home .board-chart-mark {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    border-radius: 10px;
+  }
+  .page-home .board-chart-mark svg {
+    width: 18px;
+    height: 18px;
+  }
+}
