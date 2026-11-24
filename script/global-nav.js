@@ -3,6 +3,9 @@ import { hydrateIcons, icon } from "./icons.js";
 import { showFirstVisitWelcome } from "./onboarding.js";
 import { startMandiNavGuide } from "./mandi-nav-guide.js";
 
+const asyncFontStylesheet = document.querySelector('link[data-async-fonts]');
+if (asyncFontStylesheet) asyncFontStylesheet.media = "all";
+
 const LOGO_URL = new URL("../Images/Logo.webp", import.meta.url).href;
 
 const LINKS = [

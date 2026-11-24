@@ -45,6 +45,9 @@ async function main() {
     check(/<a class="skip-link" href="#main-content"/.test(html),
       `${file}: keyboard skip navigation`);
   }
+  check(/data-async-fonts/.test(home) && !/\sonload=/.test(home) &&
+    /link\[data-async-fonts\][\s\S]*?asyncFontStylesheet\.media = "all"/.test(globalNav),
+    "homepage font stylesheet avoids a CSP-blocked inline load handler");
 
   check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(weather),
     "weather.html: responsive viewport metadata");
