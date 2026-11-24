@@ -1,0 +1,204 @@
+/* Rate-GPT shared themes — Liquid Morph transition */
+:root {
+  color-scheme: light;
+  --theme-origin-x: 50vw;
+  --theme-origin-y: 40px;
+}
+.theme-toggle {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  min-height:40px; padding:0 12px; border:1px solid var(--line);
+  border-radius:999px; background:var(--surface); color:var(--forest);
+  font:700 .9rem/1 var(--font); white-space:nowrap;
+  box-shadow:0 2px 8px rgba(20,50,34,.06);
+  transition:background-color .35s ease,color .35s ease,border-color .35s ease,transform .2s ease;
+}
+.theme-toggle:hover { transform:translateY(-1px); background:var(--soft); }
+.theme-toggle > span:first-child { font-size:1.2rem; line-height:1; }
+@media(max-width:720px) {
+  .header-actions { gap:7px; }
+  .theme-toggle { min-height:40px; padding-inline:10px; }
+  .theme-toggle-label { display:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .theme-toggle { transition:none; }
+}
+
+/* Native View Transitions provide the expanding, softly blurred liquid reveal. */
+@supports (view-transition-name:root) {
+  html { view-transition-name:root; }
+  ::view-transition-group(root) { animation-duration:720ms; }
+  ::view-transition-old(root) { animation:theme-old .32s ease both; }
+  ::view-transition-new(root) {
+    animation:liquid-morph-in .72s cubic-bezier(.2,.78,.18,1) both;
+    transform-origin:var(--theme-origin-x) var(--theme-origin-y);
+  }
+  @keyframes liquid-morph-in {
+    from { clip-path:ellipse(0% 0% at var(--theme-origin-x) var(--theme-origin-y)); filter:blur(12px) brightness(1.12); }
+    55% { filter:blur(3px) brightness(1.03); }
+    to { clip-path:ellipse(150% 150% at var(--theme-origin-x) var(--theme-origin-y)); filter:blur(0) brightness(1); }
+  }
+  @keyframes theme-old { to { opacity:.82; } }
+}
+html[data-theme="light"] { color-scheme:light; }
+html[data-theme="dark"] {
+  color-scheme:dark;
+  --forest:#a6e2bd;
+  --green:#62c98d;
+  --ivory:#111a16;
+  --surface:#1b2821;
+  --gold:#f2bd61;
+  --ink:#e7f0e9;
+  --muted:#a5b5aa;
+  --line:#34483c;
+  --soft:#263a2e;
+  --warning:#f2c36d;
+  --error:#ff9388;
+  --control:#60786a;
+  --leaf:#a6e2bd;
+  --on-forest:#edf7ef;
+}
+html[data-theme="dark"] body {
+  background:var(--ivory);
+  color:var(--ink);
+  transition:background-color .45s ease,color .45s ease;
+}
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .site-footer,
+html[data-theme="dark"] .footer-help,
+html[data-theme="dark"] .lang-toggle,
+html[data-theme="dark"] .theme-toggle,
+html[data-theme="dark"] .site-nav,
+html[data-theme="dark"] .location-dialog,
+html[data-theme="dark"] .demo-dialog,
+html[data-theme="dark"] .welcome-dialog,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .finder-panel,
+html[data-theme="dark"] .results,
+html[data-theme="dark"] .results-table-wrap,
+html[data-theme="dark"] .table-wrap,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .filter-panel,
+html[data-theme="dark"] .toolbar,
+html[data-theme="dark"] .field select,
+html[data-theme="dark"] .field input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea {
+  background-color:var(--surface);
+  color:var(--ink);
+  border-color:var(--line);
+}
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .site-footer { border-color:var(--line); }
+html[data-theme="dark"] .brand,
+html[data-theme="dark"] .site-nav a,
+html[data-theme="dark"] .footer-nav a,
+html[data-theme="dark"] .footer-helpline,
+html[data-theme="dark"] .footer-source,
+html[data-theme="dark"] .footer-official-link { color:var(--forest); }
+html[data-theme="dark"] .brand-mark img { mix-blend-mode:normal; }
+html[data-theme="dark"] .site-nav a[aria-current="page"],
+html[data-theme="dark"] .site-nav a:hover,
+html[data-theme="dark"] .lang-toggle button[aria-pressed="true"] {
+  background:var(--soft); color:var(--forest);
+}
+html[data-theme="dark"] .lang-toggle button { color:var(--ink); }
+html[data-theme="dark"] .lang-toggle button[aria-pressed="true"] { background:var(--forest); color:#102219; }
+html[data-theme="dark"] .theme-toggle { color:var(--ink); }
+html[data-theme="dark"] .menu-toggle { background:var(--surface); color:var(--ink); border-color:var(--line); }
+html[data-theme="dark"] .site-nav { background:var(--surface); }
+html[data-theme="dark"] .footer-help { background:#202f27; }
+html[data-theme="dark"] .site-footer::before { opacity:.85; }
+html[data-theme="dark"] .btn {
+  background:var(--surface); color:var(--forest); border-color:var(--forest);
+}
+html[data-theme="dark"] .btn-primary {
+  background:#26784d; color:#f3fff6; border-color:#26784d;
+}
+html[data-theme="dark"] .btn:hover { background:var(--soft); }
+html[data-theme="dark"] .btn-primary:hover { background:#318b5c; }
+html[data-theme="dark"] select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea { color-scheme:dark; }
+html[data-theme="dark"] select:disabled,
+html[data-theme="dark"] input:disabled { background:#202d25; color:#91a398; }
+html[data-theme="dark"] .skip-link { background:#a6e2bd; color:#102219; }
+html[data-theme="dark"] :focus-visible { outline-color:#a6e2bd; }
+html[data-theme="dark"] .page-head,
+html[data-theme="dark"] .page-head h1,
+html[data-theme="dark"] .page-head h2,
+html[data-theme="dark"] .results-head,
+html[data-theme="dark"] .field > label,
+html[data-theme="dark"] .field-label,
+html[data-theme="dark"] .count,
+html[data-theme="dark"] .lede,
+html[data-theme="dark"] .sync,
+html[data-theme="dark"] .toolbar,
+html[data-theme="dark"] .mandi-help,
+html[data-theme="dark"] .recent-label { color:var(--ink); }
+html[data-theme="dark"] .page-home {
+  background:#111a16;
+  background-image:radial-gradient(ellipse at 78% 12%,rgba(35,91,61,.28),transparent 40%);
+}
+html[data-theme="dark"] .page-home .hero::before {
+  background:linear-gradient(0deg,rgba(17,26,22,.18),rgba(17,26,22,.9)),
+    url("../Images/Golden Hour Countryside Farm Panorama.webp") center bottom / cover no-repeat;
+  opacity:.3;
+}
+html[data-theme="dark"] .page-home .hero-copy h1,
+html[data-theme="dark"] .page-home .hero-copy h1::first-line { color:#e9f4ec; }
+html[data-theme="dark"] .page-home .hero-copy .lede,
+html[data-theme="dark"] .page-home .fine { color:#c1d1c6; }
+html[data-theme="dark"] .page-home .hero-kicker { background:#203c2c; color:#b8e8c7; }
+html[data-theme="dark"] .page-home .hero-secondary { background:#1c2a22; border-color:#3c5545; color:#e8f2eb; }
+html[data-theme="dark"] .page-home .board-row { background:#f4f8f2; color:#202b25; }
+html[data-theme="dark"] .page-home .board-row .crop-name small { color:#5b6860; }
+html[data-theme="dark"] .page-home .board-modal strong { color:#08613e; }
+html[data-theme="dark"] .page-home .board-modal small { color:#397052; }
+html[data-theme="dark"] .page-home .site-footer { background:#17231c; }
+html[data-theme="dark"] .nav-backdrop.is-visible { background:rgba(0,0,0,.62); }
+html[data-theme="dark"] .location-dialog,
+html[data-theme="dark"] .demo-dialog { background:var(--surface); color:var(--ink); border-color:var(--line); }
+html[data-theme="dark"] .location-dialog h2,
+html[data-theme="dark"] .demo-dialog h2 { color:var(--ink); }
+html[data-theme="dark"] .location-dialog::backdrop,
+html[data-theme="dark"] .demo-dialog::backdrop { background:rgba(0,0,0,.68); }
+html[data-theme="dark"] .skeleton { background:#2b4033; }
+html[data-theme="dark"] .board,
+html[data-theme="dark"] .on-forest { color:var(--on-forest); }
+html[data-theme="dark"] .table,
+html[data-theme="dark"] table,
+html[data-theme="dark"] tr,
+html[data-theme="dark"] th,
+html[data-theme="dark"] td { border-color:var(--line); }
+html[data-theme="dark"] .table thead,
+html[data-theme="dark"] thead { background:#23372b; color:#e5f1e8; }
+html[data-theme="dark"] tbody tr:nth-child(even) { background:#19271f; }
+html[data-theme="dark"] tbody tr:nth-child(odd) { background:#1d2c23; }
+html[data-theme="dark"] .chip,
+html[data-theme="dark"] .chips button,
+html[data-theme="dark"] .recent button { background:#23372b; color:#dcebe0; border-color:#405a48; }
+html[data-theme="dark"] .chip[aria-pressed="true"],
+html[data-theme="dark"] .chips button[aria-pressed="true"] { background:#285d3e; color:#fff; }
+html[data-theme="dark"] .error,
+html[data-theme="dark"] .notice { background:#352b22; color:#f4d8a6; border-color:#66503a; }
+
+@media(prefers-reduced-motion:no-preference) {
+  html[data-theme] body,
+  html[data-theme] .site-header,
+  html[data-theme] .site-footer,
+  html[data-theme] .site-nav,
+  html[data-theme] .footer-help,
+  html[data-theme] .btn,
+  html[data-theme] .card,
+  html[data-theme] input,
+  html[data-theme] select,
+  html[data-theme] textarea {
+    transition:background-color .42s ease,color .42s ease,border-color .42s ease,box-shadow .42s ease;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  ::view-transition-group(root),::view-transition-old(root),::view-transition-new(root) { animation:none !important; }
+}
