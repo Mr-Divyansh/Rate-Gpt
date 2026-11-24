@@ -234,8 +234,10 @@ async function main() {
     "mobile drawer resets inherited horizontal-nav grid placement");
   check(/\.site-nav\s*\{[\s\S]*?margin:0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
-  check(/\.site-nav\.is-open\s*\{[^}]*transform:translateX\(0\);\s*visibility:visible;/s.test(baseCss),
-    "mobile drawer has an explicit open state");
+  check(/\.site-nav\s*\{[\s\S]*?clip-path:\s*inset\(0 0 0 100%\);[\s\S]*?visibility:\s*hidden;/s.test(baseCss),
+    "closed mobile drawer is clipped in place to prevent horizontal overflow");
+  check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
+    "mobile drawer has an explicit visible state without off-canvas transforms");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 
