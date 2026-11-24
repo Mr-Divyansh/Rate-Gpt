@@ -9,12 +9,12 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="description" content="Explore government-reported mandi prices by crop and location. Compare minimum, maximum and modal rates with arrival dates and clear data context.">
   <title>Rate-GPT</title>
-  <!-- Keep the main desktop hero image discoverable before CSS and scripts finish. -->
-  <link rel="preload" as="image" href="/Images/farmer.webp" fetchpriority="high" media="(min-width: 761px)">
+  <!-- Load the large desktop landscape early so the hero paints as one composition. -->
+  <link rel="preload" as="image" href="/Images/Golden Hour Countryside Farm Panorama.webp" fetchpriority="high" media="(min-width: 761px)">
   <!-- Load optional brand fonts without blocking the first text paint on slow mobile networks. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet" media="print" data-async-fonts>
   <noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/style.css?v=home-polish-20261124b">
@@ -68,7 +68,7 @@
         <p class="fine"><span class="trust-mark" aria-hidden="true">✓</span><span data-i18n="home.fine">Prices are in ₹ per quintal. They are recorded sales, not offers.</span></p>
       </div>
 
-      <img class="hero-farmer" src="Images/farmer.webp" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
+      <img class="hero-farmer" src="/Images/Indian Farmer Using Rate-GPT Tablet.webp" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
 
       <section class="board on-forest" id="rateBoard" aria-labelledby="boardTitle" aria-busy="true">
         <header class="board-head">

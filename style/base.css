@@ -213,11 +213,11 @@ select:focus-visible, input:focus-visible { outline: 3px solid var(--forest); ou
     padding:88px 20px 24px; display:flex; flex-direction:column;
     align-items:stretch; justify-content:flex-start; gap:6px;
     background:#fff; box-shadow:-18px 0 48px rgba(16,48,32,.16);
-    transform:translateX(105%); visibility:hidden;
-    transition:transform .25s ease,visibility .25s ease;
+    clip-path:inset(0 0 0 100%); visibility:hidden;
+    transition:clip-path .25s ease,visibility .25s ease;
     overflow-y:auto; overscroll-behavior:contain;
   }
-  .site-nav.is-open { transform:translateX(0); visibility:visible; }
+  .site-nav.is-open { clip-path:inset(0); visibility:visible; }
   .site-nav a {
     flex:0 0 auto; width:100%; min-height:48px; justify-content:flex-start;
     padding:10px 14px; font-size:1rem; line-height:1.25;
@@ -569,11 +569,11 @@ body > main {
     padding: 88px 20px 24px; display: flex; flex-direction: column;
     align-items: stretch; justify-content: flex-start; gap: 6px;
     background: #fff; box-shadow: -18px 0 48px rgba(16,48,32,.16);
-    transform: translateX(105%); visibility: hidden;
-    transition: transform .25s ease, visibility .25s ease;
+    clip-path: inset(0 0 0 100%); visibility: hidden;
+    transition: clip-path .25s ease, visibility .25s ease;
     overflow-y: auto; overscroll-behavior: contain;
   }
-  .site-nav.is-open { transform: translateX(0); visibility: visible; }
+  .site-nav.is-open { clip-path: inset(0); visibility: visible; }
   .site-nav a {
     flex: 0 0 auto; width: 100%; min-height: 48px; justify-content: flex-start;
     padding: 10px 14px; font-size: 1rem; line-height: 1.25;

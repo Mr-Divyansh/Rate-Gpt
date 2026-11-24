@@ -45,6 +45,9 @@ async function main() {
     check(/<a class="skip-link" href="#main-content"/.test(html),
       `${file}: keyboard skip navigation`);
   }
+  check(/data-async-fonts/.test(home) && !/\sonload=/.test(home) &&
+    /link\[data-async-fonts\][\s\S]*?asyncFontStylesheet\.media = "all"/.test(globalNav),
+    "homepage font stylesheet avoids a CSP-blocked inline load handler");
 
   check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(weather),
     "weather.html: responsive viewport metadata");
@@ -234,8 +237,12 @@ async function main() {
     "mobile drawer resets inherited horizontal-nav grid placement");
   check(/\.site-nav\s*\{[\s\S]*?margin:0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
-  check(/\.site-nav\.is-open\s*\{[^}]*transform:translateX\(0\);\s*visibility:visible;/s.test(baseCss),
-    "mobile drawer has an explicit open state");
+  check(/\.site-nav\s*\{[\s\S]*?clip-path:\s*inset\(0 0 0 100%\);[\s\S]*?visibility:\s*hidden;/s.test(baseCss),
+    "closed mobile drawer is clipped in place to prevent horizontal overflow");
+  check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
+    "mobile drawer has an explicit visible state without off-canvas transforms");
+  check(/@media\s*\(max-width:\s*760px\)[\s\S]*?\.page-home\s+\.hero-farmer\s*\{[^}]*top:\s*150px;[\s\S]*?right:\s*-3%;/s.test(homeCss),
+    "mobile farmer artwork stays within the viewport edge");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 

@@ -1271,3 +1271,324 @@
     margin-top: 6px;
   }
 }
+
+/* Premium tutorial layout: pair the existing farmer artwork with an editorial,
+   easy-to-scan lesson while keeping every screen's copy and flow unchanged. */
+.onboarding-dialog:has(.onboarding-card) {
+  width: min(94vw, 840px);
+  max-width: 840px;
+  max-height: min(90dvh, 760px);
+  border: 1px solid rgba(228, 238, 225, .9);
+  border-radius: 30px;
+  background: #f7f8f2;
+  box-shadow: 0 34px 100px rgba(5, 28, 17, .34), 0 8px 26px rgba(5, 28, 17, .14);
+}
+.onboarding-dialog:has(.onboarding-card--solution) {
+  max-height: min(90dvh, 680px);
+}
+.onboarding-card {
+  display: grid;
+  grid-template-columns: minmax(215px, .82fr) minmax(0, 1.18fr);
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  height: auto;
+  min-height: min(620px, 82dvh);
+  max-height: min(90dvh, 760px);
+  padding: 18px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #fffefa, #f3f6ee);
+  text-align: left;
+}
+.onboarding-card .onboarding-art-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(240, 222, 169, .32);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 54% 26%, rgba(245, 204, 119, .9) 0 11%, transparent 11.5%),
+    radial-gradient(ellipse at 0% 100%, rgba(174, 202, 128, .28) 0 32%, transparent 32.5%),
+    linear-gradient(160deg, #0d3d2c 0%, #145c40 57%, #0b3427 100%);
+}
+.onboarding-card .onboarding-art-wrap::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: repeating-linear-gradient(164deg, transparent 0 34px, rgba(240, 247, 220, .045) 35px 36px);
+  content: "";
+}
+.onboarding-card .onboarding-art-wrap::after {
+  position: absolute;
+  z-index: -1;
+  right: -24%;
+  bottom: -19%;
+  left: -24%;
+  height: 45%;
+  border-top: 1px solid rgba(244, 224, 172, .38);
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, rgba(182, 198, 123, .34), rgba(8, 41, 29, .72));
+  content: "";
+}
+.onboarding-dialog .onboarding-card .onboarding-art {
+  position: relative;
+  z-index: 1;
+  width: min(92%, 310px) !important;
+  max-width: 310px !important;
+  height: min(470px, 72dvh) !important;
+  max-height: 470px !important;
+  object-position: center bottom;
+  filter: drop-shadow(0 18px 22px rgba(1, 23, 14, .3));
+}
+.onboarding-card .onboarding-copy {
+  align-self: center;
+  align-items: flex-start;
+  justify-self: stretch;
+  width: 100%;
+  max-width: none;
+  max-height: 100%;
+  padding: 18px 22px 18px 30px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: left;
+  scrollbar-color: #9ab99f transparent;
+  scrollbar-width: thin;
+}
+.onboarding-card .onboarding-progress {
+  margin-bottom: 12px;
+}
+.onboarding-card .onboarding-progress-meta {
+  color: #52715c;
+  font-size: .66rem;
+  letter-spacing: .12em;
+}
+.onboarding-card .onboarding-progress-track {
+  height: 7px;
+  background: #e3e9dc;
+}
+.onboarding-card .onboarding-progress-track span {
+  background: linear-gradient(90deg, #176c49, #86af63);
+}
+.onboarding-card .onboarding-eyebrow {
+  margin-bottom: 9px;
+  color: #8a6428;
+  font-size: .68rem;
+  letter-spacing: .13em;
+}
+.onboarding-card .onboarding-copy h2 {
+  max-width: 520px;
+  margin-bottom: 10px;
+  color: #153f2d;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  line-height: 1.12;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+.onboarding-card .onboarding-message {
+  max-width: 520px;
+  color: #52635a;
+  font-size: .92rem;
+  line-height: 1.55;
+}
+.onboarding-card .onboarding-benefits,
+.onboarding-card .onboarding-solution-points {
+  gap: 9px;
+  margin-top: 16px;
+}
+.onboarding-card .onboarding-benefits li,
+.onboarding-card .onboarding-solution-points li {
+  min-height: 52px;
+  padding: 11px 13px 11px 40px;
+  border: 1px solid rgba(32, 88, 59, .1);
+  border-left: 3px solid #c99a4d;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .86);
+  color: #40554a;
+  box-shadow: 0 4px 12px rgba(17, 61, 38, .045);
+  font-size: .83rem;
+  line-height: 1.42;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.onboarding-card .onboarding-benefits li:hover,
+.onboarding-card .onboarding-solution-points li:hover {
+  transform: translateX(2px);
+  box-shadow: 0 7px 16px rgba(17, 61, 38, .09);
+}
+.onboarding-card .onboarding-benefits li::before,
+.onboarding-card .onboarding-solution-points li::before {
+  top: 50%;
+  left: 13px;
+  width: 19px;
+  height: 19px;
+  background: #e5f0e2;
+  color: #176c49;
+  transform: translateY(-50%);
+}
+.onboarding-card .onboarding-assistant-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid #8eaf72;
+  border-radius: 0 10px 10px 0;
+  background: rgba(230, 239, 224, .72);
+  color: #416148;
+  font-size: .8rem;
+  line-height: 1.45;
+}
+.onboarding-card .onboarding-actions {
+  gap: 10px;
+  margin-top: 20px;
+}
+.onboarding-card .onboarding-actions--single {
+  width: 100%;
+  max-width: 360px;
+  margin: 16px 0 0;
+}
+.onboarding-card .onboarding-actions .btn {
+  min-height: 48px;
+  border-radius: 13px;
+}
+.onboarding-card .onboarding-view,
+.onboarding-card .onboarding-actions--single .btn {
+  box-shadow: 0 8px 20px rgba(15, 98, 64, .18);
+}
+.onboarding-card .onboarding-skip {
+  border: 1px solid rgba(36, 83, 56, .19);
+  background: rgba(255, 255, 255, .72);
+  color: #365845;
+}
+.onboarding-card .onboarding-note {
+  margin-top: 14px;
+  color: #718077;
+  font-size: .78rem;
+}
+.onboarding-card .onboarding-actions .btn:focus-visible {
+  outline: 3px solid #c99a4d;
+  outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .onboarding-dialog:has(.onboarding-card) {
+    width: min(94vw, 520px);
+    max-width: 520px;
+    max-height: min(91dvh, 780px);
+    border-radius: 24px;
+  }
+  .onboarding-dialog:has(.onboarding-card--solution) {
+    max-height: min(91dvh, 680px);
+  }
+  .onboarding-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 132px auto;
+    align-content: start;
+    gap: 0;
+    min-height: 0;
+    max-height: min(91dvh, 780px);
+    padding: 12px;
+    overflow-y: auto;
+  }
+  .onboarding-card .onboarding-art-wrap {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    height: 132px;
+    border-radius: 17px;
+  }
+  .onboarding-dialog .onboarding-card .onboarding-art {
+    width: min(52vw, 188px) !important;
+    max-width: 188px !important;
+    height: 132px !important;
+    max-height: 132px !important;
+  }
+  .onboarding-card .onboarding-copy {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    max-height: none;
+    padding: 18px 8px 10px;
+    overflow: visible;
+  }
+  .onboarding-card .onboarding-progress {
+    margin-bottom: 9px;
+  }
+  .onboarding-card .onboarding-copy h2 {
+    font-size: clamp(1.3rem, 5.2vw, 1.65rem);
+  }
+  .onboarding-card .onboarding-message {
+    font-size: .86rem;
+    line-height: 1.48;
+  }
+  .onboarding-card .onboarding-benefits,
+  .onboarding-card .onboarding-solution-points {
+    gap: 7px;
+    margin-top: 11px;
+  }
+  .onboarding-card .onboarding-benefits li,
+  .onboarding-card .onboarding-solution-points li {
+    min-height: 48px;
+    padding: 9px 10px 9px 36px;
+    font-size: .79rem;
+  }
+  .onboarding-card .onboarding-benefits li::before,
+  .onboarding-card .onboarding-solution-points li::before {
+    left: 10px;
+    width: 17px;
+    height: 17px;
+  }
+  .onboarding-card .onboarding-assistant-note {
+    margin-top: 9px;
+    font-size: .76rem;
+  }
+  .onboarding-card .onboarding-actions {
+    margin-top: 15px;
+  }
+  .onboarding-card .onboarding-actions--single {
+    max-width: none;
+    margin-top: 11px;
+  }
+  .onboarding-card .onboarding-note {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .onboarding-card {
+    padding: 9px;
+  }
+  .onboarding-card .onboarding-copy {
+    padding: 15px 6px 8px;
+  }
+  .onboarding-card .onboarding-benefits li,
+  .onboarding-card .onboarding-solution-points li {
+    padding-right: 8px;
+    font-size: .76rem;
+  }
+}
+
+@media (max-height: 620px) and (min-width: 721px) {
+  .onboarding-card {
+    min-height: 0;
+    grid-template-columns: minmax(180px, .72fr) minmax(0, 1.28fr);
+    padding: 12px;
+  }
+  .onboarding-card .onboarding-copy {
+    padding-block: 8px;
+  }
+  .onboarding-dialog .onboarding-card .onboarding-art {
+    height: min(420px, 82dvh) !important;
+    max-height: 420px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-card .onboarding-benefits li,
+  .onboarding-card .onboarding-solution-points li {
+    transition: none;
+  }
+}

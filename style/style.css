@@ -40,7 +40,7 @@
   height: 35%;
   background:
     linear-gradient(0deg, rgba(247, 248, 241, .12), rgba(247, 248, 241, .82)),
-    url("../Images/Farmer Marketplace Sunrise Banner.webp") left bottom / 130% auto no-repeat;
+    url("../Images/Golden Hour Countryside Farm Panorama.webp") center bottom / cover no-repeat;
   opacity: .48;
   pointer-events: none;
 }
@@ -872,7 +872,7 @@ html.page-home-root {
   height: 28%;
   background:
     linear-gradient(0deg, rgba(247, 248, 241, .14), rgba(247, 248, 241, .86)),
-    url("../Images/Farmer Marketplace Sunrise Banner.webp") center bottom / cover no-repeat;
+    url("../Images/Golden Hour Countryside Farm Panorama.webp") center bottom / cover no-repeat;
   opacity: .42;
 }
 
@@ -1123,7 +1123,7 @@ html.page-home-root {
     opacity: .27;
     background:
       linear-gradient(0deg, rgba(247, 248, 241, .1), rgba(247, 248, 241, .92)),
-      url("../Images/Farmer Marketplace Sunrise Banner.webp") center bottom / cover no-repeat;
+      url("../Images/Golden Hour Countryside Farm Panorama.webp") center bottom / cover no-repeat;
   }
 
   .page-home .hero-copy {
@@ -1363,4 +1363,492 @@ html.page-home-root {
     width: 18px;
     height: 18px;
   }
+}
+
+/* ---------- premium landscape homepage ---------- */
+.page-home {
+  --home-forest: #0b3d2e;
+  --home-green: #126b45;
+  --home-leaf: #20a45a;
+  --home-cream: #f8f8ef;
+  background: var(--home-cream) url("../Images/Golden Hour Countryside Farm Panorama.webp") center top / 100vw auto no-repeat;
+}
+
+.page-home .site-footer { margin-top: 0; }
+
+.page-home .site-header {
+  top: 12px;
+  width: min(calc(100% - clamp(32px, 8vw, 120px)), 1480px);
+  min-height: 68px;
+  margin: 12px auto 0;
+  border: 1px solid rgba(255, 255, 255, .86);
+  border-bottom: 1px solid rgba(255, 255, 255, .86);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 12px 36px rgba(11, 61, 46, .12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.page-home .header-inner {
+  width: 100%;
+  max-width: none;
+  min-height: 66px;
+  margin: 0;
+  padding: 7px clamp(14px, 2.2vw, 32px);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(10px, 1.8vw, 26px);
+}
+
+.page-home .brand { gap: 9px; }
+.page-home .brand-mark { width: 40px; height: 38px; }
+.page-home .brand-mark img { width: 66px; height: 66px; left: -13px; top: -5px; }
+.page-home .brand-text strong { font-size: 1.16rem; }
+.page-home .brand-text small { font-size: .69rem; }
+.page-home .site-nav { justify-content: center; gap: 2px; }
+.page-home .site-nav a {
+  min-height: 40px;
+  padding-inline: clamp(7px, .9vw, 13px);
+  border-radius: 999px;
+  font-size: clamp(.78rem, .9vw, .9rem);
+  transition: background-color .18s ease, color .18s ease, transform .18s ease;
+}
+.page-home .site-nav a:hover { background: #edf5e9; color: var(--home-forest); }
+.page-home .site-nav a[aria-current="page"] {
+  background: var(--home-forest);
+  box-shadow: 0 5px 14px rgba(11, 61, 46, .2);
+  color: #fff;
+}
+.page-home .header-actions { gap: 8px; }
+.page-home .lang-toggle {
+  padding: 2px;
+  border-color: #dce8df;
+  background: rgba(255, 255, 255, .78);
+}
+.page-home .lang-toggle button {
+  min-width: 38px;
+  min-height: 32px;
+  padding-inline: 8px;
+  font-size: .82rem;
+}
+.page-home .menu-toggle {
+  border-color: #dce8df;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.page-home #main-content { min-height: 0; }
+.page-home .hero.wrap {
+  width: min(calc(100% - clamp(40px, 7vw, 112px)), 1480px);
+  min-height: max(580px, calc(100svh - 96px));
+  padding-block: clamp(34px, 5vh, 68px);
+  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  gap: clamp(22px, 3.5vw, 52px);
+}
+
+.page-home .hero::before {
+  inset: 0 calc((100vw - 100%) / -2);
+  height: auto;
+  background:
+    linear-gradient(90deg, rgba(248, 248, 239, .94) 0%, rgba(248, 248, 239, .84) 34%, rgba(248, 248, 239, .2) 67%, rgba(11, 61, 46, .08) 100%),
+    linear-gradient(0deg, rgba(11, 61, 46, .2), transparent 38%),
+    url("../Images/Golden Hour Countryside Farm Panorama.webp") center 55% / cover no-repeat;
+  opacity: 1;
+}
+
+.page-home .hero::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: auto calc((100vw - 100%) / -2) 0;
+  height: clamp(58px, 9vw, 104px);
+  background:
+    radial-gradient(ellipse 54% 92% at 18% 150%, rgba(6, 70, 38, .9) 0 70%, transparent 71%),
+    radial-gradient(ellipse 56% 105% at 92% 160%, rgba(18, 107, 69, .88) 0 68%, transparent 69%),
+    linear-gradient(180deg, transparent 0 53%, rgba(9, 77, 47, .2) 100%);
+  pointer-events: none;
+}
+
+.page-home .hero-copy {
+  z-index: 2;
+  max-width: 620px;
+  gap: clamp(15px, 2.2vh, 23px);
+}
+.page-home .hero-kicker {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid rgba(32, 164, 90, .12);
+  border-radius: 999px;
+  background: rgba(234, 245, 232, .94);
+  color: var(--home-forest);
+  font-size: .88rem;
+}
+.page-home .hero-copy h1 {
+  max-width: 14ch;
+  color: #102c22;
+  font-size: clamp(3rem, 5vw, 5rem);
+  line-height: .99;
+  letter-spacing: -.05em;
+  text-wrap: pretty;
+}
+.page-home .hero-copy h1::after {
+  content: "";
+  display: block;
+  width: clamp(72px, 8vw, 112px);
+  height: 5px;
+  margin-top: .16em;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--home-leaf), rgba(32, 164, 90, .15));
+}
+.page-home .hero-copy .lede {
+  max-width: 44ch;
+  color: #42584d;
+  font-size: clamp(1.02rem, 1.2vw, 1.16rem);
+  line-height: 1.58;
+}
+.page-home .hero-actions { gap: 12px; }
+.page-home .hero-actions .btn {
+  min-height: 54px;
+  padding-inline: clamp(17px, 2vw, 25px);
+  border: 1px solid var(--home-green);
+  border-radius: 999px;
+  background: var(--home-green);
+  box-shadow: 0 9px 22px rgba(18, 107, 69, .2);
+  color: #fff;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.page-home .hero-actions .btn:hover {
+  background: var(--home-forest);
+  box-shadow: 0 13px 28px rgba(11, 61, 46, .24);
+  transform: translateY(-2px);
+}
+.page-home .hero-actions .hero-secondary {
+  min-width: 0;
+  border-color: rgba(11, 61, 46, .16);
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 7px 20px rgba(11, 61, 46, .09);
+  color: var(--home-forest);
+}
+.page-home .hero-actions .hero-secondary:hover {
+  border-color: rgba(11, 61, 46, .28);
+  background: #fff;
+}
+.page-home .hero-actions .hero-secondary .play-mark {
+  background: var(--home-forest);
+  color: #fff;
+}
+.page-home .fine {
+  max-width: 50ch;
+  color: #31483d;
+  font-size: .88rem;
+  line-height: 1.45;
+}
+.page-home .trust-mark { background: var(--home-forest); }
+.page-home .hero-farmer {
+  --farmer-opacity: 1;
+  z-index: 1;
+  right: 14%;
+  bottom: -1%;
+  width: min(52vw, 720px);
+  height: 92%;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 1;
+  filter: drop-shadow(0 18px 26px rgba(12, 45, 31, .17));
+}
+
+.page-home .board {
+  z-index: 3;
+  width: min(100%, 500px);
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(11, 61, 46, .12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 25px 64px rgba(11, 61, 46, .2);
+  color: #17352b;
+}
+.page-home .board-head {
+  padding: 16px 21px 13px;
+  background: linear-gradient(112deg, #0b3d2e, #126b45);
+}
+.page-home .board-head h2 {
+  gap: 11px;
+  color: #fff;
+  font-size: clamp(1.22rem, 1.7vw, 1.5rem);
+  letter-spacing: -.025em;
+}
+.page-home .board-chart-mark {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border-color: rgba(255, 255, 255, .22);
+  background: rgba(255, 255, 255, .12);
+  color: #c8ee95;
+}
+.page-home .board-meta {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, .78);
+  font-size: .79rem;
+}
+.page-home .board-rows { gap: 5px; padding: 8px 12px 10px; }
+.page-home .board-row {
+  min-height: 58px;
+  grid-template-columns: minmax(0, 1.18fr) minmax(62px, .65fr) auto;
+  gap: 11px;
+  padding: 6px 10px;
+  border: 1px solid #e8eee8;
+  border-radius: 12px;
+  background: #fff;
+  transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.page-home .board-row:hover {
+  transform: translateY(-1px);
+  border-color: #c9ddcd;
+  background: #f8fbf7;
+}
+.page-home .board-crop {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+.page-home .board-crop-art {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e5eee3;
+  border-radius: 10px;
+  background: #f1f7ed;
+  color: #43835a;
+}
+.page-home .board-crop-art img {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  object-fit: contain;
+}
+.page-home .board-crop-art svg { width: 22px; height: 22px; }
+.page-home .board-row .crop-name { min-width: 0; }
+.page-home .board-row .crop-name strong {
+  overflow: hidden;
+  color: #17352b;
+  font-size: .96rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page-home .board-row .crop-name small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #68786d;
+  font-size: .69rem;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+.page-home .board-row .range-track { height: 4px; background: #e4eee5; }
+.page-home .board-row .range-fill { background: linear-gradient(90deg, #62b47a, #208050); }
+.page-home .board-row .range-modal {
+  background: #20a45a;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 2px #20a45a;
+}
+.page-home .board-modal strong {
+  color: #0b5a3b;
+  font-size: clamp(1.15rem, 1.8vw, 1.58rem);
+  letter-spacing: -.035em;
+}
+.page-home .board-modal small { color: #64756d; font-size: .68rem; }
+.page-home .board-trend {
+  min-height: 38px;
+  margin: 0 20px 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e8eee8;
+  color: #64756d;
+}
+.page-home .board-trend p { color: #64756d; font-size: .76rem; }
+.page-home .board-status { color: #52645a; }
+.page-home .board-foot {
+  margin: 0;
+  padding: 10px 20px;
+  border: 0;
+  background: var(--home-forest);
+}
+.page-home .board-foot a {
+  min-height: 35px;
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 700;
+}
+.page-home .board-foot a:hover { color: #e5f4e9; }
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .page-home .hero.wrap {
+    width: min(calc(100% - 44px), 1020px);
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: 20px;
+  }
+  .page-home .hero-copy h1 { font-size: clamp(2.5rem, 4.8vw, 3.7rem); }
+  .page-home .hero-farmer { right: 22%; width: 48vw; opacity: .8; }
+  .page-home .board-head { padding: 17px 17px 13px; }
+  .page-home .board-rows { padding-inline: 10px; }
+  .page-home .board-row { gap: 8px; padding-inline: 8px; }
+  .page-home .board-crop { grid-template-columns: 36px minmax(0, 1fr); gap: 7px; }
+  .page-home .board-crop-art { width: 36px; height: 36px; border-radius: 10px; }
+}
+
+@media (max-width: 1000px) and (min-width: 901px) {
+  .page-home .header-inner { gap: 8px; padding-inline: 18px; }
+  .page-home .site-nav a { padding-inline: 6px; font-size: .78rem; }
+}
+
+@media (max-width: 900px) {
+  .page-home .site-header {
+    width: calc(100% - 28px);
+    margin-top: 10px;
+    border-radius: 24px;
+  }
+  .page-home .header-inner {
+    min-height: 60px;
+    padding: 6px 13px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .page-home .brand-text small { display: none; }
+  .page-home .header-actions { gap: 7px; }
+  .page-home .site-nav { gap: 4px; }
+  .page-home .site-nav a[aria-current="page"] {
+    background: #edf5e9;
+    box-shadow: inset 3px 0 0 var(--home-green);
+    color: var(--home-forest);
+  }
+}
+
+@media (max-width: 760px) {
+  .page-home .hero.wrap {
+    width: min(calc(100% - 32px), 620px);
+    min-height: 0;
+    padding-block: 27px 18px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 21px;
+  }
+  .page-home .hero::before {
+    background:
+      linear-gradient(180deg, rgba(248, 248, 239, .92) 0%, rgba(248, 248, 239, .78) 44%, rgba(248, 248, 239, .22) 100%),
+      linear-gradient(0deg, rgba(11, 61, 46, .18), transparent 44%),
+      url("../Images/Golden Hour Countryside Farm Panorama.webp") 59% center / cover no-repeat;
+  }
+  .page-home .hero-copy { max-width: 560px; gap: 13px; }
+  .page-home .hero-kicker { min-height: 34px; padding: 7px 11px; font-size: .81rem; }
+  .page-home .hero-copy h1 {
+    max-width: 15ch;
+    font-size: clamp(2.45rem, 8vw, 3.4rem);
+    line-height: 1;
+  }
+  .page-home .hero-copy .lede { max-width: 52ch; font-size: .98rem; }
+  .page-home .hero-actions { width: 100%; gap: 9px; }
+  .page-home .hero-actions .btn { min-height: 48px; padding-inline: 15px; font-size: .88rem; }
+  .page-home .hero-actions .hero-secondary { min-width: 0; }
+  .page-home .fine { font-size: .78rem; }
+  .page-home .hero-farmer {
+    --farmer-opacity: .26;
+    top: 150px;
+    right: -3%;
+    bottom: auto;
+    width: min(76vw, 390px);
+    height: 280px;
+    object-position: right center;
+    opacity: .26;
+    filter: saturate(.8);
+  }
+  .page-home .board {
+    width: 100%;
+    max-height: none;
+    border-radius: 18px;
+    box-shadow: 0 15px 34px rgba(11, 61, 46, .15);
+  }
+  .page-home .board-head { padding: 16px 16px 12px; }
+  .page-home .board-rows { gap: 6px; padding: 9px 10px 12px; }
+  .page-home .board-row {
+    min-height: 58px;
+    grid-template-columns: minmax(0, 1fr) minmax(38px, .46fr) auto;
+    gap: 7px;
+    padding: 7px 8px;
+  }
+  .page-home .board-crop { grid-template-columns: 36px minmax(0, 1fr); gap: 7px; }
+  .page-home .board-crop-art { width: 36px; height: 36px; border-radius: 10px; }
+  .page-home .board-row .crop-name strong { font-size: .85rem; }
+  .page-home .board-row .crop-name small { font-size: .64rem; }
+  .page-home .board-modal strong { font-size: 1.08rem; }
+  .page-home .board-trend { margin-inline: 14px; }
+  .page-home .board-foot { display: block; padding: 10px 15px; }
+}
+
+@media (max-width: 460px) {
+  .page-home .site-header { width: calc(100% - 20px); }
+  .page-home .brand-mark { width: 36px; height: 36px; }
+  .page-home .brand-text strong { font-size: 1.05rem; }
+  .page-home .header-actions { gap: 5px; }
+  .page-home .lang-toggle button { min-width: 31px; min-height: 30px; padding-inline: 5px; font-size: .75rem; }
+  .page-home .menu-toggle { width: 39px; height: 39px; padding: 8px; }
+  .page-home .hero.wrap { width: calc(100% - 24px); padding-top: 23px; gap: 18px; }
+  .page-home .hero-copy h1 { max-width: 14ch; font-size: clamp(2.25rem, 9.2vw, 2.75rem); }
+  .page-home .hero-actions .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 8px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+  .page-home .hero-actions .hero-secondary .play-mark { width: 21px; height: 21px; flex-basis: 21px; }
+  .page-home .board-head { padding-inline: 13px; }
+  .page-home .board-head h2 { gap: 8px; font-size: 1.05rem; }
+  .page-home .board-chart-mark { width: 30px; height: 30px; flex-basis: 30px; }
+  .page-home .board-row { grid-template-columns: minmax(0, 1fr) minmax(32px, .38fr) auto; gap: 5px; }
+  .page-home .board-crop { grid-template-columns: 31px minmax(0, 1fr); gap: 6px; }
+  .page-home .board-crop-art { width: 31px; height: 31px; border-radius: 9px; }
+  .page-home .board-row .crop-name strong { font-size: .79rem; }
+  .page-home .board-row .crop-name small { font-size: .6rem; }
+  .page-home .board-modal strong { font-size: 1rem; }
+  .page-home .board-modal small { font-size: .61rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-home .hero-kicker,
+  .page-home .hero-copy h1,
+  .page-home .hero-copy .lede,
+  .page-home .hero-actions,
+  .page-home .hero-copy .fine {
+    animation: home-fade-up .58s cubic-bezier(.16, 1, .3, 1) both;
+  }
+  .page-home .hero-kicker { animation-delay: .03s; }
+  .page-home .hero-copy h1 { animation-delay: .08s; }
+  .page-home .hero-copy .lede { animation-delay: .14s; }
+  .page-home .hero-actions { animation-delay: .2s; }
+  .page-home .hero-copy .fine { animation-delay: .25s; }
+  .page-home .hero-farmer { animation: home-farmer-in .8s ease-out both; }
+  .page-home .board { animation: home-fade-up .65s .14s cubic-bezier(.16, 1, .3, 1) both; }
+  @keyframes home-fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes home-farmer-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: var(--farmer-opacity, 1); transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-home .site-nav a,
+  .page-home .hero-actions .btn,
+  .page-home .board-row { transition: none; }
+  .page-home .hero-actions .btn:hover,
+  .page-home .board-row:hover { transform: none; }
 }
