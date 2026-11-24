@@ -1547,7 +1547,7 @@ html.page-home-root {
 .page-home .hero-farmer {
   --farmer-opacity: 1;
   z-index: 1;
-  right: 14%;
+  right: 18%;
   bottom: -1%;
   width: min(52vw, 720px);
   height: 92%;
@@ -1558,7 +1558,7 @@ html.page-home-root {
 }
 
 .page-home .board {
-  z-index: 3;
+  z-index: 4;
   width: min(100%, 500px);
   max-height: none;
   padding: 0;
