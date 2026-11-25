@@ -1,7 +1,7 @@
 {
   "name": "Rate-GPT — Mandi Price Discovery",
   "short_name": "Rate-GPT",
-  "description": "Government-reported mandi price discovery and farmer decision tools.",
+  "description": "Government-reported mandi price discovery for farmers.",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",

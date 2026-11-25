@@ -1,10 +1,10 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 
 const pages = [
   ["index.html", "https://rate-gpt.vercel.app/"],
   ["mandi-prices.html", "https://rate-gpt.vercel.app/mandi-prices.html"],
-  ["decision-tools.html", "https://rate-gpt.vercel.app/decision-tools.html"],
-  ["farmer-dashboard.html", "https://rate-gpt.vercel.app/farmer-dashboard.html"],
   ["about.html", "https://rate-gpt.vercel.app/about.html"],
   ["contact.html", "https://rate-gpt.vercel.app/contact.html"],
   ["weather.html", "https://rate-gpt.vercel.app/weather.html"],
@@ -27,6 +27,25 @@ function check(condition: boolean, label: string) {
 
 async function main() {
   console.log("\nRate-GPT public-site metadata checks");
+
+  const htmlFiles = (await readdir(".")).filter((file) => file.endsWith(".html"));
+  for (const file of htmlFiles) {
+    const html = await readFile(file, "utf8");
+    const localReferences = [...html.matchAll(/(?:href|src)\s*=\s*["']([^"']+)["']/gi)]
+      .map((match) => match[1])
+      .filter((target) =>
+        target &&
+        !target.startsWith("#") &&
+        !/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(target),
+      );
+    for (const reference of localReferences) {
+      const path = decodeURIComponent(reference.split(/[?#]/, 1)[0]).replace(/^\/+/, "");
+      const exists =
+        existsSync(resolve(dirname(file), path)) ||
+        existsSync(resolve("public", path));
+      check(exists, `${file}: internal reference ${reference}`);
+    }
+  }
 
   for (const [file, canonical] of pages) {
     const html = await readFile(file, "utf8");

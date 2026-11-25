@@ -29,8 +29,6 @@ export default defineConfig(() => {
         input: {
           home: path.resolve(rootDir, "index.html"),
           mandiPrices: path.resolve(rootDir, "mandi-prices.html"),
-          decisionTools: path.resolve(rootDir, "decision-tools.html"),
-          farmerDashboard: path.resolve(rootDir, "farmer-dashboard.html"),
           about: path.resolve(rootDir, "about.html"),
           contact: path.resolve(rootDir, "contact.html"),
           weather: path.resolve(rootDir, "weather.html"),

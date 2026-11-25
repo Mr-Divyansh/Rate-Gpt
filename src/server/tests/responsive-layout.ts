@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -35,6 +35,7 @@ async function main() {
     readFile("style/mandi-nav-guide.css", "utf8"),
     readFile("script/home-market-preview.js", "utf8"),
     readFile("script/i18n.js", "utf8"),
+    readFile("public/service-worker.js", "utf8"),
   ]);
 
   const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
@@ -48,6 +49,17 @@ async function main() {
   check(/data-async-fonts/.test(home) && !/\sonload=/.test(home) &&
     /link\[data-async-fonts\][\s\S]*?asyncFontStylesheet\.media = "all"/.test(globalNav),
     "homepage font stylesheet avoids a CSP-blocked inline load handler");
+  check(["index.html", "mandi-prices.html", "weather.html", "about.html", "contact.html"].every(page =>
+    globalNav.includes(`"${page}"`)) &&
+    !/decision-tools|farmer-dashboard/.test(globalNav),
+    "shared navigation preserves the remaining pages and omits the retired tools");
+  check(homeCss.includes("border-radius: 0 0 50% 50% / 0 0 8% 8%") &&
+    /@media \(max-width: 1100px\) and \(min-width: 761px\)[\s\S]*?border-radius: 0 0 50% 50% \/ 0 0 6% 6%/.test(homeCss) &&
+    /@media \(max-width: 760px\)[\s\S]*?border-radius: 0 0 50% 50% \/ 0 0 4% 4%/.test(homeCss),
+    "homepage hero keeps its broad U-shaped edge treatment across desktop, tablet and mobile");
+  check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v2"') &&
+    serviceWorker.includes('if (url.pathname.startsWith("/api/")) return;'),
+    "service worker refreshes the shell cache while continuing to bypass live APIs");
 
   check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(weather),
     "weather.html: responsive viewport metadata");
