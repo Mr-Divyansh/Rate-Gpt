@@ -54,6 +54,33 @@ function languageToggle() {
   const sync = () => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === getLang())));
   sync(); onLangChange(sync); return group;
 }
+function themeToggle() {
+  const button = document.createElement("button");
+  button.className = "theme-toggle";
+  button.type = "button";
+  button.innerHTML = '<svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.2 15.1A8.3 8.3 0 0 1 8.9 3.8 8.4 8.4 0 1 0 20.2 15.1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="m16.5 4 .5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5.5-1.5Z" fill="currentColor"/></svg>';
+
+  const sync = () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    const language = getLang();
+    button.setAttribute("aria-pressed", String(dark));
+    button.setAttribute(
+      "aria-label",
+      dark
+        ? language === "hi" ? "लाइट थीम चालू करें" : "Switch to light theme"
+        : language === "hi" ? "डार्क थीम चालू करें" : "Switch to dark theme",
+    );
+    button.title = dark
+      ? language === "hi" ? "लाइट थीम" : "Light theme"
+      : language === "hi" ? "डार्क थीम" : "Dark theme";
+  };
+
+  button.addEventListener("click", event => window.rateGptToggleTheme(button, event));
+  document.addEventListener("rategpt:themechange", sync);
+  onLangChange(sync);
+  sync();
+  return button;
+}
 function renderHeader(header) {
   header.replaceChildren(); header.classList.add("has-mobile-drawer");
   const inner = document.createElement("div"); inner.className = "header-inner wrap";
@@ -64,7 +91,7 @@ function renderHeader(header) {
   const nav = document.createElement("nav"); nav.className = "site-nav"; nav.id = "primaryNavigation";
   nav.dataset.i18nAttr = "aria-label:nav.label"; LINKS.forEach(item => nav.append(navLink(item)));
   const actions = document.createElement("div"); actions.className = "header-actions";
-  actions.append(languageToggle(), toggle);
+  actions.append(languageToggle(), themeToggle(), toggle);
   inner.append(brand("brand"), nav, actions); header.append(inner);
   const backdrop = document.createElement("button"); backdrop.className = "nav-backdrop";
   backdrop.type = "button"; backdrop.tabIndex = -1; backdrop.setAttribute("aria-label", getLang()==="hi" ? "मेनू बंद करें" : "Close menu");
@@ -102,7 +129,7 @@ function renderHeader(header) {
       first.focus();
     }
   });
-  const mq = window.matchMedia("(min-width: 901px)");
+  const mq = window.matchMedia("(min-width: 1101px)");
   mq.addEventListener?.("change", e => { if (e.matches) close(); });
 }
 function renderFooter(footer) {

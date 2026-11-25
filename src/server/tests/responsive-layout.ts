@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, themeScript, themeCss, serviceWorker, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -25,6 +25,9 @@ async function main() {
     readFile("style/style.css", "utf8"),
     readFile("style/weather.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
+    readFile("public/script/theme.js", "utf8"),
+    readFile("style/theme.css", "utf8"),
+    readFile("public/service-worker.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
     readFile("script/weather.js", "utf8"),
     readFile("script/onboarding.js", "utf8"),
@@ -36,6 +39,11 @@ async function main() {
     readFile("script/home-market-preview.js", "utf8"),
     readFile("script/i18n.js", "utf8"),
   ]);
+  const sharedPageFiles = [
+    "index.html", "mandi-prices.html", "decision-tools.html", "farmer-dashboard.html",
+    "weather.html", "about.html", "contact.html", "privacy.html", "terms.html",
+  ];
+  const sharedPages = await Promise.all(sharedPageFiles.map(file => readFile(file, "utf8")));
 
   const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
 
@@ -48,6 +56,60 @@ async function main() {
   check(/data-async-fonts/.test(home) && !/\sonload=/.test(home) &&
     /link\[data-async-fonts\][\s\S]*?asyncFontStylesheet\.media = "all"/.test(globalNav),
     "homepage font stylesheet avoids a CSP-blocked inline load handler");
+  check(sharedPages.every(html =>
+    /<header class="site-header"/.test(html) &&
+    /src="\/script\/global-nav\.js"/.test(html)) &&
+    globalNav.includes("renderHeader(header)") &&
+    globalNav.includes("renderFooter(footer)") &&
+    globalNav.includes('window.matchMedia("(min-width: 1101px)")') &&
+    baseCss.includes("@media (min-width: 721px) and (max-width: 1100px)"),
+    "all pages render the same shared header and footer");
+  check(!/\.page-home\s+\.site-header\s*\{/.test(homeCss) &&
+    /html[\s\S]*\.page-home \.hero\.wrap \{\s*width:\s*100%;/.test(homeCss) &&
+    /\.page-home \.hero-farmer \{\s*z-index:\s*4;/.test(homeCss) &&
+    /display:\s*block;[\s\S]*position:\s*relative;[\s\S]*grid-row:\s*2;[\s\S]*opacity:\s*1;/.test(homeCss),
+    "homepage keeps shared navigation, full-bleed hero and a visible foreground farmer on mobile");
+  check(home.indexOf('src="/script/theme.js"') < home.indexOf('href="style/base.css"') &&
+    home.includes('href="style/theme.css"') &&
+    [prices, weather].every(html => html.includes('/script/theme.js') && html.includes('style/theme.css')) &&
+    themeScript.includes('window.localStorage.getItem(STORAGE_KEY)') &&
+    themeScript.includes('window.localStorage.setItem(STORAGE_KEY, theme)'),
+    "theme preference initializes before page styles and persists across page navigation");
+  check(globalNav.includes('className = "theme-toggle"') &&
+    globalNav.includes('window.rateGptToggleTheme(button, event)') &&
+    globalNav.includes("languageToggle(), themeToggle(), toggle") &&
+    themeScript.includes("event.clientX") &&
+    themeScript.includes("event.clientY"),
+    "reference-style theme button sits beside existing language and menu controls and uses its click origin");
+  check(themeCss.includes("::view-transition-new(root)") &&
+    themeCss.includes("clip-path: circle(0 at var(--theme-reveal-x) var(--theme-reveal-y))") &&
+    themeCss.includes("clip-path: circle(var(--theme-reveal-radius) at var(--theme-reveal-x) var(--theme-reveal-y))") &&
+    themeScript.includes('typeof startViewTransition !== "function"') &&
+    themeCss.includes("@media (prefers-reduced-motion: reduce)"),
+    "circular reveal covers the viewport with reduced-motion and unsupported-browser fallbacks");
+  check(themeCss.includes(':root[data-theme="dark"]') &&
+    themeCss.includes("--ivory: #090a0d;") &&
+    themeCss.includes("--forest: #d2b675;") &&
+    themeCss.includes("--gold: #e2bd73;") &&
+    !themeCss.includes("#303323") &&
+    themeCss.includes(".page-prices .price-card") &&
+    themeCss.includes(".page-weather .weather-result") &&
+    themeCss.includes(".page-home .board"),
+    "dark theme uses near-black graphite with restrained champagne accents and dedicated page data surfaces");
+  check(themeCss.includes(".page-home .board-row .range-fill") &&
+    themeCss.includes(".page-home .board-foot") &&
+    themeCss.includes("filter: grayscale(.88) sepia(.18) brightness(.92)") &&
+    themeCss.includes(".page-home .hero-copy h1::after") &&
+    themeCss.includes("rgba(226, 189, 115, .15)") &&
+    themeCss.includes(".page-home .board-crop-art img"),
+    "dark homepage recolors remaining green data accents and tones the hero image to a warm charcoal");
+  check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v12"') &&
+    serviceWorker.includes('CSS_REQUEST("/style/base.css")') &&
+    serviceWorker.includes('CSS_REQUEST("/style/theme.css")') &&
+    serviceWorker.includes('"/script/theme.js"') &&
+    serviceWorker.includes('hasExpectedContentType = response.headers.get("content-type")?.startsWith("text/css")') &&
+    serviceWorker.includes('(!isStylesheet || hasExpectedContentType)'),
+    "service worker refreshes theme assets and only caches CSS responses with stylesheet MIME");
 
   check(/<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i.test(weather),
     "weather.html: responsive viewport metadata");
@@ -178,7 +240,7 @@ async function main() {
 
   check(!globalNav.includes("function demoMenu()") &&
     !globalNav.includes("demo-menu-trigger") &&
-    globalNav.includes("actions.append(languageToggle(), toggle)") &&
+    globalNav.includes("actions.append(languageToggle(), themeToggle(), toggle)") &&
     globalNav.includes('const DEVICE_VISIT_KEY = "rateGptDeviceVisited"') &&
     globalNav.includes('window.localStorage.getItem(DEVICE_VISIT_KEY) === "1"') &&
     globalNav.includes('window.localStorage.getItem("rateGptWelcomeSeen") === "1"') &&

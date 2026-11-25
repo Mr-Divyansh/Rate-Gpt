@@ -1,10 +1,15 @@
-const CACHE_NAME = "rate-gpt-shell-v1";
+const CACHE_NAME = "rate-gpt-shell-v12";
 const OFFLINE_URL = "/offline.html";
+const CSS_REQUEST = (url) => new Request(url, {
+  headers: { Accept: "text/css,*/*;q=0.1" }
+});
 const PRECACHE_URLS = [
   OFFLINE_URL,
   "/manifest.webmanifest",
-  "/style/base.css",
-  "/style/offline.css",
+  CSS_REQUEST("/style/base.css"),
+  CSS_REQUEST("/style/theme.css"),
+  CSS_REQUEST("/style/offline.css"),
+  "/script/theme.js",
   "/Images/Logo.webp"
 ];
 
@@ -53,7 +58,9 @@ self.addEventListener("fetch", (event) => {
   if (/\.(?:css|js|mjs|webp|png|jpg|jpeg|svg|woff2?|webmanifest)$/i.test(url.pathname)) {
     const cachedResponse = caches.match(request);
     const networkResponse = fetch(request).then(async (response) => {
-      if (response.ok) {
+      const isStylesheet = url.pathname.endsWith(".css");
+      const hasExpectedContentType = response.headers.get("content-type")?.startsWith("text/css");
+      if (response.ok && (!isStylesheet || hasExpectedContentType)) {
         const copy = response.clone();
         const cache = await caches.open(CACHE_NAME);
         await cache.put(request, copy);
