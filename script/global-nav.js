@@ -20,20 +20,21 @@ const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || 
 
 // Shared Light / Dark theme preference and animated Liquid Morph transition.
 const THEME_KEY = "rateGptTheme";
+function syncThemeToggle(button, theme) {
+  const dark = theme === "dark";
+  button.setAttribute("aria-pressed", String(dark));
+  button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+  button.title = dark ? "Switch to light mode" : "Switch to dark mode";
+  button.innerHTML = dark
+    ? '<span aria-hidden="true">☀</span><span class="theme-toggle-label">Light</span>'
+    : '<span aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span>';
+}
 function applyTheme(theme) {
   const next = theme === "dark" ? "dark" : "light";
   document.documentElement.dataset.theme = next;
   document.documentElement.style.colorScheme = next;
   try { localStorage.setItem(THEME_KEY, next); } catch { /* storage may be blocked */ }
-  document.querySelectorAll("[data-theme-toggle]").forEach(button => {
-    const dark = next === "dark";
-    button.setAttribute("aria-pressed", String(dark));
-    button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
-    button.title = dark ? "Switch to light mode" : "Switch to dark mode";
-    button.innerHTML = dark
-      ? '<span aria-hidden="true">☀</span><span class="theme-toggle-label">Light</span>'
-      : '<span aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span>';
-  });
+  document.querySelectorAll("[data-theme-toggle]").forEach(button => syncThemeToggle(button, next));
 }
 function themeToggle() {
   const button = document.createElement("button");
@@ -46,13 +47,14 @@ function themeToggle() {
     const root = document.documentElement;
     root.style.setProperty("--theme-origin-x", `${rect.left + rect.width / 2}px`);
     root.style.setProperty("--theme-origin-y", `${rect.top + rect.height / 2}px`);
-    if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (document.startViewTransition && document.visibilityState === "visible" &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.startViewTransition(() => applyTheme(next));
     } else {
       applyTheme(next);
     }
   });
-  applyTheme(document.documentElement.dataset.theme || "light");
+  syncThemeToggle(button, document.documentElement.dataset.theme || "light");
   return button;
 }
 try {
@@ -62,7 +64,7 @@ try {
 if (!document.querySelector('link[data-theme-styles]')) {
   const themeStyles = document.createElement("link");
   themeStyles.rel = "stylesheet";
-  themeStyles.href = "/style/theme.css?v=liquid-morph-20261124";
+  themeStyles.href = "/style/theme.css?v=liquid-morph-20261125";
   themeStyles.dataset.themeStyles = "";
   document.head.append(themeStyles);
 }

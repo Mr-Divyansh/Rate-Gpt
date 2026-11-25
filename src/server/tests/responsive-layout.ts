@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker] = await Promise.all([
+  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -24,6 +24,7 @@ async function main() {
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
     readFile("style/weather.css", "utf8"),
+    readFile("style/theme.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
     readFile("script/weather.js", "utf8"),
@@ -53,10 +54,24 @@ async function main() {
     globalNav.includes(`"${page}"`)) &&
     !/decision-tools|farmer-dashboard/.test(globalNav),
     "shared navigation preserves the remaining pages and omits the retired tools");
-  check(homeCss.includes("border-radius: 0 0 50% 50% / 0 0 8% 8%") &&
-    /@media \(max-width: 1100px\) and \(min-width: 761px\)[\s\S]*?border-radius: 0 0 50% 50% \/ 0 0 6% 6%/.test(homeCss) &&
-    /@media \(max-width: 760px\)[\s\S]*?border-radius: 0 0 50% 50% \/ 0 0 4% 4%/.test(homeCss),
-    "homepage hero keeps its broad U-shaped edge treatment across desktop, tablet and mobile");
+  check(/\.page-home \.hero\.wrap\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;[^}]*padding:\s*clamp\(/s.test(homeCss) &&
+    homeCss.includes("clip-path: ellipse(150% 300% at 50% -200%)") &&
+    homeCss.includes("clip-path: ellipse(150% 180% at 50% -80%)") &&
+    homeCss.includes("clip-path: ellipse(150% 140% at 50% -40%)"),
+    "homepage background uses a full-width, responsive U-shaped silhouette without rounded-corner clipping");
+  check(/grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\)/.test(homeCss) &&
+    /\.page-home \.site-nav a\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss) &&
+    /\.page-home \.header-actions\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss),
+    "desktop navigation stays centered while links and action controls retain their size");
+  check(themeCss.includes("flex:0 0 auto; min-width:80px; min-height:44px") &&
+    themeCss.includes("flex:0 0 40px; width:40px; min-width:40px; min-height:40px") &&
+    globalNav.includes("syncThemeToggle(button, document.documentElement.dataset.theme || \"light\")") &&
+    globalNav.includes('button.setAttribute("aria-pressed", String(dark))') &&
+    globalNav.includes('document.visibilityState === "visible"'),
+    "theme toggle initializes its icon and accessible state and cannot collapse");
+  check(/@media \(max-width: 1100px\) and \(min-width: 761px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;/s.test(homeCss) &&
+    /@media \(max-width: 760px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;[\s\S]*?opacity:\s*1;/s.test(homeCss),
+    "tablet and mobile hero artwork stacks without obscuring copy or the mandi panel");
   check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v2"') &&
     serviceWorker.includes('if (url.pathname.startsWith("/api/")) return;'),
     "service worker refreshes the shell cache while continuing to bypass live APIs");
@@ -253,8 +268,6 @@ async function main() {
     "closed mobile drawer is clipped in place to prevent horizontal overflow");
   check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
     "mobile drawer has an explicit visible state without off-canvas transforms");
-  check(/@media\s*\(max-width:\s*760px\)[\s\S]*?\.page-home\s+\.hero-farmer\s*\{[^}]*top:\s*150px;[\s\S]*?right:\s*-3%;/s.test(homeCss),
-    "mobile farmer artwork stays within the viewport edge");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 

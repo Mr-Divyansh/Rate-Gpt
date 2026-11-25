@@ -1378,7 +1378,7 @@ html.page-home-root {
 
 .page-home .site-header {
   top: 12px;
-  width: min(calc(100% - clamp(32px, 8vw, 120px)), 1480px);
+  width: min(calc(100% - clamp(32px, 5vw, 80px)), 1680px);
   min-height: 68px;
   margin: 12px auto 0;
   border: 1px solid rgba(255, 255, 255, .86);
@@ -1396,17 +1396,18 @@ html.page-home-root {
   min-height: 66px;
   margin: 0;
   padding: 7px clamp(14px, 2.2vw, 32px);
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: clamp(10px, 1.8vw, 26px);
 }
 
-.page-home .brand { gap: 9px; }
+.page-home .brand { justify-self: start; gap: 9px; }
 .page-home .brand-mark { width: 40px; height: 38px; }
 .page-home .brand-mark img { width: 66px; height: 66px; left: -13px; top: -5px; }
 .page-home .brand-text strong { font-size: 1.16rem; }
 .page-home .brand-text small { font-size: .69rem; }
-.page-home .site-nav { justify-content: center; gap: 2px; }
+.page-home .site-nav { min-width: 0; justify-self: center; justify-content: center; gap: 2px; }
 .page-home .site-nav a {
+  flex: 0 0 auto;
   min-height: 40px;
   padding-inline: clamp(7px, .9vw, 13px);
   border-radius: 999px;
@@ -1419,7 +1420,7 @@ html.page-home-root {
   box-shadow: 0 5px 14px rgba(11, 61, 46, .2);
   color: #fff;
 }
-.page-home .header-actions { gap: 8px; }
+.page-home .header-actions { justify-self: end; flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
 .page-home .lang-toggle {
   padding: 2px;
   border-color: #dce8df;
@@ -1439,16 +1440,19 @@ html.page-home-root {
 
 .page-home #main-content { min-height: 0; }
 .page-home .hero.wrap {
-  width: min(calc(100% - clamp(40px, 7vw, 112px)), 1480px);
+  width: 100%;
+  max-width: none;
   min-height: max(580px, calc(100svh - 96px));
-  padding-block: clamp(34px, 5vh, 68px);
-  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  padding: clamp(34px, 5vh, 68px) clamp(24px, 5vw, 88px);
+  overflow: clip;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
   gap: clamp(22px, 3.5vw, 52px);
 }
 
 .page-home .hero::before {
   inset: 0 calc((100vw - 100%) / -2);
   height: auto;
+  clip-path: ellipse(150% 300% at 50% -200%);
   background:
     linear-gradient(90deg, rgba(248, 248, 239, .94) 0%, rgba(248, 248, 239, .84) 34%, rgba(248, 248, 239, .2) 67%, rgba(11, 61, 46, .08) 100%),
     linear-gradient(0deg, rgba(11, 61, 46, .2), transparent 38%),
@@ -1462,6 +1466,7 @@ html.page-home-root {
   z-index: 0;
   inset: auto calc((100vw - 100%) / -2) 0;
   height: clamp(58px, 9vw, 104px);
+  clip-path: ellipse(150% 300% at 50% -200%);
   background:
     radial-gradient(ellipse 54% 92% at 18% 150%, rgba(6, 70, 38, .9) 0 70%, transparent 71%),
     radial-gradient(ellipse 56% 105% at 92% 160%, rgba(18, 107, 69, .88) 0 68%, transparent 69%),
@@ -1547,9 +1552,10 @@ html.page-home-root {
 .page-home .hero-farmer {
   --farmer-opacity: 1;
   z-index: 1;
-  right: 18%;
+  right: auto;
+  left: 35%;
   bottom: -1%;
-  width: min(52vw, 720px);
+  width: min(34vw, 620px);
   height: 92%;
   object-fit: contain;
   object-position: center bottom;
@@ -1687,12 +1693,34 @@ html.page-home-root {
 
 @media (max-width: 1100px) and (min-width: 761px) {
   .page-home .hero.wrap {
-    width: min(calc(100% - 44px), 1020px);
+    width: 100%;
+    padding-inline: clamp(24px, 4vw, 48px);
     grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
     gap: 20px;
   }
+  .page-home .hero::before,
+  .page-home .hero::after { clip-path: ellipse(150% 180% at 50% -80%); }
+  .page-home .hero-copy { grid-column: 1; grid-row: 1; }
+  .page-home .board { grid-column: 2; grid-row: 1; }
+  .page-home .hero-farmer {
+    position: relative;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    justify-self: center;
+    width: min(70vw, 620px);
+    height: auto;
+    max-height: 420px;
+    aspect-ratio: 3 / 2;
+    object-position: center;
+    opacity: 1;
+  }
   .page-home .hero-copy h1 { font-size: clamp(2.5rem, 4.8vw, 3.7rem); }
-  .page-home .hero-farmer { right: 22%; width: 48vw; opacity: .8; }
   .page-home .board-head { padding: 17px 17px 13px; }
   .page-home .board-rows { padding-inline: 10px; }
   .page-home .board-row { gap: 8px; padding-inline: 8px; }
@@ -1717,6 +1745,7 @@ html.page-home-root {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
   }
+  .page-home .header-actions { grid-column: 2; grid-row: 1; }
   .page-home .brand-text small { display: none; }
   .page-home .header-actions { gap: 7px; }
   .page-home .site-nav { gap: 4px; }
@@ -1729,14 +1758,16 @@ html.page-home-root {
 
 @media (max-width: 760px) {
   .page-home .hero.wrap {
-    width: min(calc(100% - 32px), 620px);
+    width: 100%;
     min-height: 0;
-    padding-block: 27px 18px;
+    padding: 27px clamp(16px, 4vw, 28px) 18px;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     align-content: start;
     gap: 21px;
   }
+  .page-home .hero::before,
+  .page-home .hero::after { clip-path: ellipse(150% 140% at 50% -40%); }
   .page-home .hero::before {
     background:
       linear-gradient(180deg, rgba(248, 248, 239, .92) 0%, rgba(248, 248, 239, .78) 44%, rgba(248, 248, 239, .22) 100%),
@@ -1755,18 +1786,27 @@ html.page-home-root {
   .page-home .hero-actions .btn { min-height: 48px; padding-inline: 15px; font-size: .88rem; }
   .page-home .hero-actions .hero-secondary { min-width: 0; }
   .page-home .fine { font-size: .78rem; }
+  .page-home .hero-copy { grid-column: 1; grid-row: 1; }
   .page-home .hero-farmer {
-    --farmer-opacity: .26;
-    top: 150px;
-    right: -3%;
+    position: relative;
+    grid-column: 1;
+    grid-row: 2;
+    top: auto;
+    right: auto;
     bottom: auto;
-    width: min(76vw, 390px);
-    height: 280px;
-    object-position: right center;
-    opacity: .26;
-    filter: saturate(.8);
+    left: auto;
+    justify-self: center;
+    width: min(88vw, 460px);
+    height: auto;
+    max-height: 320px;
+    aspect-ratio: 3 / 2;
+    object-position: center;
+    opacity: 1;
+    filter: drop-shadow(0 10px 18px rgba(12, 45, 31, .12));
   }
   .page-home .board {
+    grid-column: 1;
+    grid-row: 3;
     width: 100%;
     max-height: none;
     border-radius: 18px;
@@ -1796,7 +1836,7 @@ html.page-home-root {
   .page-home .header-actions { gap: 5px; }
   .page-home .lang-toggle button { min-width: 31px; min-height: 30px; padding-inline: 5px; font-size: .75rem; }
   .page-home .menu-toggle { width: 39px; height: 39px; padding: 8px; }
-  .page-home .hero.wrap { width: calc(100% - 24px); padding-top: 23px; gap: 18px; }
+  .page-home .hero.wrap { width: 100%; padding: 23px 14px 18px; gap: 18px; }
   .page-home .hero-copy h1 { max-width: 14ch; font-size: clamp(2.25rem, 9.2vw, 2.75rem); }
   .page-home .hero-actions .btn {
     flex: 1 1 0;
@@ -1851,32 +1891,4 @@ html.page-home-root {
   .page-home .board-row { transition: none; }
   .page-home .hero-actions .btn:hover,
   .page-home .board-row:hover { transform: none; }
-}
-
-/* Full-bleed hero with broad curved edges framing the landscape. */
-.page-home .hero.wrap {
-  width: 100%;
-  max-width: none;
-  overflow: clip;
-  border-radius: 0 0 50% 50% / 0 0 8% 8%;
-}
-
-@media (max-width: 1100px) and (min-width: 761px) {
-  .page-home .hero.wrap {
-    width: 100%;
-    padding-inline: clamp(24px, 4vw, 48px);
-    border-radius: 0 0 50% 50% / 0 0 6% 6%;
-  }
-}
-
-@media (max-width: 760px) {
-  .page-home .hero.wrap {
-    width: 100%;
-    padding-inline: clamp(16px, 4vw, 28px);
-    border-radius: 0 0 50% 50% / 0 0 4% 4%;
-  }
-}
-
-@media (max-width: 460px) {
-  .page-home .hero.wrap { padding-inline: 14px; }
 }
