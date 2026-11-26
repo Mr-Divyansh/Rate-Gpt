@@ -167,7 +167,7 @@
           </div>
           <div class="team-info">
             <p class="team-role" data-i18n="about.member.role">Project contributor</p>
-            <h3 data-i18n="about.member1.name">Divyansh Kumar</h3>
+            <h3 data-i18n="about.member1.name">Divyansh</h3>
             <p class="team-bio" data-i18n="about.member1.bio">A BCA student, full-stack developer and founder of D Web Studio, focused on product direction, web development and bringing the Rate-GPT experience together.</p>
             <p class="team-focus" data-i18n="about.member1.focus">Product direction · Full-stack development · D Web Studio</p>
             <a class="team-profile" href="https://github.com/Mr-Divyansh" target="_blank" rel="noopener noreferrer" aria-label="Mr Divyansh on GitHub">
@@ -182,7 +182,7 @@
           </div>
           <div class="team-info">
             <p class="team-role" data-i18n="about.member.role">Project contributor</p>
-            <h3 data-i18n="about.member2.name">Abhay Web Dev</h3>
+            <h3 data-i18n="about.member2.name">Abhay</h3>
             <p class="team-bio" data-i18n="about.member2.bio">A project teammate contributing to collaborative development, implementation and ongoing improvements to Rate-GPT.</p>
             <p class="team-focus" data-i18n="about.member2.focus">Collaborative development · Implementation · Improvements</p>
             <a class="team-profile" href="https://github.com/AbhayWebWorld" target="_blank" rel="noopener noreferrer" aria-label="Abhay Web Dev on GitHub">
@@ -192,9 +192,48 @@
         </article>
       </div>
     </section>
+    <section class="about-contributions wrap" aria-labelledby="contributionsTitle" data-contributions>
+      <div class="contributions-heading">
+        <div>
+          <p class="section-kicker" data-i18n="about.contributions.kicker">Open-source activity</p>
+          <h2 id="contributionsTitle" data-i18n="about.contributions.title">Team contributions</h2>
+          <p class="contributions-lede" data-i18n="about.contributions.lede">A live, all-time snapshot of work recorded in this GitHub repository.</p>
+        </div>
+        <button class="contributions-refresh" type="button" data-contributions-refresh>
+          <span aria-hidden="true">↻</span><span data-i18n="about.contributions.refresh">Refresh data</span>
+        </button>
+      </div>
+      <div class="contributions-legend" aria-label="Contributor colours">
+        <span><i class="contributor-dot dot-divyansh"></i>Divyansh</span>
+        <span><i class="contributor-dot dot-abhay"></i>Abhay</span>
+      </div>
+      <div class="contributions-status" data-contributions-status role="status" aria-live="polite" data-i18n="about.contributions.loading">Fetching live GitHub data…</div>
+      <div class="contributions-grid" data-contributions-grid hidden>
+        <article class="contribution-person contribution-divyansh" data-person="Mr-Divyansh">
+          <div class="contribution-person-head"><span class="contributor-dot dot-divyansh"></span><h3>Divyansh</h3><span class="contribution-login">@Mr-Divyansh</span></div>
+          <div class="contribution-total"><strong data-metric="commits">—</strong><span data-i18n="about.contributions.commits">Commits</span></div>
+        </article>
+        <article class="contribution-person contribution-abhay" data-person="AbhayWebWorld">
+          <div class="contribution-person-head"><span class="contributor-dot dot-abhay"></span><h3>Abhay</h3><span class="contribution-login">@AbhayWebWorld</span></div>
+          <div class="contribution-total"><strong data-metric="commits">—</strong><span data-i18n="about.contributions.commits">Commits</span></div>
+        </article>
+      </div>
+      <div class="contribution-comparison" data-contribution-comparison hidden>
+        <h3 data-i18n="about.contributions.compare">Contribution comparison</h3>
+        <div class="comparison-metric" data-compare="commits"><div class="comparison-label"><span data-i18n="about.contributions.commits">Commits</span><b></b></div><div class="comparison-track"><i class="bar-divyansh"></i><i class="bar-abhay"></i></div></div>
+        <div class="comparison-metric" data-compare="pullRequests"><div class="comparison-label"><span data-i18n="about.contributions.pullRequests">Pull requests</span><b></b></div><div class="comparison-track"><i class="bar-divyansh"></i><i class="bar-abhay"></i></div></div>
+        <div class="comparison-metric" data-compare="comments"><div class="comparison-label"><span data-i18n="about.contributions.comments">Comments</span><b></b></div><div class="comparison-track"><i class="bar-divyansh"></i><i class="bar-abhay"></i></div></div>
+        <div class="comparison-metric" data-compare="additions"><div class="comparison-label"><span data-i18n="about.contributions.additions">Lines added</span><b></b></div><div class="comparison-track"><i class="bar-divyansh"></i><i class="bar-abhay"></i></div></div>
+        <div class="comparison-metric" data-compare="deletions"><div class="comparison-label"><span data-i18n="about.contributions.deletions">Lines deleted</span><b></b></div><div class="comparison-track"><i class="bar-divyansh"></i><i class="bar-abhay"></i></div></div>
+      </div>
+      <p class="contributions-footnote" data-i18n="about.contributions.note">Counts reflect activity attributed by GitHub to this repository. They measure recorded development activity, not money earned, individual effort quality or all work done outside GitHub.</p>
+      <p class="contributions-updated" data-contributions-updated></p>
+      <a class="contributions-source" href="https://github.com/Mr-Divyansh/Rate-Gpt/graphs/contributors" target="_blank" rel="noopener noreferrer" data-i18n="about.contributions.source">View GitHub contributor graph</a>
+    </section>
   </main>
 
   <footer class="site-footer"></footer>
   <script type="module" src="/script/global-nav.js"></script>
+  <script type="module" src="/script/about-contributions.js"></script>
 </body>
 </html>
