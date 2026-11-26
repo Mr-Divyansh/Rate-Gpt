@@ -76,7 +76,7 @@ async function main() {
     /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
     /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
     "shared, homepage and alternate navbar headers disable backdrop blur across viewports");
-  check(themeCss.includes("flex:0 0 auto; min-width:80px; min-height:44px") &&
+  check(themeCss.includes("flex:0 0 auto; width:44px; min-width:44px; min-height:44px") &&
     themeCss.includes("flex:0 0 40px; width:40px; min-width:40px; min-height:40px") &&
     globalNav.includes("syncThemeToggle(button, document.documentElement.dataset.theme || \"light\")") &&
     globalNav.includes('button.setAttribute("aria-pressed", String(dark))') &&

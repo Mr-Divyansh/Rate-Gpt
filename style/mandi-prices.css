@@ -310,8 +310,9 @@
   min-height: clamp(270px, 24vw, 350px);
   margin-right: 0;
   clip-path: ellipse(100% 145% at 100% 50%);
+  aspect-ratio: 1;
 }
-.page-prices .mandi-intro-visual img { min-height: inherit; object-position: 52% 50%; }
+.page-prices .mandi-intro-visual img { min-height: inherit; object-position: 52% 50%; object-fit: cover; }
 
 .page-prices .finder-panel {
   width: min(100% - 2 * var(--gutter), var(--wrap));

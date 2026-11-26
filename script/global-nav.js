@@ -26,8 +26,8 @@ function syncThemeToggle(button, theme) {
   button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
   button.title = dark ? "Switch to light mode" : "Switch to dark mode";
   button.innerHTML = dark
-    ? '<span aria-hidden="true">☀</span><span class="theme-toggle-label">Light</span>'
-    : '<span aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span>';
+    ? '<span aria-hidden="true">☀</span>'
+    : '<span aria-hidden="true">☾</span>';
 }
 function applyTheme(theme, persist = true) {
   const next = theme === "dark" ? "dark" : "light";
