@@ -17,7 +17,8 @@ if (root) {
     status.classList.toggle("is-error", isError);
   }
 
-  // Render only GitHub-attributed counts; missing contributor records remain zero, not estimates.\n  function render(data) {
+  // Render only GitHub-attributed counts; missing contributor records remain zero, not estimates.
+  function render(data) {
     latestData = data;
     status.hidden = true;
     grid.hidden = false;
