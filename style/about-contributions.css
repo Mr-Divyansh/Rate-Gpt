@@ -1,0 +1,77 @@
+/* Live GitHub contribution comparison */
+.about-contributions {
+  margin-top: clamp(58px, 8vw, 96px);
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid #d8e2d5;
+  background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(239,246,236,.82));
+  box-shadow: 12px 14px 0 rgba(31,91,60,.055);
+}
+.contributions-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; }
+.contributions-heading h2 { color:#183c2b; font-size:clamp(1.8rem,3vw,2.55rem); line-height:1.05; }
+.contributions-lede { margin-top:9px; color:#69766f; line-height:1.55; }
+.contributions-refresh {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:42px; padding:0 14px; border:1px solid #b9cbbb; border-radius:8px;
+  background:#fff; color:#174d38; font:inherit; font-size:.84rem; font-weight:800; cursor:pointer;
+}
+.contributions-refresh:disabled { opacity:.65; cursor:wait; }
+.contributions-refresh.is-loading span:first-child { animation: contribution-spin .8s linear infinite; }
+@keyframes contribution-spin { to { transform:rotate(360deg); } }
+.contributions-legend { display:flex; flex-wrap:wrap; gap:18px; margin:22px 0 14px; color:#43564a; font-size:.84rem; font-weight:750; }
+.contributions-legend span,.contribution-person-head { display:flex; align-items:center; gap:9px; }
+.contributor-dot { display:inline-block; width:10px; height:10px; flex:none; border-radius:50%; }
+.dot-divyansh { background:#16845a; }
+.dot-abhay { background:#d49a32; }
+.contributions-status { padding:22px; border:1px dashed #c8d7c7; color:#53665a; text-align:center; }
+.contributions-status.is-error { color:#9b493e; border-color:#d9aaa2; }
+.contributions-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; }
+.contribution-person { min-width:0; padding:20px; border:1px solid #d9e3d7; background:#fff; }
+.contribution-divyansh { border-top:4px solid #16845a; }
+.contribution-abhay { border-top:4px solid #d49a32; }
+.contribution-person-head { flex-wrap:wrap; }
+.contribution-person-head h3 { color:#183c2b; font-size:1.2rem; }
+.contribution-login { color:#77847b; font-size:.76rem; }
+.contribution-total { display:flex; align-items:baseline; gap:9px; margin-top:16px; }
+.contribution-total strong { color:#183c2b; font-size:2.1rem; font-variant-numeric:tabular-nums; line-height:1; }
+.contribution-total span { color:#69766f; font-size:.88rem; font-weight:700; }
+.contribution-comparison { display:grid; gap:18px; margin-top:26px; }
+.contribution-comparison h3 { color:#183c2b; font-size:1.18rem; }
+.comparison-metric { display:grid; gap:8px; }
+.comparison-label { display:flex; align-items:baseline; justify-content:space-between; gap:12px; color:#43564a; font-size:.88rem; font-weight:800; }
+.comparison-label b { color:#68766d; font-size:.76rem; font-weight:650; text-align:right; font-variant-numeric:tabular-nums; }
+.comparison-track { display:grid; gap:5px; }
+.comparison-track i { display:block; height:9px; min-width:2px; border-radius:999px; transition:width .55s cubic-bezier(.22,1,.36,1); }
+.comparison-track .bar-divyansh { background:#16845a; }
+.comparison-track .bar-abhay { background:#d49a32; }
+.contributions-footnote { margin-top:24px; color:#758178; font-size:.78rem; line-height:1.55; }
+.contributions-updated { margin-top:10px; color:#718076; font-size:.76rem; }
+.contributions-source { display:inline-flex; margin-top:12px; color:#176345; font-size:.82rem; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
+@media(max-width:650px) {
+  .about-contributions { padding:20px 16px; }
+  .contributions-heading { align-items:flex-start; flex-direction:column; }
+  .contributions-grid { grid-template-columns:1fr; }
+  .contribution-person { padding:16px; }
+  .comparison-label { align-items:flex-start; flex-direction:column; gap:3px; }
+  .comparison-label b { text-align:left; }
+}
+html[data-theme="dark"] .about-contributions { background:#111e16; border-color:#2d4536; box-shadow:12px 14px 0 rgba(0,0,0,.12); }
+html[data-theme="dark"] .contributions-heading h2,
+html[data-theme="dark"] .contribution-person-head h3,
+html[data-theme="dark"] .contribution-total strong,
+html[data-theme="dark"] .contribution-comparison h3 { color:#e7f1e9; }
+html[data-theme="dark"] .contributions-lede,
+html[data-theme="dark"] .contributions-legend,
+html[data-theme="dark"] .contribution-total span,
+html[data-theme="dark"] .comparison-label { color:#bdcfc2; }
+html[data-theme="dark"] .contributions-status { background:#17271e; border-color:#36513f; color:#c8d8cd; }
+html[data-theme="dark"] .contribution-person,
+html[data-theme="dark"] .contributions-refresh { background:#17271e; border-color:#36513f; color:#e7f1e9; }
+html[data-theme="dark"] .contribution-login,
+html[data-theme="dark"] .comparison-label b,
+html[data-theme="dark"] .contributions-footnote,
+html[data-theme="dark"] .contributions-updated { color:#a9bdb0; }
+html[data-theme="dark"] .contributions-source { color:#9edbb3; }
+@media(prefers-reduced-motion:reduce) {
+  .comparison-track i,.contributions-refresh { transition:none; }
+  .contributions-refresh.is-loading span:first-child { animation:none; }
+}
