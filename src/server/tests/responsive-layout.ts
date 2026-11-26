@@ -79,9 +79,9 @@ async function main() {
     sharedNavbarCss.includes('body header.site-header') &&
     sharedNavbarCss.includes('width: 100% !important') &&
     sharedNavbarCss.includes('border-radius: 0 !important') &&
-    sharedNavbarCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr))') &&
+    sharedNavbarCss.includes('height: 100dvh !important') &&
     sharedNavbarCss.includes('.site-nav.is-open') &&
-    sharedNavbarCss.includes('position: absolute !important') &&
+    sharedNavbarCss.includes('position: fixed !important') &&
     sharedNavbarCss.includes('html[data-theme="dark"]'),
     "all public pages load one shared full-width navbar with consistent responsive dropdown and theme styling");
   check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
