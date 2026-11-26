@@ -173,7 +173,7 @@ export function startMandiNavGuide() {
   }
 
   function onDrawerTransitionEnd(event) {
-    if (event.target === siteNav && event.propertyName === "transform") {
+    if (event.target === siteNav && event.propertyName === "clip-path") {
       window.clearTimeout(drawerFallbackTimer);
       schedulePositionGuide();
     }
@@ -207,7 +207,7 @@ export function startMandiNavGuide() {
   window.visualViewport?.addEventListener("scroll", schedulePositionGuide);
   if (openingMobileNav) {
     // The drawer animates from off-screen over 250ms; measure only when it
-    // reaches its final transform, with a fallback for reduced-motion cases.
+    // reaches its final clip-path, with a fallback for reduced-motion cases.
     siteNav?.addEventListener("transitionend", onDrawerTransitionEnd);
     drawerFallbackTimer = window.setTimeout(schedulePositionGuide, 400);
   } else {
