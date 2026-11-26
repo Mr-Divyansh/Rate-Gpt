@@ -1,0 +1,47 @@
+/* Original explanatory content used on the homepage and mandi data page. */
+.editorial-section {
+  display: grid;
+  gap: clamp(18px, 3vw, 28px);
+  padding-block: clamp(36px, 6vw, 64px);
+  color: var(--ink);
+}
+.editorial-heading { display: grid; gap: 12px; max-width: 76ch; }
+.editorial-kicker {
+  color: var(--green);
+  font-size: .9rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.editorial-heading h2 { max-width: 26ch; }
+.editorial-heading > p:last-child { color: var(--muted); font-size: 1.08rem; }
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.editorial-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.editorial-card, .editorial-note {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: clamp(18px, 2.4vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+}
+.editorial-card h3, .editorial-note h3 { color: var(--forest); }
+.editorial-card p, .editorial-note p { color: var(--muted); }
+.editorial-note { background: var(--soft); }
+.editorial-link { width: fit-content; color: var(--forest); font-weight: 800; text-underline-offset: 4px; }
+.editorial-source { color: var(--muted); font-size: .92rem; }
+.editorial-note > p + p { font-size: .95rem; }
+.editorial-note a { color: var(--forest); font-weight: 700; text-underline-offset: 3px; }
+.page-home #main-content { display: flex; flex-direction: column; }
+.page-home .hero.wrap { flex: 1 0 auto; }
+.page-home .home-editorial { flex: 0 0 auto; }
+@media (max-width: 760px) {
+  .editorial-grid, .editorial-grid-two { grid-template-columns: 1fr; }
+  .editorial-section { padding-block: 32px; }
+}
