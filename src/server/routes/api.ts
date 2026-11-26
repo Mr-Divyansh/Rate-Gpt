@@ -322,6 +322,104 @@ router.get("/commodities/search", async (req: Request, res: Response) => {
 });
 
 
+
+/**
+ * Live public GitHub contribution summary for the About page.
+ * Counts repository commits, authored PRs, issue comments and PR review comments.
+ * GitHub's public API is cached at the edge to avoid repeated anonymous API calls.
+ */
+const CONTRIBUTOR_LOGINS = ["Mr-Divyansh", "AbhayWebWorld"] as const;
+const GITHUB_REPO = "Mr-Divyansh/Rate-Gpt";
+const githubJsonCache = new Map<string, { expiresAt: number; data: any }>();
+
+async function githubGetJson(url: string): Promise<any> {
+  const cached = githubJsonCache.get(url);
+  if (cached && cached.expiresAt > Date.now()) return cached.data;
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "Rate-GPT-About-Contributions",
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) {
+    const error: any = new Error("GitHub contribution data is temporarily unavailable");
+    error.status = response.status === 403 || response.status === 429 ? 503 : 502;
+    throw error;
+  }
+  const data = await response.json();
+  githubJsonCache.set(url, { expiresAt: Date.now() + 5 * 60 * 1000, data });
+  return data;
+}
+
+async function githubGetPages(pathname: string, maxPages = 20): Promise<any[]> {
+  const items: any[] = [];
+  for (let page = 1; page <= maxPages; page += 1) {
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/${pathname}${pathname.includes("?") ? "&" : "?"}per_page=100&page=${page}`;
+    const batch = await githubGetJson(url);
+    if (!Array.isArray(batch)) break;
+    items.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return items;
+}
+
+router.get("/github/contributions", async (_req: Request, res: Response) => {
+  try {
+    const [contributors, pulls, issueComments, reviewComments] = await Promise.all([
+      githubGetJson(`https://api.github.com/repos/${GITHUB_REPO}/stats/contributors`),
+      githubGetPages("pulls?state=all"),
+      githubGetPages("issues/comments"),
+      githubGetPages("pulls/comments"),
+    ]);
+    const people = CONTRIBUTOR_LOGINS.map((login) => {
+      const stats = Array.isArray(contributors)
+        ? contributors.find((entry: any) => entry?.author?.login?.toLowerCase() === login.toLowerCase())
+        : undefined;
+      const authoredPulls = pulls.filter((pr: any) => pr?.user?.login?.toLowerCase() === login.toLowerCase());
+      const issueCommentCount = issueComments.filter((comment: any) => comment?.user?.login?.toLowerCase() === login.toLowerCase()).length;
+      const reviewCommentCount = reviewComments.filter((comment: any) => comment?.user?.login?.toLowerCase() === login.toLowerCase()).length;
+      const weeks = Array.isArray(stats?.weeks) ? stats.weeks : [];
+      return {
+        login,
+        commits: Number(stats?.total ?? 0),
+        pullRequests: authoredPulls.length,
+        comments: issueCommentCount + reviewCommentCount,
+        issueComments: issueCommentCount,
+        reviewComments: reviewCommentCount,
+        additions: weeks.reduce((sum: number, week: any) => sum + Number(week?.a ?? 0), 0),
+        deletions: weeks.reduce((sum: number, week: any) => sum + Number(week?.d ?? 0), 0),
+        codeChanges: weeks.reduce((sum: number, week: any) => sum + Number(week?.a ?? 0) + Number(week?.d ?? 0), 0),
+        statsAvailable: Boolean(stats),
+      };
+    });
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900, max-age=0");
+    res.setHeader("Vercel-CDN-Cache-Control", "max-age=300, stale-while-revalidate=900");
+    return sendSuccess(res, {
+      repository: GITHUB_REPO,
+      period: "all-time",
+      source: "GitHub public repository API",
+      updatedAt: new Date().toISOString(),
+      contributors: people,
+      definitions: {
+        commits: "Commits attributed to the contributor in GitHub repository contribution statistics.",
+        pullRequests: "Pull requests opened by the contributor, including closed and merged PRs.",
+        comments: "Issue/PR conversation comments plus inline pull-request review comments.",
+        additions: "Lines added in commits, as reported by GitHub contribution statistics.",
+        deletions: "Lines deleted in commits, as reported by GitHub contribution statistics.",
+      },
+    }, { cacheSeconds: 300 }, "Live GitHub contribution data retrieved");
+  } catch (error: any) {
+    return sendError(
+      res,
+      "GITHUB_CONTRIBUTIONS_UNAVAILABLE",
+      "GitHub contribution data could not be loaded right now. Please try again shortly.",
+      Number(error?.status) || 502,
+    );
+  }
+});
+
 // Contact form: personal data is validated and forwarded server-to-server.
 // The Web3Forms access key is never included in browser code or responses.
 const contactSchema = z.object({
