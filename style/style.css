@@ -1386,8 +1386,8 @@ html.page-home-root {
   border-radius: 999px;
   background: rgba(255, 255, 255, .82);
   box-shadow: 0 12px 36px rgba(11, 61, 46, .12);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .page-home .header-inner {
@@ -1749,7 +1749,7 @@ html.page-home-root {
   .page-home .header-actions { grid-column: 2; grid-row: 1; }
   .page-home .brand-text small { display: none; }
   .page-home .header-actions { gap: 7px; }
-  .page-home .site-nav { gap: 4px; }
+  .page-home .site-nav { justify-content: flex-start; gap: 4px; }
   .page-home .site-nav a[aria-current="page"] {
     background: #edf5e9;
     box-shadow: inset 3px 0 0 var(--home-green);

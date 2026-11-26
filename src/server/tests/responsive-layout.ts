@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, contact, privacy, terms, about, baseCss, pricesCss, homeCss, weatherCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker, themeInit] = await Promise.all([
+  const [home, prices, weather, contact, privacy, terms, about, baseCss, pricesCss, homeCss, weatherCss, globalNavCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker, themeInit] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -28,6 +28,7 @@ async function main() {
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
     readFile("style/weather.css", "utf8"),
+    readFile("style/global-nav.css", "utf8"),
     readFile("style/theme.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
@@ -71,6 +72,10 @@ async function main() {
   check(/\.page-home \.site-header\s*\{[^}]*border-radius:\s*999px/s.test(homeCss) &&
     /@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-header\s*\{[^}]*border-radius:\s*0;[\s\S]*?\.page-home \.header-inner\s*\{[^}]*border-radius:\s*0;/s.test(homeCss),
     "homepage header keeps its desktop pill and removes rounding from the mobile header and inner container");
+  check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
+    /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
+    /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
+    "shared, homepage and alternate navbar headers disable backdrop blur across viewports");
   check(themeCss.includes("flex:0 0 auto; min-width:80px; min-height:44px") &&
     themeCss.includes("flex:0 0 40px; width:40px; min-width:40px; min-height:40px") &&
     globalNav.includes("syncThemeToggle(button, document.documentElement.dataset.theme || \"light\")") &&
@@ -289,8 +294,15 @@ async function main() {
     "mobile drawer resets inherited horizontal-nav grid placement");
   check(/\.site-nav\s*\{[\s\S]*?margin:0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
+  check(/@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-nav\s*\{[^}]*justify-content:\s*flex-start;/s.test(homeCss),
+    "homepage mobile drawer aligns links from the top instead of centering them below the header");
   check(/\.site-nav\s*\{[\s\S]*?clip-path:\s*inset\(0 0 0 100%\);[\s\S]*?visibility:\s*hidden;/s.test(baseCss),
     "closed mobile drawer is clipped in place to prevent horizontal overflow");
+  check(/\.site-nav\s*\{[^}]*position:fixed;[^}]*top:0;[^}]*right:0;[^}]*bottom:0;[^}]*left:auto;/s.test(baseCss) &&
+    /\.site-nav\s*\{[^}]*overflow-x:hidden;[^}]*overflow-y:auto;[^}]*overscroll-behavior:contain;/s.test(baseCss) &&
+    baseCss.includes("env(safe-area-inset-top)") &&
+    baseCss.includes("env(safe-area-inset-bottom)"),
+    "mobile drawer remains viewport-fixed, vertically scrollable and safe-area padded");
   check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
     "mobile drawer has an explicit visible state without off-canvas transforms");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
