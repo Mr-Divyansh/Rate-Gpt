@@ -65,8 +65,9 @@ function themeToggle() {
     if (themeTransitionRunning || root.dataset.magicuiThemeVt === "active") return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pageIsVisible = document.visibilityState === "visible";
     if (typeof document.startViewTransition !== "function" ||
-        document.visibilityState !== "visible" || reducedMotion) {
+        !pageIsVisible || reducedMotion) {
       applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
       return;
     }
