@@ -348,6 +348,7 @@ async function githubGetJson(url: string): Promise<any> {
     error.status = response.status === 403 || response.status === 429 ? 503 : 502;
     throw error;
   }
+  if (response.status === 202) return null; // GitHub is still calculating contributor statistics.
   const data = await response.json();
   githubJsonCache.set(url, { expiresAt: Date.now() + 5 * 60 * 1000, data });
   return data;
@@ -373,6 +374,9 @@ router.get("/github/contributions", async (_req: Request, res: Response) => {
       githubGetPages("issues/comments"),
       githubGetPages("pulls/comments"),
     ]);
+    if (!Array.isArray(contributors)) {
+      return sendError(res, "GITHUB_STATS_PROCESSING", "GitHub is still calculating repository contribution statistics. Please retry shortly.", 503);
+    }
     const people = CONTRIBUTOR_LOGINS.map((login) => {
       const stats = Array.isArray(contributors)
         ? contributors.find((entry: any) => entry?.author?.login?.toLowerCase() === login.toLowerCase())
