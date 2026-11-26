@@ -21,6 +21,10 @@ import {
   buildPreviousObservationIndex,
   calculatePriceDelta,
 } from "../../../script/price-comparison.js";
+import {
+  attachImageFallback,
+  CROP_IMAGE_FALLBACK,
+} from "../../../script/crop-image-fallback.js";
 
 let passed = 0;
 let failed = 0;
@@ -66,6 +70,23 @@ function responseFor(
 async function main(): Promise<void> {
   process.env.DATA_GOV_API_KEY = "deterministic-test-key";
   process.env.DATA_GOV_API_BASE_URL = "https://example.test/resource";
+
+  class FakeImage extends EventTarget {
+    dataset: Record<string, string> = {};
+    src = "";
+    hidden = false;
+  }
+  const cropImage = new FakeImage();
+  cropImage.src = "/Images/Vegetables/vegetables/tomato.webp";
+  attachImageFallback(cropImage);
+  check(
+    cropImage.src === "/Images/Vegetables/vegetables/tomato.webp",
+    "working crop image sources are preserved",
+  );
+  cropImage.dispatchEvent(new Event("error"));
+  check(cropImage.src === CROP_IMAGE_FALLBACK, "broken crop images use the shared fallback");
+  cropImage.dispatchEvent(new Event("error"));
+  check(cropImage.hidden, "a broken fallback image is hidden instead of showing a broken icon");
 
   check(normalizeArrivalDate("13/11/2026") === "2026-11-13", "DD/MM/YYYY dates are normalized");
   check(normalizeArrivalDate("2026-11-13") === "2026-11-13", "ISO dates are preserved");
