@@ -17,7 +17,7 @@ if (root) {
     status.classList.toggle("is-error", isError);
   }
 
-  function render(data) {
+  // Render only GitHub-attributed counts; missing contributor records remain zero, not estimates.\n  function render(data) {
     latestData = data;
     status.hidden = true;
     grid.hidden = false;
@@ -50,8 +50,17 @@ if (root) {
       const values = people.map((login) => Number(byLogin.get(login)?.[property]) || 0);
       const max = Math.max(...values, 1);
       const bars = row.querySelectorAll(".comparison-track i");
-      bars[0].style.width = `${(values[0] / max) * 100}%`;
-      bars[1].style.width = `${(values[1] / max) * 100}%`;
+      // Animate transforms through the Web Animations API instead of writing
+      // inline CSS. This keeps the chart compatible with the site's strict CSP.
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      bars.forEach((bar, index) => {
+        const scale = values[index] / max;
+        bar.getAnimations().forEach((animation) => animation.cancel());
+        bar.animate(
+          [{ transform: "scaleX(0)" }, { transform: `scaleX(${scale})` }],
+          { duration: reduceMotion ? 0 : 560, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "forwards" }
+        );
+      });
       row.querySelector(".comparison-label b").textContent = `Divyansh ${number(values[0])} · Abhay ${number(values[1])}`;
       row.setAttribute("aria-label", `${t(`about.contributions.${key}`)}: Divyansh ${values[0]}, Abhay ${values[1]}`);
     }
