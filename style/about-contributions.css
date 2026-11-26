@@ -24,6 +24,7 @@
 .dot-abhay { background:#d49a32; }
 .contributions-status { padding:22px; border:1px dashed #c8d7c7; color:#53665a; text-align:center; }
 .contributions-status.is-error { color:#9b493e; border-color:#d9aaa2; }
+.contributions-grid[hidden],.contribution-comparison[hidden] { display:none !important; }
 .contributions-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; }
 .contribution-person { min-width:0; padding:20px; border:1px solid #d9e3d7; background:#fff; }
 .contribution-divyansh { border-top:4px solid #16845a; }
