@@ -212,3 +212,181 @@ html[data-theme="dark"] .notice { background:#352b22; color:#f4d8a6; border-colo
 @media(prefers-reduced-motion:reduce) {
   ::view-transition-group(root),::view-transition-old(root),::view-transition-new(root) { animation:none !important; }
 }
+
+
+/* ---------- complete dark surfaces: homepage and shared components ---------- */
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background-color: #0b120e;
+  color: #e7f1e9;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] main,
+html[data-theme="dark"] #main-content,
+html[data-theme="dark"] .page-home {
+  background-color: #0b120e;
+  color: #e7f1e9;
+}
+html[data-theme="dark"] .page-home {
+  background-image:
+    radial-gradient(ellipse at 82% 10%, rgba(35, 105, 68, .2), transparent 42%),
+    linear-gradient(135deg, #0b120e 0%, #101c15 58%, #0c1711 100%);
+}
+html[data-theme="dark"] .page-home .hero::before {
+  background:
+    linear-gradient(180deg, rgba(8, 15, 11, .38) 0%, rgba(8, 15, 11, .88) 100%),
+    url("../Images/Golden Hour Countryside Farm Panorama.webp") center bottom / cover no-repeat;
+  opacity: .48;
+}
+html[data-theme="dark"] .page-home .hero-copy h1,
+html[data-theme="dark"] .page-home .hero-copy h1::first-line {
+  color: #edf7ef;
+}
+html[data-theme="dark"] .page-home .hero-copy .lede,
+html[data-theme="dark"] .page-home .fine {
+  color: #bdcfc2;
+}
+html[data-theme="dark"] .page-home .hero-kicker {
+  background: #1a3526;
+  border: 1px solid #315b40;
+  color: #c7efd2;
+}
+html[data-theme="dark"] .page-home .hero-secondary {
+  background: #1a2920;
+  border-color: #3a5744;
+  color: #e8f3eb;
+}
+html[data-theme="dark"] .page-home .hero-actions .btn-primary {
+  background: #16764b;
+  border-color: #16764b;
+  color: #f4fff7;
+}
+html[data-theme="dark"] .page-home .board-row {
+  background: #17271e;
+  border: 1px solid #2b4635;
+  color: #e5f1e8;
+  box-shadow: inset 0 1px rgba(255,255,255,.025);
+}
+html[data-theme="dark"] .page-home .board-row .crop-name strong,
+html[data-theme="dark"] .page-home .board-modal strong {
+  color: #dff6e5;
+}
+html[data-theme="dark"] .page-home .board-row .crop-name small,
+html[data-theme="dark"] .page-home .board-modal small {
+  color: #a9c2b1;
+}
+html[data-theme="dark"] .page-home .board-row .range-track {
+  background: #344a3b;
+}
+html[data-theme="dark"] .page-home .board-row .range-fill {
+  background: #58c987;
+}
+html[data-theme="dark"] .page-home .board-row .range-modal {
+  background: #a7f0bf;
+  border-color: #17271e;
+  box-shadow: 0 0 0 1px #58c987;
+}
+html[data-theme="dark"] .page-home .board {
+  background: linear-gradient(145deg, #102b1e, #0d2419 78%);
+  border-color: #294936;
+}
+html[data-theme="dark"] .page-home .site-footer {
+  background: #101d15;
+}
+html[data-theme="dark"] .site-footer,
+html[data-theme="dark"] .footer-help,
+html[data-theme="dark"] .content-card,
+html[data-theme="dark"] .help-card,
+html[data-theme="dark"] .legal-card,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .location-dialog,
+html[data-theme="dark"] .demo-dialog,
+html[data-theme="dark"] .modal {
+  background-color: #142119;
+  color: #e7f1e9;
+  border-color: #2d4536;
+}
+html[data-theme="dark"] .demo-video-frame {
+  background: #0d1711;
+  border-color: #2d4536;
+}
+html[data-theme="dark"] .demo-dialog .dialog-close,
+html[data-theme="dark"] .location-dialog .dialog-close {
+  background: #263a2d;
+  color: #dff3e5;
+  border-color: #3b5845;
+}
+html[data-theme="dark"] .site-header {
+  background: #101b14;
+  border-color: #293d30;
+}
+html[data-theme="dark"] .site-nav,
+html[data-theme="dark"] .site-nav.is-open {
+  background: #111e16;
+}
+html[data-theme="dark"] .site-nav a {
+  color: #dcebe0;
+}
+html[data-theme="dark"] .site-nav a[aria-current="page"],
+html[data-theme="dark"] .site-nav a:hover {
+  background: #21392a;
+  color: #b9edc9;
+}
+html[data-theme="dark"] .menu-toggle,
+html[data-theme="dark"] .theme-toggle,
+html[data-theme="dark"] .lang-toggle {
+  background: #17271e;
+  color: #e3f0e7;
+  border-color: #36513f;
+}
+html[data-theme="dark"] .lang-toggle button[aria-pressed="true"] {
+  background: #a6e2bd;
+  color: #102219;
+}
+html[data-theme="dark"] .nav-backdrop.is-visible {
+  background: rgba(0, 0, 0, .72);
+}
+html[data-theme="dark"] .mandi-nav-guide__bubble,
+html[data-theme="dark"] .mandi-tour-panel,
+html[data-theme="dark"] .mandi-tour-water,
+html[data-theme="dark"] .mandi-tour-card {
+  background: #17271e;
+  color: #e7f1e9;
+  border-color: #36513f;
+}
+html[data-theme="dark"] .mandi-nav-guide__bubble *,
+html[data-theme="dark"] .mandi-tour-panel *,
+html[data-theme="dark"] .mandi-tour-card * {
+  color: inherit;
+}
+html[data-theme="dark"] .mandi-nav-guide__bubble button,
+html[data-theme="dark"] .mandi-tour-panel button,
+html[data-theme="dark"] .mandi-tour-card button {
+  background: #244331;
+  color: #e7f1e9;
+  border-color: #45634e;
+}
+html[data-theme="dark"] .site-footer .footer-help {
+  background: #18291f;
+  border-color: #304b39;
+}
+html[data-theme="dark"] .site-footer .footer-bottom {
+  border-color: #2b4433;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme] body,
+  html[data-theme] .page-home,
+  html[data-theme] .hero::before,
+  html[data-theme] .board-row,
+  html[data-theme] .site-header,
+  html[data-theme] .site-footer,
+  html[data-theme] .site-nav,
+  html[data-theme] .footer-help,
+  html[data-theme] .demo-dialog,
+  html[data-theme] .demo-video-frame {
+    transition: background-color .48s cubic-bezier(.22, 1, .36, 1),
+      color .48s cubic-bezier(.22, 1, .36, 1),
+      border-color .48s cubic-bezier(.22, 1, .36, 1),
+      box-shadow .48s cubic-bezier(.22, 1, .36, 1);
+  }
+}
