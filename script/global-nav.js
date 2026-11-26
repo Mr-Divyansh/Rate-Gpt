@@ -367,8 +367,7 @@ onLangChange(applySharedTranslations);
 // Localise the static educational sections without replacing their semantic HTML.
 function applyEditorialTranslations() {
   const language = getLang() === "hi" ? "hi" : "en";
-  document.querySelectorAll("[data-en][data-hi]").forEach((element) => {
-    if (element.id === "contactConsentText") return;
+  document.querySelectorAll(".editorial-section [data-en][data-hi], #advertising-privacy [data-en][data-hi]").forEach((element) => {
     const translated = element.dataset[language];
     if (translated) element.textContent = translated;
   });
