@@ -16,10 +16,14 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, baseCss, pricesCss, homeCss, weatherCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker] = await Promise.all([
+  const [home, prices, weather, contact, privacy, terms, about, baseCss, pricesCss, homeCss, weatherCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker, themeInit] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
+    readFile("contact.html", "utf8"),
+    readFile("privacy.html", "utf8"),
+    readFile("terms.html", "utf8"),
+    readFile("about.html", "utf8"),
     readFile("style/base.css", "utf8"),
     readFile("style/mandi-prices.css", "utf8"),
     readFile("style/style.css", "utf8"),
@@ -37,6 +41,7 @@ async function main() {
     readFile("script/home-market-preview.js", "utf8"),
     readFile("script/i18n.js", "utf8"),
     readFile("public/service-worker.js", "utf8"),
+    readFile("public/theme-init.js", "utf8"),
   ]);
 
   const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
@@ -69,10 +74,27 @@ async function main() {
     globalNav.includes('button.setAttribute("aria-pressed", String(dark))') &&
     globalNav.includes('document.visibilityState === "visible"'),
     "theme toggle initializes its icon and accessible state and cannot collapse");
+  check([home, prices, weather, contact, privacy, terms, about].every(html =>
+      html.includes('/theme-init.js')) &&
+    themeInit.includes('window.matchMedia("(prefers-color-scheme: dark)").matches') &&
+    globalNav.includes('window.matchMedia("(prefers-color-scheme: dark)").matches') &&
+    globalNav.includes('systemTheme.addEventListener?.("change", followSystemTheme)') &&
+    globalNav.includes('localStorage.getItem(THEME_KEY) === null'),
+    "all pages initialize saved or system theme before paint and follow later system changes");
+  check(contact.includes('name="access_key" value=""') &&
+    !contact.includes("%VITE_WEB3FORMS_ACCESS_KEY%") &&
+    /<title>Contact Rate-GPT<\/title>/.test(contact),
+    "contact form has no unresolved build placeholder and identifies its page in the title");
+  check(/<title>Government Mandi Prices \| Rate-GPT<\/title>|<title>Rate-GPT \| Government Mandi Prices<\/title>/.test(home) &&
+    /<title>Mandi Prices \| Rate-GPT<\/title>/.test(prices) &&
+    /<title>Privacy Policy \| Rate-GPT<\/title>/.test(privacy) &&
+    /<title>Terms &amp; Conditions \| Rate-GPT<\/title>/.test(terms),
+    "public pages use descriptive production titles");
   check(/@media \(max-width: 1100px\) and \(min-width: 761px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;/s.test(homeCss) &&
     /@media \(max-width: 760px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;[\s\S]*?opacity:\s*1;/s.test(homeCss),
     "tablet and mobile hero artwork stacks without obscuring copy or the mandi panel");
-  check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v2"') &&
+  check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v3"') &&
+    serviceWorker.includes('"/theme-init.js"') &&
     serviceWorker.includes('if (url.pathname.startsWith("/api/")) return;'),
     "service worker refreshes the shell cache while continuing to bypass live APIs");
 

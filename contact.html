@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#f7f7f0">
   <link rel="manifest" href="/manifest.webmanifest">
+  <script src="/theme-init.js"></script>
     <meta name="description" content="Contact Rate-GPT to report a bug, share feedback or ask a question.">
-    <title>Rate-GPT</title>
+    <title>Contact Rate-GPT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
@@ -51,7 +52,7 @@
             Please provide an email address or phone number so we can respond.
           </p>
           <form id="contactForm" action="https://api.web3forms.com/submit" method="POST" novalidate>
-            <input type="hidden" name="access_key" value="%VITE_WEB3FORMS_ACCESS_KEY%">
+            <input type="hidden" name="access_key" value="">
             <input type="checkbox" name="botcheck" class="botcheck" tabindex="-1" autocomplete="off">
             <div class="form-field">
               <label for="contactName" data-en="Your name" data-hi="आपका नाम">
