@@ -1,10 +1,11 @@
-const CACHE_NAME = "rate-gpt-shell-v2";
+const CACHE_NAME = "rate-gpt-shell-v3";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE_URLS = [
   OFFLINE_URL,
   "/manifest.webmanifest",
   "/style/base.css",
   "/style/offline.css",
+  "/theme-init.js",
   "/Images/Logo.webp"
 ];
 

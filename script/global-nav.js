@@ -29,11 +29,15 @@ function syncThemeToggle(button, theme) {
     ? '<span aria-hidden="true">☀</span><span class="theme-toggle-label">Light</span>'
     : '<span aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span>';
 }
-function applyTheme(theme) {
+function applyTheme(theme, persist = true) {
   const next = theme === "dark" ? "dark" : "light";
   document.documentElement.dataset.theme = next;
   document.documentElement.style.colorScheme = next;
-  try { localStorage.setItem(THEME_KEY, next); } catch { /* storage may be blocked */ }
+  if (persist) {
+    try { localStorage.setItem(THEME_KEY, next); } catch { /* storage may be blocked */ }
+  }
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) themeColor.setAttribute("content", next === "dark" ? "#111a16" : "#f7f7f0");
   document.querySelectorAll("[data-theme-toggle]").forEach(button => syncThemeToggle(button, next));
 }
 function themeToggle() {
@@ -59,8 +63,23 @@ function themeToggle() {
 }
 try {
   const savedTheme = localStorage.getItem(THEME_KEY);
-  applyTheme(savedTheme === "dark" ? "dark" : "light");
-} catch { applyTheme("light"); }
+  if (savedTheme === "dark" || savedTheme === "light") {
+    applyTheme(savedTheme, false);
+  } else {
+    applyTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light", false);
+  }
+} catch {
+  applyTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light", false);
+}
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+const followSystemTheme = (event) => {
+  try {
+    if (localStorage.getItem(THEME_KEY) === null) applyTheme(event.matches ? "dark" : "light", false);
+  } catch {
+    applyTheme(event.matches ? "dark" : "light", false);
+  }
+};
+systemTheme.addEventListener?.("change", followSystemTheme);
 if (!document.querySelector('link[data-theme-styles]')) {
   const themeStyles = document.createElement("link");
   themeStyles.rel = "stylesheet";

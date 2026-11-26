@@ -113,6 +113,25 @@ html[data-theme="dark"] .theme-toggle { color:var(--ink); }
 html[data-theme="dark"] .menu-toggle { background:var(--surface); color:var(--ink); border-color:var(--line); }
 html[data-theme="dark"] .site-nav { background:var(--surface); }
 html[data-theme="dark"] .footer-help { background:#202f27; }
+html[data-theme="dark"] .content-card,
+html[data-theme="dark"] .help-card,
+html[data-theme="dark"] .legal-card,
+html[data-theme="dark"] .form-card {
+  background:var(--surface);
+  color:var(--ink);
+  border-color:var(--line);
+}
+html[data-theme="dark"] .contact-grid .content-card h2,
+html[data-theme="dark"] .legal-card h1,
+html[data-theme="dark"] .legal-card h2,
+html[data-theme="dark"] .legal-section h2,
+html[data-theme="dark"] .help-card h2,
+html[data-theme="dark"] .help-card h3,
+html[data-theme="dark"] .helpline-number { color:var(--ink); }
+html[data-theme="dark"] .legal-section p,
+html[data-theme="dark"] .privacy-hint,
+html[data-theme="dark"] .small-note,
+html[data-theme="dark"] .field-hint { color:var(--muted); }
 html[data-theme="dark"] .site-footer::before { opacity:.85; }
 html[data-theme="dark"] .btn {
   background:var(--surface); color:var(--forest); border-color:var(--forest);
