@@ -343,12 +343,14 @@ async function githubGetJson(url: string): Promise<any> {
     },
     signal: AbortSignal.timeout(10000),
   });
+  // GitHub returns 202 with an empty response body while it calculates
+  // repository contributor statistics. Handle it before attempting JSON parsing.
+  if (response.status === 202) return null;
   if (!response.ok) {
     const error: any = new Error("GitHub contribution data is temporarily unavailable");
     error.status = response.status === 403 || response.status === 429 ? 503 : 502;
     throw error;
   }
-  if (response.status === 202) return null; // GitHub is still calculating contributor statistics.
   const data = await response.json();
   githubJsonCache.set(url, { expiresAt: Date.now() + 5 * 60 * 1000, data });
   return data;
