@@ -68,6 +68,9 @@ async function main() {
     /\.page-home \.site-nav a\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss) &&
     /\.page-home \.header-actions\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss),
     "desktop navigation stays centered while links and action controls retain their size");
+  check(/\.page-home \.site-header\s*\{[^}]*border-radius:\s*999px/s.test(homeCss) &&
+    /@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-header\s*\{[^}]*border-radius:\s*0;[\s\S]*?\.page-home \.header-inner\s*\{[^}]*border-radius:\s*0;/s.test(homeCss),
+    "homepage header keeps its desktop pill and removes rounding from the mobile header and inner container");
   check(themeCss.includes("flex:0 0 auto; min-width:80px; min-height:44px") &&
     themeCss.includes("flex:0 0 40px; width:40px; min-width:40px; min-height:40px") &&
     globalNav.includes("syncThemeToggle(button, document.documentElement.dataset.theme || \"light\")") &&
