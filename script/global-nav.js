@@ -363,6 +363,19 @@ function applySharedTranslations() {
 }
 applySharedTranslations();
 onLangChange(applySharedTranslations);
+
+// Localise the static educational sections without replacing their semantic HTML.
+function applyEditorialTranslations() {
+  const language = getLang() === "hi" ? "hi" : "en";
+  document.querySelectorAll("[data-en][data-hi]").forEach((element) => {
+    if (element.id === "contactConsentText") return;
+    const translated = element.dataset[language];
+    if (translated) element.textContent = translated;
+  });
+}
+applyEditorialTranslations();
+onLangChange(applyEditorialTranslations);
+
 hydrateIcons();
 
 // Progressive web app support. The service worker caches only static shell
