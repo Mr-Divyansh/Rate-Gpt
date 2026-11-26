@@ -587,3 +587,28 @@ body > main {
   body:has(.site-header.menu-open) { overflow: hidden; }
   .brand-text small { display: none; }
 }
+
+
+/* Smooth, full-height mobile drawer entrance from right to left. */
+@media (max-width: 900px) {
+  .site-nav {
+    transition: clip-path .42s cubic-bezier(.22, 1, .36, 1),
+      visibility .42s step-end;
+    box-shadow: -24px 0 64px rgba(10, 32, 20, .2);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .site-nav.is-open {
+    transition: clip-path .42s cubic-bezier(.22, 1, .36, 1),
+      visibility 0s step-start;
+  }
+  .nav-backdrop {
+    transition: opacity .38s ease, visibility .38s step-end;
+  }
+  .nav-backdrop.is-visible {
+    transition: opacity .38s ease, visibility 0s step-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-nav, .nav-backdrop { transition: none !important; }
+}

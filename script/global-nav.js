@@ -18,9 +18,9 @@ const LINKS = [
 
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
 
-// Shared Light / Dark theme preference with Magic UI's circle-reveal View Transition.
+// Shared Light / Dark theme preference with a smooth top-to-bottom View Transition.
 const THEME_KEY = "rateGptTheme";
-const THEME_TRANSITION_DURATION = 400;
+const THEME_TRANSITION_DURATION = 560;
 let themeTransitionRunning = false;
 let activeThemeAnimation = null;
 
@@ -72,20 +72,10 @@ function themeToggle() {
       return;
     }
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const rect = button.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    const maxRadius = Math.hypot(
-      Math.max(x, viewportWidth - x),
-      Math.max(y, viewportHeight - y)
-    );
-    const point = `${(x / viewportWidth) * 100}% ${(y / viewportHeight) * 100}%`;
-    const radius = (maxRadius / (Math.hypot(viewportWidth, viewportHeight) / Math.SQRT2)) * 100;
+    // Reveal the incoming theme from the top edge down: no sudden circular flash.
     const clipPaths = [
-      `circle(0% at ${point})`,
-      `circle(${radius}% at ${point})`
+      "inset(0 0 100% 0)",
+      "inset(0 0 0 0)"
     ];
 
     themeTransitionRunning = true;
@@ -115,7 +105,7 @@ function themeToggle() {
         { clipPath: clipPaths },
         {
           duration: THEME_TRANSITION_DURATION,
-          easing: "ease-in-out",
+          easing: "cubic-bezier(.22, 1, .36, 1)",
           fill: "forwards",
           pseudoElement: "::view-transition-new(root)"
         }
