@@ -130,6 +130,7 @@ html[data-theme="dark"] body header.site-header .site-nav a[aria-current="page"]
   background: var(--soft, #26382d) !important;
   color: var(--ink, #edf4ed) !important;
 }
+/* Mobile and tablet navigation: full-height drawer that enters from the right. */
 @media (max-width: 900px) {
   body header.site-header { min-height: 62px !important; }
   body header.site-header .header-inner {
@@ -149,42 +150,73 @@ html[data-theme="dark"] body header.site-header .site-nav a[aria-current="page"]
     border-radius: 10px !important;
   }
   body header.site-header .site-nav {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
+    position: fixed !important;
+    inset: 0 0 0 auto !important;
     z-index: 210 !important;
-    display: none !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px !important;
-    width: 100% !important;
-    max-height: min(65vh, 440px);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: min(86vw, 360px) !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: none !important;
     margin: 0 !important;
-    padding: 12px 14px 16px !important;
+    padding: max(88px, calc(env(safe-area-inset-top) + 72px)) 20px max(24px, env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
     overflow-y: auto !important;
+    overscroll-behavior: contain;
     border: 0 !important;
-    border-top: 1px solid var(--line, #e3e8e1) !important;
-    border-radius: 0 0 14px 14px !important;
+    border-left: 1px solid var(--line, #e3e8e1) !important;
+    border-radius: 0 !important;
     background: var(--surface, #fff) !important;
-    box-shadow: 0 14px 24px rgba(23, 77, 56, .12) !important;
-    visibility: visible !important;
+    box-shadow: -24px 0 64px rgba(10, 32, 20, .2) !important;
+    clip-path: inset(0 0 0 100%) !important;
+    visibility: hidden !important;
+    transition: clip-path .42s cubic-bezier(.22, 1, .36, 1), visibility .42s step-end !important;
   }
   body header.site-header .site-nav.is-open {
-    display: grid !important;
-    clip-path: none !important;
+    display: flex !important;
+    clip-path: inset(0) !important;
+    visibility: visible !important;
+    transition: clip-path .42s cubic-bezier(.22, 1, .36, 1), visibility 0s step-start !important;
   }
   body header.site-header .site-nav a {
+    display: flex !important;
     justify-content: flex-start !important;
+    flex: 0 0 auto !important;
     width: 100% !important;
-    min-height: 44px !important;
-    padding: 10px 12px !important;
-    border-radius: 8px !important;
-    font-size: .92rem !important;
+    min-height: 48px !important;
+    padding: 11px 14px !important;
+    border-radius: 9px !important;
+    font-size: 1rem !important;
+    line-height: 1.3;
     white-space: normal;
+  }
+  body .nav-backdrop {
+    display: block !important;
+    position: fixed !important;
+    z-index: 190 !important;
+    inset: 0 !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .38s ease, visibility .38s step-end;
+  }
+  body .nav-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity .38s ease, visibility 0s step-start;
   }
   html[data-theme="dark"] body header.site-header .site-nav {
     background: var(--surface, #17231c) !important;
-    border-top-color: var(--line, #34463a) !important;
+    border-left-color: var(--line, #34463a) !important;
+  }
+  html[data-theme="dark"] body header.site-header .site-nav a {
+    color: var(--ink, #edf4ed) !important;
   }
 }
 @media (max-width: 420px) {
