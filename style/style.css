@@ -2043,3 +2043,39 @@ html[data-theme="dark"] .page-home .board-modal small { color: #a5b5aa; }
 html[data-theme="dark"] .page-home .board-modal strong { color: #a6e2bd; }
 html[data-theme="dark"] .page-home .board-foot { border-top-color: rgba(166,226,189,.2); }
 html[data-theme="dark"] .page-home .board-foot a { color: #a6e2bd; }
+
+/* Homepage navbar: match the full-bleed shared header used on Mandi Prices. */
+.page-home .site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 68px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--ivory);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.page-home .header-inner {
+  width: min(100% - 2 * var(--gutter), 1200px);
+  max-width: 1200px;
+  min-height: 68px;
+  margin-inline: auto;
+  padding: 0;
+}
+@media (max-width: 900px) {
+  .page-home .site-header {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  .page-home .header-inner {
+    width: 100%;
+    max-width: 1200px;
+    padding-inline: var(--gutter);
+  }
+}
