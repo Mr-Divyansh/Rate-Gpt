@@ -18,8 +18,8 @@
 }
 
 /* Magic UI-compatible View Transition: only active while this toggle is running. */
-::view-transition-old(root),
-::view-transition-new(root) {
+html[data-magicui-theme-vt="active"]::view-transition-old(root),
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
   animation:none;
   mix-blend-mode:normal;
 }
