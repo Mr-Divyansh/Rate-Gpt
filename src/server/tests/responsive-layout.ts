@@ -16,7 +16,7 @@ function check(condition: boolean, label: string) {
 async function main() {
   console.log("\nRate-GPT responsive layout regression checks");
 
-  const [home, prices, weather, contact, privacy, terms, about, baseCss, pricesCss, homeCss, weatherCss, globalNavCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker, themeInit] = await Promise.all([
+  const [home, prices, weather, contact, privacy, terms, about, baseCss, pricesCss, homeCss, weatherCss, globalNavCss, sharedNavbarCss, themeCss, globalNav, mandiScript, weatherScript, onboardingScript, onboardingCss, mandiNavGuideScript, finderTourScript, finderTourCss, mandiNavGuideCss, homePreviewScript, i18n, serviceWorker, themeInit] = await Promise.all([
     readFile("index.html", "utf8"),
     readFile("mandi-prices.html", "utf8"),
     readFile("weather.html", "utf8"),
@@ -29,6 +29,7 @@ async function main() {
     readFile("style/style.css", "utf8"),
     readFile("style/weather.css", "utf8"),
     readFile("style/global-nav.css", "utf8"),
+    readFile("style/shared-navbar.css", "utf8"),
     readFile("style/theme.css", "utf8"),
     readFile("script/global-nav.js", "utf8"),
     readFile("script/mandi-prices.js", "utf8"),
@@ -69,9 +70,16 @@ async function main() {
     /\.page-home \.site-nav a\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss) &&
     /\.page-home \.header-actions\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss),
     "desktop navigation stays centered while links and action controls retain their size");
-  check(/\.page-home \.site-header\s*\{[^}]*border-radius:\s*999px/s.test(homeCss) &&
-    /@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-header\s*\{[^}]*border-radius:\s*0;[\s\S]*?\.page-home \.header-inner\s*\{[^}]*border-radius:\s*0;/s.test(homeCss),
-    "homepage header keeps its desktop pill and removes rounding from the mobile header and inner container");
+  check([home, prices, weather, about, contact, privacy, terms].every(html =>
+      html.includes('/style/shared-navbar.css?v=shared-nav-20261126')) &&
+    sharedNavbarCss.includes('body header.site-header') &&
+    sharedNavbarCss.includes('width: 100% !important') &&
+    sharedNavbarCss.includes('border-radius: 0 !important') &&
+    sharedNavbarCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr))') &&
+    sharedNavbarCss.includes('.site-nav.is-open') &&
+    sharedNavbarCss.includes('position: absolute !important') &&
+    sharedNavbarCss.includes('html[data-theme="dark"]'),
+    "all public pages load one shared full-width navbar with consistent responsive dropdown and theme styling");
   check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
     /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
     /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
