@@ -321,7 +321,7 @@ async function main() {
     "mobile drawer backdrop receives pointer input only when visible");
 
 
-  check(about.includes('/style/about-contributions.css') &&
+  check(about.includes('href="style/about-contributions.css"') &&
     about.includes('/script/about-contributions.js') &&
     aboutContributionsCss.includes('grid-template-columns:1fr') &&
     aboutContributionsScript.includes('bar.animate(') &&
