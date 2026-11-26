@@ -65,12 +65,23 @@ if (root) {
     refresh.classList.add("is-loading");
     showStatus(t("about.contributions.loading"));
     try {
-      const response = await fetch("/api/v1/github/contributions", {
-        headers: { Accept: "application/json" },
-        cache: force ? "no-store" : "default",
-      });
-      const payload = await response.json();
-      if (!response.ok || payload?.success !== true || !Array.isArray(payload?.data?.contributors)) {
+      let response;
+      let payload;
+      // GitHub can return 202 while its repository statistics are being calculated.
+      // The API translates that into a temporary 503; retry a few times quietly.
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        response = await fetch("/api/v1/github/contributions", {
+          headers: { Accept: "application/json" },
+          cache: force ? "no-store" : "default",
+        });
+        payload = await response.json().catch(() => null);
+        if (response.ok && payload?.success === true && Array.isArray(payload?.data?.contributors)) break;
+        if (response.status !== 503 || attempt === 2) {
+          throw new Error(payload?.error?.message || "Request failed");
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 1800));
+      }
+      if (!response?.ok || payload?.success !== true || !Array.isArray(payload?.data?.contributors)) {
         throw new Error(payload?.error?.message || "Request failed");
       }
       render(payload.data);
