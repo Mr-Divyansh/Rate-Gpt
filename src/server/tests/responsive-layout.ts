@@ -337,7 +337,8 @@ async function main() {
     sharedNavbarCss.includes('visibility: hidden !important') &&
     sharedNavbarCss.includes('visibility: visible !important'),
     "tablet and mobile drawer covers the viewport height, scrolls vertically and has explicit closed/open states");
-\n  check(/\.price-table\s*\{[^}]*min-width:\s*760px;/s.test(pricesCss),
+
+  check(/\.price-table\s*\{[^}]*min-width:\s*760px;/s.test(pricesCss),
     "desktop price table retains a readable minimum width");
   check(/@media\s*\(max-width:\s*820px\)[\s\S]*?\.table-wrap\s*\{\s*display:\s*none;\s*\}[\s\S]*?\.mobile-list\s*\{\s*display:\s*grid;/s.test(pricesCss),
     "small screens switch from wide table to mobile price cards");
