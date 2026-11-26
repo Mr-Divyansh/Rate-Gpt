@@ -390,3 +390,36 @@ html[data-theme="dark"] .site-footer .footer-bottom {
       box-shadow .48s cubic-bezier(.22, 1, .36, 1);
   }
 }
+
+
+/* Dark-mode tutorial surfaces: keep guided steps readable in both tours. */
+html[data-theme="dark"] .page-home .mandi-nav-guide__copy,
+html[data-theme="dark"] .page-home .mandi-nav-guide__copy::before,
+html[data-theme="dark"] .mandi-finder-tour__panel {
+  background: #17271e;
+  color: #e7f1e9;
+  border-color: #36513f;
+}
+html[data-theme="dark"] .page-home .mandi-nav-guide__title,
+html[data-theme="dark"] .page-home .mandi-nav-guide__message,
+html[data-theme="dark"] .mandi-finder-tour__title,
+html[data-theme="dark"] .mandi-finder-tour__message {
+  color: #e7f1e9;
+}
+html[data-theme="dark"] .page-home .mandi-nav-guide__eyebrow,
+html[data-theme="dark"] .mandi-finder-tour__progress {
+  color: #9edbb3;
+}
+html[data-theme="dark"] .mandi-finder-tour__hint {
+  background: #213a2b;
+  color: #bfe8cc;
+}
+html[data-theme="dark"] .mandi-finder-tour__close {
+  background: #263d2e;
+  color: #e7f1e9;
+  border-color: #45634e;
+}
+html[data-theme="dark"] .page-home .site-nav.is-open a.is-guide-highlighted {
+  background: #e5f6e9;
+  color: #123522;
+}
