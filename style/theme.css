@@ -1,9 +1,5 @@
-/* Rate-GPT shared themes — Liquid Morph transition */
-:root {
-  color-scheme: light;
-  --theme-origin-x: 50vw;
-  --theme-origin-y: 40px;
-}
+/* Rate-GPT shared themes — Magic UI Animated Theme Toggler (vanilla JS adaptation). */
+:root { color-scheme: light; }
 .theme-toggle {
   display:inline-flex; align-items:center; justify-content:center;
   flex:0 0 auto; width:44px; min-width:44px; min-height:44px; height:44px; padding:0;
@@ -20,26 +16,20 @@
   .lang-toggle button { min-width:40px; padding-inline:8px; }
   .theme-toggle { flex:0 0 40px; width:40px; min-width:40px; min-height:40px; height:40px; padding:0; }
 }
-@media(prefers-reduced-motion:reduce) {
-  .theme-toggle { transition:none; }
+
+/* Magic UI-compatible View Transition: only active while this toggle is running. */
+html[data-magicui-theme-vt="active"]::view-transition-old(root),
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  animation:none;
+  mix-blend-mode:normal;
+}
+html[data-magicui-theme-vt="active"]::view-transition-group(root) {
+  animation-duration:var(--magicui-theme-toggle-vt-duration);
+}
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  clip-path:var(--magicui-theme-vt-clip-from);
 }
 
-/* Native View Transitions provide the expanding, softly blurred liquid reveal. */
-@supports (view-transition-name:root) {
-  html { view-transition-name:root; }
-  ::view-transition-group(root) { animation-duration:720ms; }
-  ::view-transition-old(root) { animation:theme-old .32s ease both; }
-  ::view-transition-new(root) {
-    animation:liquid-morph-in .72s cubic-bezier(.2,.78,.18,1) both;
-    transform-origin:var(--theme-origin-x) var(--theme-origin-y);
-  }
-  @keyframes liquid-morph-in {
-    from { clip-path:ellipse(0% 0% at var(--theme-origin-x) var(--theme-origin-y)); filter:blur(12px) brightness(1.12); }
-    55% { filter:blur(3px) brightness(1.03); }
-    to { clip-path:ellipse(150% 150% at var(--theme-origin-x) var(--theme-origin-y)); filter:blur(0) brightness(1); }
-  }
-  @keyframes theme-old { to { opacity:.82; } }
-}
 html[data-theme="light"] { color-scheme:light; }
 html[data-theme="dark"] {
   color-scheme:dark;

@@ -18,8 +18,12 @@ const LINKS = [
 
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
 
-// Shared Light / Dark theme preference and animated Liquid Morph transition.
+// Shared Light / Dark theme preference with Magic UI's circle-reveal View Transition.
 const THEME_KEY = "rateGptTheme";
+const THEME_TRANSITION_DURATION = 400;
+let themeTransitionRunning = false;
+let activeThemeAnimation = null;
+
 function syncThemeToggle(button, theme) {
   const dark = theme === "dark";
   button.setAttribute("aria-pressed", String(dark));
@@ -29,6 +33,7 @@ function syncThemeToggle(button, theme) {
     ? '<span aria-hidden="true">☀</span>'
     : '<span aria-hidden="true">☾</span>';
 }
+
 function applyTheme(theme, persist = true) {
   const next = theme === "dark" ? "dark" : "light";
   document.documentElement.dataset.theme = next;
@@ -40,27 +45,86 @@ function applyTheme(theme, persist = true) {
   if (themeColor) themeColor.setAttribute("content", next === "dark" ? "#111a16" : "#f7f7f0");
   document.querySelectorAll("[data-theme-toggle]").forEach(button => syncThemeToggle(button, next));
 }
+
+function cleanupThemeTransition(root) {
+  themeTransitionRunning = false;
+  delete root.dataset.magicuiThemeVt;
+  root.style.removeProperty("--magicui-theme-toggle-vt-duration");
+  root.style.removeProperty("--magicui-theme-vt-clip-from");
+  activeThemeAnimation?.cancel();
+  activeThemeAnimation = null;
+}
+
 function themeToggle() {
   const button = document.createElement("button");
   button.className = "theme-toggle";
   button.type = "button";
   button.dataset.themeToggle = "";
   button.addEventListener("click", () => {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    const rect = button.getBoundingClientRect();
     const root = document.documentElement;
-    root.style.setProperty("--theme-origin-x", `${rect.left + rect.width / 2}px`);
-    root.style.setProperty("--theme-origin-y", `${rect.top + rect.height / 2}px`);
-    if (document.startViewTransition && document.visibilityState === "visible" &&
-        !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.startViewTransition(() => applyTheme(next));
-    } else {
-      applyTheme(next);
+    if (themeTransitionRunning || root.dataset.magicuiThemeVt === "active") return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof document.startViewTransition !== "function" ||
+        document.visibilityState !== "visible" || reducedMotion) {
+      applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      return;
     }
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const rect = button.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const maxRadius = Math.hypot(
+      Math.max(x, viewportWidth - x),
+      Math.max(y, viewportHeight - y)
+    );
+    const point = `${(x / viewportWidth) * 100}% ${(y / viewportHeight) * 100}%`;
+    const radius = (maxRadius / (Math.hypot(viewportWidth, viewportHeight) / Math.SQRT2)) * 100;
+    const clipPaths = [
+      `circle(0% at ${point})`,
+      `circle(${radius}% at ${point})`
+    ];
+
+    themeTransitionRunning = true;
+    root.dataset.magicuiThemeVt = "active";
+    root.style.setProperty("--magicui-theme-toggle-vt-duration", `${THEME_TRANSITION_DURATION}ms`);
+    root.style.setProperty("--magicui-theme-vt-clip-from", clipPaths[0]);
+
+    let transition;
+    try {
+      transition = document.startViewTransition(() => {
+        applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      });
+    } catch {
+      cleanupThemeTransition(root);
+      applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      return;
+    }
+
+    if (transition?.finished?.finally) {
+      transition.finished.finally(() => cleanupThemeTransition(root)).catch(() => {});
+    } else {
+      cleanupThemeTransition(root);
+    }
+
+    transition?.ready?.then(() => {
+      activeThemeAnimation = root.animate(
+        { clipPath: clipPaths },
+        {
+          duration: THEME_TRANSITION_DURATION,
+          easing: "ease-in-out",
+          fill: "forwards",
+          pseudoElement: "::view-transition-new(root)"
+        }
+      );
+    }).catch(() => {});
   });
   syncThemeToggle(button, document.documentElement.dataset.theme || "light");
   return button;
 }
+
 try {
   const savedTheme = localStorage.getItem(THEME_KEY);
   if (savedTheme === "dark" || savedTheme === "light") {
@@ -83,7 +147,7 @@ systemTheme.addEventListener?.("change", followSystemTheme);
 if (!document.querySelector('link[data-theme-styles]')) {
   const themeStyles = document.createElement("link");
   themeStyles.rel = "stylesheet";
-  themeStyles.href = "/style/theme.css?v=liquid-morph-20261125";
+  themeStyles.href = "/style/theme.css?v=magicui-circle-reveal-20261126";
   themeStyles.dataset.themeStyles = "";
   document.head.append(themeStyles);
 }
