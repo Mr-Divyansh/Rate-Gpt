@@ -46,6 +46,10 @@ async function main() {
     readFile("public/theme-init.js", "utf8"),
   ]);
 
+  const [aboutContributionsCss, aboutContributionsScript] = await Promise.all([
+    readFile("style/about-contributions.css", "utf8"),
+    readFile("script/about-contributions.js", "utf8"),
+  ]);
   const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -212,7 +216,7 @@ async function main() {
   check(mandiNavGuideScript.indexOf('pricesLink.classList.add("is-guide-highlighted")') <
       mandiNavGuideScript.indexOf("const rect = pricesLink.getBoundingClientRect()") &&
     mandiNavGuideScript.includes('siteNav?.addEventListener("transitionend", onDrawerTransitionEnd)') &&
-    mandiNavGuideScript.includes('event.propertyName === "transform"') &&
+    mandiNavGuideScript.includes('event.propertyName === "clip-path"') &&
     mandiNavGuideScript.includes("drawerFallbackTimer = window.setTimeout(schedulePositionGuide, 400)") &&
     mandiNavGuideScript.includes('guide.style.setProperty("--spot-rx", geometry.radiusX + "px")') &&
     mandiNavGuideCss.includes("ellipse var(--spot-rx, 150px) var(--spot-ry, 38px)") &&
@@ -316,7 +320,24 @@ async function main() {
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 
-  check(/\.price-table\s*\{[^}]*min-width:\s*760px;/s.test(pricesCss),
+
+  check(about.includes('/style/about-contributions.css') &&
+    about.includes('/script/about-contributions.js') &&
+    aboutContributionsCss.includes('grid-template-columns:1fr') &&
+    aboutContributionsScript.includes('bar.animate(') &&
+    !aboutContributionsScript.includes('bar.style.width'),
+    "About contribution cards and charts load with mobile stacking and CSP-safe animated bars");
+  check(about.includes('role="img" aria-label="D Web Studio logo"') &&
+    about.includes('Images/AbhayWebDev.jpeg') &&
+    about.includes('loading="lazy" decoding="async"'),
+    "About team branding has a non-broken fallback and defers the below-the-fold teammate image");
+  check(sharedNavbarCss.includes('inset: 0 0 0 auto !important') &&
+    sharedNavbarCss.includes('overflow-y: auto !important') &&
+    sharedNavbarCss.includes('overscroll-behavior: contain') &&
+    sharedNavbarCss.includes('visibility: hidden !important') &&
+    sharedNavbarCss.includes('visibility: visible !important'),
+    "tablet and mobile drawer covers the viewport height, scrolls vertically and has explicit closed/open states");
+\n  check(/\.price-table\s*\{[^}]*min-width:\s*760px;/s.test(pricesCss),
     "desktop price table retains a readable minimum width");
   check(/@media\s*\(max-width:\s*820px\)[\s\S]*?\.table-wrap\s*\{\s*display:\s*none;\s*\}[\s\S]*?\.mobile-list\s*\{\s*display:\s*grid;/s.test(pricesCss),
     "small screens switch from wide table to mobile price cards");
