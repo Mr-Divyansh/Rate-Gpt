@@ -83,7 +83,7 @@ async function main() {
     sharedNavbarCss.includes('.site-nav.is-open') &&
     sharedNavbarCss.includes('position: fixed !important') &&
     sharedNavbarCss.includes('html[data-theme="dark"]'),
-    "all public pages load one shared full-width navbar with consistent responsive dropdown and theme styling");
+    "all public pages load one shared full-width navbar with consistent full-height responsive drawer and theme styling");
   check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
     /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
     /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
