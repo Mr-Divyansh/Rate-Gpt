@@ -1,0 +1,20 @@
+/* AdSense content styles - reusable ad placement styles */
+.ad-unit {
+  margin-block: clamp(24px, 4vw, 48px);
+  text-align: center;
+}
+
+.ad-unit--large {
+  margin-block: clamp(32px, 5vw, 64px);
+}
+
+/* Ensure ad containers don't overflow */
+.ad-container {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Prevent layout shifts around ads */
+.js .ad-container {
+  min-height: 50px;
+}
