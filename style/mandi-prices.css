@@ -1594,3 +1594,330 @@ html[lang="hi"] .mandi-hero-eyebrow {
   letter-spacing: 0;
   text-transform: none;
 }
+
+.page-prices .mandi-intro {
+  --mandi-hero-surface: #f7faf4;
+  --mandi-hero-ink: #10251a;
+  --mandi-hero-muted: #4f5f54;
+  --mandi-hero-green: #148340;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  min-height: min(780px, calc(100svh - 68px));
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: clamp(46px, 7vh, 84px) max(var(--gutter), calc((100vw - var(--wrap)) / 2)) 142px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--mandi-hero-surface);
+  box-shadow: none;
+  font-family: "Anek Latin", "Anek Devanagari", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.page-prices .mandi-intro::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, #f7faf4 0%, rgba(247, 250, 244, .98) 29%, rgba(247, 250, 244, .9) 41%, rgba(247, 250, 244, .58) 55%, rgba(247, 250, 244, 0) 74%);
+  content: "";
+  pointer-events: none;
+}
+
+.page-prices .mandi-intro .page-head-copy {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  justify-self: start;
+  width: min(660px, 56%);
+  max-width: 660px;
+  gap: clamp(15px, 2.2vh, 23px);
+  margin: 0;
+  padding: 0;
+}
+
+.page-prices .mandi-intro .page-head-copy > * {
+  margin-block: 0;
+}
+
+.page-prices .mandi-hero-eyebrow {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  min-height: 48px;
+  gap: 12px;
+  padding: 5px 17px 5px 8px;
+  border-color: rgba(32, 132, 66, .12);
+  background: rgba(224, 242, 222, .94);
+  color: #155e35;
+  font-size: .96rem;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.page-prices .mandi-hero-eyebrow::after {
+  position: absolute;
+  left: calc(100% + 20px);
+  width: clamp(44px, 11vw, 166px);
+  height: 1px;
+  background: rgba(35, 122, 64, .48);
+  content: "";
+}
+
+.page-prices .mandi-hero-eyebrow-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  color: #19833e;
+}
+
+.page-prices .mandi-hero-eyebrow-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.page-prices .mandi-intro h1 {
+  max-width: none;
+  color: var(--mandi-hero-ink);
+  font-size: clamp(3.35rem, 5.2vw, 5.15rem);
+  line-height: .96;
+  letter-spacing: -.055em;
+  text-wrap: pretty;
+}
+
+.page-prices .mandi-intro h1 > span {
+  display: block;
+}
+
+.page-prices .mandi-intro h1 .mandi-hero-live {
+  color: var(--mandi-hero-green);
+}
+
+.page-prices .mandi-hero-live::after {
+  display: block;
+  width: clamp(140px, 20vw, 250px);
+  height: 7px;
+  margin: 7px 0 0 22%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a5d83b 0%, #a5d83b 74%, rgba(165, 216, 59, 0) 100%);
+  content: "";
+  transform: rotate(-1.3deg);
+}
+
+.page-prices .mandi-intro .lede {
+  display: block;
+  max-width: 43ch;
+  color: var(--mandi-hero-muted);
+  font-size: clamp(1.05rem, 1.35vw, 1.23rem);
+  line-height: 1.55;
+}
+
+.page-prices .mandi-hero-highlights {
+  display: grid;
+  width: min(100%, 650px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page-prices .mandi-hero-highlights li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 16px;
+  color: var(--mandi-hero-ink);
+  font-size: .96rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.page-prices .mandi-hero-highlights li:first-child {
+  padding-inline-start: 0;
+}
+
+.page-prices .mandi-hero-highlights li + li {
+  border-inline-start: 1px solid rgba(29, 109, 57, .34);
+}
+
+.page-prices .mandi-hero-highlight-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcefd6;
+  color: #08733c;
+}
+
+.page-prices .mandi-hero-highlight-icon svg {
+  width: 27px;
+  height: 27px;
+}
+
+.page-prices .mandi-intro .sync {
+  max-width: 100%;
+  margin: 0;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .76);
+  box-shadow: none;
+  line-height: 1.4;
+}
+
+.page-prices .mandi-intro-visual {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 auto;
+  width: 74%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  aspect-ratio: auto;
+  clip-path: none;
+  box-shadow: none;
+}
+
+.page-prices .mandi-intro-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  object-fit: cover;
+  object-position: 12% center;
+}
+
+.page-prices .mandi-hero-wave {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: -1px;
+  display: block;
+  width: 100%;
+  height: clamp(76px, 8.5vw, 112px);
+  pointer-events: none;
+}
+
+.page-prices .mandi-hero-wave-ridge {
+  fill: #a7d839;
+}
+
+.page-prices .mandi-hero-wave-base {
+  fill: #07583a;
+}
+
+@media (max-width: 900px) {
+  .page-prices .mandi-intro {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 36px 0 122px;
+  }
+
+  .page-prices .mandi-intro::before {
+    background: linear-gradient(180deg, rgba(247, 250, 244, .84) 0%, rgba(247, 250, 244, .52) 41%, rgba(247, 250, 244, 0) 63%);
+  }
+
+  .page-prices .mandi-intro .page-head-copy {
+    width: auto;
+    max-width: 680px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 5vw, 44px);
+    gap: 17px;
+  }
+
+  .page-prices .mandi-intro h1 {
+    font-size: clamp(3rem, 7.2vw, 4.35rem);
+  }
+
+  .page-prices .mandi-intro-visual {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: clamp(270px, 53vw, 440px);
+    margin-top: 26px;
+  }
+
+  .page-prices .mandi-intro-visual img {
+    object-position: 20% center;
+  }
+
+  .page-prices .mandi-hero-wave {
+    height: 86px;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-prices .mandi-intro {
+    padding-top: 28px;
+    padding-bottom: 104px;
+  }
+
+  .page-prices .mandi-intro .page-head-copy {
+    gap: 15px;
+  }
+
+  .page-prices .mandi-hero-eyebrow {
+    min-height: 42px;
+    padding-inline: 7px 13px;
+    font-size: .83rem;
+  }
+
+  .page-prices .mandi-hero-eyebrow::after {
+    display: none;
+  }
+
+  .page-prices .mandi-intro h1 {
+    font-size: clamp(2.35rem, 9.2vw, 3.25rem);
+    line-height: 1;
+  }
+
+  .page-prices .mandi-hero-live::after {
+    width: 40%;
+    height: 5px;
+    margin-top: 4px;
+  }
+
+  .page-prices .mandi-hero-highlights li {
+    flex-direction: column;
+    gap: 7px;
+    padding-inline: 6px;
+    text-align: center;
+    font-size: .78rem;
+  }
+
+  .page-prices .mandi-hero-highlight-icon {
+    width: 43px;
+    height: 43px;
+    flex-basis: 43px;
+  }
+
+  .page-prices .mandi-hero-highlight-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .page-prices .mandi-intro .lede {
+    font-size: .98rem;
+  }
+
+  .page-prices .mandi-intro-visual {
+    height: clamp(250px, 76vw, 340px);
+    margin-top: 22px;
+  }
+
+  .page-prices .mandi-intro-visual img {
+    object-position: 70% center;
+  }
+}

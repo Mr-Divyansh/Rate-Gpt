@@ -918,3 +918,63 @@ html[data-theme="dark"] .source-card {
 html[data-theme="dark"] .team-card {
   box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
 }
+
+html[data-theme="dark"] .page-prices .mandi-intro {
+  --mandi-hero-surface: #101b14;
+  --mandi-hero-ink: #edf6ef;
+  --mandi-hero-muted: #c1d0c4;
+  --mandi-hero-green: #7cdda0;
+  border: 0;
+  background: var(--mandi-hero-surface);
+  box-shadow: none;
+}
+html[data-theme="dark"] .page-prices .mandi-intro::before {
+  background: linear-gradient(90deg, rgba(16, 27, 20, 1) 0%, rgba(16, 27, 20, .98) 29%, rgba(16, 27, 20, .9) 41%, rgba(16, 27, 20, .58) 55%, rgba(16, 27, 20, 0) 74%);
+}
+html[data-theme="dark"] .page-prices .mandi-hero-eyebrow {
+  border-color: rgba(145, 219, 165, .16);
+  background: rgba(29, 59, 39, .94);
+  color: #c5f0d1;
+}
+html[data-theme="dark"] .page-prices .mandi-hero-eyebrow-icon {
+  color: #8be2a7;
+}
+html[data-theme="dark"] .page-prices .mandi-hero-eyebrow::after {
+  background: rgba(138, 218, 160, .52);
+}
+html[data-theme="dark"] .page-prices .mandi-intro h1 {
+  color: var(--mandi-hero-ink);
+}
+html[data-theme="dark"] .page-prices .mandi-intro h1 .mandi-hero-live {
+  color: var(--mandi-hero-green);
+}
+html[data-theme="dark"] .page-prices .mandi-intro .lede {
+  color: var(--mandi-hero-muted);
+}
+html[data-theme="dark"] .page-prices .mandi-hero-highlights li {
+  color: #edf6ef;
+}
+html[data-theme="dark"] .page-prices .mandi-hero-highlights li + li {
+  border-inline-start-color: rgba(153, 216, 171, .34);
+}
+html[data-theme="dark"] .page-prices .mandi-hero-highlight-icon {
+  background: #1d432c;
+  color: #8fe1a9;
+}
+html[data-theme="dark"] .page-prices .mandi-intro .sync {
+  border-color: #36513f;
+  background: rgba(23, 39, 30, .92);
+  color: #c1d1c6;
+}
+html[data-theme="dark"] .page-prices .mandi-hero-wave-ridge {
+  fill: #5da938;
+}
+html[data-theme="dark"] .page-prices .mandi-hero-wave-base {
+  fill: #06452f;
+}
+
+@media (max-width: 900px) {
+  html[data-theme="dark"] .page-prices .mandi-intro::before {
+    background: linear-gradient(180deg, rgba(16, 27, 20, .84) 0%, rgba(16, 27, 20, .52) 41%, rgba(16, 27, 20, 0) 63%);
+  }
+}
