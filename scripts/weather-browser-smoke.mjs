@@ -79,7 +79,7 @@ try{
   assert.equal(weatherQueries.at(-1),"31.708,76.932");
   assert.match(await page.locator("#weatherStatus").innerText(),/accuracy.*42/i);
   const geoOptions=await page.evaluate(()=>window.__weatherGeoOptions);
-  assert.deepEqual(geoOptions,{enableHighAccuracy:false,timeout:8000,maximumAge:300000},
+  assert.deepEqual(geoOptions,{enableHighAccuracy:false,timeout:10000,maximumAge:0},
     viewport.name+": device location uses a bounded network-assisted request with a fresh cached position");
   pass(viewport.name+": device location uses fast cached/network-assisted coordinates and reports accuracy");
 
