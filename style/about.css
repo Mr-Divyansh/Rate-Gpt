@@ -575,7 +575,6 @@
   .team-card:hover { transform: none; }
 }
 
-<<<<<<< HEAD
 html[lang="hi"] .page-about .about-hero h1,
 html[lang="hi"] .page-about .section-heading h2 {
   line-height: 1.3;
@@ -587,7 +586,8 @@ html[lang="hi"] .page-about .section-kicker,
 html[lang="hi"] .page-about .team-role {
   letter-spacing: 0;
   text-transform: none;
-=======
+}
+
 /* Text-based brand fallback avoids a broken image when an optional logo asset is absent. */
 .team-logo-studio {
   display: flex;
@@ -610,5 +610,4 @@ html[lang="hi"] .page-about .team-role {
   font-size: .55rem;
   font-weight: 800;
   letter-spacing: .18em;
->>>>>>> 8798aa0efd9103e7cdd06c0adff00397a9ac58f5
 }
