@@ -348,7 +348,10 @@ body.page-weather {
   color: rgba(245, 255, 247, .82);
 }
 .weather-condition-icon {
-  display: none;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  object-fit: contain;
 }
 .weather-main-reading {
   display: flex;
