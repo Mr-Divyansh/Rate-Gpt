@@ -39,12 +39,11 @@
         <p data-i18n="weather.subtitle">Find current conditions for your village, town or city.</p>
         </div>
         <div class="weather-art">
-        <img src="/Images/weather.png" alt="" width="1254" height="1254" fetchpriority="high" decoding="async">
+        <img class="weather-background" src="/Images/weather.png" alt="" width="1254" height="1254" fetchpriority="high" decoding="async">
         <section class="weather-result" id="weatherResult" aria-live="polite" aria-label="Current weather" hidden>
           <div class="weather-result-top">
             <div class="weather-place-block"><span class="weather-result-label" id="weatherSourceLabel" data-i18n="weather.current">CURRENT CONDITIONS</span>
               <h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
-            <img class="weather-condition-icon" id="weatherIcon" alt="" width="96" height="96" hidden>
           </div>
           <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong>
             <div><span class="weather-condition" id="weatherCondition"></span><span class="weather-feels-like" id="weatherFeelsLike"></span></div></div>

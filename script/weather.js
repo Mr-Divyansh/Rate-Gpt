@@ -22,9 +22,8 @@ import { getLocale, onLangChange, t } from "./i18n.js";
   const forecast = document.getElementById("weatherForecast");
   const updated = document.getElementById("weatherUpdated");
   const sourceLabel = document.getElementById("weatherSourceLabel");
-  const weatherIcon = document.getElementById("weatherIcon");
 
-  if (![form,input,searchButton,locationButton,approximateButton,suggestions,result,errorBox,status,city,temperature,condition,feelsLike,details,forecast,updated,sourceLabel,weatherIcon].every(Boolean)) return;
+  if (![form,input,searchButton,locationButton,approximateButton,suggestions,result,errorBox,status,city,temperature,condition,feelsLike,details,forecast,updated,sourceLabel].every(Boolean)) return;
 
   const API = "https://api.weatherapi.com/v1";
   let searchController = null;
@@ -145,14 +144,6 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     temperature.textContent = `${current.temp_c}°C`;
     condition.textContent = current.condition?.text || t("weather.conditionUnavailable");
     feelsLike.textContent = `${t("weather.feelsLike")}: ${current.feelslike_c}°C`;
-    if (current.condition?.icon) {
-      weatherIcon.src = current.condition.icon.startsWith("//") ? `https:${current.condition.icon}` : current.condition.icon;
-      weatherIcon.alt = current.condition.text || t("weather.weatherIcon");
-      weatherIcon.hidden = false;
-    } else {
-      weatherIcon.removeAttribute("src");
-      weatherIcon.hidden = true;
-    }
     details.replaceChildren(
       detail(t("weather.humidity"),`${current.humidity}%`),
       detail(t("weather.wind"),`${current.wind_kph} km/h`),

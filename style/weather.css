@@ -285,7 +285,7 @@ body.page-weather {
   isolation: isolate;
 }
 
-.weather-art img {
+.weather-art > .weather-background {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -354,12 +354,6 @@ body.page-weather {
 .weather-result .weather-forecast-day > span,
 .weather-result .weather-forecast-note {
   color: rgba(245, 255, 247, .82);
-}
-.weather-condition-icon {
-  width: 72px;
-  height: 72px;
-  flex: 0 0 72px;
-  object-fit: contain;
 }
 .weather-main-reading {
   display: flex;
@@ -489,7 +483,6 @@ body.page-weather {
   .weather-detail { padding: 12px 10px; }
   .weather-main-reading { align-items: flex-start; gap: 14px; }
   .weather-temperature { font-size: clamp(2.2rem, 14vw, 3.6rem); }
-  .weather-condition-icon { width: 70px; height: 70px; flex-basis: 70px; }
   .weather-forecast { grid-template-columns: 1fr; }
   .weather-result { padding: 16px; gap: 10px; border-radius: 16px; }
 }

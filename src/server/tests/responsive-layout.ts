@@ -388,6 +388,13 @@ async function main() {
     weatherScript.includes('result.closest(".weather-art")?.classList.add("has-weather")') &&
     /@media\s*\(max-width:\s*940px\)[\s\S]*?\.weather-art\.has-weather\s*\{[^}]*grid-area:\s*result/s.test(weatherCss),
     "weather report overlays its image and remains visible on compact layouts");
+  check(/<img class="weather-background"/.test(weather) &&
+    /\.weather-art\s*>\s*\.weather-background\s*\{/.test(weatherCss) &&
+    !/\.weather-art\s+img\s*\{/.test(weatherCss) &&
+    !weather.includes('id="weatherIcon"') &&
+    !weatherScript.includes("weatherIcon") &&
+    !weatherCss.includes("weather-condition-icon"),
+    "weather card excludes the decorative provider icon and keeps background image styles scoped");
   check(/\.weather-forecast\s*\{[^}]*grid-template-columns:\s*repeat\(3/s.test(weatherCss) &&
     /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-forecast\s*\{\s*grid-template-columns:\s*1fr;/s.test(weatherCss),
     "three-day forecast cards collapse to a single column on mobile");
