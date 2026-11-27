@@ -315,7 +315,7 @@ async function main() {
     "unused Demo dropdown styles are removed from the shared header stylesheet");
 
   check(/\.menu-toggle\s*\{[^}]*display:\s*none/s.test(baseCss), "desktop navigation toggle is hidden by default");
-  check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
+  check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:\\s*block/s.test(baseCss),
     "mobile navigation exposes its menu toggle");
   check(/\.site-nav\s*\{[\s\S]*?grid-column:\s*auto;\s*grid-row:\s*auto;\s*order:\s*initial;/s.test(baseCss),
     "mobile drawer resets inherited horizontal-nav grid placement");
