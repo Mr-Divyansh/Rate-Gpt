@@ -315,11 +315,11 @@ async function main() {
     "unused Demo dropdown styles are removed from the shared header stylesheet");
 
   check(/\.menu-toggle\s*\{[^}]*display:\s*none/s.test(baseCss), "desktop navigation toggle is hidden by default");
-  check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:\\s*block/s.test(baseCss),
+  check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:\s*block/s.test(baseCss),
     "mobile navigation exposes its menu toggle");
   check(/\.site-nav\s*\{[\s\S]*?grid-column:\s*auto;\s*grid-row:\s*auto;\s*order:\s*initial;/s.test(baseCss),
     "mobile drawer resets inherited horizontal-nav grid placement");
-  check(/\.site-nav\s*\{[\s\S]*?margin:\\s*0;/s.test(baseCss),
+  check(/\.site-nav\s*\{[\s\S]*?margin:\s*0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
   check(/@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-nav\s*\{[^}]*justify-content:\s*flex-start;/s.test(homeCss),
     "homepage mobile drawer aligns links from the top instead of centering them below the header");
