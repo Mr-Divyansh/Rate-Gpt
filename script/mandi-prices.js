@@ -972,7 +972,16 @@ function renderSync() {
   text.textContent = data.fetchedAt
     ? t("sync.fetched", { time: formatDateTime(data.fetchedAt) })
     : t("sync.noFetchYet");
-  dot.dataset.state = data.fetchedAt ? "live" : "none";
+  const sourceUpdatedDate = data.upstreamUpdatedAt
+    ? new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit",
+      }).format(new Date(data.upstreamUpdatedAt))
+    : null;
+  const todayInIndia = indiaTodayIsoDate();
+  // Colour reflects the source dataset date, never the time this page fetched it.
+  dot.dataset.state = sourceUpdatedDate === todayInIndia
+    ? "fresh"
+    : sourceUpdatedDate && sourceUpdatedDate < todayInIndia ? "stale" : "none";
   const transparency = data.fetchedAt
     ? t("sync.transparency", {
         source: data.source || "Government of India OGD / AGMARKNET",
