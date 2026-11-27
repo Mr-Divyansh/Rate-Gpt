@@ -558,7 +558,7 @@ html[data-theme="dark"] .weather-search-divider {
 }
 html[data-theme="dark"] .weather-detail,
 html[data-theme="dark"] .weather-forecast-day {
-  background: rgba(25, 42, 32, .22);
+  background: rgba(0, 0, 0, .32);
 }
 html[data-theme="dark"] .weather-detail .value {
   color: var(--ink);

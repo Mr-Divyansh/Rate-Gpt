@@ -290,7 +290,7 @@ body.page-weather {
   position: absolute;
   z-index: 1;
   inset: 0;
-  background: linear-gradient(180deg, rgba(6, 23, 14, .22), rgba(6, 23, 14, .52));
+  background: linear-gradient(180deg, rgba(4, 16, 10, .38) 0%, rgba(4, 16, 10, .62) 100%);
   content: "";
   pointer-events: none;
 }
@@ -309,11 +309,11 @@ body.page-weather {
   overscroll-behavior: contain;
   border: none;
   border-radius: 24px;
-  background: rgba(9, 27, 18, .32);
+  background: rgba(6, 18, 11, .55);
   box-shadow: 0 20px 46px rgba(0, 0, 0, .32);
   color: #f5fff7;
-  backdrop-filter: blur(24px) saturate(1.12);
-  -webkit-backdrop-filter: blur(24px) saturate(1.12);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   min-width: 0;
@@ -380,7 +380,7 @@ body.page-weather {
   min-width: 0;
   padding: 12px 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, .14);
+  background: rgba(0, 0, 0, .22);
 }
 .weather-detail .label { font-size: .78rem; }
 .weather-detail .value {
@@ -409,7 +409,7 @@ body.page-weather {
   min-width: 0;
   padding: 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, .14);
+  background: rgba(0, 0, 0, .22);
 }
 .weather-forecast-day > strong { display: block; color: #b5edc7; font-size: .92rem; }
 .weather-forecast-day p {
