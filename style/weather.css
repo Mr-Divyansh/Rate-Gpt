@@ -448,11 +448,6 @@ body.page-weather {
 @keyframes weather-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 940px) {
-<<<<<<< HEAD
-  .weather-art.has-weather {
-    grid-area: result;
-  }
-=======
   .weather-col {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "intro" "search" "result";
@@ -469,7 +464,6 @@ body.page-weather {
   }
 
   .weather-intro { max-width: 680px; }
->>>>>>> 086c63e57b322adabcd04602e654c32b778f4492
 }
 
 @media (max-width: 650px) {
