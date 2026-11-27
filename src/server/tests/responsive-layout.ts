@@ -152,12 +152,12 @@ async function main() {
     "weather search input and action use a single-column mobile layout");
   check(/locationButton\.addEventListener\("click",\s*useDeviceLocation\)/.test(weatherScript) &&
     /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
-    /enableHighAccuracy\s*:\s*false/.test(weatherScript) &&
-    /timeout\s*:\s*10000/.test(weatherScript) &&
+    /enableHighAccuracy\s*:\s*true/.test(weatherScript) &&
+    /timeout\s*:\s*15000/.test(weatherScript) &&
     /maximumAge\s*:\s*0/.test(weatherScript) &&
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
-    "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
+    "one-shot device location prefers fresh high accuracy, a bounded timeout and opt-in approximate lookup");
 
   check(onboardingScript.includes("onboarding-continue") &&
     /class="btn btn-primary onboarding-continue" type="button"/.test(onboardingScript) &&
