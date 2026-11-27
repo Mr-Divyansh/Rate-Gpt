@@ -459,9 +459,17 @@ export async function fetchLivePrices(
 
   const seen = new Set<string>();
   const records: MandiRecord[] = [];
+  const requestedCommodity = options.commodity?.trim().toLocaleLowerCase();
+  let excludedCommodityNearMatches = false;
   for (const raw of rawRecords) {
     const mapped = mapUpstreamRecord(raw);
     if (!mapped) continue;
+    // OGD's commodity filter can return substring neighbours (e.g. Potato
+    // also returns Sweet Potato). Preserve the selected crop's exact meaning.
+    if (requestedCommodity && mapped.commodity.trim().toLocaleLowerCase() !== requestedCommodity) {
+      excludedCommodityNearMatches = true;
+      continue;
+    }
     const key = mapped.sourceRecordId
       ? `id:${mapped.sourceRecordId}`
       : [
@@ -507,7 +515,8 @@ export async function fetchLivePrices(
       limit,
       offset,
       nextOffset,
-      total,
+      // OGD's broader substring total is not an exact count after local filtering.
+      total: excludedCommodityNearMatches ? null : total,
       hasNext,
       upstreamHasNext,
       truncated: upstreamHasNext && !hasNext,

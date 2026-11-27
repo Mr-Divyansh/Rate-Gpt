@@ -40,6 +40,28 @@ const sourceRecords = [
     Modal_Price: "1,100",
   },
   {
+    id: "potato-1",
+    State: "Maharashtra",
+    District: "Pune",
+    Market: "Pune Market",
+    Commodity: "Potato",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "1,000",
+    Max_Price: "1,400",
+    Modal_Price: "1,200",
+  },
+  {
+    id: "sweet-potato-1",
+    State: "Maharashtra",
+    District: "Pune",
+    Market: "Pune Market",
+    Commodity: "Sweet Potato",
+    Arrival_Date: "13/11/2026",
+    Min_Price: "1,100",
+    Max_Price: "1,500",
+    Modal_Price: "1,300",
+  },
+  {
     id: "guava-1",
     State: "Gujarat",
     District: "Surat",
@@ -181,7 +203,12 @@ const upstream = http.createServer((req, res) => {
   let records = (sourceRecords as any[]).filter((record) =>
     filters.every(([parameter, field]) => {
       const filter = url.searchParams.get(parameter);
-      return !filter || String(record[field]) === filter;
+      if (!filter) return true;
+      const actual = String(record[field]);
+      // Mirror OGD's substring matching so exact post-filtering is covered.
+      return parameter === "filters[commodity]"
+        ? actual.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        : actual === filter;
     }),
   );
   const query = url.searchParams.get("q")?.toLocaleLowerCase();
@@ -409,6 +436,21 @@ async function main() {
     assert(filtered.meta.total === 2 && filtered.data.length === 1, "upstream totals are retained while duplicate daily records are removed");
     assert(filtered.meta.upstreamHasNext === false && filtered.meta.truncated === false, "price pagination distinguishes upstream completion from local boundary truncation");
     assert(filtered.meta.cacheStatus === "live" && filtered.meta.fetchedAt, "live source and fetch timestamp are returned");
+
+    const potatoResponse = await fetch(
+      `${base}/api/v1/prices?state=Maharashtra&district=Pune&market=Pune%20Market&commodity=Potato&limit=10`,
+    );
+    const potato = await potatoResponse.json();
+    assert(
+      potatoResponse.status === 200 &&
+        potato.data.length === 1 &&
+        potato.data[0].commodity === "Potato",
+      "exact commodity selection excludes substring neighbours such as Sweet Potato",
+    );
+    assert(
+      potato.meta.total === null && potato.meta.hasNext === false,
+      "exact post-filter does not publish OGD's broader substring total as an exact count",
+    );
     assert(
       filtered.meta.upstreamUpdatedAt === "2026-11-13T20:00:47.000Z" &&
         filtered.meta.upstreamUpdatedAt !== filtered.meta.fetchedAt,
