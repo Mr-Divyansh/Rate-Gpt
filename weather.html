@@ -15,6 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/base.css">
   <link rel="stylesheet" href="style/weather.css?v=weather-polish-20261124">
+  <link rel="stylesheet" href="/style/adsense-content.css">
   <link rel="canonical" href="https://rate-gpt.vercel.app/weather.html">
   <meta property="og:type" content="website"><meta property="og:site_name" content="Rate-GPT">
   <meta property="og:title" content="Weather | Rate-GPT"><meta property="og:description" content="Check current weather for your village, town or city with Rate-GPT.">
@@ -81,6 +82,34 @@
         </section>
         <p class="weather-source" data-i18n="weather.source">Current conditions provided by WeatherAPI.</p>
       </section>
+    </section>
+
+    <section class="editorial-section weather-editorial wrap" aria-labelledby="weatherGuideTitle">
+      <div class="editorial-heading">
+        <p class="editorial-kicker" data-en="A practical guide to local forecasts" data-hi="स्थानीय मौसम पूर्वानुमान की उपयोगी जानकारी">A practical guide to local forecasts</p>
+        <h2 id="weatherGuideTitle" data-en="How to read the weather information on Rate-GPT" data-hi="Rate-GPT पर मौसम की जानकारी कैसे समझें">How to read the weather information on Rate-GPT</h2>
+        <p data-en="Use the selected place and the time of the observation before interpreting a temperature, condition or forecast. Weather can vary between nearby villages, valleys and higher locations, so a result for one place may not describe the conditions across an entire district." data-hi="तापमान, मौसम की स्थिति या पूर्वानुमान समझने से पहले चुनी गई जगह और जानकारी का समय देखें। पास के गाँवों, घाटियों और ऊँचाई वाले स्थानों में मौसम अलग हो सकता है, इसलिए एक जगह का परिणाम पूरे जिले की स्थिति नहीं बताता।">Use the selected place and the time of the observation before interpreting a temperature, condition or forecast. Weather can vary between nearby villages, valleys and higher locations, so a result for one place may not describe the conditions across an entire district.</p>
+      </div>
+      <div class="editorial-grid">
+        <article class="editorial-card">
+          <h3 data-en="Choose the closest matching place" data-hi="सबसे सही जगह चुनें">Choose the closest matching place</h3>
+          <p data-en="Search by village, town, district or PIN code, then select the matching suggestion. Check the displayed place name and region before relying on the result. If the exact village is unavailable, a nearby town is only an approximation—not a measurement from your field." data-hi="गाँव, कस्बे, जिले या PIN code से खोजें और फिर सही सुझाव चुनें। परिणाम पर भरोसा करने से पहले दिखाई गई जगह और क्षेत्र जाँचें। यदि गाँव उपलब्ध न हो, तो पास के कस्बे का मौसम केवल अनुमान है—आपके खेत का सीधा माप नहीं।">Search by village, town, district or PIN code, then select the matching suggestion. Check the displayed place name and region before relying on the result. If the exact village is unavailable, a nearby town is only an approximation—not a measurement from your field.</p>
+        </article>
+        <article class="editorial-card">
+          <h3 data-en="Understand current conditions and forecasts" data-hi="वर्तमान स्थिति और पूर्वानुमान समझें">Understand current conditions and forecasts</h3>
+          <p data-en="Current conditions describe the provider’s latest available observation for the selected location. The three-day outlook is a forecast, not a promise. Forecast details can change as new observations and model updates become available." data-hi="वर्तमान स्थिति चुनी गई जगह के लिए प्रदाता की उपलब्ध नवीनतम जानकारी दिखाती है। तीन दिन का पूर्वानुमान अनुमान है, पक्की बात नहीं। नई जानकारी और मॉडल अपडेट आने पर पूर्वानुमान बदल सकता है।">Current conditions describe the provider’s latest available observation for the selected location. The three-day outlook is a forecast, not a promise. Forecast details can change as new observations and model updates become available.</p>
+        </article>
+        <article class="editorial-card">
+          <h3 data-en="Read the measurements in context" data-hi="माप को संदर्भ के साथ पढ़ें">Read the measurements in context</h3>
+          <p data-en="Temperature, feels-like temperature, humidity, wind, pressure and UV are different measurements. Wind is shown in kilometres per hour and pressure in millibars. A single measurement does not describe every local condition or determine whether it is safe to work outdoors." data-hi="तापमान, महसूस होने वाला तापमान, नमी, हवा, दबाव और UV अलग-अलग माप हैं। हवा किलोमीटर प्रति घंटा और दबाव millibar में दिखाया जाता है। कोई एक माप हर स्थानीय स्थिति नहीं बताता और न ही यह तय करता है कि बाहर काम करना सुरक्षित है।">Temperature, feels-like temperature, humidity, wind, pressure and UV are different measurements. Wind is shown in kilometres per hour and pressure in millibars. A single measurement does not describe every local condition or determine whether it is safe to work outdoors.</p>
+        </article>
+      </div>
+      <div class="editorial-note">
+        <h3 data-en="Use forecasts carefully for farm decisions" data-hi="खेती के फैसलों में पूर्वानुमान सावधानी से इस्तेमाल करें">Use forecasts carefully for farm decisions</h3>
+        <p data-en="Do not use a general forecast as the only basis for irrigation, spraying, harvesting, travel or other weather-sensitive work. Check the latest local conditions and official warnings from the India Meteorological Department, and follow guidance from qualified local agricultural or disaster-management authorities when relevant." data-hi="सिंचाई, छिड़काव, कटाई, यात्रा या मौसम पर निर्भर दूसरे कामों के लिए सामान्य पूर्वानुमान को अकेला आधार न बनाएँ। नवीनतम स्थानीय स्थिति और भारत मौसम विज्ञान विभाग की आधिकारिक चेतावनियाँ देखें। ज़रूरत पड़ने पर योग्य स्थानीय कृषि या आपदा-प्रबंधन अधिकारियों की सलाह मानें।">Do not use a general forecast as the only basis for irrigation, spraying, harvesting, travel or other weather-sensitive work. Check the latest local conditions and official warnings from the India Meteorological Department, and follow guidance from qualified local agricultural or disaster-management authorities when relevant.</p>
+        <p class="editorial-source" data-en="Weather data provider: WeatherAPI. Rate-GPT displays third-party information and does not operate weather stations or issue official warnings." data-hi="मौसम डेटा प्रदाता: WeatherAPI। Rate-GPT तीसरे पक्ष की जानकारी दिखाता है; यह मौसम स्टेशन नहीं चलाता और आधिकारिक चेतावनी जारी नहीं करता।">Weather data provider: WeatherAPI. Rate-GPT displays third-party information and does not operate weather stations or issue official warnings.</p>
+        <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener noreferrer" data-en="India Meteorological Department — official website ↗" data-hi="भारत मौसम विज्ञान विभाग — आधिकारिक वेबसाइट ↗">India Meteorological Department — official website ↗</a>
+      </div>
     </section>
   </main>
   <footer class="site-footer"></footer>

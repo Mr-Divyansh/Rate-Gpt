@@ -46,6 +46,10 @@ async function main() {
     readFile("public/theme-init.js", "utf8"),
   ]);
 
+  const [aboutContributionsCss, aboutContributionsScript] = await Promise.all([
+    readFile("style/about-contributions.css", "utf8"),
+    readFile("script/about-contributions.js", "utf8"),
+  ]);
   const { calculateSpotlightGeometry } = await import("../../../script/mandi-nav-guide.js" as string);
 
   for (const [file, html] of [["index.html", home], ["mandi-prices.html", prices]] as const) {
@@ -75,11 +79,11 @@ async function main() {
     sharedNavbarCss.includes('body header.site-header') &&
     sharedNavbarCss.includes('width: 100% !important') &&
     sharedNavbarCss.includes('border-radius: 0 !important') &&
-    sharedNavbarCss.includes('grid-template-columns: repeat(2, minmax(0, 1fr))') &&
+    sharedNavbarCss.includes('height: 100dvh !important') &&
     sharedNavbarCss.includes('.site-nav.is-open') &&
-    sharedNavbarCss.includes('position: absolute !important') &&
+    sharedNavbarCss.includes('position: fixed !important') &&
     sharedNavbarCss.includes('html[data-theme="dark"]'),
-    "all public pages load one shared full-width navbar with consistent responsive dropdown and theme styling");
+    "all public pages load one shared full-width navbar with consistent full-height responsive drawer and theme styling");
   check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
     /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
     /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
@@ -212,7 +216,7 @@ async function main() {
   check(mandiNavGuideScript.indexOf('pricesLink.classList.add("is-guide-highlighted")') <
       mandiNavGuideScript.indexOf("const rect = pricesLink.getBoundingClientRect()") &&
     mandiNavGuideScript.includes('siteNav?.addEventListener("transitionend", onDrawerTransitionEnd)') &&
-    mandiNavGuideScript.includes('event.propertyName === "transform"') &&
+    mandiNavGuideScript.includes('event.propertyName === "clip-path"') &&
     mandiNavGuideScript.includes("drawerFallbackTimer = window.setTimeout(schedulePositionGuide, 400)") &&
     mandiNavGuideScript.includes('guide.style.setProperty("--spot-rx", geometry.radiusX + "px")') &&
     mandiNavGuideCss.includes("ellipse var(--spot-rx, 150px) var(--spot-ry, 38px)") &&
@@ -315,6 +319,24 @@ async function main() {
     "mobile drawer has an explicit visible state without off-canvas transforms");
   check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
+
+
+  check(about.includes('href="style/about-contributions.css"') &&
+    about.includes('/script/about-contributions.js') &&
+    aboutContributionsCss.includes('grid-template-columns:1fr') &&
+    aboutContributionsScript.includes('bar.animate(') &&
+    !aboutContributionsScript.includes('bar.style.width'),
+    "About contribution cards and charts load with mobile stacking and CSP-safe animated bars");
+  check(about.includes('role="img" aria-label="D Web Studio logo"') &&
+    about.includes('Images/AbhayWebDev.jpeg') &&
+    about.includes('loading="lazy" decoding="async"'),
+    "About team branding has a non-broken fallback and defers the below-the-fold teammate image");
+  check(sharedNavbarCss.includes('inset: 0 0 0 auto !important') &&
+    sharedNavbarCss.includes('overflow-y: auto !important') &&
+    sharedNavbarCss.includes('overscroll-behavior: contain') &&
+    sharedNavbarCss.includes('visibility: hidden !important') &&
+    sharedNavbarCss.includes('visibility: visible !important'),
+    "tablet and mobile drawer covers the viewport height, scrolls vertically and has explicit closed/open states");
 
   check(/\.price-table\s*\{[^}]*min-width:\s*760px;/s.test(pricesCss),
     "desktop price table retains a readable minimum width");

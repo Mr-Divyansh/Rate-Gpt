@@ -8,7 +8,7 @@
     "start": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --check script/i18n.js && node --check script/weather.js && node --check public/service-worker.js && node --check scripts/weather-browser-smoke.mjs && tsx src/server/tests/verify.ts",
+    "test": "node --check script/i18n.js && node --check script/about-contributions.js && node --check script/weather.js && node --check public/service-worker.js && node --check scripts/weather-browser-smoke.mjs && tsx src/server/tests/verify.ts",
     "test:integration": "tsx src/server/tests/api.integration.ts",
     "test:agmarknet2": "tsx src/server/tests/agmarknet2.ts",
     "test:agmarknet2:live": "tsx src/server/tests/agmarknet2-live.ts",
@@ -28,20 +28,20 @@
   "dependencies": {
     "@types/node": "^22.14.0",
     "compression": "^1.8.2",
-    "dotenv": "^17.2.3",
-    "express": "^4.21.2",
-    "express-rate-limit": "^8.7.2",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
     "helmet": "^8.3.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
     "esbuild": "^0.28.0",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
-    "vite": "^6.4.6"
+    "vite": "^8.3.8"
   },
   "engines": {
     "node": ">=20.0.0"

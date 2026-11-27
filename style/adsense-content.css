@@ -15,6 +15,7 @@
 }
 .editorial-heading h2 { max-width: 26ch; }
 .editorial-heading > p:last-child { color: var(--muted); font-size: 1.08rem; }
+<<<<<<< HEAD
 .page-home .home-editorial {
   position: relative;
   z-index: 5;
@@ -40,6 +41,8 @@
   text-shadow: none;
 }
 .page-home .home-editorial .editorial-heading > p:last-child { color: #52635a; }
+=======
+>>>>>>> 8798aa0efd9103e7cdd06c0adff00397a9ac58f5
 .editorial-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
