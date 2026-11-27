@@ -319,7 +319,7 @@ async function main() {
     "mobile navigation exposes its menu toggle");
   check(/\.site-nav\s*\{[\s\S]*?grid-column:auto;\s*grid-row:auto;\s*order:initial;/s.test(baseCss),
     "mobile drawer resets inherited horizontal-nav grid placement");
-  check(/\.site-nav\s*\{[\s\S]*?margin:0;/s.test(baseCss),
+  check(/\.site-nav\s*\{[\s\S]*?margin:\\s*0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
   check(/@media \(max-width: 900px\)[\s\S]*?\.page-home \.site-nav\s*\{[^}]*justify-content:\s*flex-start;/s.test(homeCss),
     "homepage mobile drawer aligns links from the top instead of centering them below the header");
@@ -332,7 +332,7 @@ async function main() {
     "mobile drawer remains viewport-fixed, vertically scrollable and safe-area padded");
   check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
     "mobile drawer has an explicit visible state without off-canvas transforms");
-  check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:auto;/s.test(baseCss),
+  check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:\\s*auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 
 
