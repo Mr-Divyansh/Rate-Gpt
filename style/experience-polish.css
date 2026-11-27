@@ -111,3 +111,108 @@ body header.site-header .lang-toggle button[aria-pressed="true"] {
 .page-home .hero-kicker-icon svg { width: 19px; height: 19px; }
 .page-home .play-mark svg { width: 14px; height: 14px; }
 .page-weather .weather-location-icon svg { width: 23px; height: 23px; }
+
+
+/* ---------- focused visual corrections from the homepage review ---------- */
+/* The hero copy is intentionally unboxed: remove any residual border/outline. */
+.page-home .hero-copy {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Keep the dashboard clean; its green surface provides enough separation. */
+.page-home .board {
+  border: 0 !important;
+  border-radius: 24px;
+  padding: clamp(18px, 2vw, 26px);
+  box-shadow: 0 22px 58px rgba(16, 48, 31, .16);
+}
+.page-home .board-head {
+  gap: 16px;
+  padding: 2px 4px 18px;
+}
+.page-home .board-head h2 {
+  gap: 15px;
+}
+.page-home .board-chart-mark {
+  display: inline-grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .12);
+  line-height: 1;
+}
+.page-home .board-chart-mark svg {
+  width: 21px;
+  height: 21px;
+}
+.page-home .board-rows {
+  gap: 9px;
+}
+.page-home .board-row {
+  min-height: 58px;
+  padding: 10px 14px;
+  border-radius: 14px;
+}
+.page-home .board-foot {
+  margin-top: 10px;
+  padding: 11px 4px 0;
+}
+
+/* Restore the intended forest-green footer instead of a near-white panel. */
+.site-footer {
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(111, 170, 119, .2), transparent 36%),
+    linear-gradient(135deg, #174d38 0%, #123f2e 58%, #0e3528 100%) !important;
+}
+.site-footer .brand-text strong,
+.site-footer .footer-heading { color: #f5f8f1; }
+.site-footer .footer-about p,
+.site-footer .footer-source,
+.site-footer .footer-official-link,
+.site-footer .footer-nav a,
+.site-footer .footer-hours,
+.site-footer .footer-help-text { color: #d4e4d7; }
+.site-footer .footer-bottom {
+  border-top-color: rgba(224, 239, 225, .2);
+  color: #c5d8c9;
+}
+.site-footer .footer-help {
+  background: rgba(255, 255, 255, .075);
+  border-color: rgba(226, 240, 226, .2);
+}
+html[data-theme="dark"] .site-footer {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(79, 157, 108, .16), transparent 40%),
+    linear-gradient(135deg, #17251d 0%, #101a14 100%) !important;
+}
+
+/* Smoothly interpolate theme-dependent dashboard surfaces where View Transitions
+   are unavailable; the existing animated theme button/reveal remains unchanged. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme] .page-home .board,
+  html[data-theme] .page-home .board-head,
+  html[data-theme] .page-home .board-head h2,
+  html[data-theme] .page-home .board-chart-mark,
+  html[data-theme] .page-home .board-meta,
+  html[data-theme] .page-home .board-row,
+  html[data-theme] .page-home .board-foot,
+  html[data-theme] .page-home .site-footer {
+    transition:
+      background-color .38s cubic-bezier(.22, 1, .36, 1),
+      color .38s cubic-bezier(.22, 1, .36, 1),
+      border-color .38s cubic-bezier(.22, 1, .36, 1),
+      box-shadow .38s cubic-bezier(.22, 1, .36, 1);
+  }
+}
+@media (max-width: 760px) {
+  .page-home .board { padding: 16px; border-radius: 20px; }
+  .page-home .board-head { padding-bottom: 14px; }
+  .page-home .board-head h2 { gap: 12px; }
+  .page-home .board-chart-mark { flex-basis: 34px; width: 34px; height: 34px; }
+  .page-home .board-row { min-height: 52px; padding: 9px 11px; }
+}
