@@ -2,6 +2,7 @@ import { t, onLangChange } from "./i18n.js";
 import { hydrateIcons } from "./icons.js";
 import { fetchPrices } from "./api.js";
 import { showFirstVisitWelcome } from "./onboarding.js";
+import { attachImageFallback, showImageFallback } from "./crop-image-fallback.js";
 import {
   spreadAxis, cropNames, createRange, createSparkline, formatDate, formatPrice, priceNumber,
 } from "./rate-ui.js";
@@ -88,6 +89,7 @@ function cropArtwork(commodity) {
 
   if (match) {
     const image = document.createElement("img");
+    attachImageFallback(image);
     image.src = `/Images/Vegetables/${match[1]}`;
     image.alt = "";
     image.loading = "lazy";
@@ -96,17 +98,11 @@ function cropArtwork(commodity) {
     return art;
   }
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "1.8");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  stem.setAttribute("d", "M12 20v-8m0 3c-4.5 0-7-2.6-7-6 4.7 0 7 2.2 7 6Zm0-3c0-4.1 2.4-6.5 7-6.5 0 3.8-2.4 6.5-7 6.5Z");
-  svg.append(stem);
-  art.append(svg);
+  const image = document.createElement("img");
+  image.alt = "";
+  attachImageFallback(image);
+  showImageFallback(image);
+  art.append(image);
   return art;
 }
 

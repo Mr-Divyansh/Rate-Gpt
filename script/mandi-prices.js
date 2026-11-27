@@ -10,6 +10,7 @@ import {
   formatDate, formatDateTime, formatPrice,
 } from "./rate-ui.js";
 import { buildPreviousObservationIndex } from "./price-comparison.js";
+import { attachImageFallback, showImageFallback } from "./crop-image-fallback.js";
 import {
   createCsvFilename, fetchAllMatchingRecords, recordsToCsv,
 } from "./csv-export.js";
@@ -467,9 +468,9 @@ function showCommodityImage(target, request) {
     target.placeholder.hidden = true;
     return;
   }
-  target.placeholder.textContent = "Photo unavailable";
-  target.placeholder.classList.add("unavailable");
-  target.image.removeAttribute("src");
+  target.artwork.classList.add("has-photo");
+  target.placeholder.hidden = true;
+  showImageFallback(target.image);
 }
 
 async function startNextCommodityImage() {
@@ -548,26 +549,33 @@ function commodityArtwork(record) {
   artwork.append(placeholder);
 
   const photo = findCommodityImage(record.commodity);
-  if (!photo) {
-    placeholder.textContent = commodityImageManifestLoaded ? "Photo unavailable" : "Loading photo…";
-    if (commodityImageManifestLoaded) placeholder.classList.add("unavailable");
+  if (!photo && !commodityImageManifestLoaded) {
+    placeholder.textContent = "Loading photo…";
     return artwork;
   }
 
   const image = document.createElement("img");
   image.className = "crop-photo";
-  image.alt = `${photo.name} photograph`;
+  image.alt = photo ? `${photo.name} photograph` : "Crop photo coming soon";
   image.decoding = "async";
   image.fetchPriority = "low";
   image.width = 320;
   image.height = 180;
-  image.addEventListener("error", () => {
+  attachImageFallback(image, () => {
     artwork.classList.remove("has-photo");
     placeholder.textContent = "Photo unavailable";
     placeholder.classList.add("unavailable");
     placeholder.hidden = false;
-  }, { once: true });
+  });
   artwork.append(image);
+
+  if (!photo) {
+    artwork.classList.add("has-photo");
+    placeholder.hidden = true;
+    showImageFallback(image);
+    return artwork;
+  }
+
   enqueueCommodityImage({ src: photo.src, image, artwork, placeholder });
   return artwork;
 }

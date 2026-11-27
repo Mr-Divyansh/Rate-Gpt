@@ -55,6 +55,31 @@
 }
 .editorial-heading h2 { max-width: 26ch; }
 .editorial-heading > p:last-child { color: var(--muted); font-size: 1.08rem; }
+.page-home .home-editorial {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: clamp(24px, 5vw, 88px);
+  background: #f8f8ef;
+  border-radius: 0;
+  isolation: isolate;
+}
+.page-home .home-editorial .editorial-heading {
+  max-width: 76ch;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.page-home .home-editorial .editorial-kicker { color: #17613f; }
+.page-home .home-editorial .editorial-heading h2 {
+  color: #102c22;
+  text-shadow: none;
+}
+.page-home .home-editorial .editorial-heading > p:last-child { color: #52635a; }
 .editorial-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

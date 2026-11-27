@@ -113,6 +113,21 @@ async function main() {
   check(/@media \(max-width: 1100px\) and \(min-width: 761px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;/s.test(homeCss) &&
     /@media \(max-width: 760px\)[\s\S]*?\.page-home \.hero-farmer\s*\{[^}]*position:\s*relative;[\s\S]*?grid-row:\s*2;[\s\S]*?opacity:\s*1;/s.test(homeCss),
     "tablet and mobile hero artwork stacks without obscuring copy or the mandi panel");
+  const pricesHero = prices.match(/<section class="page-head mandi-intro wrap"[\s\S]*?<\/section>/)?.[0] ?? "";
+  check(pricesHero.includes("Real-Time Market Data") &&
+    pricesHero.includes("Mandi Prices") &&
+    pricesHero.includes("Live &amp; Updated") &&
+    pricesHero.includes("Real-Time Prices") &&
+    pricesHero.includes("Market Trends") &&
+    pricesHero.includes("Better Decisions") &&
+    pricesHero.includes("/Images/Farmer%20Overlooking%20a%20Bustling%20Mandi.png") &&
+    !pricesHero.includes('href="#stateSelect"') &&
+    !pricesHero.includes("mandi-hero-actions") &&
+    !/<(?:select|input|textarea)\b/i.test(pricesHero) &&
+    prices.includes('id="stateSelect"') &&
+    prices.includes('id="districtSelect"') &&
+    /@media \(max-width: 900px\)[\s\S]*?\.page-prices \.mandi-intro-visual\s*\{[^}]*position:\s*relative;[\s\S]*?height:/s.test(pricesCss),
+    "Mandi hero matches the requested design while preserving selectors below it and stacking its photo responsively");
   check(serviceWorker.includes('const CACHE_NAME = "rate-gpt-shell-v3"') &&
     serviceWorker.includes('"/theme-init.js"') &&
     serviceWorker.includes('if (url.pathname.startsWith("/api/")) return;'),
@@ -321,7 +336,7 @@ async function main() {
     "mobile drawer backdrop receives pointer input only when visible");
 
 
-  check(about.includes('href="style/about-contributions.css"') &&
+  check(/href="style\/about-contributions\.css(?:\?[^"]*)?"/.test(about) &&
     about.includes('/script/about-contributions.js') &&
     aboutContributionsCss.includes('grid-template-columns:1fr') &&
     aboutContributionsScript.includes('bar.animate(') &&

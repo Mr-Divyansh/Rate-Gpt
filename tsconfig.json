@@ -23,6 +23,7 @@
     "noEmit": true
   },
   "exclude": [
-    "dist"
+    "dist",
+    "Rate-Gpt"
   ]
 }

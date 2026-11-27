@@ -20,8 +20,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/base.css">
-  <link rel="stylesheet" href="style/mandi-prices.css?v=prices-square-images-20261126">
+  <link rel="stylesheet" href="style/mandi-prices.css?v=prices-photo-hero-20261127">
   <link rel="stylesheet" href="/style/adsense-content.css">
+  <link rel="stylesheet" href="/style/mandi-finder-guide.css">
     <link rel="canonical" href="https://rate-gpt.vercel.app/mandi-prices.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Rate-GPT">
@@ -34,6 +35,7 @@
     <meta name="twitter:description" content="Explore government-reported crop prices at Indian mandis. Filter by state, district, market and crop with Rate-GPT.">
     <meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
     <link rel="stylesheet" href="/style/shared-navbar.css?v=shared-nav-20261126">
+    <link rel="stylesheet" href="/style/theme.css?v=theme-mandi-about-polish-20261127">
   </head>
 <body class="page-prices">
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
@@ -42,8 +44,47 @@
   <main id="main-content" tabindex="-1">
     <section class="page-head mandi-intro wrap" aria-labelledby="pricesHeroTitle">
       <div class="page-head-copy">
-        <h1 id="pricesHeroTitle" data-i18n="prices.title">Latest government-reported mandi prices</h1>
-        <p class="lede" data-i18n="prices.lede">Choose a mandi to see the prices recorded there. Search by crop name in English or Hindi.</p>
+        <p class="mandi-hero-eyebrow">
+          <span class="mandi-hero-eyebrow-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 20h18M5.5 17v-5m5 5V8m5 9v-7m5 7V4M4 9l5-3 4 2 7-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span data-i18n="prices.eyebrow">Real-Time Market Data</span>
+        </p>
+        <h1 id="pricesHeroTitle">
+          <span data-i18n="prices.title">Mandi Prices</span>
+          <span class="mandi-hero-live" data-i18n="prices.live">Live &amp; Updated</span>
+        </h1>
+        <p class="lede" data-i18n="prices.lede">Get the latest mandi prices for crops and vegetables across India.</p>
+        <ul class="mandi-hero-highlights" aria-label="Rate-GPT benefits">
+          <li>
+            <span class="mandi-hero-highlight-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="m13.4 2.5-8 11h5.4l-.3 8 8.1-11.2h-5.3l.1-7.8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span data-i18n="prices.benefitPrices">Real-Time Prices</span>
+          </li>
+          <li>
+            <span class="mandi-hero-highlight-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 19.5h16M6.5 16v-4m5 4V8m5 8v-6M5 8.5l5-3 4 2 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16.5 3.5H19v2.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span data-i18n="prices.benefitTrends">Market Trends</span>
+          </li>
+          <li>
+            <span class="mandi-hero-highlight-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3 19 6v5.5c0 4.4-2.9 7.7-7 9.5-4.1-1.8-7-5.1-7-9.5V6l7-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span data-i18n="prices.benefitDecisions">Better Decisions</span>
+          </li>
+        </ul>
         <p class="sync" id="syncChip">
           <span class="sync-dot" id="syncDot" data-state="none" aria-hidden="true"></span>
           <span id="syncText" data-i18n="sync.onSearch">Latest government-reported mandi prices · fetched on demand</span>
@@ -54,6 +95,10 @@
              alt="A farmer overlooking a busy Indian agricultural mandi with traders, produce and grain sacks"
              width="1648" height="928" fetchpriority="high" decoding="async">
       </div>
+      <svg class="mandi-hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path class="mandi-hero-wave-ridge" d="M0 62C230 24 410 86 690 89c280 2 500-64 750-54v85H0Z"/>
+        <path class="mandi-hero-wave-base" d="M0 82c260-40 450 30 730 32 300 2 490-61 710-57v63H0Z"/>
+      </svg>
     </section>
 
     <!-- Step 1: pick a mandi (inline, no dialog) -->
@@ -191,7 +236,6 @@
   <footer class="site-footer"></footer>
 
   <script type="module" src="/script/global-nav.js"></script>
-  <link rel="stylesheet" href="/style/mandi-finder-guide.css">
   <script type="module" src="/script/mandi-prices.js"></script>
   <script type="module" src="/script/mandi-finder-guide.js"></script>
 </body>

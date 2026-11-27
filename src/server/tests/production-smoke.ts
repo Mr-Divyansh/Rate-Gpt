@@ -156,21 +156,10 @@ async function main(): Promise<void> {
     `/api/v1/prices?state=Himachal%20Pradesh&date=${encodeURIComponent(priorReportDate)}&limit=100`,
   );
   check(
-    hpPriorDay.response.status === 200 &&
-      hpPriorDay.body?.success === true &&
-      Array.isArray(hpPriorDay.body?.data),
-    "OGD accepts an exact historical arrival-date query",
+    hpPriorDay.response.status === 410 &&
+      hpPriorDay.body?.error?.code === "HISTORICAL_DATE_UNAVAILABLE",
+    "historical arrival-date queries are explicitly unavailable",
   );
-  if (hpPriorDay.body?.data?.length) {
-    check(
-      hpPriorDay.body.data.every((record: any) =>
-        record.state === "Himachal Pradesh" && record.arrival_date === priorReportDate
-      ),
-      "historical date results contain only the requested state and arrival date",
-    );
-  } else {
-    console.log(`INFO OGD returned no Himachal Pradesh rows for ${priorReportDate}; the current-daily resource does not expose a historical observation for that date.`);
-  }
 
   const hpPotatoPrices = await json("/api/v1/prices?state=Himachal%20Pradesh&commodity=Potato&limit=100");
   check(
@@ -226,7 +215,11 @@ async function main(): Promise<void> {
 
   const page = await request("/mandi-prices.html");
   const html = await page.text();
-  check(page.status === 200 && /<title[^>]*>Rate-GPT<\/title>/i.test(html), "public mandi prices page is served");
+  check(
+    page.status === 200 &&
+      /<title[^>]*>[^<]*Mandi Prices[^<]*Rate-GPT[^<]*<\/title>/i.test(html),
+    "public mandi prices page is served with its descriptive title",
+  );
   check(
     /id=["']stateSelect["']/.test(html) &&
       /id=["']districtSelect["']/.test(html) &&
