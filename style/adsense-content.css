@@ -40,6 +40,7 @@
   margin-top: 4px;
   border-radius: var(--r-s);
 }
+.editorial-section {
   display: grid;
   gap: clamp(18px, 3vw, 28px);
   padding-block: clamp(36px, 6vw, 64px);
