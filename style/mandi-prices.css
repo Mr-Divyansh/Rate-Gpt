@@ -1403,156 +1403,194 @@
   font-size: .74rem;
 }
 
-.page-prices .price-card-meta > span:first-child::before {
-  content: "";
-}
-
-.page-prices .price-card-meta .delta.is-none {
-  color: #88958e;
-}
-
-@media (min-width: 761px) and (max-width: 1100px) {
-  .page-prices .mobile-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 760px) {
-  .page-prices .mobile-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .page-prices .price-card {
-    min-height: 318px;
-  }
-
-  .page-prices .crop-art,
-  .page-prices .crop-art .crop-photo {
-    min-height: 122px;
-    height: 122px;
-  }
-}
-
-@media (max-width: 420px) {
-  .page-prices .mobile-list {
-    grid-template-columns: 1fr;
-  }
-
-  .page-prices .price-card {
-    min-height: 0;
-    padding: 14px;
-  }
-
-  .page-prices .crop-art,
-  .page-prices .crop-art .crop-photo {
-    min-height: 138px;
-    height: 138px;
-  }
-}
-
-/* Final mobile dashboard override: a single, easier-to-scan card per row. */
-@media (max-width: 760px) {
-  .page-prices .mobile-list {
-    grid-template-columns: 1fr !important;
-  }
-
-  .page-prices .price-card {
-    display: grid;
-    grid-template-columns: 112px minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    align-items: center;
-    min-height: 0;
-    gap: 8px 12px;
-    padding: 10px;
-  }
-
-  .page-prices .crop-art,
-  .page-prices .crop-art .crop-photo {
-    min-height: 112px;
-    height: 112px;
-  }
-
-  .page-prices .crop-art {
-    grid-row: 1 / span 2;
-  }
-
-  .page-prices .price-card-top {
-    grid-column: 2;
-    grid-row: 1;
-    align-items: start;
-    justify-items: start;
-  }
-
-  .page-prices .price-card .crop-name,
-  .page-prices .price-card .crop-name strong,
-  .page-prices .price-card .crop-name small {
-    justify-items: start;
-    text-align: left;
-  }
-
-  .page-prices .price-card .crop-name strong {
-    font-size: 1rem;
-  }
-
-  .page-prices .price-card .crop-name small {
-    max-width: 24ch;
-  }
-
-  .page-prices .price-card .modal-price {
-    justify-content: flex-start;
-  }
-
-  .page-prices .price-card .range {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .page-prices .price-card-meta {
-    grid-column: 1 / -1;
-    grid-row: 3;
-  }
-}
-
-/* Give every crop photo a consistent, edge-to-edge gallery frame. */
-.page-prices .crop-art {
-  border-color: #e1e9df;
+/* A balanced, data-first Mandi hero that keeps the market controls in view. */
+.page-prices .mandi-intro {
+  width: min(100% - 2 * var(--gutter), 1280px);
+  max-width: 1280px;
+  min-height: clamp(470px, 43vw, 590px);
+  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 68px);
+  margin: clamp(16px, 2.2vw, 28px) auto 0;
+  padding: clamp(28px, 4.2vw, 58px);
+  border: 1px solid #dfe8dc;
+  border-radius: 28px;
   background:
-    radial-gradient(ellipse at 50% 35%, rgba(255,255,255,.98), transparent 68%),
-    linear-gradient(145deg, #eef4ea, #e7eee3);
-}
-.page-prices .crop-art .crop-photo {
-  padding: 0;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 12px;
-  mix-blend-mode: multiply;
-  transform: none;
+    radial-gradient(ellipse at 12% 8%, rgba(223, 239, 218, .78), transparent 38%),
+    linear-gradient(130deg, #f8faf4 0%, #eff5e9 72%, #f7f5e9 100%);
+  box-shadow: 0 18px 48px rgba(23, 77, 56, .075);
 }
 
-/* Crop photos in mandi result cards use a true square image frame. */
-.page-prices .crop-art {
-  width: 100%;
-  min-height: 0;
-  height: auto;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
+.page-prices .mandi-intro .page-head-copy {
+  gap: clamp(13px, 1.8vw, 20px);
+  max-width: 650px;
+  padding: 0;
 }
-.page-prices .crop-art .crop-photo {
-  display: block;
+
+.mandi-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 11px;
+  border: 1px solid #d5e3d3;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .7);
+  color: #286644;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .075em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.mandi-hero-eyebrow-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #d7a348;
+  box-shadow: 0 0 0 4px rgba(215, 163, 72, .14);
+}
+
+.page-prices .mandi-intro h1 {
+  max-width: 17ch;
+  color: #173c2c;
+  font-size: clamp(2.7rem, 4.8vw, 4.25rem);
+  line-height: .99;
+  letter-spacing: -.05em;
+  text-wrap: balance;
+}
+
+.page-prices .mandi-intro .lede {
+  max-width: 48ch;
+  color: #52635a;
+  font-size: clamp(1.02rem, 1.25vw, 1.16rem);
+  line-height: 1.58;
+}
+
+.mandi-hero-actions .btn {
+  min-height: 52px;
+  padding-inline: 20px;
+  border-radius: 11px;
+  box-shadow: 0 8px 20px rgba(23, 77, 56, .13);
+}
+
+.page-prices .mandi-intro .sync {
+  max-width: 100%;
+  margin: 0;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .76);
+  box-shadow: none;
+  line-height: 1.4;
+}
+
+.page-prices .mandi-intro-visual {
+  min-height: clamp(320px, 34vw, 440px);
+  max-height: 460px;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 1.28;
+  border: 1px solid rgba(30, 75, 47, .12);
+  border-radius: 24px;
+  clip-path: none;
+  box-shadow: 0 18px 38px rgba(26, 64, 42, .12);
+}
+
+.page-prices .mandi-intro-visual img {
   width: 100%;
   height: 100%;
-  min-height: 0;
-  max-height: none;
-  aspect-ratio: 1 / 1;
-  padding: 0;
+  min-height: inherit;
   object-fit: cover;
-  object-position: center;
-  border-radius: inherit;
+  object-position: 54% 50%;
 }
-.page-prices .crop-art .crop-art-placeholder {
-  aspect-ratio: 1 / 1;
+
+.page-prices .finder-panel {
+  margin-top: clamp(18px, 2.4vw, 28px);
 }
-.page-prices .price-card {
-  min-height: 0;
-  align-content: start;
+
+@media (max-width: 900px) {
+  .page-prices .mandi-intro {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    padding: clamp(24px, 4.5vw, 38px);
+  }
+
+  .page-prices .mandi-intro .page-head-copy {
+    max-width: 720px;
+  }
+
+  .page-prices .mandi-intro .lede {
+    display: block;
+  }
+
+  .page-prices .mandi-intro-visual {
+    width: 100%;
+    min-height: clamp(210px, 40vw, 310px);
+    max-height: 320px;
+    aspect-ratio: 1.9;
+  }
+}
+
+@media (max-width: 540px) {
+  .page-prices .mandi-intro {
+    width: calc(100% - 24px);
+    margin-top: 12px;
+    padding: 22px 18px 18px;
+    gap: 18px;
+    border-radius: 22px;
+  }
+
+  .page-prices .mandi-intro .page-head-copy {
+    gap: 12px;
+  }
+
+  .mandi-hero-eyebrow {
+    font-size: .68rem;
+  }
+
+  .page-prices .mandi-intro h1 {
+    max-width: 16ch;
+    font-size: clamp(2.05rem, 10.4vw, 2.85rem);
+    line-height: 1.02;
+  }
+
+  .page-prices .mandi-intro .lede {
+    font-size: .98rem;
+  }
+
+  .mandi-hero-actions,
+  .mandi-hero-actions .btn {
+    width: 100%;
+  }
+
+  .page-prices .mandi-intro .sync {
+    align-items: flex-start;
+    padding: 8px 10px;
+    font-size: .76rem;
+  }
+
+  .page-prices .mandi-intro-visual {
+    min-height: 190px;
+    max-height: 220px;
+    border-radius: 17px;
+    aspect-ratio: 1.65;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-prices .mandi-intro-visual img {
+    transition: none;
+    transform: none;
+  }
+}
+
+html[lang="hi"] .page-prices .mandi-intro h1 {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+html[lang="hi"] .mandi-hero-eyebrow {
+  letter-spacing: 0;
+  text-transform: none;
 }

@@ -1,17 +1,18 @@
 /* Live GitHub contribution comparison */
 .about-contributions {
-  margin-top: clamp(58px, 8vw, 96px);
+  margin-top: clamp(52px, 7vw, 82px);
   padding: clamp(24px, 4vw, 42px);
   border: 1px solid #d8e2d5;
+  border-radius: 20px;
   background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(239,246,236,.82));
-  box-shadow: 12px 14px 0 rgba(31,91,60,.055);
+  box-shadow: 0 16px 40px rgba(23,77,56,.08);
 }
 .contributions-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; }
 .contributions-heading h2 { color:#183c2b; font-size:clamp(1.8rem,3vw,2.55rem); line-height:1.05; }
 .contributions-lede { margin-top:9px; color:#69766f; line-height:1.55; }
 .contributions-refresh {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  min-height:42px; padding:0 14px; border:1px solid #b9cbbb; border-radius:8px;
+  min-height:42px; padding:0 14px; border:1px solid #b9cbbb; border-radius:9px;
   background:#fff; color:#174d38; font:inherit; font-size:.84rem; font-weight:800; cursor:pointer;
 }
 .contributions-refresh:disabled { opacity:.65; cursor:wait; }
@@ -22,11 +23,11 @@
 .contributor-dot { display:inline-block; width:10px; height:10px; flex:none; border-radius:50%; }
 .dot-divyansh { background:#16845a; }
 .dot-abhay { background:#d49a32; }
-.contributions-status { padding:22px; border:1px dashed #c8d7c7; color:#53665a; text-align:center; }
+.contributions-status { padding:22px; border:1px dashed #c8d7c7; border-radius:12px; color:#53665a; text-align:center; }
 .contributions-status.is-error { color:#9b493e; border-color:#d9aaa2; }
 .contributions-grid[hidden],.contribution-comparison[hidden] { display:none !important; }
 .contributions-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; }
-.contribution-person { min-width:0; padding:20px; border:1px solid #d9e3d7; background:#fff; }
+.contribution-person { min-width:0; padding:20px; border:1px solid #d9e3d7; border-radius:14px; background:#fff; }
 .contribution-divyansh { border-top:4px solid #16845a; }
 .contribution-abhay { border-top:4px solid #d49a32; }
 .contribution-person-head { flex-wrap:wrap; }
@@ -55,7 +56,7 @@
   .comparison-label { align-items:flex-start; flex-direction:column; gap:3px; }
   .comparison-label b { text-align:left; }
 }
-html[data-theme="dark"] .about-contributions { background:#111e16; border-color:#2d4536; box-shadow:12px 14px 0 rgba(0,0,0,.12); }
+html[data-theme="dark"] .about-contributions { background:#111e16; border-color:#2d4536; box-shadow:0 16px 40px rgba(0,0,0,.16); }
 html[data-theme="dark"] .contributions-heading h2,
 html[data-theme="dark"] .contribution-person-head h3,
 html[data-theme="dark"] .contribution-total strong,
@@ -65,6 +66,7 @@ html[data-theme="dark"] .contributions-legend,
 html[data-theme="dark"] .contribution-total span,
 html[data-theme="dark"] .comparison-label { color:#bdcfc2; }
 html[data-theme="dark"] .contributions-status { background:#17271e; border-color:#36513f; color:#c8d8cd; }
+html[data-theme="dark"] .contributions-status.is-error { background:#33211f; border-color:#784b45; color:#ffc0b7; }
 html[data-theme="dark"] .contribution-person,
 html[data-theme="dark"] .contributions-refresh { background:#17271e; border-color:#36513f; color:#e7f1e9; }
 html[data-theme="dark"] .contribution-login,

@@ -18,7 +18,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&family=Anek+Devanagari:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style/base.css">
-  <link rel="stylesheet" href="style/mandi-prices.css?v=prices-square-images-20261126">
+  <link rel="stylesheet" href="style/mandi-prices.css?v=prices-hero-polish-20261127">
+  <link rel="stylesheet" href="/style/mandi-finder-guide.css">
     <link rel="canonical" href="https://rate-gpt.vercel.app/mandi-prices.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Rate-GPT">
@@ -31,6 +32,7 @@
     <meta name="twitter:description" content="Explore government-reported crop prices at Indian mandis. Filter by state, district, market and crop with Rate-GPT.">
     <meta name="twitter:image" content="https://rate-gpt.vercel.app/Images/link-image.png">
     <link rel="stylesheet" href="/style/shared-navbar.css?v=shared-nav-20261126">
+    <link rel="stylesheet" href="/style/theme.css?v=theme-mandi-about-polish-20261127">
   </head>
 <body class="page-prices">
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
@@ -39,8 +41,18 @@
   <main id="main-content" tabindex="-1">
     <section class="page-head mandi-intro wrap" aria-labelledby="pricesHeroTitle">
       <div class="page-head-copy">
+        <p class="mandi-hero-eyebrow">
+          <span class="mandi-hero-eyebrow-dot" aria-hidden="true"></span>
+          <span data-i18n="prices.eyebrow">Government-reported market data</span>
+        </p>
         <h1 id="pricesHeroTitle" data-i18n="prices.title">Latest government-reported mandi prices</h1>
         <p class="lede" data-i18n="prices.lede">Choose a mandi to see the prices recorded there. Search by crop name in English or Hindi.</p>
+        <div class="mandi-hero-actions">
+          <a class="btn btn-primary" href="#stateSelect">
+            <span data-i18n="prices.chooseMarket">Choose a market</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
         <p class="sync" id="syncChip">
           <span class="sync-dot" id="syncDot" data-state="none" aria-hidden="true"></span>
           <span id="syncText" data-i18n="sync.onSearch">Latest government-reported mandi prices · fetched on demand</span>
@@ -156,7 +168,6 @@
   <footer class="site-footer"></footer>
 
   <script type="module" src="/script/global-nav.js"></script>
-  <link rel="stylesheet" href="/style/mandi-finder-guide.css">
   <script type="module" src="/script/mandi-prices.js"></script>
   <script type="module" src="/script/mandi-finder-guide.js"></script>
 </body>

@@ -226,7 +226,11 @@ async function main(): Promise<void> {
 
   const page = await request("/mandi-prices.html");
   const html = await page.text();
-  check(page.status === 200 && /<title[^>]*>Rate-GPT<\/title>/i.test(html), "public mandi prices page is served");
+  check(
+    page.status === 200 &&
+      /<title[^>]*>[^<]*Mandi Prices[^<]*Rate-GPT[^<]*<\/title>/i.test(html),
+    "public mandi prices page is served with its descriptive title",
+  );
   check(
     /id=["']stateSelect["']/.test(html) &&
       /id=["']districtSelect["']/.test(html) &&

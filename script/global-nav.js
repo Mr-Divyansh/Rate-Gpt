@@ -18,9 +18,9 @@ const LINKS = [
 
 const currentPage = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
 
-// Shared Light / Dark theme preference with a smooth top-to-bottom View Transition.
+// Shared Light / Dark theme preference with a smooth circle View Transition.
 const THEME_KEY = "rateGptTheme";
-const THEME_TRANSITION_DURATION = 560;
+const THEME_TRANSITION_DURATION = 750;
 let themeTransitionRunning = false;
 let activeThemeAnimation = null;
 
@@ -29,9 +29,22 @@ function syncThemeToggle(button, theme) {
   button.setAttribute("aria-pressed", String(dark));
   button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
   button.title = dark ? "Switch to light mode" : "Switch to dark mode";
-  button.innerHTML = dark
-    ? '<span aria-hidden="true">☀</span>'
-    : '<span aria-hidden="true">☾</span>';
+  button.classList.toggle("is-dark", dark);
+  button.innerHTML = `
+    <svg class="classic-theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <g class="classic-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"></circle>
+        <path d="M12 1.4v2.4" stroke-width="2"></path>
+        <path d="m20.3 3.7-2.5 2.5" stroke-width="2"></path>
+        <path d="M22.6 12h-2.4" stroke-width="2"></path>
+        <path d="M12 22.6v-2.4" stroke-width="2"></path>
+        <path d="M1.4 12h2.4" stroke-width="2"></path>
+        <path d="m20.3 20.3-2.5-2.5" stroke-width="2"></path>
+        <path d="m3.7 20.3 2.5-2.5" stroke-width="2"></path>
+        <path d="m3.7 3.7 2.5 2.5" stroke-width="2"></path>
+      </g>
+      <path class="classic-moon" d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.2 8.2 0 1 0 11.2 11.2Z"></path>
+    </svg>`;
 }
 
 function applyTheme(theme, persist = true) {
@@ -48,11 +61,26 @@ function applyTheme(theme, persist = true) {
 
 function cleanupThemeTransition(root) {
   themeTransitionRunning = false;
-  delete root.dataset.magicuiThemeVt;
-  root.style.removeProperty("--magicui-theme-toggle-vt-duration");
-  root.style.removeProperty("--magicui-theme-vt-clip-from");
+  delete root.dataset.themeTransitionActive;
   activeThemeAnimation?.cancel();
   activeThemeAnimation = null;
+}
+
+function themeCircleReveal(button) {
+  const rect = button.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const corners = [
+    Math.hypot(x, y),
+    Math.hypot(window.innerWidth - x, y),
+    Math.hypot(x, window.innerHeight - y),
+    Math.hypot(window.innerWidth - x, window.innerHeight - y),
+  ];
+  const finalRadius = Math.ceil(Math.max(...corners)) + 1;
+  return [
+    { clipPath: `circle(0px at ${x}px ${y}px)` },
+    { clipPath: `circle(${finalRadius}px at ${x}px ${y}px)` },
+  ];
 }
 
 function themeToggle() {
@@ -62,7 +90,7 @@ function themeToggle() {
   button.dataset.themeToggle = "";
   button.addEventListener("click", () => {
     const root = document.documentElement;
-    if (themeTransitionRunning || root.dataset.magicuiThemeVt === "active") return;
+    if (themeTransitionRunning) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const pageIsVisible = document.visibilityState === "visible";
@@ -72,16 +100,8 @@ function themeToggle() {
       return;
     }
 
-    // Reveal the incoming theme from the top edge down: no sudden circular flash.
-    const clipPaths = [
-      "inset(0 0 100% 0)",
-      "inset(0 0 0 0)"
-    ];
-
     themeTransitionRunning = true;
-    root.dataset.magicuiThemeVt = "active";
-    root.style.setProperty("--magicui-theme-toggle-vt-duration", `${THEME_TRANSITION_DURATION}ms`);
-    root.style.setProperty("--magicui-theme-vt-clip-from", clipPaths[0]);
+    root.dataset.themeTransitionActive = "true";
 
     let transition;
     try {
@@ -94,23 +114,24 @@ function themeToggle() {
       return;
     }
 
+    transition?.ready?.then(() => {
+      activeThemeAnimation = root.animate(themeCircleReveal(button), {
+        duration: THEME_TRANSITION_DURATION,
+        easing: "ease-in-out",
+        fill: "both",
+        pseudoElement: "::view-transition-new(root)",
+      });
+    }).catch(() => {
+      delete root.dataset.themeTransitionActive;
+    });
+
     if (transition?.finished?.finally) {
       transition.finished.finally(() => cleanupThemeTransition(root)).catch(() => {});
     } else {
       cleanupThemeTransition(root);
     }
 
-    transition?.ready?.then(() => {
-      activeThemeAnimation = root.animate(
-        { clipPath: clipPaths },
-        {
-          duration: THEME_TRANSITION_DURATION,
-          easing: "cubic-bezier(.22, 1, .36, 1)",
-          fill: "forwards",
-          pseudoElement: "::view-transition-new(root)"
-        }
-      );
-    }).catch(() => {});
+    window.setTimeout(() => cleanupThemeTransition(root), THEME_TRANSITION_DURATION + 80);
   });
   syncThemeToggle(button, document.documentElement.dataset.theme || "light");
   return button;
@@ -135,16 +156,6 @@ const followSystemTheme = (event) => {
   }
 };
 systemTheme.addEventListener?.("change", followSystemTheme);
-if (!document.querySelector('link[data-theme-styles]')) {
-  const themeStyles = document.createElement("link");
-  themeStyles.rel = "stylesheet";
-  themeStyles.href = "/style/theme.css?v=magicui-circle-reveal-20261126";
-  themeStyles.dataset.themeStyles = "";
-  document.head.append(themeStyles);
-}
-
-
-
 function navLink([key, href]) {
   const a = document.createElement("a");
   a.href = href;
