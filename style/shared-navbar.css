@@ -40,18 +40,18 @@ body header.site-header .brand {
 }
 body header.site-header .brand-mark {
   position: relative;
-  flex: 0 0 42px !important;
-  width: 42px !important;
+  flex: 0 0 132px !important;
+  width: 132px !important;
   height: 42px !important;
   overflow: hidden;
 }
 body header.site-header .brand-mark img {
   position: absolute;
-  left: -13px;
-  top: -4px;
-  width: 68px;
-  height: 68px;
+  inset: 0;
+  width: 132px;
+  height: 42px;
   max-width: none;
+  object-fit: contain;
   object-fit: contain;
 }
 body header.site-header .brand-text { display: grid; line-height: 1.12; }
@@ -139,8 +139,8 @@ html[data-theme="dark"] body header.site-header .site-nav a[aria-current="page"]
     gap: 8px !important;
     padding: 7px 14px !important;
   }
-  body header.site-header .brand-mark { flex-basis: 38px !important; width: 38px !important; height: 38px !important; }
-  body header.site-header .brand-mark img { width: 62px; height: 62px; left: -12px; top: -4px; }
+  body header.site-header .brand-mark { flex-basis: 108px !important; width: 108px !important; height: 38px !important; }
+  body header.site-header .brand-mark img { width: 108px; height: 38px; inset: 0; }
   body header.site-header .brand-text small { display: none !important; }
   body header.site-header .header-actions { grid-column: 2 !important; grid-row: 1 !important; gap: 7px !important; }
   body header.site-header .menu-toggle {

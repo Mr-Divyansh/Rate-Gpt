@@ -306,15 +306,15 @@ import { getLocale, onLangChange, t } from "./i18n.js";
       // Desktop devices can spend much longer probing unavailable GPS hardware.
       const position = await getPosition({
         enableHighAccuracy: false,
-        timeout: 3000,
-        maximumAge: 600000,
+        timeout: 8000,
+        maximumAge: 300000,
       });
       const {latitude,longitude,accuracy} = position.coords;
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("invalid-position");
       await fetchWeather(`${latitude},${longitude}`,"device",accuracy);
     } catch (error) {
       if (error.code === 1) showError(t("weather.locationDenied"));
-      else if (error.code === 3) await fetchWeather("auto:ip","approximate");
+      else if (error.code === 3) showError(t("weather.locationTimeout"));
       else showError(t("weather.locationUnavailable"));
     } finally { setBusy(false); }
   }

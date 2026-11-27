@@ -439,6 +439,12 @@ body.page-weather {
 
 @keyframes weather-spin { to { transform: rotate(360deg); } }
 
+@media (max-width: 940px) {
+  .weather-art.has-weather {
+    grid-area: result;
+  }
+}
+
 @media (max-width: 650px) {
   .weather-wrap { padding-block: 28px 34px; }
   .weather-intro { margin-bottom: 18px; }
@@ -455,7 +461,7 @@ body.page-weather {
     margin-top: 9px;
   }
   .weather-suggestions { top: calc(100% + 64px); }
-  .weather-location-actions { align-items: stretch; flex-direction: column; }
+  .weather-location-actions { align-items: stretch; flex-direction:column; }
   .weather-location-actions .btn { width: 100%; }
   .weather-text-button { align-self: flex-start; }
   .weather-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }

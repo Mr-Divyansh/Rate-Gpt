@@ -149,8 +149,8 @@ async function main() {
   check(/locationButton\.addEventListener\("click",\s*useDeviceLocation\)/.test(weatherScript) &&
     /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
     /enableHighAccuracy\s*:\s*false/.test(weatherScript) &&
-    /timeout\s*:\s*3000/.test(weatherScript) &&
-    /maximumAge\s*:\s*600000/.test(weatherScript) &&
+    /timeout\s*:\s*8000/.test(weatherScript) &&
+    /maximumAge\s*:\s*300000/.test(weatherScript) &&
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");

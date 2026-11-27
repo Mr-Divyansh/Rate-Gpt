@@ -171,7 +171,7 @@ function brand(className) {
   const mark = document.createElement("span");
   mark.className = "brand-mark";
   const img = document.createElement("img");
-  img.src = LOGO_URL; img.alt = "Rate-GPT logo"; img.width = 70; img.height = 70; img.decoding = "async";
+  img.src = LOGO_URL; img.alt = "Rate-GPT logo"; img.width = 132; img.height = 42; img.decoding = "async";
   mark.append(img);
   const text = document.createElement("span"); text.className = "brand-text";
   const name = document.createElement("strong"); name.textContent = "Rate-GPT";
