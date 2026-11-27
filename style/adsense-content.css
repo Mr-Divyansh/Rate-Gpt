@@ -111,3 +111,12 @@
   .editorial-grid, .editorial-grid-two { grid-template-columns: 1fr; }
   .editorial-section { padding-block: 32px; }
 }
+
+
+/* Do not render ad placeholders as empty ad cards. Keep the visible ad label
+   only when a real AdSense slot ID has been configured. */
+.ad-unit:has(.adsbygoogle[data-ad-slot^="placeholder-"]),
+.ad-unit:has(.adsbygoogle:not([data-ad-slot])),
+.ad-unit:has(.adsbygoogle[data-ad-slot=""]) {
+  display: none !important;
+}

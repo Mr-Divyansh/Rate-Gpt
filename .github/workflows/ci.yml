@@ -97,6 +97,12 @@ jobs:
           RATE_GPT_BASE_URL: http://127.0.0.1:4173
         run: node scripts/weather-browser-smoke.mjs
 
+      - name: Homepage visual and theme regression checks
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          RATE_GPT_BASE_URL: http://127.0.0.1:4173
+        run: node scripts/homepage-visual-smoke.mjs
+
       - name: Select Vercel preview for pull-request browser checks
         id: preview
         if: github.event_name == 'pull_request'
