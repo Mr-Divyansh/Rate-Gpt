@@ -40,11 +40,9 @@ body header.site-header .brand {
 }
 body header.site-header .brand-mark {
   position: relative;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: 132px !important;
-  max-height: 42px !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
   overflow: visible !important;
 }
 body header.site-header .brand-mark img {
@@ -140,7 +138,7 @@ html[data-theme="dark"] body header.site-header .site-nav a[aria-current="page"]
     gap: 8px !important;
     padding: 7px 14px !important;
   }
-  body header.site-header .brand-mark { flex-basis: auto !important; max-width: 108px !important; max-height: 38px !important; width: auto !important; height: auto !important; }
+  body header.site-header .brand-mark { flex-basis: 40px !important; width: 40px !important; height: 40px !important; }
   body header.site-header .brand-mark img { width: 100%; height: 100%; inset: 0; object-fit: contain; }
   body header.site-header .brand-text small { display: none !important; }
   body header.site-header .header-actions { grid-column: 2 !important; grid-row: 1 !important; gap: 7px !important; }

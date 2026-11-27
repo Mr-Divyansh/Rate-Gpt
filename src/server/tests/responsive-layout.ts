@@ -75,7 +75,7 @@ async function main() {
     /\.page-home \.header-actions\s*\{[^}]*flex:\s*0 0 auto/s.test(homeCss),
     "desktop navigation stays centered while links and action controls retain their size");
   check([home, prices, weather, about, contact, privacy, terms].every(html =>
-      html.includes('/style/shared-navbar.css?v=shared-nav-20261126')) &&
+      html.includes('/style/shared-navbar.css')) &&
     sharedNavbarCss.includes('body header.site-header') &&
     sharedNavbarCss.includes('width: 100% !important') &&
     sharedNavbarCss.includes('border-radius: 0 !important') &&
@@ -84,6 +84,10 @@ async function main() {
     sharedNavbarCss.includes('position: fixed !important') &&
     sharedNavbarCss.includes('html[data-theme="dark"]'),
     "all public pages load one shared full-width navbar with consistent full-height responsive drawer and theme styling");
+  check(weather.includes('/style/shared-navbar.css?v=shared-nav-logo-20261127') &&
+    /body header\.site-header \.brand-mark\s*\{[^}]*width:\s*44px\s*!important;[^}]*height:\s*44px\s*!important;/s.test(sharedNavbarCss) &&
+    /@media \(max-width: 900px\)[\s\S]*?body header\.site-header \.brand-mark\s*\{[^}]*width:\s*40px\s*!important;[^}]*height:\s*40px\s*!important;/s.test(sharedNavbarCss),
+    "weather navbar loads a visible full-aspect brand logo at desktop and mobile sizes");
   check(/\.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(baseCss) &&
     /\.page-home \.site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(homeCss) &&
     /\.global-site-header\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/s.test(globalNavCss),
