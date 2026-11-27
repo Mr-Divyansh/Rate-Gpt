@@ -459,9 +459,9 @@
   border-radius: 14px;
   background: #eff3eb;
 }
-.team-logo img { width: 100%; height: 100%; object-fit: cover; }
+.team-logo img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
 .team-logo-studio { background: #080b10; }
-.team-logo-studio img { object-fit: contain; }
+.team-logo-studio img { object-fit: contain; padding: 14px; }
 .team-role {
   margin-bottom: 4px;
   color: #397857;

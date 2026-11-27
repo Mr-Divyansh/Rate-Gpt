@@ -965,3 +965,159 @@ html[data-theme="dark"] .page-prices .mandi-hero-wave-base {
     background: linear-gradient(180deg, rgba(16, 27, 20, .84) 0%, rgba(16, 27, 20, .52) 41%, rgba(16, 27, 20, 0) 63%);
   }
 }
+
+/* Contact page: dark mode surfaces for cards, fields, and consent area. */
+html[data-theme="dark"] .page-shell:not(.legal-page) .page-intro {
+  border-color: var(--line);
+  background:
+    radial-gradient(circle at 92% 22%, rgba(225, 172, 73, .08), transparent 9rem),
+    linear-gradient(135deg, #142119, #192a20);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .page-intro h1 {
+  color: var(--ink);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .page-intro > p:last-child {
+  color: var(--muted);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .eyebrow {
+  border-color: #36513f;
+  background: #1b3024;
+  color: #a6e2bd;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .content-card {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .content-card h2 {
+  color: var(--ink);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .form-field input,
+html[data-theme="dark"] .page-shell:not(.legal-page) .form-field textarea {
+  border-color: #526b5b;
+  background: #0f1913;
+  color: var(--ink);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .form-field input:focus,
+html[data-theme="dark"] .page-shell:not(.legal-page) .form-field textarea:focus {
+  border-color: var(--forest);
+  background: #101c15;
+  box-shadow: 0 0 0 4px rgba(166, 226, 189, .14);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .consent-field {
+  border-color: var(--line);
+  background: #192a20;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card {
+  border-color: var(--line);
+  background: #142119;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card h2,
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card h3 {
+  color: var(--ink);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card > p:not(.eyebrow):not(.muted):not(.small-note) {
+  color: #d0dfd2;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card .muted {
+  color: #bdcfbf;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card .helpline-number {
+  color: #f4ce78;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card .text-link {
+  color: #d8edda;
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card hr,
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card .small-note {
+  border-color: rgba(231, 241, 231, .2);
+}
+html[data-theme="dark"] .page-shell:not(.legal-page) .help-card .small-note {
+  color: #bdcfbf;
+}
+
+/* About page: dark mode logo and team card fixes. */
+html[data-theme="dark"] .team-logo {
+  border-color: var(--line);
+  background: #142119;
+}
+html[data-theme="dark"] .team-logo-studio {
+  background: #080b10;
+}
+html[data-theme="dark"] .team-card {
+  border-color: var(--line);
+  background: #142119;
+}
+html[data-theme="dark"] .team-card:hover {
+  border-color: #45634e;
+  background: #192a20;
+}
+html[data-theme="dark"] .source-card {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .2);
+}
+
+/* Weather page: additional dark mode coverage. */
+html[data-theme="dark"] .weather-search-card {
+  border-color: var(--line);
+  background: #142119;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .2);
+}
+html[data-theme="dark"] .weather-result {
+  background: rgba(8, 20, 13, .46);
+  box-shadow: 0 20px 46px rgba(0, 0, 0, .45);
+}
+html[data-theme="dark"] .weather-art {
+  filter: none;
+}
+html[data-theme="dark"] .weather-location-icon,
+html[data-theme="dark"] .weather-location-actions .btn {
+  border-color: #36513f;
+  background: #1b3024;
+  color: #dff3e5;
+}
+html[data-theme="dark"] .weather-search-control input {
+  border-color: #526b5b;
+  background: #0f1913;
+  color: var(--ink);
+}
+html[data-theme="dark"] .weather-search-control input:focus {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 4px rgba(166, 226, 189, .14);
+}
+html[data-theme="dark"] .weather-text-button {
+  color: #a6e2bd;
+}
+html[data-theme="dark"] .weather-text-button:hover {
+  color: #d7f3e0;
+}
+html[data-theme="dark"] .weather-suggestions {
+  border-color: var(--line);
+  background: #142119;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, .3);
+}
+html[data-theme="dark"] .weather-suggestion {
+  color: var(--ink);
+}
+html[data-theme="dark"] .weather-suggestion:hover,
+html[data-theme="dark"] .weather-suggestion[aria-selected="true"] {
+  background: #21392a;
+}
+html[data-theme="dark"] .weather-suggestion span,
+html[data-theme="dark"] .weather-search-divider {
+  color: var(--muted);
+}
+html[data-theme="dark"] .weather-detail,
+html[data-theme="dark"] .weather-forecast-day {
+  background: rgba(0, 0, 0, .32);
+}
+html[data-theme="dark"] .weather-detail .value {
+  color: var(--ink);
+}
+html[data-theme="dark"] .weather-error {
+  border-color: #784b45;
+  background: #33211f;
+  color: #ffc0b7;
+}

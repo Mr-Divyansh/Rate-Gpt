@@ -302,12 +302,12 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     setBusy(true);
     setStatus(t("weather.locatingWeather"));
     try {
-      // Network-assisted/cached positioning is enough for local weather.
-      // Desktop devices can spend much longer probing unavailable GPS hardware.
+      // Always request a fresh position (no cache) so weather matches current location.
+      // enableHighAccuracy: false saves battery/GPS — weather only needs city-level accuracy.
       const position = await getPosition({
         enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 300000,
+        timeout: 10000,
+        maximumAge: 0,
       });
       const {latitude,longitude,accuracy} = position.coords;
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("invalid-position");
