@@ -32,12 +32,13 @@
   <header class="site-header"></header>
   <main id="main-content" tabindex="-1">
     <section class="weather-wrap wrap" aria-labelledby="weatherPageTitle">
-      <div class="weather-intro">
-        <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
+      <div class="weather-col">
+        <div class="weather-intro">
+          <span class="weather-eyebrow" data-i18n="weather.eyebrow">LOCAL WEATHER</span>
         <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
         <p data-i18n="weather.subtitle">Find current conditions for your village, town or city.</p>
-      </div>
-      <div class="weather-art">
+        </div>
+        <div class="weather-art">
         <img src="/Images/weather.png" alt="" width="1254" height="1254" fetchpriority="high" decoding="async">
         <section class="weather-result" id="weatherResult" aria-live="polite" aria-label="Current weather" hidden>
           <div class="weather-result-top">
@@ -55,8 +56,8 @@
           </section>
           <p class="weather-source" data-i18n="weather.source">Current conditions provided by WeatherAPI.</p>
         </section>
-      </div>
-      <section class="weather-search-card" aria-label="Find a weather location">
+        </div>
+        <section class="weather-search-card" aria-label="Find a weather location">
         <div class="weather-search-heading">
           <span class="weather-location-icon" aria-hidden="true">⌖</span>
           <div><h2 data-i18n="weather.locationTitle">Where do you want the weather?</h2>
@@ -79,7 +80,7 @@
         <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
       </section>
-    </section>
+      </div>
 
     <!-- AdSense ad placement: between weather result and editorial -->
     <div class="ad-weather-below-search">

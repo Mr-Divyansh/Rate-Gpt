@@ -507,17 +507,16 @@ html[data-theme="dark"] .weather-temperature,
 html[data-theme="dark"] .weather-forecast-day > strong {
   color: var(--forest);
 }
-html[data-theme="dark"] .weather-search-card,
-html[data-theme="dark"] .weather-result {
+html[data-theme="dark"] .weather-search-card {
   border-color: var(--line);
   background: #142119;
   box-shadow: 0 14px 34px rgba(0, 0, 0, .2);
 }
 html[data-theme="dark"] .weather-result {
-  background: rgba(8, 20, 13, .42);
+  background: rgba(8, 20, 13, .46);
+  box-shadow: 0 20px 46px rgba(0, 0, 0, .45);
 }
 html[data-theme="dark"] .weather-art {
-  border-color: #34513e;
   filter: none;
 }
 html[data-theme="dark"] .weather-location-icon,
@@ -557,15 +556,8 @@ html[data-theme="dark"] .weather-suggestion span,
 html[data-theme="dark"] .weather-search-divider {
   color: var(--muted);
 }
-html[data-theme="dark"] .weather-search-divider::before,
-html[data-theme="dark"] .weather-search-divider::after,
-html[data-theme="dark"] .weather-main-reading,
-html[data-theme="dark"] .weather-forecast-section {
-  border-color: var(--line);
-}
 html[data-theme="dark"] .weather-detail,
 html[data-theme="dark"] .weather-forecast-day {
-  border-color: #304b39;
   background: rgba(25, 42, 32, .22);
 }
 html[data-theme="dark"] .weather-detail .value {
