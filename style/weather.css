@@ -14,10 +14,17 @@ body.page-weather {
 }
 
 .weather-col {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  grid-template-areas:
+    "intro art"
+    "search art";
+  align-items: center;
+  gap: 26px clamp(28px, 4vw, 48px);
 }
+
+.weather-intro { grid-area: intro; }
+.weather-search-card { grid-area: search; }
 
 .weather-intro {
   max-width: 620px;
@@ -264,6 +271,7 @@ body.page-weather {
 
 .weather-art {
   position: relative;
+  grid-area: art;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -439,6 +447,25 @@ body.page-weather {
 
 @keyframes weather-spin { to { transform: rotate(360deg); } }
 
+@media (max-width: 940px) {
+  .weather-col {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "intro" "search" "result";
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .weather-art { display: none; }
+
+  .weather-art.has-weather {
+    display: flex;
+    grid-area: result;
+    min-height: 0;
+  }
+
+  .weather-intro { max-width: 680px; }
+}
+
 @media (max-width: 650px) {
   .weather-wrap { padding-block: 28px 34px; }
   .weather-intro { margin-bottom: 18px; }
@@ -455,7 +482,7 @@ body.page-weather {
     margin-top: 9px;
   }
   .weather-suggestions { top: calc(100% + 64px); }
-  .weather-location-actions { align-items: stretch; flex-direction: column; }
+  .weather-location-actions { align-items: stretch; flex-direction:column; }
   .weather-location-actions .btn { width: 100%; }
   .weather-text-button { align-self: flex-start; }
   .weather-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
