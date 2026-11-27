@@ -514,16 +514,11 @@ html[data-theme="dark"] .weather-result {
   box-shadow: 0 14px 34px rgba(0, 0, 0, .2);
 }
 html[data-theme="dark"] .weather-result {
-  background:
-    radial-gradient(ellipse at 92% 0%, rgba(68, 117, 80, .16), transparent 34rem),
-    #142119;
+  background: rgba(8, 20, 13, .42);
 }
 html[data-theme="dark"] .weather-art {
   border-color: #34513e;
-  background:
-    radial-gradient(circle at 72% 23%, rgba(245, 193, 93, .14), transparent 12rem),
-    linear-gradient(155deg, #1c3123 0%, #243b2b 56%, #16261d 100%);
-  filter: brightness(.94) saturate(.86);
+  filter: none;
 }
 html[data-theme="dark"] .weather-location-icon,
 html[data-theme="dark"] .weather-location-actions .btn {
@@ -571,7 +566,7 @@ html[data-theme="dark"] .weather-forecast-section {
 html[data-theme="dark"] .weather-detail,
 html[data-theme="dark"] .weather-forecast-day {
   border-color: #304b39;
-  background: #192a20;
+  background: rgba(25, 42, 32, .22);
 }
 html[data-theme="dark"] .weather-detail .value {
   color: var(--ink);

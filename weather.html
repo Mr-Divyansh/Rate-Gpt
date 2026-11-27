@@ -37,8 +37,24 @@
         <h1 id="weatherPageTitle" data-i18n="weather.title">Weather near you</h1>
         <p data-i18n="weather.subtitle">Find current conditions for your village, town or city.</p>
       </div>
-      <div class="weather-art" aria-hidden="true">
+      <div class="weather-art">
         <img src="/Images/weather.png" alt="" width="1254" height="1254" fetchpriority="high" decoding="async">
+        <section class="weather-result" id="weatherResult" aria-live="polite" aria-label="Current weather" hidden>
+          <div class="weather-result-top">
+            <div class="weather-place-block"><span class="weather-result-label" id="weatherSourceLabel" data-i18n="weather.current">CURRENT CONDITIONS</span>
+              <h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
+            <img class="weather-condition-icon" id="weatherIcon" alt="" width="96" height="96" hidden>
+          </div>
+          <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong>
+            <div><span class="weather-condition" id="weatherCondition"></span><span class="weather-feels-like" id="weatherFeelsLike"></span></div></div>
+          <div class="weather-details" id="weatherDetails"></div>
+          <section class="weather-forecast-section" aria-labelledby="weatherForecastTitle">
+            <h3 id="weatherForecastTitle" data-i18n="weather.forecastTitle">3-day outlook</h3>
+            <div class="weather-forecast" id="weatherForecast"></div>
+            <p class="weather-forecast-note" data-i18n="weather.forecastNote">Forecasts are estimates and can change. Check local advisories before making weather-sensitive decisions.</p>
+          </section>
+          <p class="weather-source" data-i18n="weather.source">Current conditions provided by WeatherAPI.</p>
+        </section>
       </div>
       <section class="weather-search-card" aria-label="Find a weather location">
         <div class="weather-search-heading">
@@ -62,22 +78,6 @@
         <p class="weather-privacy" data-i18n="weather.privacy">Your device location is only used after you tap the button. It is not saved.</p>
         <p class="weather-status" id="weatherStatus" role="status" aria-live="polite" hidden></p>
         <div class="weather-error" id="weatherError" role="alert" hidden></div>
-      </section>
-      <section class="weather-result" id="weatherResult" aria-live="polite" aria-label="Current weather" hidden>
-        <div class="weather-result-top">
-          <div class="weather-place-block"><span class="weather-result-label" id="weatherSourceLabel" data-i18n="weather.current">CURRENT CONDITIONS</span>
-            <h2 class="weather-city" id="weatherCity"></h2><p class="weather-updated" id="weatherUpdated"></p></div>
-          <img class="weather-condition-icon" id="weatherIcon" alt="" width="96" height="96" hidden>
-        </div>
-        <div class="weather-main-reading"><strong class="weather-temperature" id="weatherTemperature"></strong>
-          <div><span class="weather-condition" id="weatherCondition"></span><span class="weather-feels-like" id="weatherFeelsLike"></span></div></div>
-        <div class="weather-details" id="weatherDetails"></div>
-        <section class="weather-forecast-section" aria-labelledby="weatherForecastTitle">
-          <h3 id="weatherForecastTitle" data-i18n="weather.forecastTitle">3-day outlook</h3>
-          <div class="weather-forecast" id="weatherForecast"></div>
-          <p class="weather-forecast-note" data-i18n="weather.forecastNote">Forecasts are estimates and can change. Check local advisories before making weather-sensitive decisions.</p>
-        </section>
-        <p class="weather-source" data-i18n="weather.source">Current conditions provided by WeatherAPI.</p>
       </section>
     </section>
 

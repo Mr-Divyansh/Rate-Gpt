@@ -189,6 +189,7 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     sourceLabel.textContent = source === "device" ? t("weather.deviceLocation")
       : source === "approximate" ? t("weather.approximateLabel") : t("weather.searchResult");
     result.hidden = false;
+    result.closest(".weather-art")?.classList.add("has-weather");
     if (source === "device" && Number.isFinite(accuracy)) setStatus(t("weather.locationAccuracy",{meters:Math.round(accuracy)}));
     else if (source === "approximate") setStatus(t("weather.approxLocationSuccess"));
     else setStatus("");

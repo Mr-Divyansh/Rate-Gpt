@@ -384,6 +384,10 @@ async function main() {
     weatherScript.includes('url.searchParams.set("days","3")') &&
     weatherScript.includes("daily_chance_of_rain"),
     "weather page requests and renders a source-provided three-day outlook");
+  check(weather.indexOf('class="weather-art"') < weather.indexOf('id="weatherResult"') &&
+    weatherScript.includes('result.closest(".weather-art")?.classList.add("has-weather")') &&
+    /@media\s*\(max-width:\s*940px\)[\s\S]*?\.weather-art\.has-weather\s*\{[^}]*grid-area:\s*result/s.test(weatherCss),
+    "weather report overlays its image and remains visible on compact layouts");
   check(/\.weather-forecast\s*\{[^}]*grid-template-columns:\s*repeat\(3/s.test(weatherCss) &&
     /@media\s*\(max-width:\s*650px\)[\s\S]*?\.weather-forecast\s*\{\s*grid-template-columns:\s*1fr;/s.test(weatherCss),
     "three-day forecast cards collapse to a single column on mobile");
