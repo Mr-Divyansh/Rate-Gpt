@@ -149,8 +149,8 @@ async function main() {
   check(/locationButton\.addEventListener\("click",\s*useDeviceLocation\)/.test(weatherScript) &&
     /navigator\.geolocation\.getCurrentPosition\(/.test(weatherScript) &&
     /enableHighAccuracy\s*:\s*false/.test(weatherScript) &&
-    /timeout\s*:\s*8000/.test(weatherScript) &&
-    /maximumAge\s*:\s*300000/.test(weatherScript) &&
+    /timeout\s*:\s*10000/.test(weatherScript) &&
+    /maximumAge\s*:\s*0/.test(weatherScript) &&
     /fetchWeather\("auto:ip","approximate"\)/.test(weatherScript) &&
     !/navigator\.geolocation\.watchPosition\(/.test(weatherScript),
     "one-shot device location uses balanced accuracy, a bounded timeout and opt-in approximate lookup");
@@ -314,10 +314,10 @@ async function main() {
     !baseCss.includes(".demo-menu-panel"),
     "unused Demo dropdown styles are removed from the shared header stylesheet");
 
-  check(/\.menu-toggle\s*\{[^}]*display:none/s.test(baseCss), "desktop navigation toggle is hidden by default");
+  check(/\.menu-toggle\s*\{[^}]*display:\s*none/s.test(baseCss), "desktop navigation toggle is hidden by default");
   check(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.menu-toggle\s*\{\s*display:block/s.test(baseCss),
     "mobile navigation exposes its menu toggle");
-  check(/\.site-nav\s*\{[\s\S]*?grid-column:auto;\s*grid-row:auto;\s*order:initial;/s.test(baseCss),
+  check(/\.site-nav\s*\{[\s\S]*?grid-column:\s*auto;\s*grid-row:\s*auto;\s*order:\s*initial;/s.test(baseCss),
     "mobile drawer resets inherited horizontal-nav grid placement");
   check(/\.site-nav\s*\{[\s\S]*?margin:\\s*0;/s.test(baseCss),
     "mobile drawer resets inherited negative horizontal margins");
@@ -325,14 +325,14 @@ async function main() {
     "homepage mobile drawer aligns links from the top instead of centering them below the header");
   check(/\.site-nav\s*\{[\s\S]*?clip-path:\s*inset\(0 0 0 100%\);[\s\S]*?visibility:\s*hidden;/s.test(baseCss),
     "closed mobile drawer is clipped in place to prevent horizontal overflow");
-  check(/\.site-nav\s*\{[^}]*position:fixed;[^}]*top:0;[^}]*right:0;[^}]*bottom:0;[^}]*left:auto;/s.test(baseCss) &&
-    /\.site-nav\s*\{[^}]*overflow-x:hidden;[^}]*overflow-y:auto;[^}]*overscroll-behavior:contain;/s.test(baseCss) &&
+  check(/\.site-nav\s*\{[^}]*position:\s*fixed;[^}]*top:\s*0;[^}]*right:\s*0;[^}]*bottom:\s*0;[^}]*left:\s*auto;/s.test(baseCss) &&
+    /\.site-nav\s*\{[^}]*overflow-x:\s*hidden;[^}]*overflow-y:\s*auto;[^}]*overscroll-behavior:\s*contain;/s.test(baseCss) &&
     baseCss.includes("env(safe-area-inset-top)") &&
     baseCss.includes("env(safe-area-inset-bottom)"),
     "mobile drawer remains viewport-fixed, vertically scrollable and safe-area padded");
   check(/\.site-nav\.is-open\s*\{[^}]*clip-path:\s*inset\(0\);[\s\S]*?visibility:\s*visible;/s.test(baseCss),
     "mobile drawer has an explicit visible state without off-canvas transforms");
-  check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:\\s*auto;/s.test(baseCss),
+  check(/\.nav-backdrop\.is-visible\s*\{[^}]*pointer-events:\s*auto;/s.test(baseCss),
     "mobile drawer backdrop receives pointer input only when visible");
 
 
