@@ -168,6 +168,59 @@ try {
     pass(viewport.name + ": no uncaught browser JavaScript errors");
 
     await page.close();
+
+    // Audit the homepage polish and theme toggle at the same viewport sizes.
+    const homePage = await browser.newPage({
+      viewport: { width: viewport.width, height: viewport.height },
+    });
+    const homePageErrors = [];
+    homePage.on("pageerror", (error) => homePageErrors.push(error.message));
+    await homePage.goto(baseUrl + "/", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await homePage.waitForSelector("[data-theme-toggle]", { timeout: 15_000 });
+    await homePage.waitForSelector("footer.site-footer", { timeout: 15_000 });
+
+    const homeVisuals = await homePage.evaluate(() => {
+      const hero = document.querySelector(".hero-copy");
+      const board = document.querySelector(".page-home .board");
+      const heading = document.querySelector(".page-home .board-head h2");
+      const footer = document.querySelector("footer.site-footer");
+      const placeholderAds = Array.from(document.querySelectorAll(".ad-unit")).filter((unit) =>
+        unit.querySelector('.adsbygoogle[data-ad-slot^="placeholder-"]') &&
+        getComputedStyle(unit).display !== "none"
+      );
+      return {
+        heroBorderWidth: parseFloat(getComputedStyle(hero).borderTopWidth),
+        boardBorderWidth: parseFloat(getComputedStyle(board).borderTopWidth),
+        headingGap: parseFloat(getComputedStyle(heading).columnGap),
+        footerBackground: getComputedStyle(footer).backgroundImage,
+        visiblePlaceholderAds: placeholderAds.length,
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
+        theme: document.documentElement.dataset.theme,
+      };
+    });
+    assert.equal(homeVisuals.heroBorderWidth, 0, viewport.name + ": hero copy must not retain a border");
+    assert.equal(homeVisuals.boardBorderWidth, 0, viewport.name + ": latest mandi dashboard must not retain a border");
+    assert.ok(homeVisuals.headingGap >= 12, viewport.name + ": dashboard icon and title must have breathing room");
+    assert.ok(homeVisuals.footerBackground.includes("linear-gradient"), viewport.name + ": footer must use the branded gradient");
+    assert.equal(homeVisuals.visiblePlaceholderAds, 0, viewport.name + ": unconfigured ad placeholders must stay hidden");
+    assert.equal(homeVisuals.horizontalOverflow, false, viewport.name + ": homepage must fit the viewport");
+    pass(viewport.name + ": homepage dashboard, footer and ad-placeholder styles");
+
+    const initialTheme = homeVisuals.theme;
+    await homePage.locator("[data-theme-toggle]").click();
+    await homePage.waitForFunction((theme) =>
+      document.documentElement.dataset.theme !== theme, initialTheme, { timeout: 5_000 });
+    const switchedFooterBackground = await homePage.locator("footer.site-footer").evaluate((element) =>
+      getComputedStyle(element).backgroundImage
+    );
+    assert.notEqual(
+      switchedFooterBackground,
+      homeVisuals.footerBackground,
+      viewport.name + ": footer theme must update when the animated theme toggle is used",
+    );
+    pass(viewport.name + ": animated theme toggle switches the homepage footer theme");
+    assert.deepEqual(homePageErrors, [], viewport.name + ": homepage must not emit uncaught browser JavaScript errors");
+    await homePage.close();
   }
 
   // Verify every locally managed commodity photograph is publicly served by the preview.
