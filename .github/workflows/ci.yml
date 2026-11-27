@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, fix/ogd-sort-and-ci, feat/farmer-decision-intelligence-roadmap, feat/rategpt-experience-polish-20261127]
+    branches: [main, fix/ogd-sort-and-ci, feat/farmer-decision-intelligence-roadmap]
 
 permissions:
   contents: read
