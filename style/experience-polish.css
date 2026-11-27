@@ -96,3 +96,18 @@ html[data-theme="dark"] .page-prices .sync-dot[data-state="stale"] { background:
     transition-duration: .01ms !important;
   }
 }
+
+/* Animated language selection; the existing animated theme switch remains untouched. */
+body header.site-header .lang-toggle button {
+  transition: background-color .22s ease, color .22s ease, transform .22s var(--rg-ease), box-shadow .22s ease;
+}
+body header.site-header .lang-toggle button[aria-pressed="true"] {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(23, 77, 56, .12);
+}
+.page-home .hero-kicker-icon,
+.page-home .play-mark,
+.page-weather .weather-location-icon { display: inline-grid; place-items: center; }
+.page-home .hero-kicker-icon svg { width: 19px; height: 19px; }
+.page-home .play-mark svg { width: 14px; height: 14px; }
+.page-weather .weather-location-icon svg { width: 23px; height: 23px; }
