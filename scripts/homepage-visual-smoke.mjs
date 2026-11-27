@@ -30,6 +30,11 @@ try {
     assert.equal(response?.status(), 200, viewport.name + ": homepage must return HTTP 200");
     await page.waitForSelector("[data-theme-toggle]", { timeout: 15_000 });
     await page.waitForSelector("footer.site-footer", { timeout: 15_000 });
+    const skipWelcome = page.locator(".onboarding-skip");
+    if (await skipWelcome.count()) {
+      await skipWelcome.click();
+      await page.locator(".onboarding-dialog").waitFor({ state: "detached", timeout: 5_000 });
+    }
 
     const visual = await page.evaluate(() => {
       const hero = document.querySelector(".hero-copy");
