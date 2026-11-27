@@ -194,6 +194,9 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     const timeout = setTimeout(() => controller.abort(),12000);
     setBusy(true);
     errorBox.hidden = true;
+    // Keep old location data from appearing current while a new request is pending.
+    result.hidden = true;
+    result.closest(".weather-art")?.classList.remove("has-weather");
     setStatus(t("weather.loading"), true);
     try {
       const data = await request("forecast.json",query,controller.signal);
@@ -275,6 +278,9 @@ import { getLocale, onLangChange, t } from "./i18n.js";
   async function useDeviceLocation() {
     clearMessages();
     closeSuggestions();
+    // A denied or timed-out location request must not leave old conditions visible.
+    result.hidden = true;
+    result.closest(".weather-art")?.classList.remove("has-weather");
     if (!isSecureContext) { showError(t("weather.insecureContext")); return; }
     if (!navigator.geolocation?.getCurrentPosition) { showError(t("weather.geolocationUnsupported")); return; }
 
@@ -293,11 +299,11 @@ import { getLocale, onLangChange, t } from "./i18n.js";
     setBusy(true);
     setStatus(t("weather.locatingWeather"));
     try {
-      // Always request a fresh position (no cache) so weather matches current location.
-      // enableHighAccuracy: false saves battery/GPS — weather only needs city-level accuracy.
+      // Prefer device-grade coordinates and never reuse a stale cached position.
+      // If a precise fix is unavailable, the user can search for a place manually.
       const position = await getPosition({
-        enableHighAccuracy: false,
-        timeout: 10000,
+        enableHighAccuracy: true,
+        timeout: 15000,
         maximumAge: 0,
       });
       const {latitude,longitude,accuracy} = position.coords;
