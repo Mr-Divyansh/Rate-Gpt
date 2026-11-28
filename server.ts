@@ -54,7 +54,7 @@ export function createApiApp() {
         defaultSrc: ["'self'"],
         baseUri: ["'self'"],
         objectSrc: ["'none'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://pagead2.googlesyndication.com"],
         styleSrc: ["'self'", "https://fonts.googleapis.com"],
         styleSrcAttr: ["'none'"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
@@ -63,6 +63,7 @@ export function createApiApp() {
           ? ["'self'", "https://api.weatherapi.com", "https://api.web3forms.com"]
           : ["'self'", "https://api.weatherapi.com", "https://api.web3forms.com", "ws://localhost:*", "ws://127.0.0.1:*"],
         formAction: ["'self'", "https://api.web3forms.com"],
+        frameSrc: ["'self'", "https://www.youtube-nocookie.com", "https://www.youtube.com"],
         frameAncestors: ["'none'"],
       },
     },
